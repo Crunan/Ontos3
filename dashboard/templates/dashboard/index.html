@@ -1,0 +1,6 @@
+{% extends 'dashboard/base.html' %}
+{% block content %}
+	<h1>{{ recipe.name}}</h1>
+	<p>By {{ recipe.scientist}} on {{ recipe.date_created }}</p>
+	<p>{{ recipe.values }}</p>
+{% endblock content %}
