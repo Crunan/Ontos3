@@ -1,6 +1,7 @@
 {% extends 'dashboard/base.html' %}
 {% block content %}
-	<h1>{{ recipe.name}}</h1>
-	<p>By {{ recipe.scientist}} on {{ recipe.date_created }}</p>
-	<p>{{ recipe.values }}</p>
+  <div class="container-fluid pt-3" id="socketTest">
+    <div class="col bg-secondary text-white p-3"><button id="helloworld">hello</button></div>
+    <div class="col bg-primary text-white p-3" id="servermessages"></div>
+ </div>
 {% endblock content %}

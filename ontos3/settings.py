@@ -27,7 +27,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -72,7 +71,6 @@ TEMPLATES = [
 ]
 
 #WSGI_APPLICATION = 'ontos3.wsgi.application'
-ASGI_APPLICATION = 'ontos3.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
@@ -121,9 +119,10 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+ASGI_APPLICATION = "ontos3.asgi.application"
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 
