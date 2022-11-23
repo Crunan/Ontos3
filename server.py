@@ -15,23 +15,31 @@ async def writeCommand(w, cmd):
 
 async def serial_handler(websocket):
     reader, writer = await serial_asyncio.open_serial_connection(url='/dev/ttyUSB0', baudrate=57600) 
+    PlasmaOn = asyncio.Event()
     async for message in websocket:
         print(message)
-        if message == "poll":
-            RCV = await poll(writer, reader)
-            await websocket.send(RCV)
-        elif message == "startup":
-            await startup(writer, reader)
-            await websocket.send("startup complete")
-        #elif
-        #else:
-        #    await writeCommand(writer, message)
-        #    RCV = await readResponse(reader)
+        match message: 
+            case "poll":
+                await websocket.send(await poll(writer, reader))
+            case "startup":
+                await startup(writer, reader)
+                #send JSON parsed stuff await websocket.send("startup complete")
+            case "plasmaOnOff":
+                await websocket.send(await plasmaOnOff(writer, reader))
    
+async def plasmaOnOff(w, r):
+    if PlasmaOn.is_set() == True:
+        await writeCommand(w, "$8700%") 
+        PlasmaOn.clear()
+    
+    if PlasmaOn.is_set() == False:
+        await writeCommand(w, "$8701%")
+        PlasmaOn.set()
+
+    return await readResponse(r)
 async def poll(w, r) -> str:
     await writeCommand(w, "$91%") 
-    pollResponse = await readResponse(r)
-    return pollResponse
+    return await readResponse(r)
     
 async def startup(w, r) -> complex:
     await howManyMFCs(w, r)
@@ -65,67 +73,49 @@ async def startup(w, r) -> complex:
 
 async def howManyMFCs(w, r) -> int:
     await writeCommand(w, "$2A002%") 
-    val = await readResponse(r)
-    return val
+    return await readResponse(r)
 async def BatchIDLogging(w, r) -> int:
     await writeCommand(w, "$2A011%") 
-    val = await readResponse(r)
-    return val 
+    return await readResponse(r)
 async def RecipeMBStartPos(w, r) -> float:
     await writeCommand(w, "$2A606%") 
-    val = await readResponse(r)
-    return val  
+    return await readResponse(r)
 async def RecipeRFPower(w, r) -> int:
     await writeCommand(w, "$2A605%") 
-    val = await readResponse(r)
-    return val 
+    return await readResponse(r)
 async def RecipeMFC4Flow(w, r) -> float:
     await writeCommand(w, "$2A604%") 
-    val = await readResponse(r)
-    return val  
+    return await readResponse(r)
 async def RecipeMFC3Flow(w, r) -> float:
     await writeCommand(w, "$2A603%") 
-    val = await readResponse(r)
-    return val   
+    return await readResponse(r)
 async def RecipeMFC2Flow(w, r) -> float:
     await writeCommand(w, "$2A602%") 
-    val = await readResponse(r)
-    return val 
+    return await readResponse(r)
 async def RecipeMFC1Flow(w, r) -> float:
     await writeCommand(w, "$2A601%") 
-    val = await readResponse(r)
-    return val 
+    return await readResponse(r)
 async def MFC4Range(w, r) -> float:
     await writeCommand(w, "$8504%") 
-    val = await readResponse(r)
-    return val  
+    return await readResponse(r)
 async def MFC3Range(w, r) -> float:
     await writeCommand(w, "$8503%") 
-    val = await readResponse(r)
-    return val  
+    return await readResponse(r)
 async def MFC2Range(w, r) -> float:
     await writeCommand(w, "$8502%") 
-    val = await readResponse(r)
-    return val  
+    return await readResponse(r)
 async def MFC1Range(w, r) -> float:
     await writeCommand(w, "$8501%") 
-    val = await readResponse(r)
-    return val  
+    return await readResponse(r)
 async def RFMaxPower(w, r) -> int:
     await writeCommand(w, "$2A705%") 
-    val = await readResponse(r)
-    return val  
+    return await readResponse(r)
 async def TunerAutoMode(w, r) -> int:
     await writeCommand(w, "$89%") 
-    val = await readResponse(r)
-    return val  
+    return await readResponse(r)
 async def PlasmaOn(w, r) -> int:
     await writeCommand(w, "$8700%") 
-    val = await readResponse(r)
-    return val  
-#async def producer_handler(websocket):
-    #while True:
-        #await websocket.send()
+    return await readResponse(r)
 
 #async def handler(websocket):
     # handler is called the moment the server receives a connection and opens, 
