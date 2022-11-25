@@ -87,10 +87,76 @@
 const websocket = new WebSocket("ws://localhost:5000/");
 const reader = new FileReader();
 var loop;
+var CTL = {
+  CTLPCBStatus: [
+    {statusBits: 0x5b}
+  ],
+  MBTuner: [
+    {actualPosition: 50},
+    {AutoMode: 0},
+    {getPosition: function() {
+      return this.actualPosition;
+     }
+    }
+  ],
+  RFSupply: [
+    {PowerForward: 0},
+    {PowerReflected: 0},
+    {MaxPowerForward: 200},
+    {getPowerForward: function() {
+      return this.PowerForward;
+     }
+    }
+  ],
+  PlasmaHead: [
+    {Temp: 0},
+    {PlasmaStatus: 0},
+    {getPlasmaStatus: function() {
+      return this.PlasmaStatus;
+     }
+    }
+  ],
+  MFC4: [
+    {RecipeFlow: 0},
+    {ActualFlow: 0},
+    {Range: 0},
+    {getRecipeFlow: function() {
+      return this.RecipeFlow;
+     }
+    }
+  ],
+  MFC3: [
+    {RecipeFlow: 0},
+    {ActualFlow: 0},
+    {Range: 0},
+    {getRecipeFlow: function() {
+      return this.RecipeFlow;
+     }
+    }
+  ],
+  MFC2: [
+    {RecipeFlow: 0},
+    {ActualFlow: 0},
+    {Range: 0},
+    {getRecipeFlow: function() {
+      return this.RecipeFlow;
+     }
+    }
+  ],
+  MFC1: [
+    {RecipeFlow: 0},
+    {ActualFlow: 0},
+    {Range: 0},
+    {getRecipeFlow: function() {
+      return this.RecipeFlow;
+     }
+    }
+  ]
+}
 var MFCOptions = {
-  series: [100, 100, 80, 100],
+  series: [0, 0, 0, 0],
   chart: {
-    height: 390,
+    height: 450,
     type: 'radialBar',
   },
   plotOptions: {
@@ -207,11 +273,15 @@ testBtn.addEventListener("click", () => {
 
 reader.addEventListener("loadend", (e) => {
   const text = e.srcElement.result;
-  MFCChart.updateSeries([90, 100, 0, 0])
   console.log(text);
 });
 
-websocket.onmessage = ({ data }) => reader.readAsText(data)
+websocket.onmessage = ({ data }) => {
+  CTL = JSON.parse(data); 
+  console.log(CTL);
+  MFCChart.updateSeries([CTL.MFC[0].ActualFlow, CTL.MFC[1].ActualFlow, CTL.MFC[2].ActualFlow, CTL.MFC[3].ActualFlow]);
+  //reader.readAsText(data)
+};
 
 function plasmaOnOff() {
   websocket.send("plasmaOnOff")
@@ -228,15 +298,6 @@ function pollRate(rate) {
 function pollCTL() {
   websocket.send("poll");
 }
-
-let CTLStatus = {bits: 0x5b}
-let Tuner = {actualPosition: 50, AutoMode: 0}
-let RF = {PowerForward: 0, PowerReflected: 0, MaxPowerForward: 200}
-let MFC1 = {ActualFlow: 0, Range: 0}
-let MFC2 = {ActualFlow: 0, Range: 0}
-let MFC3 = {ActualFlow: 0, Range: 0}
-let MFC4 = {ActualFlow: 0, Range: 0}
-let Plasma = {Temp: 0, PlasmaOn: 0}
 
 </script>
 </body>

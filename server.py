@@ -6,8 +6,8 @@ import serial_asyncio
 
 async def readResponse(r) -> str:
     rsp = await r.readuntil(b'#')
-    print(rsp)
-    return rsp
+    print(rsp.decode())
+    return rsp.decode()
     
 async def writeCommand(w, cmd):
     w.write(cmd.encode('ascii'))
@@ -15,28 +15,56 @@ async def writeCommand(w, cmd):
 
 async def serial_handler(websocket):
     reader, writer = await serial_asyncio.open_serial_connection(url='/dev/ttyUSB0', baudrate=57600) 
-    PlasmaOn = asyncio.Event()
     async for message in websocket:
         print(message)
         match message: 
             case "poll":
-                await websocket.send(await poll(writer, reader))
+                rcv = await poll(writer, reader)
+                websocketReadyData = organizeRCVData(rcv)
+                await websocket.send(json.dumps(websocketReadyData))
             case "startup":
                 await startup(writer, reader)
                 #send JSON parsed stuff await websocket.send("startup complete")
-            case "plasmaOnOff":
-                await websocket.send(await plasmaOnOff(writer, reader))
-   
-async def plasmaOnOff(w, r):
-    if PlasmaOn.is_set() == True:
-        await writeCommand(w, "$8700%") 
-        PlasmaOn.clear()
-    
-    if PlasmaOn.is_set() == False:
-        await writeCommand(w, "$8701%")
-        PlasmaOn.set()
+            case "plasmaOn":
+                rcv = await plasmaOn(writer, reader)
+                await websocket.send(rcv)
+  
+def organizeRCVData(d):
+    howManyValuesInPoll = d.count(';')
+    strVar = d[3:] #Lop off the first three characters
+    strVar = strVar.rstrip('#')
+    dataParsed = strVar.split(';') 
+    PCBPollData: dict
+    PCBPollData = {
+        "CTLPCBStatus": [
+            {"statusBits": dataParsed[0] }
+        ],
+        "MBTuner": [
+            {"actualPosition": dataParsed[1] }
+        ],
+        "RFSupply": [
+            {"PowerForward": dataParsed[2] },
+            {"PowerReflected": dataParsed[3] }
+        ],
+        "PlasmaHead": [
+            {"PlasmaStatus": dataParsed[4] }
+        ],
+        "MFC": [
+            {"ActualFlow": dataParsed[5] },
+            {"ActualFlow": dataParsed[6] },
+            {"ActualFlow": dataParsed[7] },
+            {"ActualFlow": dataParsed[8] }
+        ],
+   }
+    return PCBPollData
 
+async def plasmaOn(w, r):
+    await writeCommand(w, "$8701%")
     return await readResponse(r)
+async def plasmaOff(w, r):
+    await writeCommand(w, "$8700%")
+    return await readResponse(r)
+
 async def poll(w, r) -> str:
     await writeCommand(w, "$91%") 
     return await readResponse(r)
@@ -58,19 +86,6 @@ async def startup(w, r) -> complex:
     await TunerAutoMode(w, r)
     await PlasmaOn(w, r)
      
-        #task4 = startupTasks.create_task(RecipeRFPower(w, r))
-        #task5 = startupTasks.create_task(RecipeMFC1Flow(w, r))
-        #task6 = startupTasks.create_task(RecipeMFC2Flow(w, r))
-        #task7 = startupTasks.create_task(RecipeMFC3Flow(w, r))
-        #task8 = startupTasks.create_task(RecipeMFC4Flow(w, r))
-        #task9 = startupTasks.create_task(MFC1Range(w, r)) 
-        #task10 = startupTasks.create_task(MFC2Range(w, r)) 
-        #task11 = startupTasks.create_task(MFC3Range(w, r)) 
-        #task12 = startupTasks.create_task(MFC4Range(w, r)) 
-        #task13 = startupTasks.create_task(RFMaxPower(w, r))
-        #task14 = startupTasks.create_task(TunerAutoMode(w, r))
-        #task15 = startupTasks.create_task(PlasmaOn(w, r))
-
 async def howManyMFCs(w, r) -> int:
     await writeCommand(w, "$2A002%") 
     return await readResponse(r)
@@ -116,14 +131,6 @@ async def TunerAutoMode(w, r) -> int:
 async def PlasmaOn(w, r) -> int:
     await writeCommand(w, "$8700%") 
     return await readResponse(r)
-
-#async def handler(websocket):
-    # handler is called the moment the server receives a connection and opens, 
-    # this is where I want to try and open a context manager 
-    # for the PCB serial connection and the interface handlers.
-#    async with asyncio.TaskGroup() as handlers:
-#        consumer_task = handlers.create_task(consumer_handler(websocket))
-#        producer_task = handlers.create_task(producer_handler(websocket))
 
 async def main():
     # context manager for the server 
