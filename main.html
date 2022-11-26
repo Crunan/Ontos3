@@ -88,76 +88,76 @@ const websocket = new WebSocket("ws://localhost:5000/");
 const reader = new FileReader();
 var loop;
 var CTL = {
-  CTLPCBStatus: [
-    {statusBits: 0x5b}
-  ],
-  MBTuner: [
-    {actualPosition: 50},
-    {AutoMode: 0},
-    {getPosition: function() {
+  CTLPCBStatus: {
+    statusBits: 0x5b
+  },
+  MBTuner: {
+    actualPosition: 50,
+    autoMode: 0,
+
+    getPosition: function() {
       return this.actualPosition;
-     }
     }
-  ],
-  RFSupply: [
-    {PowerForward: 0},
-    {PowerReflected: 0},
-    {MaxPowerForward: 200},
-    {getPowerForward: function() {
+  },
+  RFSupply: {
+    powerForward: 0,
+    powerReflected: 0,
+    maxPowerForward: 200,
+
+    getPowerForward: function() {
       return this.PowerForward;
-     }
     }
-  ],
-  PlasmaHead: [
-    {Temp: 0},
-    {PlasmaStatus: 0},
-    {getPlasmaStatus: function() {
+  },
+  PlasmaHead: {
+    temp: 0,
+    plasmaStatus: 0,
+
+    getPlasmaStatus: function() {
       return this.PlasmaStatus;
-     }
     }
-  ],
-  MFC4: [
-    {RecipeFlow: 0},
-    {ActualFlow: 0},
-    {Range: 0},
-    {getRecipeFlow: function() {
-      return this.RecipeFlow;
+  },
+  MFC4: {
+    recipeFlow: 0,
+    actualFlow: 0,
+    Range: 0,
+
+    getRecipeFlow: function() {
+      return this.recipeFlow;
      }
-    }
-  ],
-  MFC3: [
-    {RecipeFlow: 0},
-    {ActualFlow: 0},
-    {Range: 0},
-    {getRecipeFlow: function() {
-      return this.RecipeFlow;
+  },
+  MFC3: {
+    recipeFlow: 0,
+    actualFlow: 0,
+    Range: 0,
+
+    getRecipeFlow: function() {
+      return this.recipeFlow;
      }
-    }
-  ],
-  MFC2: [
-    {RecipeFlow: 0},
-    {ActualFlow: 0},
-    {Range: 0},
-    {getRecipeFlow: function() {
-      return this.RecipeFlow;
+  },
+  MFC2: {
+    recipeFlow: 0,
+    actualFlow: 0,
+    Range: 0,
+
+    getRecipeFlow: function() {
+      return this.recipeFlow;
      }
-    }
-  ],
-  MFC1: [
-    {RecipeFlow: 0},
-    {ActualFlow: 0},
-    {Range: 0},
-    {getRecipeFlow: function() {
-      return this.RecipeFlow;
+  },
+  MFC1: {
+    recipeFlow: 0,
+    actualFlow: 0,
+    Range: 0,
+
+    getRecipeFlow: function() {
+      return this.recipeFlow;
      }
-    }
-  ]
-}
+  }
+};
 var MFCOptions = {
   series: [0, 0, 0, 0],
   chart: {
     height: 450,
-    type: 'radialBar',
+    type: "radialBar",
   },
   plotOptions: {
     radialBar: {
@@ -166,8 +166,8 @@ var MFCOptions = {
       endAngle: 270,
       hollow: {
         margin: 5,
-        size: '30%',
-        background: 'transparent',
+        size: "30%",
+        background: "transparent",
         image: undefined,
       },
       dataLabels: {
@@ -180,12 +180,12 @@ var MFCOptions = {
       }
     }
   },
-  labels: ['Helium', 'H/Hyd', 'Nitrogen', 'Oxygen'],
+  labels: ["Helium", "H/Hyd", "Nitrogen", "Oxygen"],
   legend: {
     show: true,
     floating: true,
-    fontSize: '16px',
-    position: 'left',
+    fontSize: "16px",
+    position: "left",
     offsetX: 160,
     offsetY: 15,
     labels: {
@@ -213,35 +213,35 @@ var MFCOptions = {
 var RFOptions = {
   chart: {
     height: 300,
-    type: 'radialBar',
+    type: "radialBar",
   },
   series: [100],
-  labels:['RF Power'],
-}
+  labels:["RF Power"],
+};
 var RFRefOptions = {
   chart: {
     height: 300,
-    type: 'radialBar',
+    type: "radialBar",
   },
   series: [30],
-  labels: ['Reflecter Power'],
-}
+  labels: ["Reflecter Power"],
+};
 var TempOptions = {
   chart: {
     height: 300,
-    type: 'radialBar',
+    type: "radialBar",
   },
   series: [70],
-  labels: ['Temperature'],
-}
+  labels: ["Temperature"],
+};
 var TunerOptions = {
   chart: {
     height: 300,
-    type: 'radialBar',
+    type: "radialBar",
   },
   series: [53.67],
-  labels: ['Tuner'],
-}
+  labels: ["Tuner"],
+};
 
 var MFCChart = new 
   ApexCharts(document.querySelector("#MFCChart")
@@ -268,7 +268,8 @@ TunerChart.render();
 let testBtn = document.querySelector("#testBtn");
 
 testBtn.addEventListener("click", () => {
-  websocket.send("startup");
+  console.log(CTL);
+  //websocket.send("startup");
 });
 
 reader.addEventListener("loadend", (e) => {
@@ -277,11 +278,25 @@ reader.addEventListener("loadend", (e) => {
 });
 
 websocket.onmessage = ({ data }) => {
-  CTL = JSON.parse(data); 
-  console.log(CTL);
-  MFCChart.updateSeries([CTL.MFC[0].ActualFlow, CTL.MFC[1].ActualFlow, CTL.MFC[2].ActualFlow, CTL.MFC[3].ActualFlow]);
+  const source = JSON.parse(data); 
+  console.log(source);
+  parseCTL(source);
+  //MFCChart.updateSeries([CTL.MFC[0].actualFlow, CTL.MFC[1].actualFlow, CTL.MFC[2].actualFlow, CTL.MFC[3].actualFlow]);
+  //console.log(CTL.RFSupply.powerForward);
+  //RFPowerChart.updateSeries(CTL.RFSupply.powerForward);
+  //console.log(CTL.RFSupply.powerReflected);
+  //RFRefChart.updateSeries(CTL.RFSupply.powerReflected);
+  //console.log(CTL.MBTuner.actualPosition);
+  //TunerChart.updateSeries(CTL.MBTuner.actualPosition);
   //reader.readAsText(data)
 };
+
+function parseCTL(s) {
+  Object.keys(CTL).forEach(key => {
+    CTL[key] = Object.assign(CTL[key], s[key]);
+    console.log(CTL[key]);
+  });
+}
 
 function plasmaOnOff() {
   websocket.send("plasmaOnOff")

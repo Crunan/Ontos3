@@ -36,26 +36,32 @@ def organizeRCVData(d):
     dataParsed = strVar.split(';') 
     PCBPollData: dict
     PCBPollData = {
-        "CTLPCBStatus": [
-            {"statusBits": dataParsed[0] }
-        ],
-        "MBTuner": [
-            {"actualPosition": dataParsed[1] }
-        ],
-        "RFSupply": [
-            {"PowerForward": dataParsed[2] },
-            {"PowerReflected": dataParsed[3] }
-        ],
-        "PlasmaHead": [
-            {"PlasmaStatus": dataParsed[4] }
-        ],
-        "MFC": [
-            {"ActualFlow": dataParsed[5] },
-            {"ActualFlow": dataParsed[6] },
-            {"ActualFlow": dataParsed[7] },
-            {"ActualFlow": dataParsed[8] }
-        ],
-   }
+        "CTLPCBStatus": {
+            "statusBits": int(dataParsed[0], 16)
+        },
+        "MBTuner": {
+            "actualPosition": float(dataParsed[1])
+        },
+        "RFSupply": {
+            "powerForward": int(dataParsed[2], 10),
+            "powerReflected": int(dataParsed[3], 10) 
+        },
+        "PlasmaHead": {
+            "plasmaStatus": int(dataParsed[4], 16) 
+        },
+        "MFC4": {
+            "actualFlow": float(dataParsed[5])
+        },
+        "MFC3": {
+            "actualFlow": float(dataParsed[6])
+        },
+        "MFC2": {
+            "actualFlow": float(dataParsed[7])
+        },
+        "MFC1": {
+            "actualFlow": float(dataParsed[8])
+        }
+    }
     return PCBPollData
 
 async def plasmaOn(w, r):
