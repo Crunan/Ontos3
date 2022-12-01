@@ -20,16 +20,17 @@ async def serial_handler(websocket):
         match message: 
             case "poll":
                 rcv = await poll(writer, reader)
-                websocketReadyData = organizeRCVData(rcv)
+                websocketReadyData = organizePollData(rcv)
                 await websocket.send(json.dumps(websocketReadyData))
             case "startup":
-                await startup(writer, reader)
+                startupDict = await startup(writer, reader)
+                await websocket.send(json.dumps(startupDict))
                 #send JSON parsed stuff await websocket.send("startup complete")
             case "plasmaOn":
                 rcv = await plasmaOn(writer, reader)
                 await websocket.send(rcv)
   
-def organizeRCVData(d):
+def organizePollData(d):
     howManyValuesInPoll = d.count(';')
     strVar = d[3:] #Lop off the first three characters
     strVar = strVar.rstrip('#')
@@ -75,68 +76,234 @@ async def poll(w, r) -> str:
     await writeCommand(w, "$91%") 
     return await readResponse(r)
     
-async def startup(w, r) -> complex:
-    await howManyMFCs(w, r)
-    await BatchIDLogging(w, r)
-    await RecipeMBStartPos(w, r)
-    await RecipeRFPower(w, r)
-    await RecipeMFC1Flow(w, r)
-    await RecipeMFC2Flow(w, r)
-    await RecipeMFC3Flow(w, r)
-    await RecipeMFC4Flow(w, r)
-    await MFC1Range(w, r)
-    await MFC2Range(w, r)
-    await MFC3Range(w, r)
-    await MFC4Range(w, r)
-    await RFMaxPower(w, r)
-    await TunerAutoMode(w, r)
-    await PlasmaOn(w, r)
+async def startup(w, r) -> dict:
+    a = await howManyMFCs(w, r)
+    b = await BatchIDLogging(w, r)
+    c = await RecipeMBStartPos(w, r)
+    d = await RecipeRFPower(w, r)
+    e = await RecipeMFC1Flow(w, r)
+    f = await RecipeMFC2Flow(w, r)
+    g = await RecipeMFC3Flow(w, r)
+    h = await RecipeMFC4Flow(w, r)
+    i = await MFC4Range(w, r)
+    j = await MFC3Range(w, r)
+    k = await MFC2Range(w, r)
+    l = await MFC1Range(w, r)
+    m = await RFMaxPower(w, r)
+    n = await TunerAutoMode(w, r)
+    startupData = { 
+            "howManyMFCs"       : a,
+            "BatchIDLogging"    : b,
+            "RecipeMBStartPos"  : c,
+            "RecipeRFPower"     : d,
+            "RecipeMFC1Flow"    : e,
+            "RecipeMFC2Flow"    : f,
+            "RecipeMFC3Flow"    : g,
+            "RecipeMFC4Flow"    : h,
+            "MFC4Range"         : i,
+            "MFC3Range"         : j,
+            "MFC2Range"         : k,
+            "MFC1Range"         : l,
+            "RFMaxPower"        : m,
+            "TunerAutoMode"     : n
+    }
+    return startupData
      
 async def howManyMFCs(w, r) -> int:
     await writeCommand(w, "$2A002%") 
-    return await readResponse(r)
-async def BatchIDLogging(w, r) -> int:
+    rcv = await readResponse(r)
+    strVar = rcv[3:] #Lop off the first three characters
+    strVar = strVar.rstrip('#')
+    dataParsed = strVar.split(';') 
+    howManyMFCs = {
+        "CTLPCBStatus": {
+            "numMFCs": int(dataParsed[1], 10)
+        }
+    }
+    #print(howManyMFCs)
+    return howManyMFCs
+       
+async def BatchIDLogging(w, r) -> bool:
     await writeCommand(w, "$2A011%") 
-    return await readResponse(r)
+    rcv = await readResponse(r)
+    strVar = rcv[3:] #Lop off the first three characters
+    strVar = strVar.rstrip('#')
+    dataParsed = strVar.split(';') 
+    BatchIDLogging = {
+        "CTLPCBStatus": {
+            "BatchIDLogging": bool(dataParsed[1])
+        }
+    }
+    #print(BatchIDLogging)
+    return BatchIDLogging
+     
 async def RecipeMBStartPos(w, r) -> float:
     await writeCommand(w, "$2A606%") 
-    return await readResponse(r)
-async def RecipeRFPower(w, r) -> int:
+    rcv = await readResponse(r)
+    strVar = rcv[3:] #Lop off the first three characters
+    strVar = strVar.rstrip('#')
+    dataParsed = strVar.split(';') 
+    RecipeStartPos = {
+        "MBTuner": {
+            "recipeStartPos": float(dataParsed[1])
+        }
+    }
+    #print(RecipeStartPos)
+    return RecipeStartPos
+    
+async def RecipeRFPower(w, r) -> float:
     await writeCommand(w, "$2A605%") 
-    return await readResponse(r)
+    rcv = await readResponse(r)
+    strVar = rcv[3:] #Lop off the first three characters
+    strVar = strVar.rstrip('#')
+    dataParsed = strVar.split(';') 
+    RecipeRFPower = {
+        "RFSupply": {
+            "recipeRF": float(dataParsed[1])
+        }
+    }
+    #print(RecipeRFPower)
+    return RecipeRFPower
+
 async def RecipeMFC4Flow(w, r) -> float:
     await writeCommand(w, "$2A604%") 
-    return await readResponse(r)
+    rcv = await readResponse(r)
+    strVar = rcv[3:] #Lop off the first three characters
+    strVar = strVar.rstrip('#')
+    dataParsed = strVar.split(';') 
+    RecipeMFC4Flow = {
+        "MFC4": {
+            "recipeFlow": float(dataParsed[1])
+        }
+    }
+    #print(RecipeMFC4Flow)
+    return RecipeMFC4Flow
+
 async def RecipeMFC3Flow(w, r) -> float:
     await writeCommand(w, "$2A603%") 
-    return await readResponse(r)
+    rcv = await readResponse(r)
+    strVar = rcv[3:] #Lop off the first three characters
+    strVar = strVar.rstrip('#')
+    dataParsed = strVar.split(';') 
+    RecipeMFC3Flow = {
+        "MFC3": {
+            "recipeFlow": float(dataParsed[1])
+        }
+    }
+    #print(RecipeMFC3Flow)
+    return RecipeMFC3Flow
+
+
 async def RecipeMFC2Flow(w, r) -> float:
     await writeCommand(w, "$2A602%") 
-    return await readResponse(r)
+    rcv = await readResponse(r)
+    strVar = rcv[3:] #Lop off the first three characters
+    strVar = strVar.rstrip('#')
+    dataParsed = strVar.split(';') 
+    RecipeMFC2Flow = {
+        "MFC2": {
+            "recipeFlow": float(dataParsed[1])
+        }
+    }
+    #print(RecipeMFC2Flow)
+    return RecipeMFC2Flow
+
+
 async def RecipeMFC1Flow(w, r) -> float:
     await writeCommand(w, "$2A601%") 
-    return await readResponse(r)
+    rcv = await readResponse(r)
+    strVar = rcv[3:] #Lop off the first three characters
+    strVar = strVar.rstrip('#')
+    dataParsed = strVar.split(';') 
+    RecipeMFC1Flow = {
+        "MFC1": {
+            "recipeFlow": float(dataParsed[1])
+        }
+    }
+    #print(RecipeMFC1Flow)
+    return RecipeMFC1Flow
+
+
 async def MFC4Range(w, r) -> float:
     await writeCommand(w, "$8504%") 
-    return await readResponse(r)
+    rcv = await readResponse(r)
+    strVar = rcv[5:] #Lop off the first five characters
+    dataParsed = strVar.rstrip('#')
+    MFC4Range = {
+        "MFC4": {
+            "range": float(dataParsed[1])
+        }
+    }
+    #print(MFC4Range)
+    return MFC4Range
+
 async def MFC3Range(w, r) -> float:
     await writeCommand(w, "$8503%") 
-    return await readResponse(r)
+    rcv = await readResponse(r)
+    strVar = rcv[5:] #Lop off the first five characters
+    dataParsed = strVar.rstrip('#')
+    MFC3Range = {
+        "MFC3": {
+            "range": float(dataParsed[1])
+        }
+    }
+    #print(MFC3Range)
+    return MFC3Range
+
 async def MFC2Range(w, r) -> float:
     await writeCommand(w, "$8502%") 
-    return await readResponse(r)
+    rcv = await readResponse(r)
+    strVar = rcv[5:] #Lop off the first five characters
+    dataParsed = strVar.rstrip('#')
+    MFC2Range = {
+        "MFC2": {
+            "range": float(dataParsed[1])
+        }
+    }
+    #print(MFC2Range)
+    return MFC2Range
+
+
 async def MFC1Range(w, r) -> float:
     await writeCommand(w, "$8501%") 
-    return await readResponse(r)
-async def RFMaxPower(w, r) -> int:
+    rcv = await readResponse(r)
+    strVar = rcv[5:] #Lop off the first five characters
+    dataParsed = strVar.rstrip('#')
+    MFC1Range = {
+        "MFC1": {
+            "range": float(dataParsed[1])
+        }
+    }
+    #print(MFC1Range)
+    return MFC1Range
+
+async def RFMaxPower(w, r) -> float:
     await writeCommand(w, "$2A705%") 
-    return await readResponse(r)
-async def TunerAutoMode(w, r) -> int:
+    rcv = await readResponse(r)
+    strVar = rcv[3:] #Lop off the first three characters
+    strVar = strVar.rstrip('#')
+    dataParsed = strVar.split(';') 
+    RFMax = {
+        "RFSupply": {
+            "maxPowerForward": float(dataParsed[1])
+        }
+    }
+    #print(RFMax)
+    return RFMax
+
+
+async def TunerAutoMode(w, r) -> bool:
     await writeCommand(w, "$89%") 
-    return await readResponse(r)
-async def PlasmaOn(w, r) -> int:
-    await writeCommand(w, "$8700%") 
-    return await readResponse(r)
+    rcv = await readResponse(r)
+    strVar = rcv[3:] #Lop off the first three characters
+    dataParsed = strVar.rstrip('#')
+    tunerMode = {
+        "MBTuner": {
+            "autoMode": bool(dataParsed[1])
+        }
+    }
+    #print(tunerMode)
+    return tunerMode
 
 async def main():
     # context manager for the server 

@@ -8,7 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
   <!-- Custom Styles-->
   <link rel="stylesheet" href="styles.css">
-
+  <link rel="stylesheet" href="switch.css">
   <title>Ontos3</title>
 </head>
 <body>
@@ -16,69 +16,296 @@
 <header>
   <div class="container-fluid">
     <div class="row">
-      <div class="col-8 p-4 bg-success text-white text-left">
+      <div class="col p-4 bg-success text-white text-left">
         <h1>ONTOS3</h1>
         <p>Champions in the realm of atmospheric plasma</p>
       </div>
-      <div class="col-4 p-4 bg-success" align="right">
-        <div class="btn-group" role="group">
-          <button type="button" id="testBtn" class="btn btn-warning rounded-start">TEST BUTTON</button>
-          <button type="button" class="btn btn-outline-warning" onClick="plasmaOnOff()">PLASMA ON/OFF BUTTON</button>
-          <div class="btn-group-vertical" role="group">
-            <input type="radio" class="btn-check" onClick="pollRate(1000)" name="vbtn-radio" id="vbtn-radio1" autocomplete="off" checked>
-            <label class="btn btn-outline-warning" for="vbtn-radio1">Poll Rate 1000ms</label>
-            <input type="radio" class="btn-check" onClick="pollRate(500)" name="vbtn-radio" id="vbtn-radio2" autocomplete="off">
-            <label class="btn btn-outline-warning" for="vbtn-radio2">Poll Rate 500ms</label>
-            <input type="radio" class="btn-check" onClick="pollRate(100)" name="vbtn-radio" id="vbtn-radio3" autocomplete="off">
-            <label class="btn btn-outline-warning" for="vbtn-radio3">Poll Rate 100ms</label>
-            <input type="radio" class="btn-check" onClick="pollRate(50)" name="vbtn-radio" id="vbtn-radio4" autocomplete="off">
-            <label class="btn btn-outline-warning" for="vbtn-radio4">Poll Rate 50ms</label>
-            <input type="radio" class="btn-check" onClick="stopPoll()" name="vbtn-radio" id="vbtn-radio5" autocomplete="off">
-            <label class="btn btn-danger" for="vbtn-radio5">STOP POLL</label>
+      <div class="col p-4 bg-success text-end">
+        <div class="row p-1">
+          <div class="col">
+            <button class="btn btn-toggle btn-sm btn-warning" id="fullscreenToggle" type="button" data-bs-toggle="button" aria-pressed="false" autocomplete="off" onclick="toggleFullscreen()">
+            <div class="handle"></div>
+            </button>
+            <label for="fullscreenToggle" class="form-label text-white">Fullscreen</label>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-  <div class="px-3 py-2 bg-dark text-white">
-    <div class="container">
-      <div class="d-flex flex-wrap align-items-center justify-content-center">
-        <ul class="nav col-12 col-lg-auto justify-content-evenly my-2 my-md-0 text-small">
-          <li><button class="btn btn text-white" href="#">Dashboard</a></li>
-          <li><a class="nav-link text-white" href="#">Graphs</a></li>
-          <li><a class="nav-link text-white" href="#">Logs</a></li>
-          <li><a class="nav-link text-white" href="#">Account</a></li>
-        </ul>
+        <div class="row">
+          <div class="col">
+            <button type="button" class="btn btn-warning" data-bs-toggle="offcanvas" data-bs-target="#offcanvas-pollrate">POLL RATE</button>
+          </div>
+        </div>
+          <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvas-pollrate">
+            <div class="offcanvas-header">
+              <h5 class="offcanvas-title" id="offcanvas-pollrateLabel">Poll Rate</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body text-start text-bg-success">
+              <div class="d-grid gap-2">
+                <div class="btn-group-vertical" role="group">
+                  <input type="radio" class="btn-check" onClick="pollRate(1000)" name="vbtn-radio" id="vbtn-radio1" autocomplete="off">
+                  <label class="btn btn-xl btn-outline-warning" for="vbtn-radio1">Poll Rate - 1000ms</label>
+                  <input type="radio" class="btn-check" onClick="pollRate(500)" name="vbtn-radio" id="vbtn-radio2" autocomplete="off">
+                  <label class="btn btn-xl btn-outline-warning" for="vbtn-radio2">Poll Rate - 500ms</label>
+                  <input type="radio" class="btn-check" onClick="pollRate(100)" name="vbtn-radio" id="vbtn-radio3" autocomplete="off">
+                  <label class="btn btn-xl btn-outline-warning" for="vbtn-radio3">Poll Rate - 100ms</label>
+                  <input type="radio" class="btn-check" onClick="pollRate(50)" name="vbtn-radio" id="vbtn-radio4" autocomplete="off">
+                  <label class="btn btn-xl btn-outline-warning" for="vbtn-radio4">Poll Rate - 50ms</label>
+                  <input type="radio" class="btn-check" onClick="stopPoll()" name="vbtn-radio" id="vbtn-radio5" autocomplete="off">
+                  <label class="btn btn-xl btn-danger" for="vbtn-radio5">STOP POLL</label>
+                </div>
+              </div>
+            </div>
+          </div>
       </div>
     </div>
   </div>
 </header>
 
-<div class="container-fluid pt-2">
-  <div class="row">
-    <div class="col-4">
-      <div id="MFCChart"></div>
+<div class="container-fluid p-2 text-center bg-dark">
+  <div class="card">
+    <div class="card-header">
+      <ul class="nav nav-tabs card-header-tabs">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="true" href="#">Dashboard</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Link</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link disabled">Disabled</a>
+        </li>
+        <li>
+          <a class="nav-link" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvas-3axisBtns" aria-controls="offcanvasExample">3-Axis Buttons</a>
+        </li>
+      </ul>
     </div>
-    <div class="col-8">
-      <div class="row"> 
-        <div class="col">
-          <div id="RFPower"></div>
-        </div>
-        <div class="col">
-          <div id="Tuner"></div>
-        </div>
-      <div class="row"> 
-        <div class="col">
-          <div id="RFRef"></div>
-        </div>
-        <div class="col">
-          <div id="Temp"></div>
-        </div>
+    <!-- Dashboard Card Body --> 
+    <div class="card-body"> 
+      <div class="row px-2">
+        
+        <!--MFC Card -->
+        <div class="col-xxl-3 p-1 text-center">
+          <div class="card text-bg-primary mb-3"> 
+            <div class="card-header">Mass Flow Controllers</div>
+            <div class="card-body" data-bs-toggle="modal" data-bs-target="#MFCModal">
+              <div id="MFCChart"></div>
+            </div>
+            <div class="card-footer">
+              <div class="btn-group border border-success" role="group">
+                <button type="button" class="btn btn-lg btn-outline-light" onClick="plasmaOnOff()">PLASMA ON</button>
+                <button type="button" class="btn btn-lg btn-light stetched-link" data-bs-toggle="modal" data-bs-target="#MFCModal">SET RECIPE:</button>
+              </div>
+            </div>
+          </div>
+          <!-- MFC Modal -->
+          <div class="modal" id="MFCModal" tabindex="-1" aria-labelledby="MFC Modal" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-sm">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h1 class="modal-title fs-5" id="MFC Modal Title">MFC Setpoints</h1>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <div class="input-group" role="group">
+                    <span class="input-group-text">MFC1:</span>
+                    <input type="text" class="form-control text-center" id="recipeMB" placeholder="00.00">
+                    <span class="input-group-text">SLPM</span>
+                  </div>
+                  <div class="input-group" role="group">
+                    <span class="input-group-text">MFC2:</span>
+                    <input type="text" class="form-control text-center" id="recipeMB" placeholder="00.00">
+                    <span class="input-group-text">SLPM</span>
+                  </div>
+                  <div class="input-group" role="group">
+                    <span class="input-group-text">MFC3:</span>
+                    <input type="text" class="form-control text-center" id="recipeMB" placeholder=".000">
+                    <span class="input-group-text">SLPM</span>
+                  </div>
+                  <div class="input-group" role="group">
+                    <span class="input-group-text">MFC4:</span>
+                    <input type="text" class="form-control text-center" id="recipeMB" placeholder=".000">
+                    <span class="input-group-text">SLPM</span>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!--MFC Column End-->
+        
+        <!-- RF Power Card-->
+        <div class="col p-1 "> 
+          <div class="card text-bg-secondary mb-3">    
+            <div class="card-header">RF Power Forward</div>
+            <div class="card-body" data-bs-toggle="modal" data-bs-target="#RFModal">
+              <div id="RFPower"></div>
+            </div>
+            <div class="card-footer px-4">
+              <div class="input-group border border-success" role="group">
+                <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#RFModal">SET RECIPE: </button>
+                <span class="input-group-text">RF</span>
+                <input type="text" class="form-control text-center" id="recipeRF" placeholder="0">
+                <span class="input-group-text">watts</span>
+              </div>
+            </div>
+          </div>
+          <!-- RF Modal -->
+          <div class="modal fade" id="RFModal" tabindex="-1" aria-labelledby="RF Modal" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-sm">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h1 class="modal-title fs-5" id="RF Modal Title">RF Power Setpoint</h1>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <input type="text" class="form-control text-center" id="recipeRF" placeholder="0">
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- RF Card Column End-->
+        
+        <!-- Match Box Card-->
+        <div class="col p-1">
+          <div class="card text-bg-secondary mb-3"> 
+            <div class="card-header">Matchbox Tuner</div>
+            <div class="card-body" data-bs-toggle="modal" data-bs-target="#MBModal">
+              <div id="Tuner"></div>
+            </div>
+            <div class="card-footer px-4">
+              <div class="input-group border border-success" role="group">
+                <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#MBModal">SET RECIPE: </button>
+                <span class="input-group-text">TUNER</span>
+                <input type="text" class="form-control text-center" id="recipeRF" placeholder="0">
+                <span class="input-group-text">%</span>
+              </div>
+            </div>
+          </div>
+          <!-- MB Modal -->
+          <div class="modal fade" id="MBModal" tabindex="-1" aria-labelledby="MB Modal" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-sm">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h2 class="modal-title fs-5" id="MB Modal Title">Matchbox Tuner Setpoint:</h2>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <input type="text" class="form-control text-center" id="recipeMB" placeholder="0">
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-sm btn-primary">Save changes</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- MB Card Column End-->
+
+        <!-- RF Reflected Card -->
+        <div class="col p-1">
+          <div class="card text-bg-secondary mb-3">  
+            <div class="card-header">RF Power Reflected</div>
+            <div class="card-body">
+              <div id="RFRef"></div>
+            </div>
+            <div class="card-footer">
+              <div class="btn-group border border-success" role="group">
+                <button type="button" class="btn btn-sm btn-outline-light" onClick="plasmaOnOff()">PLASMA ON/OFF BUTTON</button>
+                <button type="button" class="btn btn-sm btn-light" id="testBtn">TEST BUTTON</button>
+              </div>
+            </div>
+          </div>
+        </div><!--RF Ref Card Column End-->
+
+        <!-- Plasma Temp Card -->
+        <div class="col p-1">
+          <div class="card text-bg-secondary mb-3">   
+            <div class="card-header">Plasma Head Temperature</div>
+            <div class="card-body">
+              <div id="Temp"></div>
+            </div>
+            <div class="card-footer">
+              <div class="btn-group border border-success" role="group">
+                <button type="button" class="btn btn-sm btn-outline-light" onClick="plasmaOnOff()">PLASMA ON/OFF BUTTON</button>
+                <button type="button" class="btn btn-sm btn-light" id="testBtn">TEST BUTTON</button>
+              </div>
+            </div>
+          </div>
+        </div><!--Plasma Temp Column End-->
+        
+      </div><!--Dashboard Card Row End-->
+    
+  <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvas-3axisBtns" aria-labelledby="offcanvas 3-Axis Buttons">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="offcanvasExampleLabel">3-Axis Controls</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body border border-primary">
+      <div>
+        The following controls are to manuevre the 3-axis stage.
+      </div>
+      <div class="dropdown mt-3">
+        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+          Dropdown button
+        </button>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="#">Action</a></li>
+          <li><a class="dropdown-item" href="#">Another action</a></li>
+          <li><a class="dropdown-item" href="#">Something else here</a></li>
+        </ul>
+      </div>
+      <div class="d-grid gap-2">
+        <button class="btn btn-primary" type="button">INITIALIZE</button>
+        <button class="btn btn-primary" type="button">INITIALIZE</button>
+        <button class="btn btn-primary" type="button">INITIALIZE</button>
+        <button class="btn btn-primary" type="button">INITIALIZE</button>
+        <button class="btn btn-primary" type="button">INITIALIZE</button>
+        <button class="btn btn-primary" type="button">INITIALIZE</button>
+        <button class="btn btn-primary" type="button">START SCAN</button>
+        <button class="btn btn-primary" type="button">START SCAN</button>
+        <button class="btn btn-primary" type="button">START SCAN</button>
+        <button class="btn btn-primary" type="button">START SCAN</button>
+        <button class="btn btn-primary" type="button">START SCAN</button>
+        <button class="btn btn-primary" type="button">START SCAN</button>
       </div>
     </div>
-  </div>
-</div>
+      <div class="container-fluid">
+        <div class="row">
+          <div class="input-group w-20 pb-2 border-bottom">
+            <button class="btn btn-secondary" type="button">MB Setpoint: </button>
+            <input type="text" class="form-control" id="mbset">
+            <span class="input-group-text">%</span>
+          </div>
+        </div>
+        <div class="row pt-3">
+          <div class="input-group ps-5">
+            <button class="btn btn-lg btn-primary" type="button">7</button>
+            <button class="btn btn-lg btn-primary" type="button">8</button>
+            <button class="btn btn-lg btn-primary" type="button">9</button>
+          </div>
+          <div class="input-group ps-5">
+            <button class="btn btn-lg btn-primary" type="button">4</button>
+            <button class="btn btn-lg btn-primary" type="button">5</button>
+            <button class="btn btn-lg btn-primary" type="button">6</button>
+          </div>
+          <div class="input-group ps-5">
+            <button class="btn btn-lg btn-primary" type="button">1</button>
+            <button class="btn btn-lg btn-primary" type="button">2</button>
+            <button class="btn btn-lg btn-primary" type="button">3</button>
+          </div>
+        </div>
+      </div>
 
+</div><!--Content Container-Fluid End-->
+
+  
   <!-- Apex Charts Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script> 
 
@@ -86,13 +313,17 @@
 
 const websocket = new WebSocket("ws://localhost:5000/");
 const reader = new FileReader();
+var elem = document.documentElement;
 var loop;
 var CTL = {
   CTLPCBStatus: {
-    statusBits: 0x5b
+    statusBits: 0x00,
+    numMFCs: 0,
+    BatchIDLogging: 0
   },
   MBTuner: {
-    actualPosition: 50,
+    recipeStartPos: 50,
+    actualPosition: 0,
     autoMode: 0,
 
     getPosition: function() {
@@ -100,6 +331,7 @@ var CTL = {
     }
   },
   RFSupply: {
+    recipeRF: 0,
     powerForward: 0,
     powerReflected: 0,
     maxPowerForward: 200,
@@ -186,8 +418,8 @@ var MFCOptions = {
     floating: true,
     fontSize: "16px",
     position: "left",
-    offsetX: 160,
-    offsetY: 15,
+    offsetX: 70,
+    offsetY: 20,
     labels: {
       useSeriesColors: true,
     },
@@ -215,7 +447,7 @@ var RFOptions = {
     height: 300,
     type: "radialBar",
   },
-  series: [100],
+  series: [CTL.RFSupply.powerForward],
   labels:["RF Power"],
 };
 var RFRefOptions = {
@@ -223,7 +455,7 @@ var RFRefOptions = {
     height: 300,
     type: "radialBar",
   },
-  series: [30],
+  series: [CTL.RFSupply.powerReflected],
   labels: ["Reflecter Power"],
 };
 var TempOptions = {
@@ -231,7 +463,7 @@ var TempOptions = {
     height: 300,
     type: "radialBar",
   },
-  series: [70],
+  series: [CTL.PlasmaHead.temp],
   labels: ["Temperature"],
 };
 var TunerOptions = {
@@ -239,7 +471,7 @@ var TunerOptions = {
     height: 300,
     type: "radialBar",
   },
-  series: [53.67],
+  series: [CTL.MBTuner.actualPosition],
   labels: ["Tuner"],
 };
 
@@ -268,8 +500,7 @@ TunerChart.render();
 let testBtn = document.querySelector("#testBtn");
 
 testBtn.addEventListener("click", () => {
-  console.log(CTL);
-  //websocket.send("startup");
+  websocket.send("startup");
 });
 
 reader.addEventListener("loadend", (e) => {
@@ -281,25 +512,19 @@ websocket.onmessage = ({ data }) => {
   const source = JSON.parse(data); 
   console.log(source);
   parseCTL(source);
-  //MFCChart.updateSeries([CTL.MFC[0].actualFlow, CTL.MFC[1].actualFlow, CTL.MFC[2].actualFlow, CTL.MFC[3].actualFlow]);
-  //console.log(CTL.RFSupply.powerForward);
-  //RFPowerChart.updateSeries(CTL.RFSupply.powerForward);
-  //console.log(CTL.RFSupply.powerReflected);
-  //RFRefChart.updateSeries(CTL.RFSupply.powerReflected);
-  //console.log(CTL.MBTuner.actualPosition);
-  //TunerChart.updateSeries(CTL.MBTuner.actualPosition);
-  //reader.readAsText(data)
+  MFCChart.updateSeries([CTL.MFC4.actualFlow, CTL.MFC3.actualFlow, CTL.MFC2.actualFlow, CTL.MFC1.actualFlow]);
+  RFPowerChart.updateSeries([CTL.RFSupply.powerForward]);
+  RFRefChart.updateSeries([CTL.RFSupply.powerReflected]);
+  TunerChart.updateSeries([CTL.MBTuner.actualPosition]);
 };
 
 function parseCTL(s) {
-  Object.keys(CTL).forEach(key => {
+  Object.keys(CTL).forEach(key => { 
     CTL[key] = Object.assign(CTL[key], s[key]);
-    console.log(CTL[key]);
   });
 }
-
 function plasmaOnOff() {
-  websocket.send("plasmaOnOff")
+  websocket.send("plasmaOnOff");
 }
 function stopPoll() { 
   clearInterval(loop);
@@ -311,52 +536,32 @@ function pollRate(rate) {
     loop = setInterval(pollCTL, rate);
 }
 function pollCTL() {
+  console.log("hi");
   websocket.send("poll");
+}
+
+
+function toggleFullscreen() {
+  if (document.fullscreen) {
+    if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) { /* Safari */
+        document.webkitExitFullscreen();
+      } else if (document.msExitFullscreen) { /* IE11 */
+        document.msExitFullscreen();
+      }
+    }
+  else {
+    if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+      } else if (elem.webkitRequestFullscreen) { /* Safari */
+        elem.webkitRequestFullscreen();
+      } else if (elem.msRequestFullscreen) { /* IE11 */
+        elem.msRequestFullscreen();
+      }
+    }
 }
 
 </script>
 </body>
 </html>
-<!-- <div class="box">
-        <div class="progress" style="height:40px">
-          <div class="progress-bar bg-success" style="height:40px"></div>
-        </div>
-        <div class="input-group w-50">
-          <button class="btn btn-success" type="button">MFC 1: </button>
-          <input type="text" class="form-control">
-          <span class="input-group-text">.</span>
-          <input type="text" class="form-control">
-          <span class="input-group-text">SLPM</span>
-        </div>
-        <div class="progress" style="height:40px">
-          <div class="progress-bar bg-success" style="height:40px"></div>
-        </div>
-        <div class="input-group w-50">
-          <button class="btn btn-success" type="button">MFC 2: </button>
-          <input type="text" class="form-control">
-          <span class="input-group-text">.</span>
-          <input type="text" class="form-control">
-          <span class="input-group-text">SLPM</span>
-        </div>
-        <div class="progress" style="height:40px">
-          <div class="progress-bar bg-success" style="height:40px"></div>
-        </div>
-        <div class="input-group w-50">
-          <button class="btn btn-success" type="button">MFC 3: </button>
-          <input type="text" class="form-control">
-          <span class="input-group-text">.</span>
-          <input type="text" class="form-control">
-          <span class="input-group-text">SLPM</span>
-        </div>
-        <div class="progress" style="height:40px">
-          <div class="progress-bar bg-success" style="height:40px"></div>
-        </div>
-        <div class="input-group w-50">
-          <button class="btn btn-success" type="button">MFC 4: </button>
-          <input type="text" class="form-control">
-          <span class="input-group-text">.</span>
-          <input type="text" class="form-control">
-          <span class="input-group-text">SLPM</span>
-        </div>
-      </div>
-

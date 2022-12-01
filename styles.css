@@ -6,3 +6,71 @@
   font-size:2rem;
 }
 
+/*---switch---*/
+.switch {
+  font-weight: 300;
+  letter-spacing: 0;
+  margin-bottom: 0;
+  line-height: 29px;
+  cursor: pointer;
+  white-space: nowrap; }
+  .switch input {
+    display: none; }
+  .switch input:checked ~ .switch-indicator {
+    background: #afc3d7; }
+  .switch input:checked ~ .switch-indicator::after {
+    left: calc(100% - 20px);
+    -webkit-box-shadow: 0px 0px 3px #f3f6f9;
+    box-shadow: 0px 0px 3px #f3f6f9; }
+  .switch.switch-secondary input:checked ~ .switch-indicator::after {
+    background: #4d7bc9; }
+  .switch .switch-dark input:checked ~ .switch-indicator::after {
+    background: #172b4c; }
+
+.switch-indicator {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 10px;
+  background: #f3f6f9;
+  border-radius: 20px;
+  vertical-align: middle;
+  -webkit-transition: 0.3s;
+  transition: 0.3s; }
+  .switch-indicator::after {
+    content: '';
+    display: block;
+    position: absolute;
+    left: 0px;
+    width: 20px;
+    height: 20px;
+    -webkit-transition: 0.3s;
+    transition: 0.3s;
+    cursor: inherit;
+    background: #ffffff;
+    border-radius: 50%;
+    top: -5px;
+    -webkit-box-shadow: 0px 0px 3px #608acf;
+    box-shadow: 0px 0px 3px #608acf; }
+
+/*---fullscreen---*/
+[data-provide~="boxfull"].is-fullscreen .fullscreen-default, [data-provide~="fullscreen"].is-fullscreen .fullscreen-default {
+  display: none; }
+
+[data-provide~="boxfull"].is-fullscreen .fullscreen-active, [data-provide~="fullscreen"].is-fullscreen .fullscreen-active {
+  display: inline-block; }
+
+[data-provide~="boxfull"] .fullscreen-active, [data-provide~="fullscreen"] .fullscreen-active {
+  display: none; }
+
+@media (min-width: 768px) {
+  .dl-horizontal dt {
+    float: left;
+    width: 160px;
+    clear: left;
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap; }
+  .dl-horizontal dd {
+    margin-left: 180px; } }
