@@ -60,189 +60,157 @@
     </div>
   </div>
 </header>
+<!-- Modals --> 
 
-<div class="container-fluid p-2 text-center bg-dark">
-  <div class="card">
-    <div class="card-header">
-      <ul class="nav nav-tabs card-header-tabs">
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="true" href="#">Dashboard</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Link</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link disabled">Disabled</a>
-        </li>
-        <li>
-          <a class="nav-link" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvas-3axisBtns" aria-controls="offcanvasExample">3-Axis Buttons</a>
-        </li>
-      </ul>
+<!-- MFC Modal -->
+<div class="modal" id="MFCModal" tabindex="-1" aria-labelledby="MFC Modal" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="MFC Modal Title">MFC Setpoints</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <div class="input-group" role="group">
+            <span class="input-group-text">MFC1:</span>
+            <input type="number" class="form-control text-center" data-id="recipeMFC1" placeholder="00.00">
+            <span class="input-group-text">SLPM</span>
+          </div>
+        </div>
+        <div class="mb-3">
+          <div class="input-group" role="group">
+            <span class="input-group-text">MFC2:</span>
+            <input type="number" class="form-control text-center" data-id="recipeMFC2" placeholder="00.00">
+            <span class="input-group-text">SLPM</span>
+          </div>
+        </div>
+        <div class="mb-3">
+          <div class="input-group" role="group">
+            <span class="input-group-text">MFC3:</span>
+            <input type="number" class="form-control text-center" data-id="recipeMFC3" placeholder=".000">
+            <span class="input-group-text">SLPM</span>
+          </div>
+        </div>
+        <div class="mb-3">
+          <div class="input-group" role="group">
+            <span class="input-group-text">MFC4:</span>
+            <input type="number" class="form-control text-center" data-id="recipeMFC4" placeholder=".000">
+            <span class="input-group-text">SLPM</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-primary" type="button" data-bs-dismiss="modal">SET</button>
+      </div>
     </div>
-    <!-- Dashboard Card Body --> 
-    <div class="card-body"> 
-      <div class="row px-2">
-        
-        <!--MFC Card -->
-        <div class="col-xxl-3 p-1 text-center">
-          <div class="card text-bg-primary mb-3"> 
-            <div class="card-header">Mass Flow Controllers</div>
-            <div class="card-body" data-bs-toggle="modal" data-bs-target="#MFCModal">
-              <div id="MFCChart"></div>
-            </div>
-            <div class="card-footer">
-              <div class="btn-group border border-success" role="group">
-                <button type="button" class="btn btn-lg btn-outline-light" onClick="plasmaOnOff()">PLASMA ON</button>
-                <button type="button" class="btn btn-lg btn-light stetched-link" data-bs-toggle="modal" data-bs-target="#MFCModal">SET RECIPE:</button>
-              </div>
-            </div>
-          </div>
-          <!-- MFC Modal -->
-          <div class="modal" id="MFCModal" tabindex="-1" aria-labelledby="MFC Modal" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-sm">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h1 class="modal-title fs-5" id="MFC Modal Title">MFC Setpoints</h1>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                  <div class="input-group" role="group">
-                    <span class="input-group-text">MFC1:</span>
-                    <input type="text" class="form-control text-center" id="recipeMB" placeholder="00.00">
-                    <span class="input-group-text">SLPM</span>
-                  </div>
-                  <div class="input-group" role="group">
-                    <span class="input-group-text">MFC2:</span>
-                    <input type="text" class="form-control text-center" id="recipeMB" placeholder="00.00">
-                    <span class="input-group-text">SLPM</span>
-                  </div>
-                  <div class="input-group" role="group">
-                    <span class="input-group-text">MFC3:</span>
-                    <input type="text" class="form-control text-center" id="recipeMB" placeholder=".000">
-                    <span class="input-group-text">SLPM</span>
-                  </div>
-                  <div class="input-group" role="group">
-                    <span class="input-group-text">MFC4:</span>
-                    <input type="text" class="form-control text-center" id="recipeMB" placeholder=".000">
-                    <span class="input-group-text">SLPM</span>
-                  </div>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                  <button type="button" class="btn btn-primary">Save changes</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div><!--MFC Column End-->
-        
-        <!-- RF Power Card-->
-        <div class="col p-1 "> 
-          <div class="card text-bg-secondary mb-3">    
-            <div class="card-header">RF Power Forward</div>
-            <div class="card-body" data-bs-toggle="modal" data-bs-target="#RFModal">
-              <div id="RFPower"></div>
-            </div>
-            <div class="card-footer px-4">
-              <div class="input-group border border-success" role="group">
-                <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#RFModal">SET RECIPE: </button>
-                <span class="input-group-text">RF</span>
-                <input type="text" class="form-control text-center" id="recipeRF" placeholder="0">
-                <span class="input-group-text">watts</span>
-              </div>
-            </div>
-          </div>
-          <!-- RF Modal -->
-          <div class="modal fade" id="RFModal" tabindex="-1" aria-labelledby="RF Modal" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-sm">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h1 class="modal-title fs-5" id="RF Modal Title">RF Power Setpoint</h1>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                  <input type="text" class="form-control text-center" id="recipeRF" placeholder="0">
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                  <button type="button" class="btn btn-primary">Save changes</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div><!-- RF Card Column End-->
-        
-        <!-- Match Box Card-->
-        <div class="col p-1">
-          <div class="card text-bg-secondary mb-3"> 
-            <div class="card-header">Matchbox Tuner</div>
-            <div class="card-body" data-bs-toggle="modal" data-bs-target="#MBModal">
-              <div id="Tuner"></div>
-            </div>
-            <div class="card-footer px-4">
-              <div class="input-group border border-success" role="group">
-                <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#MBModal">SET RECIPE: </button>
-                <span class="input-group-text">TUNER</span>
-                <input type="text" class="form-control text-center" id="recipeRF" placeholder="0">
-                <span class="input-group-text">%</span>
-              </div>
-            </div>
-          </div>
-          <!-- MB Modal -->
-          <div class="modal fade" id="MBModal" tabindex="-1" aria-labelledby="MB Modal" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-sm">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h2 class="modal-title fs-5" id="MB Modal Title">Matchbox Tuner Setpoint:</h2>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                  <input type="text" class="form-control text-center" id="recipeMB" placeholder="0">
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
-                  <button type="button" class="btn btn-sm btn-primary">Save changes</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div><!-- MB Card Column End-->
+  </div>
+</div>
+<!-- MB Modal -->
+<div class="modal input-modal" id="MBModal" tabindex="-1" aria-labelledby="MB Modal" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="MB Modal Title">Matchbox Tuner Setpoint</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="input-group" role="group">
+          <span class="input-group-text">TUNER</span>
+          <input type="text" class="form-control text-center">
+          <span class="input-group-text">%</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="MBSet()">SET</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- RF Modal -->
+<div class="modal input-modal" id="RFModal" tabindex="-1" aria-labelledby="RF Modal"  aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="RF Modal Title">RF Power Setpoint</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="input-group" role="group">
+          <span class="input-group-text">RF</span>
+          <input type="text" class="form-control text-center"> 
+          <span class="input-group-text">watts</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="RFSet()">SET</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-        <!-- RF Reflected Card -->
-        <div class="col p-1">
-          <div class="card text-bg-secondary mb-3">  
-            <div class="card-header">RF Power Reflected</div>
-            <div class="card-body">
-              <div id="RFRef"></div>
-            </div>
-            <div class="card-footer">
-              <div class="btn-group border border-success" role="group">
-                <button type="button" class="btn btn-sm btn-outline-light" onClick="plasmaOnOff()">PLASMA ON/OFF BUTTON</button>
-                <button type="button" class="btn btn-sm btn-light" id="testBtn">TEST BUTTON</button>
-              </div>
-            </div>
-          </div>
-        </div><!--RF Ref Card Column End-->
+<!-- Recipe Offcanvas -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvas-recipe" aria-labelledby="offcanvas recipe">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="offcanvasExampleLabel">Recipe Configuration:</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body border border-primary">
+    <form id="recipeForm" >
+      <div class="mb-3 p-3 border-bottom">
+        <label for="recipeFile" class="form-label">Load a Recipe</label>
+        <input class="form-control" type="file" id="recipeFile">
+      </div>
+      <div class="input-group mb-5">
+        <span class="input-group-text" id="loadedRecipe">Loaded Recipe: </span>
+        <input type="text" class="form-control"> 
+      </div>
+      <div class="input-group mb-3">
+        <span class="input-group-text" >RF Power: </span>
+        <input type="number" class="form-control" id="recipeRF">
+        <span class="input-group-text" >watts</span>
+      </div>
+      <div class="input-group mb-3">
+        <span class="input-group-text">MB Tuner: </span>
+        <input type="text" class="form-control" id="recipeMB">
+        <span class="input-group-text" >%</span>
+      </div>
+      <div class="input-group mb-5">
+        <span class="input-group-text">Auto Tune: </span>
+        <div class="input-group-text">
+          <input class="form-check-input mt-0" type="checkbox" id="recipeTunerMode">
+        </div>
+      </div>
+      <div class="input-group mb-3">
+        <span class="input-group-text" >MFC 1 Flow: </span>
+        <input type="number" min="0" max="20.00" step="0.1" class="form-control" id="recipeMFC1"> 
+        <span class="input-group-text" >SLPM</span>
+      </div>
+      <div class="input-group mb-3">
+        <span class="input-group-text" >MFC 2 Flow: </span>
+        <input type="number" min="0" max="20.00" step="0.1" class="form-control" id="recipeMFC2">
+        <span class="input-group-text" >SLPM</span>
+      </div>
+      <div class="input-group mb-3">
+        <span class="input-group-text" >MFC 3 Flow: </span>
+        <input type="number" min="0" max="0.3" step="0.001" class="form-control" id="recipeMFC3">
+        <span class="input-group-text" >SLPM</span>
+      </div>
+      <div class="input-group mb-5">
+        <span class="input-group-text" >MFC 4 Flow: </span>
+        <input type="number" min="0" max="0.3" step="0.001" class="form-control" id="recipeMFC4">
+        <span class="input-group-text" >SLPM</span>
+      </div>
+      <button class="btn btn-secondary me-3" type="button" data-bs-dismiss="offcanvas">Back</button>
+      <button class="btn btn-primary" onclick="sendAllValues()">Set Values</button>
+      <button class="btn btn-success">Save Recipe</button>
+  </div>
+</div>
 
-        <!-- Plasma Temp Card -->
-        <div class="col p-1">
-          <div class="card text-bg-secondary mb-3">   
-            <div class="card-header">Plasma Head Temperature</div>
-            <div class="card-body">
-              <div id="Temp"></div>
-            </div>
-            <div class="card-footer">
-              <div class="btn-group border border-success" role="group">
-                <button type="button" class="btn btn-sm btn-outline-light" onClick="plasmaOnOff()">PLASMA ON/OFF BUTTON</button>
-                <button type="button" class="btn btn-sm btn-light" id="testBtn">TEST BUTTON</button>
-              </div>
-            </div>
-          </div>
-        </div><!--Plasma Temp Column End-->
-        
-      </div><!--Dashboard Card Row End-->
-    
-  <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvas-3axisBtns" aria-labelledby="offcanvas 3-Axis Buttons">
+<!--OffCanvas -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvas-3axisBtns" aria-labelledby="offcanvas 3-Axis Buttons">
     <div class="offcanvas-header">
       <h5 class="offcanvas-title" id="offcanvasExampleLabel">3-Axis Controls</h5>
       <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -250,16 +218,6 @@
     <div class="offcanvas-body border border-primary">
       <div>
         The following controls are to manuevre the 3-axis stage.
-      </div>
-      <div class="dropdown mt-3">
-        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-          Dropdown button
-        </button>
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="#">Action</a></li>
-          <li><a class="dropdown-item" href="#">Another action</a></li>
-          <li><a class="dropdown-item" href="#">Something else here</a></li>
-        </ul>
       </div>
       <div class="d-grid gap-2">
         <button class="btn btn-primary" type="button">INITIALIZE</button>
@@ -276,33 +234,145 @@
         <button class="btn btn-primary" type="button">START SCAN</button>
       </div>
     </div>
-      <div class="container-fluid">
-        <div class="row">
-          <div class="input-group w-20 pb-2 border-bottom">
-            <button class="btn btn-secondary" type="button">MB Setpoint: </button>
-            <input type="text" class="form-control" id="mbset">
-            <span class="input-group-text">%</span>
-          </div>
-        </div>
-        <div class="row pt-3">
-          <div class="input-group ps-5">
-            <button class="btn btn-lg btn-primary" type="button">7</button>
-            <button class="btn btn-lg btn-primary" type="button">8</button>
-            <button class="btn btn-lg btn-primary" type="button">9</button>
-          </div>
-          <div class="input-group ps-5">
-            <button class="btn btn-lg btn-primary" type="button">4</button>
-            <button class="btn btn-lg btn-primary" type="button">5</button>
-            <button class="btn btn-lg btn-primary" type="button">6</button>
-          </div>
-          <div class="input-group ps-5">
-            <button class="btn btn-lg btn-primary" type="button">1</button>
-            <button class="btn btn-lg btn-primary" type="button">2</button>
-            <button class="btn btn-lg btn-primary" type="button">3</button>
-          </div>
-        </div>
-      </div>
+</div>
 
+<!--Main Content-->
+<div class="container-fluid p-2 text-center bg-dark">
+  <div class="card">
+    <div class="card-header">
+      <ul class="nav nav-tabs card-header-tabs">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="true" href="#">Dashboard</a>
+        </li>
+        <li class="nav-item ps-2">
+          <button class="btn btn-warning" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvas-recipe">Recipe</button>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link disabled">Disabled</a>
+        </li>
+        <li>
+          <a class="nav-link" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvas-3axisBtns" aria-controls="offcanvasExample">3-Axis Buttons</a>
+        </li>
+      </ul>
+    </div>
+    <!-- Dashboard Card Body --> 
+    <div class="card-body"> 
+      <div class="row px-2">
+
+        <!--MFC Card -->
+        <div class="col-xxl-3 p-1 text-center">
+          <div class="card text-bg-primary mb-3"> 
+            <div class="card-header">Mass Flow Controllers</div>
+            <div class="card-body" data-bs-toggle="modal" data-bs-target="#MFCModal">
+              <div id="MFCChart"></div>
+            </div>
+            <div class="card-footer">
+              <div class="btn-group border border-success" role="group">
+                <button type="button" class="btn btn-lg btn-outline-light" id="plasmaBtn">PLASMA ON</button>
+                <button type="button" class="btn btn-lg btn-light stetched-link" data-bs-toggle="modal" data-bs-target="#MFCModal">SET RECIPE:</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- RF Power Card-->
+        <div class="col-xxl-2 p-1 "> 
+          <div class="card text-bg-secondary mb-3">    
+            <div class="card-header">RF Power Forward</div>
+            <div class="card-body" data-bs-toggle="modal" data-bs-target="#RFModal">
+              <div id="RFPower"></div>
+            </div>
+            <div class="card-footer px-4">
+              <div class="input-group border border-success" role="group">
+                <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#RFModal">SET RECIPE: </button>
+                <span class="input-group-text">RF</span>
+                <input type="text" class="form-control text-center" data-id="recipeRF" value="" placeholder="0" readonly>
+                <span class="input-group-text">watts</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Match Box Card-->
+        <div class="col-xxl-2 p-1">
+          <div class="card text-bg-secondary mb-3"> 
+            <div class="card-header">Matchbox Tuner</div>
+            <div class="card-body" data-bs-toggle="modal" data-bs-target="#MBModal">
+              <div id="Tuner"></div>
+            </div>
+            <div class="card-footer px-4">
+              <div class="input-group border border-success" role="group">
+                <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#MBModal">SET RECIPE: </button>
+                <span class="input-group-text">TUNER</span>
+                <input type="text" class="form-control text-center" data-id="recipeRF" value="" placeholder="0" readonly>
+                <span class="input-group-text">%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- RF Reflected Card -->
+        <div class="col-xxl-2 p-1">
+          <div class="card text-bg-secondary mb-3">  
+            <div class="card-header">RF Power Reflected</div>
+            <div class="card-body">
+              <div id="RFRef"></div>
+            </div>
+            <div class="card-footer">
+              <div class="btn-group border border-success" role="group">
+                <button type="button" class="btn btn-sm btn-outline-light">TEST BUTTON</button>
+                <button type="button" class="btn btn-sm btn-light" id="testBtn">TEST BUTTON</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Plasma Temp Card -->
+        <div class="col-xxl-2 p-1">
+          <div class="card text-bg-secondary mb-3">   
+            <div class="card-header">Plasma Head Temperature</div>
+            <div class="card-body">
+              <div id="Temp"></div>
+            </div>
+            <div class="card-footer">
+              <div class="btn-group border border-success" role="group">
+                <button type="button" class="btn btn-sm btn-outline-light">TEST BUTTON</button>
+                <button type="button" class="btn btn-sm btn-light" id="testBtn">TEST BUTTON</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- PCB Status Card-->
+        <div class="col-xxl-1 p-1"> 
+          <div class="card text-bg-secondary mb-3">  
+            <div class="card-header">Controller Status LEDs</div>
+            <div class="card-body">
+              <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
+                <button type="button" class="btn btn-light" id="led1">Gas_1</button>
+                <button type="button" class="btn btn-light" id="led2">Gas_2</button>
+                <button type="button" class="btn btn-light" id="led3">Gas_3</button>
+                <button type="button" class="btn btn-light" id="led4">Gas_4</button>
+                <button type="button" class="btn btn-light" id="led5">V5</button>
+                <button type="button" class="btn btn-light" id="led6">V6</button>
+                <button type="button" class="btn btn-light" id="led7">V7</button>
+                <button type="button" class="btn btn-light" id="led8">RF_EN</button>
+                <button type="button" class="btn btn-light" id="led9">PL_ON</button>
+                <button type="button" class="btn btn-light" id="led10">TUNING</button>
+                <button type="button" class="btn btn-light" id="led11">AUTO</button>
+                <button type="button" class="btn btn-light" id="led12">EXEC</button>
+                <button type="button" class="btn btn-light" id="led13">ESTOP_ON</button>
+                <button type="button" class="btn btn-light" id="led14">DO_CMD</button>
+                <button type="button" class="btn btn-light" id="led15">HE_SIG</button>
+                <button type="button" class="btn btn-light" id="led16">ABORT</button>
+              </div>
+            </div>
+            <div class="card-footer"></div>
+          </div>
+        </div>
+
+    </div><!--Dashboard Card Row End-->
+    
 </div><!--Content Container-Fluid End-->
 
   
@@ -311,15 +381,16 @@
 
 <script> 
 
-const websocket = new WebSocket("ws://localhost:5000/");
-const reader = new FileReader();
-var elem = document.documentElement;
-var loop;
+var websocket = new WebSocket("ws://localhost:5000/")
+const reader = new FileReader()
+const elem = document.documentElement
+let loop
 var CTL = {
-  CTLPCBStatus: {
-    statusBits: 0x00,
+  PCBStatus: {
+    statusBits: 0,
     numMFCs: 0,
-    BatchIDLogging: 0
+    BatchIDLogging: 0,
+    executeRecipe: false
   },
   MBTuner: {
     recipeStartPos: 50,
@@ -327,7 +398,7 @@ var CTL = {
     autoMode: 0,
 
     getPosition: function() {
-      return this.actualPosition;
+      return this.actualPosition
     }
   },
   RFSupply: {
@@ -337,55 +408,67 @@ var CTL = {
     maxPowerForward: 200,
 
     getPowerForward: function() {
-      return this.PowerForward;
+      return this.PowerForward
     }
   },
   PlasmaHead: {
     temp: 0,
-    plasmaStatus: 0,
+    plasmaOn: 0,
 
     getPlasmaStatus: function() {
-      return this.PlasmaStatus;
+      return this.plasmaOn
     }
   },
   MFC4: {
     recipeFlow: 0,
     actualFlow: 0,
-    Range: 0,
+    range: 0,
 
     getRecipeFlow: function() {
-      return this.recipeFlow;
+      return this.recipeFlow
+     },
+    setRecipeFlow: function(flow) {
+      this.recipeFlow = parseFloat(flow)
      }
   },
   MFC3: {
     recipeFlow: 0,
     actualFlow: 0,
-    Range: 0,
+    range: 0,
 
     getRecipeFlow: function() {
-      return this.recipeFlow;
+      return this.recipeFlow
+     },
+    setRecipeFlow: function(flow) {
+      this.recipeFlow = parseFloat(flow)
      }
   },
   MFC2: {
     recipeFlow: 0,
     actualFlow: 0,
-    Range: 0,
+    range: 0,
 
     getRecipeFlow: function() {
-      return this.recipeFlow;
+      return this.recipeFlow
+     },
+    setRecipeFlow: function(flow) {
+      this.recipeFlow = parseFloat(flow)
      }
   },
   MFC1: {
     recipeFlow: 0,
     actualFlow: 0,
-    Range: 0,
+    range: 0,
 
     getRecipeFlow: function() {
-      return this.recipeFlow;
+      return this.recipeFlow
+     },
+    setRecipeFlow: function(flow) {
+      this.recipeFlow = parseFloat(flow)
      }
   }
 };
-var MFCOptions = {
+const MFCOptions = {
   series: [0, 0, 0, 0],
   chart: {
     height: 450,
@@ -442,7 +525,7 @@ var MFCOptions = {
     }
   }]
 };
-var RFOptions = {
+const RFOptions = {
   chart: {
     height: 300,
     type: "radialBar",
@@ -450,7 +533,7 @@ var RFOptions = {
   series: [CTL.RFSupply.powerForward],
   labels:["RF Power"],
 };
-var RFRefOptions = {
+const RFRefOptions = {
   chart: {
     height: 300,
     type: "radialBar",
@@ -458,7 +541,7 @@ var RFRefOptions = {
   series: [CTL.RFSupply.powerReflected],
   labels: ["Reflecter Power"],
 };
-var TempOptions = {
+const TempOptions = {
   chart: {
     height: 300,
     type: "radialBar",
@@ -466,7 +549,7 @@ var TempOptions = {
   series: [CTL.PlasmaHead.temp],
   labels: ["Temperature"],
 };
-var TunerOptions = {
+const TunerOptions = {
   chart: {
     height: 300,
     type: "radialBar",
@@ -475,19 +558,19 @@ var TunerOptions = {
   labels: ["Tuner"],
 };
 
-var MFCChart = new 
+const MFCChart = new 
   ApexCharts(document.querySelector("#MFCChart")
     , MFCOptions);
-var RFPowerChart = new
+const RFPowerChart = new
   ApexCharts(document.querySelector("#RFPower")
     , RFOptions);
-var RFRefChart = new
+const RFRefChart = new
   ApexCharts(document.querySelector("#RFRef")
     , RFRefOptions);
-var TempChart = new
+const TempChart = new
   ApexCharts(document.querySelector("#Temp")
     , TempOptions);
-var TunerChart = new
+const TunerChart = new
   ApexCharts(document.querySelector("#Tuner")
     , TunerOptions);
 
@@ -497,67 +580,340 @@ RFRefChart.render();
 TempChart.render();
 TunerChart.render();
 
-let testBtn = document.querySelector("#testBtn");
+var testBtn = document.querySelector("#testBtn")
+var plasmaBtn = document.querySelector("#plasmaBtn")
+
+const led1 = document.querySelector("#led1")
+const led2 = document.querySelector("#led2")
+const led3 = document.querySelector("#led3")
+const led4 = document.querySelector("#led4")
+const led5 = document.querySelector("#led5")
+const led6 = document.querySelector("#led6")
+const led7 = document.querySelector("#led7")
+const led8 = document.querySelector("#led8")
+const led9 = document.querySelector("#led9")
+const led10 = document.querySelector("#led10")
+const led11 = document.querySelector("#led11")
+const led12 = document.querySelector("#led12")
+const led13 = document.querySelector("#led13")
+const led14 = document.querySelector("#led14")
+const led15 = document.querySelector("#led15")
+const led16 = document.querySelector("#led16")
+
+var UIrecipeRF = document.querySelector("#recipeRF")
+var UIrecipeMB = document.querySelector("#recipeMB")
+var UIrecipeTunerMode = document.querySelector("#recipeTunerMode")
+var UIrecipeMFC1 = document.querySelector("#recipeMFC1")
+var UIrecipeMFC2 = document.querySelector("#recipeMFC2")
+var UIrecipeMFC3 = document.querySelector("#recipeMFC3")
+var UIrecipeMFC4 = document.querySelector("#recipeMFC4")
+
+plasmaBtn.addEventListener("click", () => { 
+  executeRecipe() 
+  console.log("execute Recipe function ran")
+})
 
 testBtn.addEventListener("click", () => {
-  websocket.send("startup");
-});
+  console.log(CTL)
+  websocket.send("startup")
+})
 
 reader.addEventListener("loadend", (e) => {
-  const text = e.srcElement.result;
-  console.log(text);
-});
+  const text = e.srcElement.result
+  console.log(text)
+})
 
 websocket.onmessage = ({ data }) => {
-  const source = JSON.parse(data); 
-  console.log(source);
-  parseCTL(source);
-  MFCChart.updateSeries([CTL.MFC4.actualFlow, CTL.MFC3.actualFlow, CTL.MFC2.actualFlow, CTL.MFC1.actualFlow]);
-  RFPowerChart.updateSeries([CTL.RFSupply.powerForward]);
-  RFRefChart.updateSeries([CTL.RFSupply.powerReflected]);
-  TunerChart.updateSeries([CTL.MBTuner.actualPosition]);
-};
+  const source = JSON.parse(data)
+  console.log(source)
+  parseCTL(source)
+  updateStatus()
+
+  MFCChart.updateSeries([CTL.MFC4.actualFlow, CTL.MFC3.actualFlow, CTL.MFC2.actualFlow, CTL.MFC1.actualFlow])
+  RFPowerChart.updateSeries([CTL.RFSupply.powerForward])
+  RFRefChart.updateSeries([CTL.RFSupply.powerReflected])
+  TunerChart.updateSeries([CTL.MBTuner.actualPosition])
+}
 
 function parseCTL(s) {
   Object.keys(CTL).forEach(key => { 
-    CTL[key] = Object.assign(CTL[key], s[key]);
-  });
+    CTL[key] = Object.assign(CTL[key], s[key])
+    console.log(CTL[key])
+  })
 }
-function plasmaOnOff() {
-  websocket.send("plasmaOnOff");
+function plasmaOn() {
+  websocket.send("plasmaOn")
+}
+function plasmaOff() {
+  websocket.send("plasmaOff")
 }
 function stopPoll() { 
-  clearInterval(loop);
+  clearInterval(loop)
 }
 function pollRate(rate) {
   if (loop != null) {
-    clearInterval(loop);
-  }
-    loop = setInterval(pollCTL, rate);
+    clearInterval(loop)
+  } loop = setInterval(pollCTL, rate)
 }
 function pollCTL() {
-  console.log("hi");
-  websocket.send("poll");
+  console.log("hi")
+  websocket.send("poll")
+}
+function LED1() {
+  let bits = parseInt(CTL.PCBStatus.statusBits) 
+  let ledOn = bits & 256 
+  if (ledOn > 0) {
+    led1.setAttribute("class", "btn btn-success")
+  }
+  else {
+    led1.setAttribute("class", "btn btn-light")
+  }
+}
+ function LED2() {
+  let bits = parseInt(CTL.PCBStatus.statusBits) 
+  let ledOn = bits & 512 
+  if (ledOn > 0) {
+    led1.setAttribute("class", "btn btn-success")
+  }
+  else {
+    led1.setAttribute("class", "btn btn-light")
+  }
+}
+function LED3() {
+  let bits = parseInt(CTL.PCBStatus.statusBits) 
+  let ledOn = bits & 1024 
+  if (ledOn > 0) {
+    led1.setAttribute("class", "btn btn-success")
+  }
+  else {
+    led1.setAttribute("class", "btn btn-light")
+  }
+}
+function LED4() {
+  let bits = parseInt(CTL.PCBStatus.statusBits) 
+  let ledOn = bits & 2048 
+  if (ledOn > 0) {
+    led1.setAttribute("class", "btn btn-success")
+  }
+  else {
+    led1.setAttribute("class", "btn btn-light")
+  }
+}
+function LED5() {
+  let bits = parseInt(CTL.PCBStatus.statusBits) 
+  let ledOn = bits & 4096 
+  if (ledOn > 0) {
+    led1.setAttribute("class", "btn btn-success")
+  }
+  else {
+    led1.setAttribute("class", "btn btn-light")
+  }
+}
+function LED6() {
+  let bits = parseInt(CTL.PCBStatus.statusBits) 
+  let ledOn = bits & 8192 
+  if (ledOn > 0) {
+    led1.setAttribute("class", "btn btn-success")
+  }
+  else {
+    led1.setAttribute("class", "btn btn-light")
+  }
+}
+function LED7() {
+  let bits = parseInt(CTL.PCBStatus.statusBits) 
+  let ledOn = bits & 16384 
+  if (ledOn > 0) {
+    led1.setAttribute("class", "btn btn-success")
+  }
+  else {
+    led1.setAttribute("class", "btn btn-light")
+  }
+}
+function LED8() {
+  let bits = parseInt(CTL.PCBStatus.statusBits) 
+  let ledOn = bits & 32768 
+  if (ledOn > 0) {
+    led1.setAttribute("class", "btn btn-success")
+  }
+  else {
+    led1.setAttribute("class", "btn btn-light")
+  }
+}
+function LED9() {
+  let bits = parseInt(CTL.PCBStatus.statusBits) 
+  let ledOn = bits & 1 
+  if (ledOn > 0) {
+    led1.setAttribute("class", "btn btn-success")
+  }
+  else {
+    led1.setAttribute("class", "btn btn-light")
+  }
+}
+function LED10() {
+  let bits = parseInt(CTL.PCBStatus.statusBits) 
+  let ledOn = bits & 2 
+  if (ledOn > 0) {
+    led1.setAttribute("class", "btn btn-success")
+  }
+  else {
+    led1.setAttribute("class", "btn btn-light")
+  }
+}
+function LED11() {
+  let bits = parseInt(CTL.PCBStatus.statusBits) 
+  let ledOn = bits & 4 
+  if (ledOn > 0) {
+    led1.setAttribute("class", "btn btn-success")
+  }
+  else {
+    led1.setAttribute("class", "btn btn-light")
+  }
+}
+function LED12() {
+  let bits = parseInt(CTL.PCBStatus.statusBits) 
+  let ledOn = bits & 8 
+  if (ledOn > 0) {
+    led1.setAttribute("class", "btn btn-success")
+  }
+  else {
+    led1.setAttribute("class", "btn btn-light")
+  }
+}
+function LED13() {
+  let bits = parseInt(CTL.PCBStatus.statusBits) 
+  let ledOn = bits & 16 
+  if (ledOn > 0) {
+    led1.setAttribute("class", "btn btn-success")
+  }
+  else {
+    led1.setAttribute("class", "btn btn-light")
+  }
+}
+function LED14() {
+  let bits = parseInt(CTL.PCBStatus.statusBits) 
+  let ledOn = bits & 32 
+  if (ledOn > 0) {
+    led1.setAttribute("class", "btn btn-success")
+  }
+  else {
+    led1.setAttribute("class", "btn btn-light")
+  }
+}
+function LED15() {
+  let bits = parseInt(CTL.PCBStatus.statusBits) 
+  let ledOn = bits & 64 
+  if (ledOn > 0) {
+    led1.setAttribute("class", "btn btn-success")
+  }
+  else {
+    led1.setAttribute("class", "btn btn-light")
+  }
+}
+function LED16() {
+  let bits = parseInt(CTL.PCBStatus.statusBits) 
+  let ledOn = bits & 128 
+  if (ledOn > 0) {
+    led1.setAttribute("class", "btn btn-success")
+  }
+  else {
+    led1.setAttribute("class", "btn btn-light")
+  }
+}
+ 
+function updateStatus() {
+  let sb = CTL.PCBStatus.statusbits
+  LED1() 
+  LED2() 
+  LED3() 
+  LED4() 
+  LED5() 
+  LED6() 
+  LED7() 
+  LED8() 
+  LED9() 
+  LED10() 
+  LED11() 
+  LED12() 
+  LED13() 
+  LED14() 
+  LED15() 
+  LED16() 
 }
 
+function RFSet() {
+  let a = UIrecipeRF.value
+  if ((a != "") && (a >= 0) && (a <= CTL.RFSupply.maxPowerForward)) {
+    CTL.RFSupply.recipeRF = parseInt(a)
+  }
+  websocket.send("RFSet:" + CTL.RFSupply.recipeRF)
+}
+function MBSet() {
+  let a = UIrecipeMB.value
+  if ((a != "") && (a >= 0) && (a <= 99)) {
+    CTL.MBTuner.recipeStartPos = parseFloat(a)
+  }
+  websocket.send("MBSet:" + CTL.MBTuner.recipeStartPos)
+}
+
+function TunerModeSet() {
+  if (UIrecipeTunerMode.checked === true)
+    CTL.MBTuner.autoMode = 1
+  else 
+    CTL.MBTuner.autoMode = 0
+  websocket.send("TunerModeSet:" + CTL.MBTuner.autoMode)
+}
+function setMFCs() {
+  //interface recipe values
+  let a = UIrecipeMFC1.value
+  let b = UIrecipeMFC2.value
+  let c = UIrecipeMFC3.value
+  let d = UIrecipeMFC4.value
+
+  if ((a != "") && (a >= 0) && (a <= 20.00)) {CTL.MFC1.recipeFlow = parseFloat(a)}
+  if ((b != "") && (b >= 0) && (b <= 20.00)) {CTL.MFC2.recipeFlow = parseFloat(b)}
+  if ((c != "") && (c >= 0) && (c <= 0.30)) {CTL.MFC3.recipeFlow = parseFloat(c)}
+  if ((d != "") && (d >= 0) && (d <= 0.30)) {CTL.MFC4.recipeFlow = parseFloat(d)}
+
+  websocket.send("setMFCs:" + "1:" + CTL.MFC1.recipeFlow)
+  websocket.send("setMFCs:" + "2:" + CTL.MFC2.recipeFlow)
+  websocket.send("setMFCs:" + "3:" + CTL.MFC3.recipeFlow)
+  websocket.send("setMFCs:" + "4:" + CTL.MFC4.recipeFlow)
+}
+function executeRecipe() {
+  if (CTL.PCBStatus.executeRecipe === false) { 
+    console.log(CTL.PCBStatus.executeRecipe)
+    websocket.send("executeRecipe:1")
+    pollRate(1000)
+  }
+  else { 
+    websocket.send("executeRecipe:0")
+    stopPoll()
+  } 
+}
+function sendAllValues() {
+  RFSet()
+  MBSet()
+  TunerModeSet()
+  setMFCs()
+}
 
 function toggleFullscreen() {
   if (document.fullscreen) {
     if (document.exitFullscreen) {
-        document.exitFullscreen();
+        document.exitFullscreen()
       } else if (document.webkitExitFullscreen) { /* Safari */
-        document.webkitExitFullscreen();
+        document.webkitExitFullscreen()
       } else if (document.msExitFullscreen) { /* IE11 */
-        document.msExitFullscreen();
+        document.msExitFullscreen()
       }
     }
   else {
     if (elem.requestFullscreen) {
-        elem.requestFullscreen();
+        elem.requestFullscreen()
       } else if (elem.webkitRequestFullscreen) { /* Safari */
-        elem.webkitRequestFullscreen();
+        elem.webkitRequestFullscreen()
       } else if (elem.msRequestFullscreen) { /* IE11 */
-        elem.msRequestFullscreen();
+        elem.msRequestFullscreen()
       }
     }
 }
@@ -565,3 +921,30 @@ function toggleFullscreen() {
 </script>
 </body>
 </html>
+<!--
+        <div class="row">
+          <div class="input-group w-20 pb-2 border-bottom">
+            <button class="btn btn-secondary" type="button">MB Setpoint: </button>
+            <input type="text" class="form-control" id="mbset">
+            <span class="input-group-text">%</span>
+          </div>
+        </div>
+        <div class="row pt-3">
+          <div class="input-group ps-5">
+            <button class="btn btn-lg btn-primary" type="button">7</button>
+            <button class="btn btn-lg btn-primary" type="button">8</button>
+            <button class="btn btn-lg btn-primary" type="button">9</button>
+          </div>
+          <div class="input-group ps-5">
+            <button class="btn btn-lg btn-primary" type="button">4</button>
+            <button class="btn btn-lg btn-primary" type="button">5</button>
+            <button class="btn btn-lg btn-primary" type="button">6</button>
+          </div>
+          <div class="input-group ps-5">
+            <button class="btn btn-lg btn-primary" type="button">1</button>
+            <button class="btn btn-lg btn-primary" type="button">2</button>
+            <button class="btn btn-lg btn-primary" type="button">3</button>
+          </div>
+        </div>
+      </div>
+      -->
