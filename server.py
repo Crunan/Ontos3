@@ -21,7 +21,7 @@ async def serial_handler(websocket):
         match message.split(":"): 
             case ["poll"]:
                 rcv = await poll(writer, reader)
-                websocketReadyData = organizePollData(rcv)
+                websocketReadyData = await organizePollData(rcv)
                 await websocket.send(json.dumps(websocketReadyData))
             case ["startup"]:
                 startupDict = await startup(writer, reader)
@@ -30,14 +30,12 @@ async def serial_handler(websocket):
             case ["setMFCs", mfc, sp]:
                 await set_mfcs(writer, reader, (mfc), (sp))
             case ["Tuner Mode", TMsp]:
-                print("TunerMode: " + TMsp)
                 await TunerModeSet(writer, reader, (TMsp))
             case ["RFSet", RFsp]:
                 await RFSet(writer, reader, (RFsp))
             case ["MBSet", MBsp]:
                 await MBSet(writer, reader, (MBsp))
             case ["executeRecipe", sp]:
-                print("inside execute function")
                 await execute_recipe(writer, reader, (sp))
 
   
@@ -45,12 +43,24 @@ async def resetCTL(w, r):
     await writeCommand(w, "$90%")
     await readResponse(r)
 
-def organizePollData(d):
+async def update_status(data):
+    hex_bits = int(data, base=16)
+    status_dict = {}
+    for n in range(0, 16):
+      led_number = "led_bit_" + str(n)
+
+      if (hex_bits & (1<<n) > 0):
+        status_dict[led_number] = "on"
+      else:  
+        status_dict[led_number] = "off"
+
+    return status_dict
+
+async def organizePollData(d):
     strVar = d[3:-1] #Lop off the first three characters
     dataParsed = strVar.split(';') 
     PCBPollData = {
         "PCBStatus": {
-            "statusBits": dataParsed[0]
         },
         "MBTuner": {
             "actualPosition": float(dataParsed[1])
@@ -75,6 +85,7 @@ def organizePollData(d):
             "actualFlow": float(dataParsed[8])
         }
     }
+    PCBPollData["PCBStatus"] = await update_status(dataParsed[0]) 
     return PCBPollData
 
 async def set_mfcs(w, r, mfc, sp):
@@ -98,7 +109,6 @@ async def TunerModeSet(w, r, TMsp):
     await readResponse(r)
 
 async def execute_recipe(w, r, sp):
-    print(sp)
     execute_recipe_cmd = "$870" + sp + "%"
     await writeCommand(w, execute_recipe_cmd)
     await readResponse(r)
@@ -229,7 +239,6 @@ async def RFMaxPower(w, r) -> float:
     rcv = await readResponse(r)
     dataParsed = rcv[7:-1] 
     RFMax = {"RFSupply": {"maxPowerForward": float(dataParsed) }}
-    print(dataParsed)
     return RFMax
 
 async def TunerAutoMode(w, r) -> bool:

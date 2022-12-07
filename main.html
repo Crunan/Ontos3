@@ -151,6 +151,29 @@
   </div>
 </div>
 
+<!-- Save Recipe Modal -->
+<div class="modal input-modal" id="SaveRecipeModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5">Save Recipe:</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="input-group" role="group">
+          <span class="input-group-text">Recipe Name:</span>
+          <input type="text" id="recipeSaveInput" class="form-control text-center"> 
+          <span class="input-group-text">.rcp</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" data-bs-dismiss="modal" onclick="saveRecipe()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <!-- Recipe Offcanvas -->
 <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvas-recipe" aria-labelledby="offcanvas recipe">
   <div class="offcanvas-header">
@@ -161,10 +184,10 @@
     <form id="recipeForm" >
       <div class="mb-3 p-3 border-bottom">
         <label for="recipeFile" class="form-label">Load a Recipe</label>
-        <input class="form-control" type="file" id="recipeFile">
+        <input class="form-control" type="file" id="recipeLoadFile" accept=".rcp">
       </div>
       <div class="input-group mb-5">
-        <span class="input-group-text" id="loadedRecipe">Loaded Recipe: </span>
+        <span class="input-group-text" id="recipeName">Recipe Name: </span>
         <input type="text" class="form-control"> 
       </div>
       <div class="input-group mb-3">
@@ -205,7 +228,7 @@
       </div>
       <button class="btn btn-secondary me-3" type="button" data-bs-dismiss="offcanvas">Back</button>
       <button class="btn btn-primary" onclick="sendAllValues()">Set Values</button>
-      <button class="btn btn-success">Save Recipe</button>
+      <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#SaveRecipeModal">Save Recipe</button>
   </div>
 </div>
 
@@ -381,91 +404,55 @@
 
 <script> 
 
-var websocket = new WebSocket("ws://localhost:5000/")
+const websocket = new WebSocket("ws://localhost:5000/")
 const reader = new FileReader()
 const elem = document.documentElement
+const recipe = {}
 let loop
 var CTL = {
   PCBStatus: {
-    statusBits: 0,
+  },
+  Recipe: {
+    recipeRF: 0,
+    recipeStartPos: 50,
+    recipeFlow1: 0,
+    recipeFlow2: 0,
+    recipeFlow3: 0,
+    recipeFlow4: 0,
+    autoMode: 0,
+    executeRecipe: false,
+  },
+  Settings: { 
     numMFCs: 0,
     BatchIDLogging: 0,
-    executeRecipe: false
   },
   MBTuner: {
-    recipeStartPos: 50,
     actualPosition: 0,
-    autoMode: 0,
-
-    getPosition: function() {
-      return this.actualPosition
-    }
   },
   RFSupply: {
-    recipeRF: 0,
     powerForward: 0,
     powerReflected: 0,
     maxPowerForward: 200,
-
-    getPowerForward: function() {
-      return this.PowerForward
-    }
   },
   PlasmaHead: {
     temp: 0,
     plasmaOn: 0,
-
-    getPlasmaStatus: function() {
-      return this.plasmaOn
-    }
   },
   MFC4: {
-    recipeFlow: 0,
     actualFlow: 0,
     range: 0,
-
-    getRecipeFlow: function() {
-      return this.recipeFlow
-     },
-    setRecipeFlow: function(flow) {
-      this.recipeFlow = parseFloat(flow)
-     }
   },
   MFC3: {
-    recipeFlow: 0,
     actualFlow: 0,
     range: 0,
-
-    getRecipeFlow: function() {
-      return this.recipeFlow
-     },
-    setRecipeFlow: function(flow) {
-      this.recipeFlow = parseFloat(flow)
-     }
   },
   MFC2: {
-    recipeFlow: 0,
     actualFlow: 0,
     range: 0,
-
-    getRecipeFlow: function() {
-      return this.recipeFlow
-     },
-    setRecipeFlow: function(flow) {
-      this.recipeFlow = parseFloat(flow)
-     }
   },
   MFC1: {
-    recipeFlow: 0,
     actualFlow: 0,
     range: 0,
-
-    getRecipeFlow: function() {
-      return this.recipeFlow
-     },
-    setRecipeFlow: function(flow) {
-      this.recipeFlow = parseFloat(flow)
-     }
   }
 };
 const MFCOptions = {
@@ -580,8 +567,9 @@ RFRefChart.render();
 TempChart.render();
 TunerChart.render();
 
-var testBtn = document.querySelector("#testBtn")
-var plasmaBtn = document.querySelector("#plasmaBtn")
+const testBtn = document.querySelector("#testBtn")
+const plasmaBtn = document.querySelector("#plasmaBtn")
+const loadFileBtn = document.querySelector("#recipeFile")
 
 const led1 = document.querySelector("#led1")
 const led2 = document.querySelector("#led2")
@@ -600,22 +588,24 @@ const led14 = document.querySelector("#led14")
 const led15 = document.querySelector("#led15")
 const led16 = document.querySelector("#led16")
 
-var UIrecipeRF = document.querySelector("#recipeRF")
-var UIrecipeMB = document.querySelector("#recipeMB")
-var UIrecipeTunerMode = document.querySelector("#recipeTunerMode")
-var UIrecipeMFC1 = document.querySelector("#recipeMFC1")
-var UIrecipeMFC2 = document.querySelector("#recipeMFC2")
-var UIrecipeMFC3 = document.querySelector("#recipeMFC3")
-var UIrecipeMFC4 = document.querySelector("#recipeMFC4")
+const UIrecipeRF = document.querySelector("#recipeRF")
+const UIrecipeMB = document.querySelector("#recipeMB")
+const UIrecipeTunerMode = document.querySelector("#recipeTunerMode")
+const UIrecipeMFC1 = document.querySelector("#recipeMFC1")
+const UIrecipeMFC2 = document.querySelector("#recipeMFC2")
+const UIrecipeMFC3 = document.querySelector("#recipeMFC3")
+const UIrecipeMFC4 = document.querySelector("#recipeMFC4")
+
+window.addEventListener("load", (e) => {
+  console.log("hello")
+})
 
 plasmaBtn.addEventListener("click", () => { 
   executeRecipe() 
-  console.log("execute Recipe function ran")
 })
 
 testBtn.addEventListener("click", () => {
   console.log(CTL)
-  websocket.send("startup")
 })
 
 reader.addEventListener("loadend", (e) => {
@@ -634,7 +624,29 @@ websocket.onmessage = ({ data }) => {
   RFRefChart.updateSeries([CTL.RFSupply.powerReflected])
   TunerChart.updateSeries([CTL.MBTuner.actualPosition])
 }
+function saveRecipe() {
+  const { writeFile } = require("fs")
+  
+  const path = './recipes/'
+  const saveFileName = document.querySelector("#recipeSaveInput")
+  const myJSONrecipe = JSON.stringify(CTL.Recipe)
+  
+  writeFile(path, JSON.stringify(myJSONrecipe, null, 2, (error) => {
+    if (error) {
+      console.log("An error has occured", error)
+      return
+    }
+    console.log("recipe saved.")
+  }
+}
+function loadRecipe() {
+  const { readFileSync } = require("fs")
+  const data = readFileSync(selectedFile)
+  console.log(selectedFile)
+    json_recipe = JSON.load(openfile)
 
+  print(json_recipe)
+}
 function parseCTL(s) {
   Object.keys(CTL).forEach(key => { 
     CTL[key] = Object.assign(CTL[key], s[key])
@@ -659,208 +671,125 @@ function pollCTL() {
   console.log("hi")
   websocket.send("poll")
 }
-function LED1() {
-  let bits = parseInt(CTL.PCBStatus.statusBits) 
-  let ledOn = bits & 256 
-  if (ledOn > 0) {
-    led1.setAttribute("class", "btn btn-success")
-  }
-  else {
-    led1.setAttribute("class", "btn btn-light")
-  }
-}
- function LED2() {
-  let bits = parseInt(CTL.PCBStatus.statusBits) 
-  let ledOn = bits & 512 
-  if (ledOn > 0) {
-    led1.setAttribute("class", "btn btn-success")
-  }
-  else {
-    led1.setAttribute("class", "btn btn-light")
-  }
-}
-function LED3() {
-  let bits = parseInt(CTL.PCBStatus.statusBits) 
-  let ledOn = bits & 1024 
-  if (ledOn > 0) {
-    led1.setAttribute("class", "btn btn-success")
-  }
-  else {
-    led1.setAttribute("class", "btn btn-light")
-  }
-}
-function LED4() {
-  let bits = parseInt(CTL.PCBStatus.statusBits) 
-  let ledOn = bits & 2048 
-  if (ledOn > 0) {
-    led1.setAttribute("class", "btn btn-success")
-  }
-  else {
-    led1.setAttribute("class", "btn btn-light")
-  }
-}
-function LED5() {
-  let bits = parseInt(CTL.PCBStatus.statusBits) 
-  let ledOn = bits & 4096 
-  if (ledOn > 0) {
-    led1.setAttribute("class", "btn btn-success")
-  }
-  else {
-    led1.setAttribute("class", "btn btn-light")
-  }
-}
-function LED6() {
-  let bits = parseInt(CTL.PCBStatus.statusBits) 
-  let ledOn = bits & 8192 
-  if (ledOn > 0) {
-    led1.setAttribute("class", "btn btn-success")
-  }
-  else {
-    led1.setAttribute("class", "btn btn-light")
-  }
-}
-function LED7() {
-  let bits = parseInt(CTL.PCBStatus.statusBits) 
-  let ledOn = bits & 16384 
-  if (ledOn > 0) {
-    led1.setAttribute("class", "btn btn-success")
-  }
-  else {
-    led1.setAttribute("class", "btn btn-light")
-  }
-}
-function LED8() {
-  let bits = parseInt(CTL.PCBStatus.statusBits) 
-  let ledOn = bits & 32768 
-  if (ledOn > 0) {
-    led1.setAttribute("class", "btn btn-success")
-  }
-  else {
-    led1.setAttribute("class", "btn btn-light")
-  }
-}
-function LED9() {
-  let bits = parseInt(CTL.PCBStatus.statusBits) 
-  let ledOn = bits & 1 
-  if (ledOn > 0) {
-    led1.setAttribute("class", "btn btn-success")
-  }
-  else {
-    led1.setAttribute("class", "btn btn-light")
-  }
-}
-function LED10() {
-  let bits = parseInt(CTL.PCBStatus.statusBits) 
-  let ledOn = bits & 2 
-  if (ledOn > 0) {
-    led1.setAttribute("class", "btn btn-success")
-  }
-  else {
-    led1.setAttribute("class", "btn btn-light")
-  }
-}
-function LED11() {
-  let bits = parseInt(CTL.PCBStatus.statusBits) 
-  let ledOn = bits & 4 
-  if (ledOn > 0) {
-    led1.setAttribute("class", "btn btn-success")
-  }
-  else {
-    led1.setAttribute("class", "btn btn-light")
-  }
-}
-function LED12() {
-  let bits = parseInt(CTL.PCBStatus.statusBits) 
-  let ledOn = bits & 8 
-  if (ledOn > 0) {
-    led1.setAttribute("class", "btn btn-success")
-  }
-  else {
-    led1.setAttribute("class", "btn btn-light")
-  }
-}
-function LED13() {
-  let bits = parseInt(CTL.PCBStatus.statusBits) 
-  let ledOn = bits & 16 
-  if (ledOn > 0) {
-    led1.setAttribute("class", "btn btn-success")
-  }
-  else {
-    led1.setAttribute("class", "btn btn-light")
-  }
-}
-function LED14() {
-  let bits = parseInt(CTL.PCBStatus.statusBits) 
-  let ledOn = bits & 32 
-  if (ledOn > 0) {
-    led1.setAttribute("class", "btn btn-success")
-  }
-  else {
-    led1.setAttribute("class", "btn btn-light")
-  }
-}
-function LED15() {
-  let bits = parseInt(CTL.PCBStatus.statusBits) 
-  let ledOn = bits & 64 
-  if (ledOn > 0) {
-    led1.setAttribute("class", "btn btn-success")
-  }
-  else {
-    led1.setAttribute("class", "btn btn-light")
-  }
-}
-function LED16() {
-  let bits = parseInt(CTL.PCBStatus.statusBits) 
-  let ledOn = bits & 128 
-  if (ledOn > 0) {
-    led1.setAttribute("class", "btn btn-success")
-  }
-  else {
-    led1.setAttribute("class", "btn btn-light")
-  }
-}
- 
 function updateStatus() {
-  let sb = CTL.PCBStatus.statusbits
-  LED1() 
-  LED2() 
-  LED3() 
-  LED4() 
-  LED5() 
-  LED6() 
-  LED7() 
-  LED8() 
-  LED9() 
-  LED10() 
-  LED11() 
-  LED12() 
-  LED13() 
-  LED14() 
-  LED15() 
-  LED16() 
+  if (CTL.PCBStatus.led_bit_0 === "on") {
+    led9.setAttribute("class", "btn btn-success") 
+  } 
+  else {
+    led9.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_1 === "on") {
+    led10.setAttribute("class", "btn btn-success") 
+  } 
+  else { 
+    led10.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_2 === "on") {
+    led11.setAttribute("class", "btn btn-success") 
+  }
+  else {
+    led11.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_3 === "on") {
+    led12.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    led12.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_4 === "on") {
+    led13.setAttribute("class", "btn btn-success") 
+  }
+  else {
+    led13.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_5 === "on") {
+    led14.setAttribute("class", "btn btn-success") 
+  }
+  else {
+    led14.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_6 === "on") {
+    led15.setAttribute("class", "btn btn-success") 
+  }
+  else {
+    led15.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_7 === "on") {
+    led16.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    led16.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_8 === "on") {
+    led1.setAttribute("class", "btn btn-success") 
+  }
+  else {
+    led1.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_9 === "on") {
+    led2.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    led2.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_10 === "on") {
+    led3.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    led3.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_11 === "on") {
+    led4.setAttribute("class", "btn btn-success") 
+  }
+  else {
+    led4.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_12 === "on") {
+    led5.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    led5.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_13 === "on") {
+    led6.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    led6.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_14 === "on") {
+    led7.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    led7.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_15 === "on") {
+    led8.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    led8.setAttribute("class", "btn btn-light")
+  }
 }
-
 function RFSet() {
   let a = UIrecipeRF.value
   if ((a != "") && (a >= 0) && (a <= CTL.RFSupply.maxPowerForward)) {
-    CTL.RFSupply.recipeRF = parseInt(a)
+    CTL.Recipe.recipeRF = parseInt(a)
   }
-  websocket.send("RFSet:" + CTL.RFSupply.recipeRF)
+  websocket.send("RFSet:" + CTL.Recipe.recipeRF)
 }
 function MBSet() {
   let a = UIrecipeMB.value
   if ((a != "") && (a >= 0) && (a <= 99)) {
-    CTL.MBTuner.recipeStartPos = parseFloat(a)
+    CTL.Recipe.recipeStartPos = parseFloat(a)
   }
-  websocket.send("MBSet:" + CTL.MBTuner.recipeStartPos)
+  websocket.send("MBSet:" + CTL.Recipe.recipeStartPos)
 }
 
 function TunerModeSet() {
   if (UIrecipeTunerMode.checked === true)
-    CTL.MBTuner.autoMode = 1
+    CTL.Recipe.autoMode = 1
   else 
-    CTL.MBTuner.autoMode = 0
-  websocket.send("TunerModeSet:" + CTL.MBTuner.autoMode)
+    CTL.Recipe.autoMode = 0
+  websocket.send("TunerModeSet:" + CTL.Recipe.autoMode)
 }
 function setMFCs() {
   //interface recipe values
@@ -869,25 +798,27 @@ function setMFCs() {
   let c = UIrecipeMFC3.value
   let d = UIrecipeMFC4.value
 
-  if ((a != "") && (a >= 0) && (a <= 20.00)) {CTL.MFC1.recipeFlow = parseFloat(a)}
-  if ((b != "") && (b >= 0) && (b <= 20.00)) {CTL.MFC2.recipeFlow = parseFloat(b)}
-  if ((c != "") && (c >= 0) && (c <= 0.30)) {CTL.MFC3.recipeFlow = parseFloat(c)}
-  if ((d != "") && (d >= 0) && (d <= 0.30)) {CTL.MFC4.recipeFlow = parseFloat(d)}
+  if ((a != "") && (a >= 0) && (a <= 20.00)) {CTL.Recipe.recipeFlow1 = parseFloat(a)}
+  if ((b != "") && (b >= 0) && (b <= 20.00)) {CTL.Recipe.recipeFlow2 = parseFloat(b)}
+  if ((c != "") && (c >= 0) && (c <= 0.30)) {CTL.Recipe.recipeFlow3 = parseFloat(c)}
+  if ((d != "") && (d >= 0) && (d <= 0.30)) {CTL.Recipe.recipeFlow4 = parseFloat(d)}
 
-  websocket.send("setMFCs:" + "1:" + CTL.MFC1.recipeFlow)
-  websocket.send("setMFCs:" + "2:" + CTL.MFC2.recipeFlow)
-  websocket.send("setMFCs:" + "3:" + CTL.MFC3.recipeFlow)
-  websocket.send("setMFCs:" + "4:" + CTL.MFC4.recipeFlow)
+  websocket.send("setMFCs:" + "1:" + CTL.Recipe.recipeFlow1)
+  websocket.send("setMFCs:" + "2:" + CTL.Recipe.recipeFlow2)
+  websocket.send("setMFCs:" + "3:" + CTL.Recipe.recipeFlow3)
+  websocket.send("setMFCs:" + "4:" + CTL.Recipe.recipeFlow4)
 }
 function executeRecipe() {
-  if (CTL.PCBStatus.executeRecipe === false) { 
-    console.log(CTL.PCBStatus.executeRecipe)
+  if (CTL.Recipe.executeRecipe === false) { 
+    CTL.Recipe.executeRecipe = true
     websocket.send("executeRecipe:1")
+    plasmaBtn.innerHTML = "PLASMA OFF"
     pollRate(1000)
   }
   else { 
+    CTL.Settings.executeRecipe = false
     websocket.send("executeRecipe:0")
-    stopPoll()
+    plasmaBtn.innerHTML = "PLASMA ON"
   } 
 }
 function sendAllValues() {
