@@ -16,11 +16,11 @@
 <header>
   <div class="container-fluid">
     <div class="row">
-      <div class="col p-4 bg-success text-white text-left">
+      <div class="col p-3 bg-dark text-white text-left">
         <h1>ONTOS3</h1>
         <p>Champions in the realm of atmospheric plasma</p>
       </div>
-      <div class="col p-4 bg-success text-end">
+      <div class="col p-3 bg-dark text-end">
         <div class="row p-1">
           <div class="col">
             <button class="btn btn-toggle btn-sm btn-warning" id="fullscreenToggle" type="button" data-bs-toggle="button" aria-pressed="false" autocomplete="off" onclick="toggleFullscreen()">
@@ -31,7 +31,7 @@
         </div>
         <div class="row">
           <div class="col">
-            <button type="button" class="btn btn-warning" data-bs-toggle="offcanvas" data-bs-target="#offcanvas-pollrate">POLL RATE</button>
+            <button type="button" class="btn btn-outline-warning border border-warning" data-bs-toggle="offcanvas" data-bs-target="#offcanvas-pollrate">POLL RATE</button>
           </div>
         </div>
           <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvas-pollrate">
@@ -151,29 +151,6 @@
   </div>
 </div>
 
-<!-- Save Recipe Modal -->
-<div class="modal input-modal" id="SaveRecipeModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-sm">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5">Save Recipe:</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="input-group" role="group">
-          <span class="input-group-text">Recipe Name:</span>
-          <input type="text" id="recipeSaveInput" class="form-control text-center"> 
-          <span class="input-group-text">.rcp</span>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-success" data-bs-dismiss="modal" onclick="saveRecipe()">Save</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-
 <!-- Recipe Offcanvas -->
 <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvas-recipe" aria-labelledby="offcanvas recipe">
   <div class="offcanvas-header">
@@ -182,13 +159,13 @@
   </div>
   <div class="offcanvas-body border border-primary">
     <form id="recipeForm" >
-      <div class="mb-3 p-3 border-bottom">
-        <label for="recipeFile" class="form-label">Load a Recipe</label>
-        <input class="form-control" type="file" id="recipeLoadFile" accept=".rcp">
+      <div class="btn-group mb-3 p-3 border-bottom" role="group">
+        <input class="form-control" type="file" id="recipeLoadFile" accept=".json">
+        <button class="btn btn-primary" type="button" onclick="loadRecipe()">Load</button>
       </div>
       <div class="input-group mb-5">
-        <span class="input-group-text" id="recipeName">Recipe Name: </span>
-        <input type="text" class="form-control"> 
+        <span class="input-group-text">Recipe Name: </span>
+        <input type="text" id="recipeName" class="form-control"> 
       </div>
       <div class="input-group mb-3">
         <span class="input-group-text" >RF Power: </span>
@@ -227,8 +204,8 @@
         <span class="input-group-text" >SLPM</span>
       </div>
       <button class="btn btn-secondary me-3" type="button" data-bs-dismiss="offcanvas">Back</button>
-      <button class="btn btn-primary" onclick="sendAllValues()">Set Values</button>
-      <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#SaveRecipeModal">Save Recipe</button>
+      <button class="btn btn-primary" onclick="sendAllRecipeValuestoCTL()">Set Values</button>
+      <button class="btn btn-success" onclick="saveRecipeFile()">Save Recipe</button>
   </div>
 </div>
 
@@ -243,18 +220,16 @@
         The following controls are to manuevre the 3-axis stage.
       </div>
       <div class="d-grid gap-2">
-        <button class="btn btn-primary" type="button">INITIALIZE</button>
-        <button class="btn btn-primary" type="button">INITIALIZE</button>
-        <button class="btn btn-primary" type="button">INITIALIZE</button>
-        <button class="btn btn-primary" type="button">INITIALIZE</button>
-        <button class="btn btn-primary" type="button">INITIALIZE</button>
-        <button class="btn btn-primary" type="button">INITIALIZE</button>
+        <button class="btn btn-primary" type="button" onclick="resetIt()">RESET 3-AXIS CTL</button>
+        <button class="btn btn-primary" type="button" onclick="stopMotors()">STOP STAGE</button>
+        <button class="btn btn-primary" type="button" onclick="initStage()">INITIALIZE</button>
+        <button class="btn btn-primary" type="button">LOAD POSITION</button>
         <button class="btn btn-primary" type="button">START SCAN</button>
-        <button class="btn btn-primary" type="button">START SCAN</button>
-        <button class="btn btn-primary" type="button">START SCAN</button>
-        <button class="btn btn-primary" type="button">START SCAN</button>
-        <button class="btn btn-primary" type="button">START SCAN</button>
-        <button class="btn btn-primary" type="button">START SCAN</button>
+        <button class="btn btn-primary" type="button">TWO-SPOT</button>
+        <button class="btn btn-primary" type="button">SET DIAMETER</button>
+        <div id="stageStatus">
+          
+        </div>
       </div>
     </div>
 </div>
@@ -268,10 +243,7 @@
           <a class="nav-link active" aria-current="true" href="#">Dashboard</a>
         </li>
         <li class="nav-item ps-2">
-          <button class="btn btn-warning" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvas-recipe">Recipe</button>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link disabled">Disabled</a>
+          <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvas-recipe">Recipe</button>
         </li>
         <li>
           <a class="nav-link" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvas-3axisBtns" aria-controls="offcanvasExample">3-Axis Buttons</a>
@@ -284,7 +256,7 @@
 
         <!--MFC Card -->
         <div class="col-xxl-3 p-1 text-center">
-          <div class="card text-bg-primary mb-3"> 
+          <div class="card text-bg-secondary mb-3"> 
             <div class="card-header">Mass Flow Controllers</div>
             <div class="card-body" data-bs-toggle="modal" data-bs-target="#MFCModal">
               <div id="MFCChart"></div>
@@ -298,71 +270,75 @@
           </div>
         </div>
         
-        <!-- RF Power Card-->
-        <div class="col-xxl-2 p-1 "> 
-          <div class="card text-bg-secondary mb-3">    
-            <div class="card-header">RF Power Forward</div>
-            <div class="card-body" data-bs-toggle="modal" data-bs-target="#RFModal">
-              <div id="RFPower"></div>
+        <div class="col-xxl-4 p1 border border-danger">
+          <div class="row border border-primary">
+            <!-- RF Power Card-->
+            <div class="col p-1 "> 
+              <div class="card text-bg-secondary mb-3">    
+                <div class="card-header">RF Power Forward</div>
+                <div class="card-body" data-bs-toggle="modal" data-bs-target="#RFModal">
+                  <div id="RFPower"></div>
+                </div>
+                <div class="card-footer px-4">
+                  <div class="input-group border border-success" role="group">
+                    <span class="input-group-text">RF</span>
+                    <input type="text" class="form-control text-center" data-id="recipeRF" value="" placeholder="0" readonly>
+                    <span class="input-group-text">watts</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="card-footer px-4">
-              <div class="input-group border border-success" role="group">
-                <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#RFModal">SET RECIPE: </button>
-                <span class="input-group-text">RF</span>
-                <input type="text" class="form-control text-center" data-id="recipeRF" value="" placeholder="0" readonly>
-                <span class="input-group-text">watts</span>
+            <!-- Match Box Card-->
+            <div class="col p-1">
+              <div class="card text-bg-secondary mb-3"> 
+                <div class="card-header">Matchbox Tuner</div>
+                <div class="card-body" data-bs-toggle="modal" data-bs-target="#MBModal">
+                  <div id="Tuner"></div>
+                </div>
+                <div class="card-footer px-4">
+                  <div class="input-group border border-success" role="group">
+                    <span class="input-group-text">TUNER</span>
+                    <input type="text" class="form-control text-center" data-id="recipeRF" value="" placeholder="0" readonly>
+                    <span class="input-group-text">%</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        
-        <!-- Match Box Card-->
-        <div class="col-xxl-2 p-1">
-          <div class="card text-bg-secondary mb-3"> 
-            <div class="card-header">Matchbox Tuner</div>
-            <div class="card-body" data-bs-toggle="modal" data-bs-target="#MBModal">
-              <div id="Tuner"></div>
-            </div>
-            <div class="card-footer px-4">
-              <div class="input-group border border-success" role="group">
-                <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#MBModal">SET RECIPE: </button>
-                <span class="input-group-text">TUNER</span>
-                <input type="text" class="form-control text-center" data-id="recipeRF" value="" placeholder="0" readonly>
-                <span class="input-group-text">%</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- RF Reflected Card -->
-        <div class="col-xxl-2 p-1">
-          <div class="card text-bg-secondary mb-3">  
-            <div class="card-header">RF Power Reflected</div>
-            <div class="card-body">
-              <div id="RFRef"></div>
-            </div>
-            <div class="card-footer">
-              <div class="btn-group border border-success" role="group">
-                <button type="button" class="btn btn-sm btn-outline-light">TEST BUTTON</button>
-                <button type="button" class="btn btn-sm btn-light" id="testBtn">TEST BUTTON</button>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <!-- Plasma Temp Card -->
-        <div class="col-xxl-2 p-1">
-          <div class="card text-bg-secondary mb-3">   
-            <div class="card-header">Plasma Head Temperature</div>
-            <div class="card-body">
-              <div id="Temp"></div>
-            </div>
-            <div class="card-footer">
-              <div class="btn-group border border-success" role="group">
-                <button type="button" class="btn btn-sm btn-outline-light">TEST BUTTON</button>
-                <button type="button" class="btn btn-sm btn-light" id="testBtn">TEST BUTTON</button>
+          <div class="row">
+            <!-- RF Reflected Card -->
+            <div class="col p-1">
+              <div class="card text-bg-secondary mb-3">  
+                <div class="card-header">RF Power Reflected</div>
+                <div class="card-body">
+                  <div id="RFRef"></div>
+                </div>
+                <div class="card-footer">
+                  <div class="btn-group border border-success" role="group">
+                    <button type="button" class="btn btn-sm btn-outline-light">TEST BUTTON</button>
+                    <button type="button" class="btn btn-sm btn-light" id="testBtn">TEST BUTTON</button>
+                  </div>
+                </div>
               </div>
             </div>
+
+            <!-- Plasma Temp Card -->
+            <div class="col p-1">
+              <div class="card text-bg-secondary mb-3">   
+                <div class="card-header">Plasma Head Temperature</div>
+                <div class="card-body">
+                  <div id="Temp"></div>
+                </div>
+                <div class="card-footer">
+                  <div class="btn-group border border-success" role="group">
+                    <button type="button" class="btn btn-sm btn-outline-light">TEST BUTTON</button>
+                    <button type="button" class="btn btn-sm btn-light" id="testBtn">TEST BUTTON</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
         
@@ -394,6 +370,54 @@
           </div>
         </div>
 
+        <div class="col-xxl-2 ms-5 p-1">
+          <div class="card text-bg-danger mb-3">
+          <div class="card-header">3 Axis Stage</div>
+            <div class="card-body">
+              <div class="d-grid gap-2">
+                <button class="btn btn-secondary border border-light" type="button" onclick="resetIt()">RESET 3-AXIS CTL</button>
+                <button class="btn btn-secondary border border-light" type="button" onclick="stopMotors()">STOP STAGE</button>
+                <button class="btn btn-secondary border border-light" type="button" onclick="initStage()">INITIALIZE</button>
+                <button class="btn btn-secondary border border-light" type="button">LOAD POSITION</button>
+                <button class="btn btn-secondary border border-light" type="button">START SCAN</button>
+                <button class="btn btn-secondary border border-light" type="button">TWO-SPOT</button>
+                <button class="btn btn-secondary border border-light" type="button">SET DIAMETER</button>
+              </div>
+            </div>
+            <div id="stageStatus" class="card-footer">
+                Stage Status  
+            </div>
+          </div>
+        </div> 
+
+        <!-- 3-axis Status Card-->
+        <div class="col-xxl-1 p-1"> 
+          <div class="card text-bg-danger mb-3">  
+            <div class="card-header">3-Axis Status LEDs</div>
+            <div class="card-body">
+              <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
+                <button type="button" class="btn btn-light" id="stageled1">X_Lim</button>
+                <button type="button" class="btn btn-light" id="stageled2">X_Run</button>
+                <button type="button" class="btn btn-light" id="stageled3">Y_Lim</button>
+                <button type="button" class="btn btn-light" id="stageled4">Y_Run</button>
+                <button type="button" class="btn btn-light" id="stageled5">Z_Lim</button>
+                <button type="button" class="btn btn-light" id="stageled6">Z_Run</button>
+                <button type="button" class="btn btn-light" id="stageled7">STOP</button>
+                <button type="button" class="btn btn-light" id="stageled8">EXT1</button>
+                <button type="button" class="btn btn-light" id="stageled9">EXT2</button>
+                <button type="button" class="btn btn-light" id="stageled10">EXT3</button>
+                <button type="button" class="btn btn-light" id="stageled11">V1 0N</button>
+                <button type="button" class="btn btn-light" id="stageled12">V2 0N</button>
+                <button type="button" class="btn btn-light" id="stageled13">V3 0N</button>
+                <button type="button" class="btn btn-light" id="stageled14">V4 0N</button>
+                <button type="button" class="btn btn-light" id="stageled15">CMD</button>
+                <button type="button" class="btn btn-light" id="stageled16"></button>
+              </div>
+            </div>
+            <div class="card-footer"></div>
+          </div>
+        </div>
+
     </div><!--Dashboard Card Row End-->
     
 </div><!--Content Container-Fluid End-->
@@ -402,25 +426,46 @@
   <!-- Apex Charts Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script> 
 
-<script> 
-
+<script>
 const websocket = new WebSocket("ws://localhost:5000/")
 const reader = new FileReader()
 const elem = document.documentElement
-const recipe = {}
 let loop
+var CTL3AXIS = {
+  Status: { 
+    XYZSameState: 0,
+  },
+  LEDS: {
+  },
+  X: {
+    state: 0, 
+    err: 0, 
+    position: 0
+  },
+  Y: {
+    state: 0, 
+    err: 0, 
+    position: 0
+  },
+  Z: {
+    state: 0, 
+    err: 0, 
+    position: 0 
+  }
+}
 var CTL = {
   PCBStatus: {
   },
   Recipe: {
+    recipeName: 0,
     recipeRF: 0,
-    recipeStartPos: 50,
+    recipeStartPos: 0,
     recipeFlow1: 0,
     recipeFlow2: 0,
     recipeFlow3: 0,
     recipeFlow4: 0,
     autoMode: 0,
-    executeRecipe: false,
+    executeRecipe: 0,
   },
   Settings: { 
     numMFCs: 0,
@@ -432,7 +477,7 @@ var CTL = {
   RFSupply: {
     powerForward: 0,
     powerReflected: 0,
-    maxPowerForward: 200,
+    maxPowerForward: 0,
   },
   PlasmaHead: {
     temp: 0,
@@ -458,7 +503,7 @@ var CTL = {
 const MFCOptions = {
   series: [0, 0, 0, 0],
   chart: {
-    height: 450,
+    height: 500,
     type: "radialBar",
   },
   plotOptions: {
@@ -512,37 +557,213 @@ const MFCOptions = {
     }
   }]
 };
+
 const RFOptions = {
   chart: {
-    height: 300,
+    height: 200,
     type: "radialBar",
   },
+
   series: [CTL.RFSupply.powerForward],
-  labels:["RF Power"],
+  colors: ["#20E647"],
+  plotOptions: {
+    radialBar: {
+      hollow: {
+        margin: 0,
+        size: "70%",
+        background: "#293450"
+      },
+      track: {
+        dropShadow: {
+          enabled: true,
+          top: 2,
+          left: 0,
+          blur: 4,
+          opacity: 0.15
+        }
+      },
+      dataLabels: {
+        name: {
+          offsetY: -10,
+          color: "#fff",
+          fontSize: "13px"
+        },
+        value: {
+          color: "#fff",
+          fontSize: "30px",
+          show: true
+        }
+      }
+    }
+  },
+  fill: {
+    type: "gradient",
+    gradient: {
+      shade: "dark",
+      type: "vertical",
+      gradientToColors: ["#87D4F9"],
+      stops: [0, 100]
+    }
+  },
+  stroke: {
+    lineCap: "round"
+  },
+  labels:["RF Power"]
 };
 const RFRefOptions = {
   chart: {
-    height: 300,
+    height: 200,
     type: "radialBar",
   },
   series: [CTL.RFSupply.powerReflected],
-  labels: ["Reflecter Power"],
+  colors: ["#20E647"],
+  plotOptions: {
+    radialBar: {
+      hollow: {
+        margin: 0,
+        size: "70%",
+        background: "#293450"
+      },
+      track: {
+        dropShadow: {
+          enabled: true,
+          top: 2,
+          left: 0,
+          blur: 4,
+          opacity: 0.15
+        }
+      },
+      dataLabels: {
+        name: {
+          offsetY: -10,
+          color: "#fff",
+          fontSize: "13px"
+        },
+        value: {
+          color: "#fff",
+          fontSize: "30px",
+          show: true
+        }
+      }
+    }
+  },
+  fill: {
+    type: "gradient",
+    gradient: {
+      shade: "dark",
+      type: "vertical",
+      gradientToColors: ["#87D4F9"],
+      stops: [0, 100]
+    }
+  },
+  stroke: {
+    lineCap: "round"
+  },
+  labels: ["Reflecter Power"]
 };
+
 const TempOptions = {
   chart: {
-    height: 300,
+    height: 200,
     type: "radialBar",
   },
   series: [CTL.PlasmaHead.temp],
-  labels: ["Temperature"],
+  colors: ["#20E647"],
+  plotOptions: {
+    radialBar: {
+      hollow: {
+        margin: 0,
+        size: "70%",
+        background: "#293450"
+      },
+      track: {
+        dropShadow: {
+          enabled: true,
+          top: 2,
+          left: 0,
+          blur: 4,
+          opacity: 0.15
+        }
+      },
+      dataLabels: {
+        name: {
+          offsetY: -10,
+          color: "#fff",
+          fontSize: "13px"
+        },
+        value: {
+          color: "#fff",
+          fontSize: "30px",
+          show: true
+        }
+      }
+    }
+  },
+  fill: {
+    type: "gradient",
+    gradient: {
+      shade: "dark",
+      type: "vertical",
+      gradientToColors: ["#87D4F9"],
+      stops: [0, 100]
+    }
+  },
+  stroke: {
+    lineCap: "round"
+  },
+  labels: ["Temperature"]
 };
+
 const TunerOptions = {
   chart: {
-    height: 300,
+    height: 200,
     type: "radialBar",
   },
   series: [CTL.MBTuner.actualPosition],
-  labels: ["Tuner"],
+  colors: ["#20E647"],
+  plotOptions: {
+    radialBar: {
+      hollow: {
+        margin: 0,
+        size: "70%",
+        background: "#293450"
+      },
+      track: {
+        dropShadow: {
+          enabled: true,
+          top: 2,
+          left: 0,
+          blur: 4,
+          opacity: 0.15
+        }
+      },
+      dataLabels: {
+        name: {
+          offsetY: -10,
+          color: "#fff",
+          fontSize: "13px"
+        },
+        value: {
+          color: "#fff",
+          fontSize: "30px",
+          show: true
+        }
+      }
+    }
+  },
+  fill: {
+    type: "gradient",
+    gradient: {
+      shade: "dark",
+      type: "vertical",
+      gradientToColors: ["#87D4F9"],
+      stops: [0, 100]
+    }
+  },
+  stroke: {
+    lineCap: "round"
+  },
+  labels: ["Tuner"]
 };
 
 const MFCChart = new 
@@ -569,7 +790,7 @@ TunerChart.render();
 
 const testBtn = document.querySelector("#testBtn")
 const plasmaBtn = document.querySelector("#plasmaBtn")
-const loadFileBtn = document.querySelector("#recipeFile")
+const loadFileBtn = document.querySelector("#recipeLoadFile")
 
 const led1 = document.querySelector("#led1")
 const led2 = document.querySelector("#led2")
@@ -588,13 +809,34 @@ const led14 = document.querySelector("#led14")
 const led15 = document.querySelector("#led15")
 const led16 = document.querySelector("#led16")
 
-const UIrecipeRF = document.querySelector("#recipeRF")
-const UIrecipeMB = document.querySelector("#recipeMB")
-const UIrecipeTunerMode = document.querySelector("#recipeTunerMode")
-const UIrecipeMFC1 = document.querySelector("#recipeMFC1")
-const UIrecipeMFC2 = document.querySelector("#recipeMFC2")
-const UIrecipeMFC3 = document.querySelector("#recipeMFC3")
-const UIrecipeMFC4 = document.querySelector("#recipeMFC4")
+const sled1 = document.querySelector("#stageled1")
+const sled2 = document.querySelector("#stageled2")
+const sled3 = document.querySelector("#stageled3")
+const sled4 = document.querySelector("#stageled4")
+const sled5 = document.querySelector("#stageled5")
+const sled6 = document.querySelector("#stageled6")
+const sled7 = document.querySelector("#stageled7")
+const sled8 = document.querySelector("#stageled8")
+const sled9 = document.querySelector("#stageled9")
+const sled10 = document.querySelector("#stageled10")
+const sled11 = document.querySelector("#stageled11")
+const sled12 = document.querySelector("#stageled12")
+const sled13 = document.querySelector("#stageled13")
+const sled14 = document.querySelector("#stageled14")
+const sled15 = document.querySelector("#stageled15")
+const sled16 = document.querySelector("#stageled16")
+
+
+var UIstageStatus = document.querySelector("#stageStatus")
+
+var UIrecipeName = document.querySelector("#recipeName")
+var UIrecipeRF = document.querySelector("#recipeRF")
+var UIrecipeMB = document.querySelector("#recipeMB")
+var UIrecipeTunerMode = document.querySelector("#recipeTunerMode")
+var UIrecipeMFC1 = document.querySelector("#recipeMFC1")
+var UIrecipeMFC2 = document.querySelector("#recipeMFC2")
+var UIrecipeMFC3 = document.querySelector("#recipeMFC3")
+var UIrecipeMFC4 = document.querySelector("#recipeMFC4")
 
 window.addEventListener("load", (e) => {
   console.log("hello")
@@ -618,39 +860,77 @@ websocket.onmessage = ({ data }) => {
   console.log(source)
   parseCTL(source)
   updateStatus()
+  updateStatusStage()
+
+  updateGUIRecipeValues()
 
   MFCChart.updateSeries([CTL.MFC4.actualFlow, CTL.MFC3.actualFlow, CTL.MFC2.actualFlow, CTL.MFC1.actualFlow])
   RFPowerChart.updateSeries([CTL.RFSupply.powerForward])
   RFRefChart.updateSeries([CTL.RFSupply.powerReflected])
   TunerChart.updateSeries([CTL.MBTuner.actualPosition])
+  TempChart.updateSeries([CTL.PlasmaHead.temp])
 }
-function saveRecipe() {
-  const { writeFile } = require("fs")
-  
-  const path = './recipes/'
-  const saveFileName = document.querySelector("#recipeSaveInput")
-  const myJSONrecipe = JSON.stringify(CTL.Recipe)
-  
-  writeFile(path, JSON.stringify(myJSONrecipe, null, 2, (error) => {
-    if (error) {
-      console.log("An error has occured", error)
-      return
-    }
-    console.log("recipe saved.")
-  }
+
+function resetIt() {
+  console.log("reset")
+  websocket.send("reset")
+}
+function stopMotors() {
+  console.log("stop")
+  websocket.send("stop")
+}
+async function initStage() {
+  console.log("init")
+  websocket.send("init")
+  await checkXYZ() 
+}
+function saveRecipeFile() {
+  saveRecipeInputs()
+  var fileName = CTL.Recipe.recipeName + ".json";
+  var file = new Blob([JSON.stringify(CTL.Recipe)], {type: "application/json"})
+
+  var url = window.URL || window.webkitURL
+  link = url.createObjectURL(file)
+  var a = document.createElement("a")
+  a.download = fileName
+  a.href = link 
+  document.body.appendChild(a)
+  a.style.display = 'none'
+  a.click()
+  document.body.removeChild(a)
+}
+function saveRecipeInputs() {
+   CTL.Recipe.recipeName = UIrecipeName.value 
+   CTL.Recipe.recipeRF = UIrecipeRF.value 
+   CTL.Recipe.recipeStartPos = UIrecipeMB.value
+   CTL.Recipe.autoMode = UIrecipeTunerMode.checked
+   CTL.Recipe.recipeFlow1 = UIrecipeMFC1.value  
+   CTL.Recipe.recipeFlow2 = UIrecipeMFC2.value 
+   CTL.Recipe.recipeFlow3 = UIrecipeMFC3.value 
+   CTL.Recipe.recipeFlow4 = UIrecipeMFC4.value 
+}
+function updateGUIRecipeValues() {
+   UIrecipeName.value = CTL.Recipe.recipeName
+   UIrecipeRF.value = CTL.Recipe.recipeRF 
+   UIrecipeMB.value = CTL.Recipe.recipeStartPos
+   UIrecipeTunerMode.checked = CTL.Recipe.autoMode
+   UIrecipeMFC1.value = CTL.Recipe.recipeFlow1
+   UIrecipeMFC2.value = CTL.Recipe.recipeFlow2
+   UIrecipeMFC3.value = CTL.Recipe.recipeFlow3
+   UIrecipeMFC4.value = CTL.Recipe.recipeFlow4
 }
 function loadRecipe() {
-  const { readFileSync } = require("fs")
-  const data = readFileSync(selectedFile)
-  console.log(selectedFile)
-    json_recipe = JSON.load(openfile)
-
-  print(json_recipe)
+  fileName = loadFileBtn.files[0].name
+  websocket.send("loadRecipe:" + fileName)
 }
 function parseCTL(s) {
   Object.keys(CTL).forEach(key => { 
     CTL[key] = Object.assign(CTL[key], s[key])
     console.log(CTL[key])
+  })
+  Object.keys(CTL3AXIS).forEach(key => { 
+    CTL3AXIS[key] = Object.assign(CTL3AXIS[key], s[key])
+    console.log(CTL3AXIS[key])
   })
 }
 function plasmaOn() {
@@ -665,10 +945,10 @@ function stopPoll() {
 function pollRate(rate) {
   if (loop != null) {
     clearInterval(loop)
-  } loop = setInterval(pollCTL, rate)
+  }
+  loop = setInterval(pollCTLs, rate)
 }
-function pollCTL() {
-  console.log("hi")
+function pollCTLs() {
   websocket.send("poll")
 }
 function updateStatus() {
@@ -783,13 +1063,113 @@ function MBSet() {
   }
   websocket.send("MBSet:" + CTL.Recipe.recipeStartPos)
 }
+function updateStatusStage() {
+  if (CTL3AXIS.LEDS.led_bit_0 === "on") {
+    sled1.setAttribute("class", "btn btn-success") 
+  } 
+  else {
+    sled1.setAttribute("class", "btn btn-light")
+  }
+  if (CTL3AXIS.LEDS.led_bit_1 === "on") {
+    sled2.setAttribute("class", "btn btn-success") 
+  } 
+  else { 
+    sled2.setAttribute("class", "btn btn-light")
+  }
+  if (CTL3AXIS.LEDS.led_bit_2 === "on") {
+    sled3.setAttribute("class", "btn btn-success") 
+  }
+  else {
+    sled3.setAttribute("class", "btn btn-light")
+  }
+  if (CTL3AXIS.LEDS.led_bit_3 === "on") {
+    sled4.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    sled4.setAttribute("class", "btn btn-light")
+  }
+  if (CTL3AXIS.LEDS.led_bit_4 === "on") {
+    sled5.setAttribute("class", "btn btn-success") 
+  }
+  else {
+    sled5.setAttribute("class", "btn btn-light")
+  }
+  if (CTL3AXIS.LEDS.led_bit_5 === "on") {
+    sled6.setAttribute("class", "btn btn-success") 
+  }
+  else {
+    sled6.setAttribute("class", "btn btn-light")
+  }
+  if (CTL3AXIS.LEDS.led_bit_6 === "on") {
+    sled7.setAttribute("class", "btn btn-success") 
+  }
+  else {
+    sled7.setAttribute("class", "btn btn-light")
+  }
+  if (CTL3AXIS.LEDS.led_bit_7 === "on") {
+    sled8.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    sled8.setAttribute("class", "btn btn-light")
+  }
+  if (CTL3AXIS.LEDS.led_bit_8 === "on") {
+    sled9.setAttribute("class", "btn btn-success") 
+  }
+  else {
+    sled9.setAttribute("class", "btn btn-light")
+  }
+  if (CTL3AXIS.LEDS.led_bit_9 === "on") {
+    sled10.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    sled10.setAttribute("class", "btn btn-light")
+  }
+  if (CTL3AXIS.LEDS.led_bit_10 === "on") {
+    sled11.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    sled11.setAttribute("class", "btn btn-light")
+  }
+  if (CTL3AXIS.LEDS.led_bit_11 === "on") {
+    sled12.setAttribute("class", "btn btn-success") 
+  }
+  else {
+    sled12.setAttribute("class", "btn btn-light")
+  }
+  if (CTL3AXIS.LEDS.led_bit_12 === "on") {
+    sled13.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    sled13.setAttribute("class", "btn btn-light")
+  }
+  if (CTL3AXIS.LEDS.led_bit_13 === "on") {
+    sled14.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    sled14.setAttribute("class", "btn btn-light")
+  }
+  if (CTL3AXIS.LEDS.led_bit_14 === "on") {
+    sled15.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    sled15.setAttribute("class", "btn btn-light")
+  }
+  if (CTL3AXIS.LEDS.led_bit_15 === "on") {
+    sled16.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    sled16.setAttribute("class", "btn btn-light")
+  }
+}
 
 function TunerModeSet() {
-  if (UIrecipeTunerMode.checked === true)
+  if (UIrecipeTunerMode.checked === true) { 
     CTL.Recipe.autoMode = 1
-  else 
+  }
+  else {
     CTL.Recipe.autoMode = 0
-  websocket.send("TunerModeSet:" + CTL.Recipe.autoMode)
+  }
+  websocket.send("tunerModeSet:" + CTL.Recipe.autoMode)
 }
 function setMFCs() {
   //interface recipe values
@@ -816,12 +1196,12 @@ function executeRecipe() {
     pollRate(1000)
   }
   else { 
-    CTL.Settings.executeRecipe = false
+    CTL.Recipe.executeRecipe = false
     websocket.send("executeRecipe:0")
     plasmaBtn.innerHTML = "PLASMA ON"
   } 
 }
-function sendAllValues() {
+function sendAllRecipeValuestoCTL() {
   RFSet()
   MBSet()
   TunerModeSet()

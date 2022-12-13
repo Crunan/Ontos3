@@ -15,21 +15,28 @@ async def writeCommand(w, cmd):
 
 async def serial_handler(websocket):
     reader, writer = await serial_asyncio.open_serial_connection(url='/dev/ttyUSB0', baudrate=57600) 
-    await resetCTL(writer, reader)
+    await reset_ctl(writer, reader)
+    await asyncio.sleep(0.1)
+    startupDict = await startup(writer, reader)
+    await websocket.send(json.dumps(startupDict))
     async for message in websocket:
         print(message)
         match message.split(":"): 
             case ["poll"]:
-                rcv = await poll(writer, reader)
-                websocketReadyData = await organizePollData(rcv)
-                await websocket.send(json.dumps(websocketReadyData))
+                rcv = await poll_ctl(writer, reader)
+                websocket_ready_ctl_data = await organize_poll_data(rcv)
+                await websocket.send(json.dumps(websocket_ready_ctl_data))
+
+                rcv = await poll_3_axis(writer, reader)
+                websocket_ready_3_axis_data = await organize_3_axis_poll_data(rcv)
+                await websocket.send(json.dumps(websocket_ready_3_axis_data))
             case ["startup"]:
                 startupDict = await startup(writer, reader)
                 await websocket.send(json.dumps(startupDict))
                 #send JSON parsed stuff await websocket.send("startup complete")
             case ["setMFCs", mfc, sp]:
                 await set_mfcs(writer, reader, (mfc), (sp))
-            case ["Tuner Mode", TMsp]:
+            case ["tunerModeSet", TMsp]:
                 await TunerModeSet(writer, reader, (TMsp))
             case ["RFSet", RFsp]:
                 await RFSet(writer, reader, (RFsp))
@@ -37,11 +44,53 @@ async def serial_handler(websocket):
                 await MBSet(writer, reader, (MBsp))
             case ["executeRecipe", sp]:
                 await execute_recipe(writer, reader, (sp))
+            case ["loadRecipe", file_name]:
+                recipe_data = await load_recipe(writer, reader, (file_name))
+                await websocket.send(json.dumps(recipe_data))
+            case ["init"]:
+                rcv = await init_stage_all(writer, reader)
+                await websocket.send(json.dumps(rcv))
+            case ["reset"]:
+                await reset_3_axis_ctl(writer, reader)
+            case ["stop"]:
+                await stop_motors(writer, reader)
+                
+async def load_recipe(w, r, file_name): 
+    path = "./ontos3/recipes/"
+    file_to_open = path + file_name 
 
+    recipe_file = open(file_to_open)
+    recipe_data = {"Recipe" : json.load(recipe_file)}
+    print(recipe_data)
+    return recipe_data
   
-async def resetCTL(w, r):
+async def reset_ctl(w, r):
     await writeCommand(w, "$90%")
     await readResponse(r)
+async def reset_3_axis_ctl(w, r):
+    await writeCommand(w, "$A9%")
+    await readResponse(r)
+async def stop_motors(w, r):
+    await writeCommand(w, "$B3%")
+    return await readResponse(r)
+
+async def init_stage_x(w, r):
+    await writeCommand(w, "$B500%")
+    return await readResponse(r)
+async def init_stage_y(w, r):
+    await writeCommand(w, "$B501%")
+    return await readResponse(r)
+async def init_stage_z(w, r):
+    await writeCommand(w, "$B502%")
+    return await readResponse(r)
+
+async def init_stage_all(w, r):
+    await stop_motors(w, r)
+    x = await init_stage_x(w, r)
+    y = await init_stage_y(w, r)
+    z = await init_stage_z(w, r)
+    rcv = x, y ,z
+    return rcv 
 
 async def update_status(data):
     hex_bits = int(data, base=16)
@@ -56,10 +105,10 @@ async def update_status(data):
 
     return status_dict
 
-async def organizePollData(d):
+async def organize_poll_data(d):
     strVar = d[3:-1] #Lop off the first three characters
     dataParsed = strVar.split(';') 
-    PCBPollData = {
+    pcb_poll_data = {
         "PCBStatus": {
         },
         "MBTuner": {
@@ -85,9 +134,45 @@ async def organizePollData(d):
             "actualFlow": float(dataParsed[8])
         }
     }
-    PCBPollData["PCBStatus"] = await update_status(dataParsed[0]) 
-    return PCBPollData
+    pcb_poll_data["PCBStatus"] = await update_status(dataParsed[0]) 
+    return pcb_poll_data
 
+async def organize_3_axis_poll_data(d):
+    strVar = d[3:-1] #Lop off the first three characters
+    data_parsed = strVar.split(';') 
+    LED_status = data_parsed[0] + data_parsed[1]
+    xyz_same = await check_xyz(data_parsed[2], data_parsed[5], data_parsed[8])
+    pcb_poll_data = {
+        "LEDS": {
+        },
+        "Status": {
+          "XYZSameState": bool(xyz_same)
+        },
+        "X": { 
+          "state": int(data_parsed[2]),
+          "err": int(data_parsed[3], 16),
+          "position": float(data_parsed[4])
+        },
+        "Y": { 
+          "state": int(data_parsed[5]),
+          "err": int(data_parsed[6], 16),
+          "position": float(data_parsed[7])
+        },
+        "Z": { 
+          "state": int(data_parsed[8]),
+          "err": int(data_parsed[9], 16),
+          "position": float(data_parsed[10])
+        }
+    }
+    pcb_poll_data["LEDS"] = await update_status(LED_status) 
+    print(pcb_poll_data)
+    return pcb_poll_data
+async def check_xyz(x, y, z) -> str: 
+    print(x, y, z) 
+    if (x == y) and (x == z):
+      return True
+    
+    return False
 async def set_mfcs(w, r, mfc, sp):
     mfc_recipe_cmd = "$41" + mfc + sp + "%"
     await writeCommand(w, mfc_recipe_cmd)
@@ -118,8 +203,11 @@ async def DefaultRecipe(w, r):
     await writeCommand(w, DefaultRecipeCMD) 
     await readResponse(r)
 
-async def poll(w, r) -> str:
+async def poll_ctl(w, r) -> str:
     await writeCommand(w, "$91%") 
+    return await readResponse(r)
+async def poll_3_axis(w, r) -> str:
+    await writeCommand(w, "$C0%") 
     return await readResponse(r)
     
 async def startup(w, r) -> dict:
@@ -159,7 +247,7 @@ async def howManyMFCs(w, r) -> int:
     await writeCommand(w, "$2A002%") 
     rcv = await readResponse(r)
     dataParsed = rcv[7:-1] 
-    howManyMFCs = {"PCBStatus": {"numMFCs": int(dataParsed, 10) }}
+async def check_xyz(x, y, z) -> str: 
     return howManyMFCs
        
 async def BatchIDLogging(w, r) -> bool:
