@@ -16,14 +16,14 @@
 <header>
   <div class="container-fluid">
     <div class="row">
-      <div class="col p-3 bg-dark text-white text-left">
+      <div class="col p-3 bg-light text-black text-left">
         <h1>ONTOS3</h1>
         <p>Champions in the realm of atmospheric plasma</p>
       </div>
-      <div class="col p-3 bg-dark text-end">
+      <div class="col p-3 bg-light text-end">
         <div class="row p-1">
           <div class="col">
-            <button class="btn btn-toggle btn-sm btn-warning" id="fullscreenToggle" type="button" data-bs-toggle="button" aria-pressed="false" autocomplete="off" onclick="toggleFullscreen()">
+            <button class="btn btn-toggle btn-sm btn-dark" id="fullscreenToggle" type="button" data-bs-toggle="button" aria-pressed="false" autocomplete="off" onclick="toggleFullscreen()">
             <div class="handle"></div>
             </button>
             <label for="fullscreenToggle" class="form-label text-white">Fullscreen</label>
@@ -31,7 +31,7 @@
         </div>
         <div class="row">
           <div class="col">
-            <button type="button" class="btn btn-outline-warning border border-warning" data-bs-toggle="offcanvas" data-bs-target="#offcanvas-pollrate">POLL RATE</button>
+            <button type="button" class="btn btn-warning border border-dark shadow-sm" data-bs-toggle="offcanvas" data-bs-target="#offcanvas-pollrate">POLL RATE</button>
           </div>
         </div>
           <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvas-pollrate">
@@ -39,7 +39,7 @@
               <h5 class="offcanvas-title" id="offcanvas-pollrateLabel">Poll Rate</h5>
               <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
             </div>
-            <div class="offcanvas-body text-start text-bg-success">
+            <div class="offcanvas-body text-start text-bg-secondary">
               <div class="d-grid gap-2">
                 <div class="btn-group-vertical" role="group">
                   <input type="radio" class="btn-check" onClick="pollRate(1000)" name="vbtn-radio" id="vbtn-radio1" autocomplete="off">
@@ -151,275 +151,324 @@
   </div>
 </div>
 
-<!-- Recipe Offcanvas -->
-<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvas-recipe" aria-labelledby="offcanvas recipe">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="offcanvasExampleLabel">Recipe Configuration:</h5>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-  </div>
-  <div class="offcanvas-body border border-primary">
-    <form id="recipeForm" >
-      <div class="btn-group mb-3 p-3 border-bottom" role="group">
-        <input class="form-control" type="file" id="recipeLoadFile" accept=".json">
-        <button class="btn btn-primary" type="button" onclick="loadRecipe()">Load</button>
-      </div>
-      <div class="input-group mb-5">
-        <span class="input-group-text">Recipe Name: </span>
-        <input type="text" id="recipeName" class="form-control"> 
-      </div>
-      <div class="input-group mb-3">
-        <span class="input-group-text" >RF Power: </span>
-        <input type="number" class="form-control" id="recipeRF">
-        <span class="input-group-text" >watts</span>
-      </div>
-      <div class="input-group mb-3">
-        <span class="input-group-text">MB Tuner: </span>
-        <input type="text" class="form-control" id="recipeMB">
-        <span class="input-group-text" >%</span>
-      </div>
-      <div class="input-group mb-5">
-        <span class="input-group-text">Auto Tune: </span>
-        <div class="input-group-text">
-          <input class="form-check-input mt-0" type="checkbox" id="recipeTunerMode">
-        </div>
-      </div>
-      <div class="input-group mb-3">
-        <span class="input-group-text" >MFC 1 Flow: </span>
-        <input type="number" min="0" max="20.00" step="0.1" class="form-control" id="recipeMFC1"> 
-        <span class="input-group-text" >SLPM</span>
-      </div>
-      <div class="input-group mb-3">
-        <span class="input-group-text" >MFC 2 Flow: </span>
-        <input type="number" min="0" max="20.00" step="0.1" class="form-control" id="recipeMFC2">
-        <span class="input-group-text" >SLPM</span>
-      </div>
-      <div class="input-group mb-3">
-        <span class="input-group-text" >MFC 3 Flow: </span>
-        <input type="number" min="0" max="0.3" step="0.001" class="form-control" id="recipeMFC3">
-        <span class="input-group-text" >SLPM</span>
-      </div>
-      <div class="input-group mb-5">
-        <span class="input-group-text" >MFC 4 Flow: </span>
-        <input type="number" min="0" max="0.3" step="0.001" class="form-control" id="recipeMFC4">
-        <span class="input-group-text" >SLPM</span>
-      </div>
-      <button class="btn btn-secondary me-3" type="button" data-bs-dismiss="offcanvas">Back</button>
-      <button class="btn btn-primary" onclick="sendAllRecipeValuestoCTL()">Set Values</button>
-      <button class="btn btn-success" onclick="saveRecipeFile()">Save Recipe</button>
-  </div>
-</div>
-
-<!--OffCanvas -->
-<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvas-3axisBtns" aria-labelledby="offcanvas 3-Axis Buttons">
-    <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="offcanvasExampleLabel">3-Axis Controls</h5>
-      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+<!--Publish Abort Code (toast) -->
+<div class="toast-container top-0 start-0 text-bg-danger border-0" role="alert">
+  <div id="abortToast" class="toast" role="alert">
+    <div class="toast-header">
+      <img src="..." class="rounded me-2" alt="...">
+      <strong class="me-auto">Abort Code</strong>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
     </div>
-    <div class="offcanvas-body border border-primary">
-      <div>
-        The following controls are to manuevre the 3-axis stage.
-      </div>
-      <div class="d-grid gap-2">
-        <button class="btn btn-primary" type="button" onclick="resetIt()">RESET 3-AXIS CTL</button>
-        <button class="btn btn-primary" type="button" onclick="stopMotors()">STOP STAGE</button>
-        <button class="btn btn-primary" type="button" onclick="initStage()">INITIALIZE</button>
-        <button class="btn btn-primary" type="button">LOAD POSITION</button>
-        <button class="btn btn-primary" type="button">START SCAN</button>
-        <button class="btn btn-primary" type="button">TWO-SPOT</button>
-        <button class="btn btn-primary" type="button">SET DIAMETER</button>
-        <div id="stageStatus">
-          
-        </div>
-      </div>
+    <div class="toast-body" id="abortToastBody"></div>
     </div>
 </div>
 
 <!--Main Content-->
-<div class="container-fluid p-2 text-center bg-dark">
-  <div class="card">
-    <div class="card-header">
-      <ul class="nav nav-tabs card-header-tabs">
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="true" href="#">Dashboard</a>
-        </li>
-        <li class="nav-item ps-2">
-          <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvas-recipe">Recipe</button>
-        </li>
-        <li>
-          <a class="nav-link" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvas-3axisBtns" aria-controls="offcanvasExample">3-Axis Buttons</a>
-        </li>
-      </ul>
-    </div>
-    <!-- Dashboard Card Body --> 
-    <div class="card-body"> 
-      <div class="row px-2">
+<div class="container-fluid text-center bg-light">
+  
+  <div class="row row-cols-3"><!--cards 1-3 row-->
+    
+    <!--col for card 1-->
+    <div class="col-xxl-7">
+     <!--card 1--> 
+      <div class="card">
+        <div class="card-header">
+          Plasma Control Dashboard
+        </div>
+        <!-- Dashboard Card Body --> 
+        <div class="card-body"> 
+          <div class="row">
 
-        <!--MFC Card -->
-        <div class="col-xxl-3 p-1 text-center">
-          <div class="card text-bg-secondary mb-3"> 
-            <div class="card-header">Mass Flow Controllers</div>
-            <div class="card-body" data-bs-toggle="modal" data-bs-target="#MFCModal">
-              <div id="MFCChart"></div>
+            <!--MFC Card -->
+            <div class="col p-1 text-center">
+              <div class="card text-bg-secondary"> 
+                <div class="card-header">Mass Flow Controllers</div>
+                <div class="card-body p-1" data-bs-toggle="modal" data-bs-target="#MFCModal">
+                  <div id="MFCChart"></div>
+                </div>
+                <div class="card-footer">
+                  <div class="d-grid">
+                    <button class="btn btn-primary border border-dark shadow " type="button" id="plasmaBtn">PLASMA ON</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+                        
+            <div class="col">
+              <div class="row">
+                <!-- RF Power Card-->
+                <div class="col p-1 "> 
+                  <div class="card text-bg-secondary">    
+                    <div class="card-header">RF Power Forward</div>
+                    <div class="card-body p-1" data-bs-toggle="modal" data-bs-target="#RFModal">
+                      <div id="RFPower"></div>
+                    </div>
+                    <div class="card-footer p-4"></div>
+                  </div>
+                </div>
+                <!-- Match Box Card-->
+                <div class="col p-1">
+                  <div class="card text-bg-secondary"> 
+                    <div class="card-header">Matchbox Tuner</div>
+                    <div class="card-body p-1" data-bs-toggle="modal" data-bs-target="#MBModal">
+                      <div id="Tuner"></div>
+                    </div>
+                    <div class="card-footer">
+                      <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-light" type="button" onclick="tuneDown()">Tune Down</button>
+                        <button class="btn btn-sm btn-outline-light" type="button" onclick="tuneUp()">Tune Up</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row p-0">
+                <!-- RF Reflected Card -->
+                <div class="col p-1">
+                  <div class="card text-bg-secondary">  
+                    <div class="card-header">RF Power Reflected</div>
+                    <div class="card-body p-1">
+                      <div id="RFRef"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Plasma Temp Card -->
+                <div class="col p-1">
+                  <div class="card text-bg-secondary">   
+                    <div class="card-header">Temperature</div>
+                    <div class="card-body p-1">
+                      <div id="Temp"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tuner  Card -->
+              <div class="row p-0">
+                <div class="col p-1">
+                  <div class="card text-bg-secondary invisible">  
+                    <div class="card-header">Realtime Tuner</div>
+                    <div class="card-body p-1">
+                      <div id="RealTimeTunerChart"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- PCB Status Card-->
+            <div class="col-xxl-2 p-1"> 
+              <div class="card text-bg-light mb-3">  
+                <div class="card-header">Status LEDs</div>
+                <div class="card-body">
+                  <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
+                    <button type="button" class="btn btn-light" id="led1">Gas_1</button>
+                    <button type="button" class="btn btn-light" id="led2">Gas_2</button>
+                    <button type="button" class="btn btn-light" id="led3">Gas_3</button>
+                    <button type="button" class="btn btn-light" id="led4">Gas_4</button>
+                    <button type="button" class="btn btn-light" id="led5">V5</button>
+                    <button type="button" class="btn btn-light" id="led6">TUNING</button>
+                    <button type="button" class="btn btn-light" id="led7">ESTOP</button>
+                    <button type="button" class="btn btn-light" id="led8">RF_EN</button>
+                    <button type="button" class="btn btn-light" id="led9">PL_ON</button>
+                    <button type="button" class="btn btn-light" id="led10">485</button>
+                    <button type="button" class="btn btn-light" id="led11">AUTO</button>
+                    <button type="button" class="btn btn-light" id="led12">EXEC</button>
+                    <button type="button" class="btn btn-light" id="led13">USB_OK</button>
+                    <button type="button" class="btn btn-light" id="led14">DO_CMD</button>
+                    <button type="button" class="btn btn-light" id="led15">HE_SIG</button>
+                    <button type="button" class="btn btn-light" id="led16">ABORT</button>
+                  </div>
+                </div>
+                <div class="card-footer"></div>
+              </div>
+            </div>
+
+          </div><!--end of dashboard card row-->
+        </div><!--card body end-->
+      </div><!--card 1 end-->
+    </div><!--card 1 col end-->
+
+    <!--col for card 2-->
+    <div class="col-xxl-2 p-0">
+      <!--card 2-->
+      <div class="card text-bg-secondary">
+        <div class="card-header">3 Axis Controls</div>
+        <div class="card-body">
+
+          <div class="row row-cols-2">
+            
+            <div class="col-xxl-7">
+              <div class="card text-bg-secondary">
+                  <div class="card-header">Stage Position</div>
+                  <div class="card-body">
+                    <div class="input-group mb-2">
+                      <span class="input-group-text">X:</span>
+                      <input type="text" class="form-control" id="XPos" readonly> 
+                    </div>
+                    <div class="input-group mb-2">
+                      <span class="input-group-text">Y:</span>
+                      <input type="text" class="form-control" id="YPos" readonly>
+                    </div>
+                    <div class="input-group mb-2">
+                      <span class="input-group-text">Z:</span>
+                      <input type="text" class="form-control" id="ZPos" readonly>
+                    </div>
+                  </div>
+                </div>
+
+            <!-- 3-axis Stage Card-->
+              <div class="card text-bg-secondary">
+                <div class="card-header">Stage Control</div>
+                <div class="card-body">
+                  <div class="d-grid gap-2">
+                    <button class="btn btn-primary" type="button" onclick="resetIt()">RESET 3-AXIS CTL</button>
+                    <button class="btn btn-primary" type="button" onclick="stopMotors()">STOP STAGE</button>
+                    <button class="btn btn-primary" type="button" onclick="initStage()">INITIALIZE</button>
+                    <button class="btn btn-primary" type="button" onclick="loadStage()">LOAD POSITION</button>
+                    <button class="btn btn-primary" type="button">START SCAN</button>
+                    <button class="btn btn-primary" type="button" onclick="twoSpotStageOn()">TWO-SPOT ON</button>
+                    <button class="btn btn-primary" type="button" onclick="twoSpotStageOff()">TWO-SPOT OFF</button>
+                  </div>
+                </div>
+                <div id="stageStatus" class="card-footer">
+                    Stage Status  
+                </div>
+              </div>
+              
+            </div> <!--col end for 3 axis controls-->
+
+            <!-- 3-axis Status Card-->
+            <div class="col-xxl-5"> 
+              <div class="card text-bg-secondary">  
+                <div class="card-header">LEDs</div>
+                <div class="card-body">
+                  <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
+                    <button type="button" class="btn btn-secondary text-light" id="stageled1">X_Lim</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled2">X_Run</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled3">Y_Lim</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled4">Y_Run</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled5">Z_Lim</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled6">Z_Run</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled7">STOP</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled8">EXT1</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled9">EXT2</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled10">EXT3</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled11">V1 0N</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled12">V2 0N</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled13">V3 0N</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled14">V4 0N</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled15">CMD</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled16"></button>
+                  </div>
+                </div>
+                <div class="card-footer"></div>
+              </div>
+            </div>
+
+          </div><!-- 3 axis card row end-->
+        </div><!--body end-->
+
+      </div><!--3 axis Card Row End-->
+    </div><!--end of card 2 column-->
+
+    <!--col for card 3-->
+    <div class="col-xxl-3">
+
+          <!-- Recipe card -->
+          <div class="card text-bg-light" id="offcanvas-recipe">
+            <div class="card-header">Recipe Configuration</div>
+            <div class="card-body">
+              <form id="recipeForm" >
+                <div class="btn-group mb-4 p-3 border-bottom" role="group">
+                  <input class="form-control" type="file" id="recipeLoadFile" accept=".json">
+                  <button class="btn btn-primary" type="button" onclick="loadRecipe()">Load</button>
+                </div>
+                <div class="input-group mb-2">
+                  <span class="input-group-text">Recipe Name: </span>
+                  <input type="text" id="recipeName" class="form-control"> 
+                </div>
+                <label>Power & Tuning</label>
+                <div class="input-group mb-2">
+                  <span class="input-group-text" >RF Power: </span>
+                  <input type="number" class="form-control" id="recipeRF">
+                  <span class="input-group-text" >watts</span>
+                </div>
+                <div class="input-group mb-4">
+                  <span class="input-group-text">MB Tuner: </span>
+                  <input type="text" class="form-control" id="recipeMB">
+                  <span class="input-group-text" >%</span>
+                  <span class="input-group-text">Auto Tune: </span>
+                  <div class="input-group-text">
+                    <input class="form-check-input mt-0" type="checkbox" id="recipeTunerMode">
+                  </div>
+                </div>
+                <div class="card text-bg-success mb-2">
+                  <div class="card-header">Gas Flow</div>
+                  <div class="card-body">
+                    <div class="input-group mb-1">
+                      <span class="input-group-text" >MFC 1 Flow: </span>
+                      <input type="number" min="0" max="20.00" step="0.1" class="form-control" id="recipeMFC1"> 
+                      <span class="input-group-text" >SLPM</span>
+                    </div>
+                    <div class="input-group mb-1">
+                      <span class="input-group-text" >MFC 2 Flow: </span>
+                      <input type="number" min="0" max="20.00" step="0.1" class="form-control" id="recipeMFC2">
+                      <span class="input-group-text" >SLPM</span>
+                    </div>
+                    <div class="input-group mb-1">
+                      <span class="input-group-text" >MFC 3 Flow: </span>
+                      <input type="number" min="0" max="0.3" step="0.001" class="form-control" id="recipeMFC3">
+                      <span class="input-group-text" >SLPM</span>
+                    </div>
+                    <div class="input-group mb-1">
+                      <span class="input-group-text" >MFC 4 Flow: </span>
+                      <input type="number" min="0" max="0.3" step="0.001" class="form-control" id="recipeMFC4">
+                      <span class="input-group-text" >SLPM</span>
+                    </div>
+                  </div>
+                </div>
+                <label>Stage Inputs</label>
+                <div class="input-group mb-1">
+                  <span class="input-group-text" >Gap: </span>
+                  <input type="number" min="0" max="10.00" step="0.1" class="form-control" id="gap"> 
+                  <span class="input-group-text" >mm</span>
+                </div>
+                <div class="input-group mb-1">
+                  <span class="input-group-text" >Thickness: </span>
+                  <input type="number" min="0" max="10.00" step="0.1" class="form-control" id="thickness"> 
+                  <span class="input-group-text" >mm</span>
+                </div>
+                <div class="input-group mb-1">
+                  <span class="input-group-text" >Speed: </span>
+                  <input type="number" min="0" max="15.00" step="0.1" class="form-control" id="speed"> 
+                  <span class="input-group-text" >mm/sec</span>
+                </div>
+                <div class="input-group mb-1">
+                  <span class="input-group-text" >Cycles: </span>
+                  <input type="number" min="0" max="30.00" step="0.1" class="form-control" id="cycles"> 
+                  <span class="input-group-text" >#</span>
+                </div>
+                <div class="input-group mb-1">
+                  <span class="input-group-text" >Overlap: </span>
+                  <input type="number" min="0" max="20.00" step="0.1" class="form-control" id="overlap"> 
+                  <span class="input-group-text" >mm</span>
+                </div>
+
             </div>
             <div class="card-footer">
-              <div class="btn-group border border-success" role="group">
-                <button type="button" class="btn btn-lg btn-outline-light" id="plasmaBtn">PLASMA ON</button>
-                <button type="button" class="btn btn-lg btn-light stetched-link" data-bs-toggle="modal" data-bs-target="#MFCModal">SET RECIPE:</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="col-xxl-4 p1 border border-danger">
-          <div class="row border border-primary">
-            <!-- RF Power Card-->
-            <div class="col p-1 "> 
-              <div class="card text-bg-secondary mb-3">    
-                <div class="card-header">RF Power Forward</div>
-                <div class="card-body" data-bs-toggle="modal" data-bs-target="#RFModal">
-                  <div id="RFPower"></div>
-                </div>
-                <div class="card-footer px-4">
-                  <div class="input-group border border-success" role="group">
-                    <span class="input-group-text">RF</span>
-                    <input type="text" class="form-control text-center" data-id="recipeRF" value="" placeholder="0" readonly>
-                    <span class="input-group-text">watts</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!-- Match Box Card-->
-            <div class="col p-1">
-              <div class="card text-bg-secondary mb-3"> 
-                <div class="card-header">Matchbox Tuner</div>
-                <div class="card-body" data-bs-toggle="modal" data-bs-target="#MBModal">
-                  <div id="Tuner"></div>
-                </div>
-                <div class="card-footer px-4">
-                  <div class="input-group border border-success" role="group">
-                    <span class="input-group-text">TUNER</span>
-                    <input type="text" class="form-control text-center" data-id="recipeRF" value="" placeholder="0" readonly>
-                    <span class="input-group-text">%</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="row">
-            <!-- RF Reflected Card -->
-            <div class="col p-1">
-              <div class="card text-bg-secondary mb-3">  
-                <div class="card-header">RF Power Reflected</div>
-                <div class="card-body">
-                  <div id="RFRef"></div>
-                </div>
-                <div class="card-footer">
-                  <div class="btn-group border border-success" role="group">
-                    <button type="button" class="btn btn-sm btn-outline-light">TEST BUTTON</button>
-                    <button type="button" class="btn btn-sm btn-light" id="testBtn">TEST BUTTON</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Plasma Temp Card -->
-            <div class="col p-1">
-              <div class="card text-bg-secondary mb-3">   
-                <div class="card-header">Plasma Head Temperature</div>
-                <div class="card-body">
-                  <div id="Temp"></div>
-                </div>
-                <div class="card-footer">
-                  <div class="btn-group border border-success" role="group">
-                    <button type="button" class="btn btn-sm btn-outline-light">TEST BUTTON</button>
-                    <button type="button" class="btn btn-sm btn-light" id="testBtn">TEST BUTTON</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-        
-        <!-- PCB Status Card-->
-        <div class="col-xxl-1 p-1"> 
-          <div class="card text-bg-secondary mb-3">  
-            <div class="card-header">Controller Status LEDs</div>
-            <div class="card-body">
-              <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
-                <button type="button" class="btn btn-light" id="led1">Gas_1</button>
-                <button type="button" class="btn btn-light" id="led2">Gas_2</button>
-                <button type="button" class="btn btn-light" id="led3">Gas_3</button>
-                <button type="button" class="btn btn-light" id="led4">Gas_4</button>
-                <button type="button" class="btn btn-light" id="led5">V5</button>
-                <button type="button" class="btn btn-light" id="led6">V6</button>
-                <button type="button" class="btn btn-light" id="led7">V7</button>
-                <button type="button" class="btn btn-light" id="led8">RF_EN</button>
-                <button type="button" class="btn btn-light" id="led9">PL_ON</button>
-                <button type="button" class="btn btn-light" id="led10">TUNING</button>
-                <button type="button" class="btn btn-light" id="led11">AUTO</button>
-                <button type="button" class="btn btn-light" id="led12">EXEC</button>
-                <button type="button" class="btn btn-light" id="led13">ESTOP_ON</button>
-                <button type="button" class="btn btn-light" id="led14">DO_CMD</button>
-                <button type="button" class="btn btn-light" id="led15">HE_SIG</button>
-                <button type="button" class="btn btn-light" id="led16">ABORT</button>
-              </div>
-            </div>
-            <div class="card-footer"></div>
-          </div>
-        </div>
-
-        <div class="col-xxl-2 ms-5 p-1">
-          <div class="card text-bg-danger mb-3">
-          <div class="card-header">3 Axis Stage</div>
-            <div class="card-body">
               <div class="d-grid gap-2">
-                <button class="btn btn-secondary border border-light" type="button" onclick="resetIt()">RESET 3-AXIS CTL</button>
-                <button class="btn btn-secondary border border-light" type="button" onclick="stopMotors()">STOP STAGE</button>
-                <button class="btn btn-secondary border border-light" type="button" onclick="initStage()">INITIALIZE</button>
-                <button class="btn btn-secondary border border-light" type="button">LOAD POSITION</button>
-                <button class="btn btn-secondary border border-light" type="button">START SCAN</button>
-                <button class="btn btn-secondary border border-light" type="button">TWO-SPOT</button>
-                <button class="btn btn-secondary border border-light" type="button">SET DIAMETER</button>
+                <button class="btn btn-primary border border-dark shadow" onclick="sendAllRecipeValuestoCTL()">SEND RECIPE TO CONTROLLER</button>
+                <button class="btn btn-success border border-dark shadow" onclick="saveRecipeFile()">SAVE RECIPE</button>
               </div>
             </div>
-            <div id="stageStatus" class="card-footer">
-                Stage Status  
-            </div>
           </div>
-        </div> 
+     
+    </div><!--end of card 3 colum-->
 
-        <!-- 3-axis Status Card-->
-        <div class="col-xxl-1 p-1"> 
-          <div class="card text-bg-danger mb-3">  
-            <div class="card-header">3-Axis Status LEDs</div>
-            <div class="card-body">
-              <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
-                <button type="button" class="btn btn-light" id="stageled1">X_Lim</button>
-                <button type="button" class="btn btn-light" id="stageled2">X_Run</button>
-                <button type="button" class="btn btn-light" id="stageled3">Y_Lim</button>
-                <button type="button" class="btn btn-light" id="stageled4">Y_Run</button>
-                <button type="button" class="btn btn-light" id="stageled5">Z_Lim</button>
-                <button type="button" class="btn btn-light" id="stageled6">Z_Run</button>
-                <button type="button" class="btn btn-light" id="stageled7">STOP</button>
-                <button type="button" class="btn btn-light" id="stageled8">EXT1</button>
-                <button type="button" class="btn btn-light" id="stageled9">EXT2</button>
-                <button type="button" class="btn btn-light" id="stageled10">EXT3</button>
-                <button type="button" class="btn btn-light" id="stageled11">V1 0N</button>
-                <button type="button" class="btn btn-light" id="stageled12">V2 0N</button>
-                <button type="button" class="btn btn-light" id="stageled13">V3 0N</button>
-                <button type="button" class="btn btn-light" id="stageled14">V4 0N</button>
-                <button type="button" class="btn btn-light" id="stageled15">CMD</button>
-                <button type="button" class="btn btn-light" id="stageled16"></button>
-              </div>
-            </div>
-            <div class="card-footer"></div>
-          </div>
-        </div>
-
-    </div><!--Dashboard Card Row End-->
-    
+  </div><!--card 1-3 row end-->
+  
 </div><!--Content Container-Fluid End-->
 
   
@@ -427,10 +476,20 @@
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script> 
 
 <script>
+const date = new Date()
 const websocket = new WebSocket("ws://localhost:5000/")
 const reader = new FileReader()
 const elem = document.documentElement
 let loop
+const ASTAT = {
+  ASM_IDLE: 0x10,
+  ASM_ABS_START: 0x11,
+  ASM_ABS_WAIT: 0x12,
+  ASM_REL_START: 0x13,
+  ASM_REL_WAIT: 0x14,
+  ASM_JOY_ON: 0x15
+}
+
 var CTL3AXIS = {
   Status: { 
     XYZSameState: 0,
@@ -440,20 +499,58 @@ var CTL3AXIS = {
   X: {
     state: 0, 
     err: 0, 
-    position: 0
+    position: 0,
+    max_speed: 0,
+
+    home_position: 0,
+    plasma_head__position: 0,
+    plasma_slit_length: 0,
+    laser_position: 0,
   },
   Y: {
     state: 0, 
     err: 0, 
-    position: 0
+    position: 0,
+    max_speed: 0,
+    
+    home_position: 0,
+    plasma_head_position: 0,
+    plasma_slit_width: 0,
+    laser_position: 0,
   },
   Z: {
     state: 0, 
     err: 0, 
-    position: 0 
+    position: 0,
+    max_speed: 0,
+
+    home_position: 0,
+    plasma_head_position: 0,
+    plasma_safety_gap: 0,
+    pins_buried_position: 0,
+    pins_exposed_position: 0,
   }
 }
 var CTL = {
+  LightTower: { 
+    Error: false,
+    Ready: false,
+    Active: false,
+    Idle: false,
+  },
+  AbortCodes: {
+    NO_N2: false,
+    NO_HEARTBEAT: false,
+    NO_GAS_1: false,
+    NO_GAS_2: false,
+    NO_GAS_3: false,
+    NO_GAS_4: false,
+    BAD_HELIUM: false,
+    ESTOP: false,
+    NO_RS485: false,
+    PWR_FWD_LOW: false,
+    OVER_TEMP: false,
+  },
   PCBStatus: {
   },
   Recipe: {
@@ -466,6 +563,7 @@ var CTL = {
     recipeFlow4: 0,
     autoMode: 0,
     executeRecipe: 0,
+    loadRecipe: 0,
   },
   Settings: { 
     numMFCs: 0,
@@ -704,7 +802,7 @@ const TempOptions = {
     gradient: {
       shade: "dark",
       type: "vertical",
-      gradientToColors: ["#87D4F9"],
+      gradientToColors: ["#f73300"],
       stops: [0, 100]
     }
   },
@@ -765,30 +863,82 @@ const TunerOptions = {
   },
   labels: ["Tuner"]
 };
+var RTT = {
+      series: [{
+        data: [{ 
+          x: new Date('2022-11-24').getTime(),
+          y: 80
+        }, {
+          x: new Date('2022-11-27').getTime(),
+          y: 85 
+        }, {
+          x: new Date('2022-12-04').getTime(),
+          y: 70 
+        }, {
+          x: new Date('2022-12-14').getTime(),
+          y: 50 
+        }, {
+          x: new Date('2022-12-16').getTime(),
+          y: 36
+        }]
+      }],
+        chart: {
+        id: 'tunerrealtime',
+        height: 250,
+        type: 'line',
+        animations: {
+          enabled: true,
+          easing: 'linear',
+          dynamicAnimation: {
+            speed: 1000
+          }
+        },
+        toolbar: {
+          show: false
+        },
+        zoom: {
+          enabled: false
+        }
+      },
+      dataLabels: {
+        enabled: false
+      },
+      stroke: {
+        curve: 'smooth'
+      },
+      title: {
+        text: 'Dynamic Tuner Chart',
+        align: 'left'
+      },
+      markers: {
+        size: 0
+      },
+      xaxis: {
+        type: 'datetime'
+      },
+      yaxis: {
+        max: 100
+      },
+      legend: {
+        show: false
+      },
+};
 
-const MFCChart = new 
-  ApexCharts(document.querySelector("#MFCChart")
-    , MFCOptions);
-const RFPowerChart = new
-  ApexCharts(document.querySelector("#RFPower")
-    , RFOptions);
-const RFRefChart = new
-  ApexCharts(document.querySelector("#RFRef")
-    , RFRefOptions);
-const TempChart = new
-  ApexCharts(document.querySelector("#Temp")
-    , TempOptions);
-const TunerChart = new
-  ApexCharts(document.querySelector("#Tuner")
-    , TunerOptions);
+const RTTunerChart = new ApexCharts(document.querySelector("#RealTimeTunerChart"), RTT)
+const MFCChart = new ApexCharts(document.querySelector("#MFCChart"), MFCOptions)
+const RFPowerChart = new ApexCharts(document.querySelector("#RFPower"), RFOptions)
+const RFRefChart = new ApexCharts(document.querySelector("#RFRef"), RFRefOptions)
+const TempChart = new ApexCharts(document.querySelector("#Temp"), TempOptions)
+const TunerChart = new ApexCharts(document.querySelector("#Tuner"), TunerOptions)
 
 MFCChart.render();
 RFPowerChart.render();
 RFRefChart.render();
 TempChart.render();
 TunerChart.render();
+RTTunerChart.render();
 
-const testBtn = document.querySelector("#testBtn")
+var twospot = false
 const plasmaBtn = document.querySelector("#plasmaBtn")
 const loadFileBtn = document.querySelector("#recipeLoadFile")
 
@@ -828,6 +978,10 @@ const sled16 = document.querySelector("#stageled16")
 
 
 var UIstageStatus = document.querySelector("#stageStatus")
+var UIXPosition = document.querySelector("#XPos")
+var UIYPosition = document.querySelector("#YPos")
+var UIZPosition = document.querySelector("#ZPos")
+
 
 var UIrecipeName = document.querySelector("#recipeName")
 var UIrecipeRF = document.querySelector("#recipeRF")
@@ -838,16 +992,16 @@ var UIrecipeMFC2 = document.querySelector("#recipeMFC2")
 var UIrecipeMFC3 = document.querySelector("#recipeMFC3")
 var UIrecipeMFC4 = document.querySelector("#recipeMFC4")
 
+const abortToast = document.getElementById("#abortToast")
+const abortToastBody = document.querySelector("#abortToastBody")
+
+
 window.addEventListener("load", (e) => {
   console.log("hello")
 })
 
 plasmaBtn.addEventListener("click", () => { 
   executeRecipe() 
-})
-
-testBtn.addEventListener("click", () => {
-  console.log(CTL)
 })
 
 reader.addEventListener("loadend", (e) => {
@@ -859,10 +1013,15 @@ websocket.onmessage = ({ data }) => {
   const source = JSON.parse(data)
   console.log(source)
   parseCTL(source)
+
   updateStatus()
   updateStatusStage()
+  updateStageValues()
 
-  updateGUIRecipeValues()
+  if (CTL.Recipe.loadRecipe === 1) {
+    updateGUIRecipeValues()
+    CTL.Recipe.loadRecipe = 0
+  }
 
   MFCChart.updateSeries([CTL.MFC4.actualFlow, CTL.MFC3.actualFlow, CTL.MFC2.actualFlow, CTL.MFC1.actualFlow])
   RFPowerChart.updateSeries([CTL.RFSupply.powerForward])
@@ -870,7 +1029,50 @@ websocket.onmessage = ({ data }) => {
   TunerChart.updateSeries([CTL.MBTuner.actualPosition])
   TempChart.updateSeries([CTL.PlasmaHead.temp])
 }
+function updateStageValues() {
+  UIXPosition.value = CTL3AXIS.X.position
+  UIYPosition.value = CTL3AXIS.Y.position
+  UIZPosition.value = CTL3AXIS.Z.position
+}
+function tuneDown() {
+  websocket.send("tune:0")
+}
+function tuneUp() {
+  websocket.send("tune:1")
+}
+function getAbortCodes() {
+  websocket.send("get_abort_code")
+  publishAbortCodes()
+}
+function publishAbortCodes() {
+  for (code in CTL.AbortCode) {
+    if (CTL.AbortCode[code] === True) {
+      abortToastBody.innerHTML = CTL.AbortCode[code]
+    }
+  }
+  abortToast.show()
+}
+function setLightTower() {
+  if (CTL.Recipe.executeRecipe === true) {
+    CTL.LightTower.Active = true
+    websocket.send("light:3")
+  }
+  else {
+    CTL.LightTower.Active = false
+    websocket.send("light:2")
+  }
 
+  for (code in CTL.AbortCode) {
+    if (CTL.AbortCode[code] === true) {
+      CTL.LightTower.error = true
+      websocket.send("light:1")
+    }
+  }
+  if (CTL.LightTower.error === false) {
+    CTL.LightTower.error = false
+    websocket.send("light:2")
+  }
+}
 function resetIt() {
   console.log("reset")
   websocket.send("reset")
@@ -879,10 +1081,26 @@ function stopMotors() {
   console.log("stop")
   websocket.send("stop")
 }
-async function initStage() {
+function initStage() {
   console.log("init")
   websocket.send("init")
-  await checkXYZ() 
+}
+function loadStage() {
+  console.log("load")
+  websocket.send("load")
+}
+function twoSpotStageOn() {
+  console.log("twospot on")
+  websocket.send("twospot:1")
+}
+function twoSpotStageOff() {
+  console.log("twospot off")
+  websocket.send("twospot:0")
+}
+function checkXYZ() {
+  if ((CTL3AXIS.Status.XYZSameState === True) && (CTL3AXIS.X.state < ASM_IDLE)) {
+    return true
+  }
 }
 function saveRecipeFile() {
   saveRecipeInputs()
@@ -922,6 +1140,7 @@ function updateGUIRecipeValues() {
 function loadRecipe() {
   fileName = loadFileBtn.files[0].name
   websocket.send("loadRecipe:" + fileName)
+  CTL.Recipe.loadRecipe = 1
 }
 function parseCTL(s) {
   Object.keys(CTL).forEach(key => { 
@@ -950,6 +1169,7 @@ function pollRate(rate) {
 }
 function pollCTLs() {
   websocket.send("poll")
+  websocket.send("temp")
 }
 function updateStatus() {
   if (CTL.PCBStatus.led_bit_0 === "on") {
@@ -996,6 +1216,7 @@ function updateStatus() {
   }
   if (CTL.PCBStatus.led_bit_7 === "on") {
     led16.setAttribute("class", "btn btn-success") 
+    getAbortCode()
   }
   else { 
     led16.setAttribute("class", "btn btn-light")
@@ -1068,97 +1289,97 @@ function updateStatusStage() {
     sled1.setAttribute("class", "btn btn-success") 
   } 
   else {
-    sled1.setAttribute("class", "btn btn-light")
+    sled1.setAttribute("class", "btn btn-secondary")
   }
   if (CTL3AXIS.LEDS.led_bit_1 === "on") {
     sled2.setAttribute("class", "btn btn-success") 
   } 
   else { 
-    sled2.setAttribute("class", "btn btn-light")
+    sled2.setAttribute("class", "btn btn-secondary")
   }
   if (CTL3AXIS.LEDS.led_bit_2 === "on") {
     sled3.setAttribute("class", "btn btn-success") 
   }
   else {
-    sled3.setAttribute("class", "btn btn-light")
+    sled3.setAttribute("class", "btn btn-secondary")
   }
   if (CTL3AXIS.LEDS.led_bit_3 === "on") {
     sled4.setAttribute("class", "btn btn-success") 
   }
   else { 
-    sled4.setAttribute("class", "btn btn-light")
+    sled4.setAttribute("class", "btn btn-secondary")
   }
   if (CTL3AXIS.LEDS.led_bit_4 === "on") {
     sled5.setAttribute("class", "btn btn-success") 
   }
   else {
-    sled5.setAttribute("class", "btn btn-light")
+    sled5.setAttribute("class", "btn btn-secondary")
   }
   if (CTL3AXIS.LEDS.led_bit_5 === "on") {
     sled6.setAttribute("class", "btn btn-success") 
   }
   else {
-    sled6.setAttribute("class", "btn btn-light")
+    sled6.setAttribute("class", "btn btn-secondary")
   }
   if (CTL3AXIS.LEDS.led_bit_6 === "on") {
     sled7.setAttribute("class", "btn btn-success") 
   }
   else {
-    sled7.setAttribute("class", "btn btn-light")
+    sled7.setAttribute("class", "btn btn-secondary")
   }
   if (CTL3AXIS.LEDS.led_bit_7 === "on") {
     sled8.setAttribute("class", "btn btn-success") 
   }
   else { 
-    sled8.setAttribute("class", "btn btn-light")
+    sled8.setAttribute("class", "btn btn-secondary")
   }
   if (CTL3AXIS.LEDS.led_bit_8 === "on") {
     sled9.setAttribute("class", "btn btn-success") 
   }
   else {
-    sled9.setAttribute("class", "btn btn-light")
+    sled9.setAttribute("class", "btn btn-secondary")
   }
   if (CTL3AXIS.LEDS.led_bit_9 === "on") {
     sled10.setAttribute("class", "btn btn-success") 
   }
   else { 
-    sled10.setAttribute("class", "btn btn-light")
+    sled10.setAttribute("class", "btn btn-secondary")
   }
   if (CTL3AXIS.LEDS.led_bit_10 === "on") {
     sled11.setAttribute("class", "btn btn-success") 
   }
   else { 
-    sled11.setAttribute("class", "btn btn-light")
+    sled11.setAttribute("class", "btn btn-secondary")
   }
   if (CTL3AXIS.LEDS.led_bit_11 === "on") {
     sled12.setAttribute("class", "btn btn-success") 
   }
   else {
-    sled12.setAttribute("class", "btn btn-light")
+    sled12.setAttribute("class", "btn btn-secondary")
   }
   if (CTL3AXIS.LEDS.led_bit_12 === "on") {
     sled13.setAttribute("class", "btn btn-success") 
   }
   else { 
-    sled13.setAttribute("class", "btn btn-light")
+    sled13.setAttribute("class", "btn btn-secondary")
   }
   if (CTL3AXIS.LEDS.led_bit_13 === "on") {
     sled14.setAttribute("class", "btn btn-success") 
   }
   else { 
-    sled14.setAttribute("class", "btn btn-light")
+    sled14.setAttribute("class", "btn btn-secondary")
   }
   if (CTL3AXIS.LEDS.led_bit_14 === "on") {
     sled15.setAttribute("class", "btn btn-success") 
   }
   else { 
-    sled15.setAttribute("class", "btn btn-light")
+    sled15.setAttribute("class", "btn btn-secondary")
   }
   if (CTL3AXIS.LEDS.led_bit_15 === "on") {
     sled16.setAttribute("class", "btn btn-success") 
   }
   else { 
-    sled16.setAttribute("class", "btn btn-light")
+    sled16.setAttribute("class", "btn btn-secondary")
   }
 }
 

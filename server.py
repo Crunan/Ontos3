@@ -1,3 +1,4 @@
+from datetime import datetime
 import asyncio
 import json
 import logging
@@ -7,31 +8,51 @@ import serial_asyncio
 async def readResponse(r) -> str:
     rsp = await r.readuntil(b'#')
     print(rsp.decode())
+
+    logging.debug(datetime.now())
+    logging.debug(rsp.decode())
+    logging.debug("")
     return rsp.decode()
     
 async def writeCommand(w, cmd):
     w.write(cmd.encode('ascii'))
     await w.drain()
 
+async def setup_log(): 
+    logging.basicConfig(filename='./ontos3/logs/example.log', encoding='ascii', level=logging.DEBUG)
+
 async def serial_handler(websocket):
+    CTL_3_axis_exists: bool = True
+    await setup_log()
     reader, writer = await serial_asyncio.open_serial_connection(url='/dev/ttyUSB0', baudrate=57600) 
     await reset_ctl(writer, reader)
-    await asyncio.sleep(0.1)
-    startupDict = await startup(writer, reader)
+
+    startupDict = await startup_CTL(writer, reader)
     await websocket.send(json.dumps(startupDict))
+
+    startup_3_axis_dict = await startup_3_AXIS(writer, reader)
+    await websocket.send(json.dumps(startup_3_axis_dict))
+
     async for message in websocket:
-        print(message)
         match message.split(":"): 
             case ["poll"]:
                 rcv = await poll_ctl(writer, reader)
                 websocket_ready_ctl_data = await organize_poll_data(rcv)
                 await websocket.send(json.dumps(websocket_ready_ctl_data))
-
-                rcv = await poll_3_axis(writer, reader)
-                websocket_ready_3_axis_data = await organize_3_axis_poll_data(rcv)
-                await websocket.send(json.dumps(websocket_ready_3_axis_data))
+                if CTL_3_axis_exists == True: 
+                    try:
+                        rcv = await poll_3_axis(writer, reader)
+                        websocket_ready_3_axis_data = await organize_3_axis_poll_data(rcv)
+                        await websocket.send(json.dumps(websocket_ready_3_axis_data))
+                    except:
+                        CTL_status = {"PCBStatus": {"CTL3AxisExists": False} }
+                        await websocket.send(json.dumps(CTL_status))
+                        CTL_3_axis_exists = False 
+            case ["temp"]:
+                temp = await temperature(writer, reader)
+                await websocket.send(json.dumps(temp))
             case ["startup"]:
-                startupDict = await startup(writer, reader)
+                startupDict = await startup_CTL(writer, reader)
                 await websocket.send(json.dumps(startupDict))
                 #send JSON parsed stuff await websocket.send("startup complete")
             case ["setMFCs", mfc, sp]:
@@ -50,11 +71,108 @@ async def serial_handler(websocket):
             case ["init"]:
                 rcv = await init_stage_all(writer, reader)
                 await websocket.send(json.dumps(rcv))
+            case ["load"]:
+                rcv = await load_stage(writer, reader)
+                await websocket.send(json.dumps(rcv))
             case ["reset"]:
                 await reset_3_axis_ctl(writer, reader)
             case ["stop"]:
                 await stop_motors(writer, reader)
-                
+            case ["get_abort_code"]:
+                rcv = await get_abort_code(writer, reader)
+                await websocket.send(json.dumps(rcv))
+            case ["light", state]:
+                rcv = await set_light_tower(writer, reader, (state))
+                await websocket.send(json.dumps(rcv))
+            case ["tune", direction]:
+                rcv = await tune_matchbox(writer, reader, (direction))
+            case ["twospot", state]:
+                rcv = await two_spot(writer, reader, (state))
+
+async def two_spot(w, r, state):
+    match state:
+        case "1":
+            await writeCommand(w, "$BE%")
+            await readResponse(r)
+        case "0":
+            await writeCommand(w, "$BF%")
+            await readResponse(r)
+
+async def tune_matchbox(w, r, d):
+    match d:
+        case "1":
+            await writeCommand(w, "$11010032%")
+            await readResponse(r)
+        case "0":
+            await writeCommand(w, "$11000032%")
+            await readResponse(r)
+
+async def set_light_tower(w, r, state):
+    match state:
+        case "1":
+            await writeCommand(w, "$CB01%")
+            await readResponse(r)
+        case "2":
+            await writeCommand(w, "$CB02%")
+            await readResponse(r)
+        case "3":
+            await writeCommand(w, "$CB03%")
+            await readResponse(r)
+
+async def get_abort_code(w, r):
+    await writeCommand(w, "$8B%")
+    code = await readResponse(r)
+
+    abort_code = hex(code[3:-1]) #Lop off the first three characters
+    
+    AC_NO_N2 = 0x1
+    AC_NO_HEARTBEAT = 0x2
+    AC_NO_GAS_1 = 0x3
+    AC_NO_GAS_2 = 0x4
+    AC_NO_GAS_3 = 0x5
+    AC_NO_GAS_3 = 0x6
+    AC_NO_BAD_HELIUM = 0x7
+    AC_NO_ESTOP = 0x8
+    AC_NO_NO_RS485 = 0x9
+    AC_NO_PWR_FWD_LOW = 0xA
+    AC_NO_OVER_TEMP = 0xB
+
+    print(abort_code)
+    match abort_code:
+        case 0x1:
+            error_code = {"AbortCodes": {"NO_N2": True} }
+            return error_code
+        case 0x2:
+            error_code = {"AbortCodes": {"NO_HEARTBEAT": True} }
+            return error_code
+        case 0x3:
+            error_code = {"AbortCodes": {"NO_GAS_1": True} }
+            return error_code
+        case 0x4:
+            error_code = {"AbortCodes": {"NO_GAS_2": True} }
+            return error_code
+        case 0x5:
+            error_code = {"AbortCodes": {"NO_GAS_3": True} }
+            return error_code
+        case 0x6:
+            error_code = {"AbortCodes": {"NO_GAS_4": True} }
+            return error_code
+        case 0x7:
+            error_code = {"AbortCodes": {"BAD_HELIUM": True} }
+            return error_code
+        case 0x8:
+            error_code = {"AbortCodes": {"ESTOP": True} }
+            return error_code
+        case 0x9:
+            error_code = {"AbortCodes": {"NO_RS485": True} }
+            return error_code
+        case 0xA:
+            error_code = {"AbortCodes": {"PWR_FWD_LOW": True} }
+            return error_code
+        case 0xB:
+            error_code = {"AbortCodes": {"OVER_TEMP": True} }
+            return error_code
+    
 async def load_recipe(w, r, file_name): 
     path = "./ontos3/recipes/"
     file_to_open = path + file_name 
@@ -67,9 +185,12 @@ async def load_recipe(w, r, file_name):
 async def reset_ctl(w, r):
     await writeCommand(w, "$90%")
     await readResponse(r)
+    await asyncio.sleep(0.1)
 async def reset_3_axis_ctl(w, r):
     await writeCommand(w, "$A9%")
     await readResponse(r)
+    await asyncio.sleep(0.1)
+
 async def stop_motors(w, r):
     await writeCommand(w, "$B3%")
     return await readResponse(r)
@@ -91,6 +212,55 @@ async def init_stage_all(w, r):
     z = await init_stage_z(w, r)
     rcv = x, y ,z
     return rcv 
+
+async def load_stage(w, r):
+    zpark = 6.00
+    zhome = 29.25
+
+    xhome = 115.58
+    xspeed = 15.00
+
+    yhome = 200.00
+    yspeed = 15.00
+
+    strVar = "$B400" + str(xspeed) + "%"
+    await writeCommand(w, strVar)
+    await readResponse(r)
+    print("load started")
+
+    strVar = "$B4025.00%"
+    await writeCommand(w, strVar)
+    await readResponse(r)
+
+    strVar = "$B602" + str(zpark) + "%"
+    await writeCommand(w, strVar)
+    await readResponse(r)
+
+    strVar = "$B400" + str(xspeed) + "%"
+    await writeCommand(w, strVar)
+    await readResponse(r)
+
+    strVar = "$B401" + str(yspeed) + "%"
+    await writeCommand(w, strVar) 
+    await readResponse(r)
+
+    strVar = "$B600" + str(xhome) + "%"
+    await writeCommand(w, strVar)
+    await readResponse(r)
+
+    strVar = "$B601" + str(yhome) + "%"
+    await writeCommand(w, strVar)
+    await readResponse(r)
+    
+    await asyncio.sleep(5)
+    strVar = "$B602" + str(zhome) + "%"
+    await writeCommand(w, strVar)
+    await readResponse(r)
+
+    await asyncio.sleep(5) 
+
+    await writeCommand(w, "$B3%")
+    await readResponse(r)
 
 async def update_status(data):
     hex_bits = int(data, base=16)
@@ -135,7 +305,21 @@ async def organize_poll_data(d):
         }
     }
     pcb_poll_data["PCBStatus"] = await update_status(dataParsed[0]) 
+    print(pcb_poll_data)
     return pcb_poll_data
+
+async def temperature(w, r) -> float: 
+    await writeCommand(w, "$C5%")
+    rcv = await readResponse(r)
+    
+    temp = rcv[3:-1] #Lop off the first three characters
+    temperature = {
+            "PlasmaHead": {
+                "temp": float(temp),
+            }
+    }   
+    print(temperature)
+    return temperature
 
 async def organize_3_axis_poll_data(d):
     strVar = d[3:-1] #Lop off the first three characters
@@ -167,6 +351,7 @@ async def organize_3_axis_poll_data(d):
     pcb_poll_data["LEDS"] = await update_status(LED_status) 
     print(pcb_poll_data)
     return pcb_poll_data
+
 async def check_xyz(x, y, z) -> str: 
     print(x, y, z) 
     if (x == y) and (x == z):
@@ -210,7 +395,20 @@ async def poll_3_axis(w, r) -> str:
     await writeCommand(w, "$C0%") 
     return await readResponse(r)
     
-async def startup(w, r) -> dict:
+async def startup_3_AXIS(w, r) -> dict:
+    o = await stage_x_values(w, r)
+    p = await stage_y_values(w, r)
+    q = await stage_z_values(w, r)
+
+    startup_data = {
+        "X"    : o,
+        "Y"    : p,
+        "Z"    : q
+        }
+    print(startup_data)
+    return startup_data
+
+async def startup_CTL(w, r) -> dict:
     a = await howManyMFCs(w, r)
     b = await BatchIDLogging(w, r)
     c = await RecipeMBStartPos(w, r)
@@ -225,6 +423,7 @@ async def startup(w, r) -> dict:
     l = await MFC1Range(w, r)
     m = await RFMaxPower(w, r)
     n = await TunerAutoMode(w, r)
+
     startupData = { 
             "howManyMFCs"       : a,
             "BatchIDLogging"    : b,
@@ -240,16 +439,127 @@ async def startup(w, r) -> dict:
             "MFC1Range"         : l,
             "RFMaxPower"        : m,
             "TunerAutoMode"     : n
-    }
+        }
+    print(startupData)
     return startupData
-     
+async def stage_z_values(w, r) -> int:
+    await writeCommand(w, "$DA307%") 
+    rcv = await readResponse(r)
+    dataParsed = rcv[7:-1] 
+    z_max_speed = float(dataParsed)
+
+    await writeCommand(w, "$DA532%") 
+    rcv = await readResponse(r)
+    dataParsed = rcv[7:-1] 
+    home_pos = float(dataParsed)
+
+    await writeCommand(w, "$DA530%") 
+    rcv = await readResponse(r)
+    dataParsed = rcv[7:-1] 
+    plasma_head_pos = float(dataParsed)
+
+    await writeCommand(w, "$DA542%") 
+    rcv = await readResponse(r)
+    dataParsed = rcv[7:-1] 
+    safety_gap = float(dataParsed)
+
+    await writeCommand(w, "$DA543%") 
+    rcv = await readResponse(r)
+    dataParsed = rcv[7:-1] 
+    pins_buried = float(dataParsed)
+    
+    await writeCommand(w, "$DA544%") 
+    rcv = await readResponse(r)
+    dataParsed = rcv[7:-1] 
+    pins_exposed = float(dataParsed)
+
+    z_values = {
+        "max_speed": z_max_speed,
+        "home_position": home_pos, 
+        "plasma_head_position": plasma_head_pos, 
+        "plasma_safety_gap": safety_gap, 
+        "pins_buried_position": pins_buried, 
+        "pins_exposed_position": pins_exposed 
+    }
+    return z_values 
+ 
+async def stage_y_values(w, r) -> int:
+    await writeCommand(w, "$DA207%") 
+    rcv = await readResponse(r)
+    dataParsed = rcv[7:-1] 
+    y_max_speed = float(dataParsed)
+
+    await writeCommand(w, "$DA522%") 
+    rcv = await readResponse(r)
+    dataParsed = rcv[7:-1] 
+    home_pos = float(dataParsed)
+
+    await writeCommand(w, "$DA521%") 
+    rcv = await readResponse(r)
+    dataParsed = rcv[7:-1] 
+    plasma_head_pos = float(dataParsed)
+
+    await writeCommand(w, "$DA541%") 
+    rcv = await readResponse(r)
+    dataParsed = rcv[7:-1] 
+    slit_width = float(dataParsed)
+
+    await writeCommand(w, "$DA521%") 
+    rcv = await readResponse(r)
+    dataParsed = rcv[7:-1] 
+    laser_pos = float(dataParsed)
+    
+    y_values = {
+        "max_speed": y_max_speed,
+        "home_position": home_pos, 
+        "plasma_head_position": plasma_head_pos, 
+        "plasma_slit_width": slit_width, 
+        "laser_position": laser_pos 
+    }
+    return y_values 
+    
+async def stage_x_values(w, r) -> int:
+    await writeCommand(w, "$DA107%") 
+    rcv = await readResponse(r)
+    dataParsed = rcv[7:-1] 
+    x_max_speed = float(dataParsed)
+
+    await writeCommand(w, "$DA512%") 
+    rcv = await readResponse(r)
+    dataParsed = rcv[7:-1] 
+    home_pos = float(dataParsed)
+
+    await writeCommand(w, "$DA510%") 
+    rcv = await readResponse(r)
+    dataParsed = rcv[7:-1] 
+    plasma_head_pos = float(dataParsed)
+
+    await writeCommand(w, "$DA540%") 
+    rcv = await readResponse(r)
+    dataParsed = rcv[7:-1] 
+    slit_len = float(dataParsed)
+
+    await writeCommand(w, "$DA511%") 
+    rcv = await readResponse(r)
+    dataParsed = rcv[7:-1] 
+    laser_pos = float(dataParsed)
+    
+    x_values = {
+        "max_speed": x_max_speed,
+        "home_position": home_pos, 
+        "plasma_head_pos": plasma_head_pos, 
+        "plasma_slit_length": slit_len, 
+        "laser_position": laser_pos 
+    }
+    return x_values 
+
 async def howManyMFCs(w, r) -> int:
     await writeCommand(w, "$2A002%") 
     rcv = await readResponse(r)
     dataParsed = rcv[7:-1] 
-async def check_xyz(x, y, z) -> str: 
-    return howManyMFCs
-       
+    num_mfcs = {"Settings": {"numMFCS": int(dataParsed) }}
+    return num_mfcs
+
 async def BatchIDLogging(w, r) -> bool:
     await writeCommand(w, "$2A011%") 
     rcv = await readResponse(r)
@@ -337,10 +647,19 @@ async def TunerAutoMode(w, r) -> bool:
     return tunerMode
 
 async def main():
-    # context manager for the server 
+    #serve() starts a websocket server. (3 positional arguments:)
+        #1st - handler is the coroutine that manages the connection, 
+        #when a client connects, websockets calls handler with the connection in argument.
+        #When handler terminates, websockets closes the connection.
+        #2nd - defines the network interface where the server can be reached, 
+        #so that other devies on the same network can connect.
+        #3rd - port to which the server listens. 
     async with websockets.serve(serial_handler, "localhost", 5000):
+    # context manager for the server - ensures the server shuts down properly when termianting the program
         await asyncio.Future()  # run forever
 
-# asyncio.run() function begins our event loop by calling a coroutine function (namely main()) 
+# asyncio.run() function begins as long as we arent being imported. 
+# The event loop main() begins as a coroutine function 
 if __name__ == "__main__":
     asyncio.run(main()) 
+    #creates an asyncio event loop
