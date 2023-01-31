@@ -1,0 +1,1497 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+  <!-- Custom Styles-->
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="switch.css">
+  <title>Ontos3</title>
+</head>
+<body>
+
+<header>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col p-3 bg-light text-black text-left">
+        <h1>ONTOS3</h1>
+        <p>Champions in the realm of atmospheric plasma</p>
+      </div>
+      <div class="col p-3 bg-light text-end">
+        <div class="row p-1">
+          <div class="col">
+            <button class="btn btn-toggle btn-sm btn-dark" id="fullscreenToggle" type="button" data-bs-toggle="button" aria-pressed="false" autocomplete="off" onclick="toggleFullscreen()">
+            <div class="handle"></div>
+            </button>
+            <label for="fullscreenToggle" class="form-label text-white">Fullscreen</label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <button type="button" class="btn btn-warning border border-dark shadow-sm" data-bs-toggle="offcanvas" data-bs-target="#offcanvas-pollrate">Tool Connection</button>
+          </div>
+        </div>
+          <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvas-pollrate">
+            <div class="offcanvas-header">
+              <h5 class="offcanvas-title" id="offcanvas-pollrateLabel">Tool Connections</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body text-start text-bg-secondary">
+              <div class="btn-group" role="group">
+                  <button class="btn btn-warning" type="button" onClick="getPorts()">Get Ports</button>
+
+                  <div class="btn-group" role="group"> 
+                    <button class="btn btn-outline-warning dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                      Port List
+                    </button>
+                    <ul class="dropdown-menu"></ul>
+                  </div>
+              </div>
+
+              <div class="d-grid gap-2">
+                <div class="btn-group-vertical mt-2" role="group">
+                  <input type="radio" class="btn-check" onClick="pollRate(1000)" name="vbtn-radio" id="vbtn-radio1" autocomplete="off">
+                  <label class="btn btn-xl btn-outline-warning" for="vbtn-radio1">Poll Rate - 1000ms</label>
+                  <input type="radio" class="btn-check" onClick="pollRate(500)" name="vbtn-radio" id="vbtn-radio2" autocomplete="off">
+                  <label class="btn btn-xl btn-outline-warning" for="vbtn-radio2">Poll Rate - 500ms</label>
+                  <input type="radio" class="btn-check" onClick="pollRate(100)" name="vbtn-radio" id="vbtn-radio3" autocomplete="off">
+                  <label class="btn btn-xl btn-outline-warning" for="vbtn-radio3">Poll Rate - 100ms</label>
+                  <input type="radio" class="btn-check" onClick="pollRate(50)" name="vbtn-radio" id="vbtn-radio4" autocomplete="off">
+                  <label class="btn btn-xl btn-outline-warning" for="vbtn-radio4">Poll Rate - 50ms</label>
+                  <input type="radio" class="btn-check" onClick="stopPoll()" name="vbtn-radio" id="vbtn-radio5" autocomplete="off">
+                  <label class="btn btn-xl btn-danger" for="vbtn-radio5">STOP POLL</label>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+      </div>
+    </div>
+  </div>
+</header>
+<!-- Modals --> 
+
+<!-- MFC Modal -->
+<div class="modal" id="MFCModal" tabindex="-1" aria-labelledby="MFC Modal" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="MFC Modal Title">MFC Setpoints</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <div class="input-group" role="group">
+            <span class="input-group-text">MFC1:</span>
+            <input type="number" class="form-control text-center" data-id="recipeMFC1" placeholder="00.00">
+            <span class="input-group-text">SLPM</span>
+          </div>
+        </div>
+        <div class="mb-3">
+          <div class="input-group" role="group">
+            <span class="input-group-text">MFC2:</span>
+            <input type="number" class="form-control text-center" data-id="recipeMFC2" placeholder="00.00">
+            <span class="input-group-text">SLPM</span>
+          </div>
+        </div>
+        <div class="mb-3">
+          <div class="input-group" role="group">
+            <span class="input-group-text">MFC3:</span>
+            <input type="number" class="form-control text-center" data-id="recipeMFC3" placeholder=".000">
+            <span class="input-group-text">SLPM</span>
+          </div>
+        </div>
+        <div class="mb-3">
+          <div class="input-group" role="group">
+            <span class="input-group-text">MFC4:</span>
+            <input type="number" class="form-control text-center" data-id="recipeMFC4" placeholder=".000">
+            <span class="input-group-text">SLPM</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-primary" type="button" data-bs-dismiss="modal">SET</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- MB Modal -->
+<div class="modal input-modal" id="MBModal" tabindex="-1" aria-labelledby="MB Modal" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="MB Modal Title">Matchbox Tuner Setpoint</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="input-group" role="group">
+          <span class="input-group-text">TUNER</span>
+          <input type="text" class="form-control text-center">
+          <span class="input-group-text">%</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="MBSet()">SET</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- RF Modal -->
+<div class="modal input-modal" id="RFModal" tabindex="-1" aria-labelledby="RF Modal"  aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="RF Modal Title">RF Power Setpoint</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="input-group" role="group">
+          <span class="input-group-text">RF</span>
+          <input type="text" class="form-control text-center"> 
+          <span class="input-group-text">watts</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="RFSet()">SET</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--Publish Abort Code (toast) -->
+<div class="toast-container top-0 start-0 text-bg-danger border-0" role="alert">
+  <div id="abortToast" class="toast" role="alert">
+    <div class="toast-header">
+      <img src="..." class="rounded me-2" alt="...">
+      <strong class="me-auto">Abort Code</strong>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body" id="abortToastBody"></div>
+    </div>
+</div>
+
+<!--Main Content-->
+<div class="container-fluid text-center bg-light">
+  
+  <div class="row row-cols-3"><!--cards 1-3 row-->
+    
+    <!--col for card 1-->
+    <div class="col-xxl-7">
+     <!--card 1--> 
+      <div class="card bg-primary">
+        <div class="card-header">
+          Plasma Control Dashboard
+        </div>
+        <!-- Dashboard Card Body --> 
+        <div class="card-body"> 
+          <div class="row">
+
+            <!--MFC Card -->
+            <div class="col p-1 text-center">
+              <div class="card text-bg-secondary"> 
+                <div class="card-header">Mass Flow Controllers</div>
+                <div class="card-body p-1" data-bs-toggle="modal" data-bs-target="#MFCModal">
+                  <div id="MFCChart"></div>
+                </div>
+                <div class="card-footer">
+                  <div class="d-grid">
+                    <button class="btn btn-primary border border-dark shadow " type="button" id="plasmaBtn">PLASMA ON</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+                        
+            <div class="col">
+              <div class="row">
+                <!-- RF Power Card-->
+                <div class="col p-1 "> 
+                  <div class="card text-bg-secondary">    
+                    <div class="card-header">RF Power Forward</div>
+                    <div class="card-body p-1" data-bs-toggle="modal" data-bs-target="#RFModal">
+                      <div id="RFPower"></div>
+                    </div>
+                    <div class="card-footer p-4"></div>
+                  </div>
+                </div>
+                <!-- Match Box Card-->
+                <div class="col p-1">
+                  <div class="card text-bg-secondary"> 
+                    <div class="card-header">Matchbox Tuner</div>
+                    <div class="card-body p-1" data-bs-toggle="modal" data-bs-target="#MBModal">
+                      <div id="Tuner"></div>
+                    </div>
+                    <div class="card-footer">
+                      <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-light" type="button" onclick="tuneDown()">Tune Down</button>
+                        <button class="btn btn-sm btn-outline-light" type="button" onclick="tuneUp()">Tune Up</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row p-0">
+                <!-- RF Reflected Card -->
+                <div class="col p-1">
+                  <div class="card text-bg-secondary">  
+                    <div class="card-header">RF Power Reflected</div>
+                    <div class="card-body p-1">
+                      <div id="RFRef"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Plasma Temp Card -->
+                <div class="col p-1">
+                  <div class="card text-bg-secondary">   
+                    <div class="card-header">Temperature</div>
+                    <div class="card-body p-1">
+                      <div id="Temp"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tuner  Card -->
+              <div class="row p-0">
+                <div class="col p-1">
+                  <div class="card text-bg-secondary invisible">  
+                    <div class="card-header">Realtime Tuner</div>
+                    <div class="card-body p-1">
+                      <div id="RealTimeTunerChart"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- PCB Status Card-->
+            <div class="col-xxl-2 p-1"> 
+              <div class="card text-bg-light mb-3">  
+                <div class="card-header">Status LEDs</div>
+                <div class="card-body">
+                  <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
+                    <button type="button" class="btn btn-light" id="led1">Gas_1</button>
+                    <button type="button" class="btn btn-light" id="led2">Gas_2</button>
+                    <button type="button" class="btn btn-light" id="led3">Gas_3</button>
+                    <button type="button" class="btn btn-light" id="led4">Gas_4</button>
+                    <button type="button" class="btn btn-light" id="led5">V5</button>
+                    <button type="button" class="btn btn-light" id="led6">V6</button>
+                    <button type="button" class="btn btn-light" id="led7">V7</button>
+                    <button type="button" class="btn btn-light" id="led8">RF_EN</button>
+                    <button type="button" class="btn btn-light" id="led9">PL_ON</button>
+                    <button type="button" class="btn btn-light" id="led10">TUNING</button>
+                    <button type="button" class="btn btn-light" id="led11">AUTO</button>
+                    <button type="button" class="btn btn-light" id="led12">EXEC</button>
+                    <button type="button" class="btn btn-light" id="led13">ESTOP</button>
+                    <button type="button" class="btn btn-light" id="led14">DO_CMD</button>
+                    <button type="button" class="btn btn-light" id="led15">HE_SIG</button>
+                    <button type="button" class="btn btn-light" id="led16">ABORT</button>
+                  </div>
+                </div>
+                <div class="card-footer"></div>
+              </div>
+            </div>
+
+          </div><!--end of dashboard card row-->
+        </div><!--card body end-->
+      </div><!--card 1 end-->
+    </div><!--card 1 col end-->
+
+    <!--col for card 2-->
+    <div class="col-xxl-2 p-0">
+      <!--card 2-->
+      <div class="card text-bg-danger">
+        <div class="card-header">3 Axis Controls</div>
+        <div class="card-body">
+
+          <div class="row row-cols-2">
+            
+            <div class="col-xxl-7">
+              <div class="card text-bg-secondary">
+                  <div class="card-header">Stage Position</div>
+                  <div class="card-body">
+                    <div class="input-group mb-2">
+                      <span class="input-group-text">X:</span>
+                      <input type="text" class="form-control" id="XPos" readonly> 
+                    </div>
+                    <div class="input-group mb-2">
+                      <span class="input-group-text">Y:</span>
+                      <input type="text" class="form-control" id="YPos" readonly>
+                    </div>
+                    <div class="input-group mb-2">
+                      <span class="input-group-text">Z:</span>
+                      <input type="text" class="form-control" id="ZPos" readonly>
+                    </div>
+                  </div>
+                </div>
+
+            <!-- 3-axis Stage Card-->
+              <div class="card text-bg-secondary">
+                <div class="card-header">Stage Control</div>
+                <div class="card-body">
+                  <div class="d-grid gap-2">
+                    <button class="btn btn-primary" type="button" onclick="resetIt()">RESET 3-AXIS CTL</button>
+                    <button class="btn btn-primary" type="button" onclick="stopMotors()">STOP STAGE</button>
+                    <button class="btn btn-primary" type="button" onclick="initStage()">INITIALIZE</button>
+                    <button class="btn btn-primary" type="button" onclick="loadStage()">LOAD POSITION</button>
+                    <button class="btn btn-primary" type="button">START SCAN</button>
+                    <button class="btn btn-primary" type="button" onclick="twoSpotStageOn()">TWO-SPOT ON</button>
+                    <button class="btn btn-primary" type="button" onclick="twoSpotStageOff()">TWO-SPOT OFF</button>
+                  </div>
+                </div>
+                <div id="stageStatus" class="card-footer">
+                    Stage Status  
+                </div>
+              </div>
+              
+            </div> <!--col end for 3 axis controls-->
+
+            <!-- 3-axis Status Card-->
+            <div class="col-xxl-5"> 
+              <div class="card text-bg-secondary">  
+                <div class="card-header">LEDs</div>
+                <div class="card-body">
+                  <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
+                    <button type="button" class="btn btn-secondary text-light" id="stageled1">X_Lim</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled2">X_Run</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled3">Y_Lim</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled4">Y_Run</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled5">Z_Lim</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled6">Z_Run</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled7">STOP</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled8">EXT1</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled9">EXT2</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled10">EXT3</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled11">V1 0N</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled12">V2 0N</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled13">V3 0N</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled14">V4 0N</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled15">CMD</button>
+                    <button type="button" class="btn btn-secondary text-light" id="stageled16"></button>
+                  </div>
+                </div>
+                <div class="card-footer"></div>
+              </div>
+            </div>
+
+          </div><!-- 3 axis card row end-->
+        </div><!--body end-->
+
+      </div><!--3 axis Card Row End-->
+    </div><!--end of card 2 column-->
+
+    <!--col for card 3-->
+    <div class="col-xxl-3">
+
+          <!-- Recipe card -->
+          <div class="card text-bg-light" id="offcanvas-recipe">
+            <div class="card-header">Recipe Configuration</div>
+            <div class="card-body">
+              <form id="recipeForm" >
+                <div class="btn-group mb-4 p-3 border-bottom" role="group">
+                  <input class="form-control" type="file" id="recipeLoadFile" accept=".json">
+                  <button class="btn btn-primary" type="button" onclick="loadRecipe()">Load</button>
+                </div>
+                <div class="input-group mb-2">
+                  <span class="input-group-text">Recipe Name: </span>
+                  <input type="text" id="recipeName" class="form-control"> 
+                </div>
+                <label>Power & Tuning</label>
+                <div class="input-group mb-2">
+                  <span class="input-group-text" >RF Power: </span>
+                  <input type="number" class="form-control" id="recipeRF">
+                  <span class="input-group-text" >watts</span>
+                </div>
+                <div class="input-group mb-4">
+                  <span class="input-group-text">MB Tuner: </span>
+                  <input type="text" class="form-control" id="recipeMB">
+                  <span class="input-group-text" >%</span>
+                  <span class="input-group-text">Auto Tune: </span>
+                  <div class="input-group-text">
+                    <input class="form-check-input mt-0" type="checkbox" id="recipeTunerMode">
+                  </div>
+                </div>
+                <div class="card text-bg-success mb-2">
+                  <div class="card-header">Gas Flow</div>
+                  <div class="card-body">
+                    <div class="input-group mb-1">
+                      <span class="input-group-text" >MFC 1 Flow: </span>
+                      <input type="number" min="0" max="20.00" step="0.1" class="form-control" id="recipeMFC1"> 
+                      <span class="input-group-text" >SLPM</span>
+                    </div>
+                    <div class="input-group mb-1">
+                      <span class="input-group-text" >MFC 2 Flow: </span>
+                      <input type="number" min="0" max="20.00" step="0.1" class="form-control" id="recipeMFC2">
+                      <span class="input-group-text" >SLPM</span>
+                    </div>
+                    <div class="input-group mb-1">
+                      <span class="input-group-text" >MFC 3 Flow: </span>
+                      <input type="number" min="0" max="0.3" step="0.001" class="form-control" id="recipeMFC3">
+                      <span class="input-group-text" >SLPM</span>
+                    </div>
+                    <div class="input-group mb-1">
+                      <span class="input-group-text" >MFC 4 Flow: </span>
+                      <input type="number" min="0" max="0.3" step="0.001" class="form-control" id="recipeMFC4">
+                      <span class="input-group-text" >SLPM</span>
+                    </div>
+                  </div>
+                </div>
+                <label>Stage Inputs</label>
+                <div class="input-group mb-1">
+                  <span class="input-group-text" >Gap: </span>
+                  <input type="number" min="0" max="10.00" step="0.1" class="form-control" id="gap"> 
+                  <span class="input-group-text" >mm</span>
+                </div>
+                <div class="input-group mb-1">
+                  <span class="input-group-text" >Thickness: </span>
+                  <input type="number" min="0" max="10.00" step="0.1" class="form-control" id="thickness"> 
+                  <span class="input-group-text" >mm</span>
+                </div>
+                <div class="input-group mb-1">
+                  <span class="input-group-text" >Speed: </span>
+                  <input type="number" min="0" max="15.00" step="0.1" class="form-control" id="speed"> 
+                  <span class="input-group-text" >mm/sec</span>
+                </div>
+                <div class="input-group mb-1">
+                  <span class="input-group-text" >Cycles: </span>
+                  <input type="number" min="0" max="30.00" step="0.1" class="form-control" id="cycles"> 
+                  <span class="input-group-text" >#</span>
+                </div>
+                <div class="input-group mb-1">
+                  <span class="input-group-text" >Overlap: </span>
+                  <input type="number" min="0" max="20.00" step="0.1" class="form-control" id="overlap"> 
+                  <span class="input-group-text" >mm</span>
+                </div>
+
+            </div>
+            <div class="card-footer">
+              <div class="d-grid gap-2">
+                <button class="btn btn-primary border border-dark shadow" onclick="sendAllRecipeValuestoCTL()">SEND RECIPE TO CONTROLLER</button>
+                <button class="btn btn-success border border-dark shadow" onclick="saveRecipeFile()">SAVE RECIPE</button>
+              </div>
+            </div>
+          </div>
+     
+    </div><!--end of card 3 colum-->
+
+  </div><!--card 1-3 row end-->
+  
+</div><!--Content Container-Fluid End-->
+
+  
+  <!-- Apex Charts Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script> 
+
+<script>
+const date = new Date()
+const websocket = new WebSocket("ws://localhost:5000/")
+const reader = new FileReader()
+const elem = document.documentElement
+let loop
+const ASTAT = {
+  ASM_IDLE: 0x10,
+  ASM_ABS_START: 0x11,
+  ASM_ABS_WAIT: 0x12,
+  ASM_REL_START: 0x13,
+  ASM_REL_WAIT: 0x14,
+  ASM_JOY_ON: 0x15
+}
+
+var CTL3AXIS = {
+  Status: { 
+    XYZSameState: 0,
+  },
+  LEDS: {
+  },
+  X: {
+    state: 0, 
+    err: 0, 
+    position: 0,
+    max_speed: 0,
+
+    home_position: 0,
+    plasma_head__position: 0,
+    plasma_slit_length: 0,
+    laser_position: 0,
+  },
+  Y: {
+    state: 0, 
+    err: 0, 
+    position: 0,
+    max_speed: 0,
+    
+    home_position: 0,
+    plasma_head_position: 0,
+    plasma_slit_width: 0,
+    laser_position: 0,
+  },
+  Z: {
+    state: 0, 
+    err: 0, 
+    position: 0,
+    max_speed: 0,
+
+    home_position: 0,
+    plasma_head_position: 0,
+    plasma_safety_gap: 0,
+    pins_buried_position: 0,
+    pins_exposed_position: 0,
+  }
+}
+var CTL = {
+  LightTower: { 
+    Error: false,
+    Ready: false,
+    Active: false,
+    Idle: false,
+  },
+  AbortCodes: {
+    NO_N2: false,
+    NO_HEARTBEAT: false,
+    NO_GAS_1: false,
+    NO_GAS_2: false,
+    NO_GAS_3: false,
+    NO_GAS_4: false,
+    BAD_HELIUM: false,
+    ESTOP: false,
+    NO_RS485: false,
+    PWR_FWD_LOW: false,
+    OVER_TEMP: false,
+  },
+  PCBStatus: {
+  },
+  Recipe: {
+    recipeName: 0,
+    recipeRF: 0,
+    recipeStartPos: 0,
+    recipeFlow1: 0,
+    recipeFlow2: 0,
+    recipeFlow3: 0,
+    recipeFlow4: 0,
+    autoMode: 0,
+    executeRecipe: 0,
+    loadRecipe: 0,
+  },
+  Settings: { 
+    numMFCs: 0,
+    BatchIDLogging: 0,
+  },
+  MBTuner: {
+    actualPosition: 0,
+  },
+  RFSupply: {
+    powerForward: 0,
+    powerReflected: 0,
+    maxPowerForward: 0,
+  },
+  PlasmaHead: {
+    temp: 0,
+    plasmaOn: 0,
+  },
+  MFC4: {
+    actualFlow: 0,
+    range: 0,
+  },
+  MFC3: {
+    actualFlow: 0,
+    range: 0,
+  },
+  MFC2: {
+    actualFlow: 0,
+    range: 0,
+  },
+  MFC1: {
+    actualFlow: 0,
+    range: 0,
+  }
+};
+const MFCOptions = {
+  series: [0, 0, 0, 0],
+  chart: {
+    height: 500,
+    type: "radialBar",
+  },
+  plotOptions: {
+    radialBar: {
+      offsetY: 0,
+      startAngle: 0,
+      endAngle: 270,
+      hollow: {
+        margin: 5,
+        size: "30%",
+        background: "transparent",
+        image: undefined,
+      },
+      dataLabels: {
+        name: {
+          show: false,
+        },
+        value: {
+          show: false,
+        }
+      }
+    }
+  },
+  labels: ["Helium", "H/Hyd", "Nitrogen", "Oxygen"],
+  legend: {
+    show: true,
+    floating: true,
+    fontSize: "16px",
+    position: "left",
+    offsetX: 70,
+    offsetY: 20,
+    labels: {
+      useSeriesColors: true,
+    },
+    markers: {
+      size: 0
+    },
+    formatter: function(seriesName, opts) {
+      return seriesName + ": " + opts.w.globals.series[opts.seriesIndex]
+    },
+    itemMargin: {
+      vertical: 3
+    }
+  },
+  responsive: [{
+    breakpoint: 480,
+    options: {
+      legend: {
+        show: false,
+      }
+    }
+  }]
+};
+
+const RFOptions = {
+  chart: {
+    height: 200,
+    type: "radialBar",
+  },
+
+  series: [CTL.RFSupply.powerForward],
+  colors: ["#20E647"],
+  plotOptions: {
+    radialBar: {
+      hollow: {
+        margin: 0,
+        size: "70%",
+        background: "#293450"
+      },
+      track: {
+        dropShadow: {
+          enabled: true,
+          top: 2,
+          left: 0,
+          blur: 4,
+          opacity: 0.15
+        }
+      },
+      dataLabels: {
+        name: {
+          offsetY: -10,
+          color: "#fff",
+          fontSize: "13px"
+        },
+        value: {
+          color: "#fff",
+          fontSize: "30px",
+          show: true
+        }
+      }
+    }
+  },
+  fill: {
+    type: "gradient",
+    gradient: {
+      shade: "dark",
+      type: "vertical",
+      gradientToColors: ["#87D4F9"],
+      stops: [0, 100]
+    }
+  },
+  stroke: {
+    lineCap: "round"
+  },
+  labels:["RF Power"]
+};
+const RFRefOptions = {
+  chart: {
+    height: 200,
+    type: "radialBar",
+  },
+  series: [CTL.RFSupply.powerReflected],
+  colors: ["#20E647"],
+  plotOptions: {
+    radialBar: {
+      hollow: {
+        margin: 0,
+        size: "70%",
+        background: "#293450"
+      },
+      track: {
+        dropShadow: {
+          enabled: true,
+          top: 2,
+          left: 0,
+          blur: 4,
+          opacity: 0.15
+        }
+      },
+      dataLabels: {
+        name: {
+          offsetY: -10,
+          color: "#fff",
+          fontSize: "13px"
+        },
+        value: {
+          color: "#fff",
+          fontSize: "30px",
+          show: true
+        }
+      }
+    }
+  },
+  fill: {
+    type: "gradient",
+    gradient: {
+      shade: "dark",
+      type: "vertical",
+      gradientToColors: ["#87D4F9"],
+      stops: [0, 100]
+    }
+  },
+  stroke: {
+    lineCap: "round"
+  },
+  labels: ["Reflecter Power"]
+};
+
+const TempOptions = {
+  chart: {
+    height: 200,
+    type: "radialBar",
+  },
+  series: [CTL.PlasmaHead.temp],
+  colors: ["#20E647"],
+  plotOptions: {
+    radialBar: {
+      hollow: {
+        margin: 0,
+        size: "70%",
+        background: "#293450"
+      },
+      track: {
+        dropShadow: {
+          enabled: true,
+          top: 2,
+          left: 0,
+          blur: 4,
+          opacity: 0.15
+        }
+      },
+      dataLabels: {
+        name: {
+          offsetY: -10,
+          color: "#fff",
+          fontSize: "13px"
+        },
+        value: {
+          color: "#fff",
+          fontSize: "30px",
+          show: true
+        }
+      }
+    }
+  },
+  fill: {
+    type: "gradient",
+    gradient: {
+      shade: "dark",
+      type: "vertical",
+      gradientToColors: ["#f73300"],
+      stops: [0, 100]
+    }
+  },
+  stroke: {
+    lineCap: "round"
+  },
+  labels: ["Temperature"]
+};
+
+const TunerOptions = {
+  chart: {
+    height: 200,
+    type: "radialBar",
+  },
+  series: [CTL.MBTuner.actualPosition],
+  colors: ["#20E647"],
+  plotOptions: {
+    radialBar: {
+      hollow: {
+        margin: 0,
+        size: "70%",
+        background: "#293450"
+      },
+      track: {
+        dropShadow: {
+          enabled: true,
+          top: 2,
+          left: 0,
+          blur: 4,
+          opacity: 0.15
+        }
+      },
+      dataLabels: {
+        name: {
+          offsetY: -10,
+          color: "#fff",
+          fontSize: "13px"
+        },
+        value: {
+          color: "#fff",
+          fontSize: "30px",
+          show: true
+        }
+      }
+    }
+  },
+  fill: {
+    type: "gradient",
+    gradient: {
+      shade: "dark",
+      type: "vertical",
+      gradientToColors: ["#87D4F9"],
+      stops: [0, 100]
+    }
+  },
+  stroke: {
+    lineCap: "round"
+  },
+  labels: ["Tuner"]
+};
+var RTT = {
+      series: [{
+        data: [{ 
+          x: new Date('2022-11-24').getTime(),
+          y: 80
+        }, {
+          x: new Date('2022-11-27').getTime(),
+          y: 85 
+        }, {
+          x: new Date('2022-12-04').getTime(),
+          y: 70 
+        }, {
+          x: new Date('2022-12-14').getTime(),
+          y: 50 
+        }, {
+          x: new Date('2022-12-16').getTime(),
+          y: 36
+        }]
+      }],
+        chart: {
+        id: 'tunerrealtime',
+        height: 250,
+        type: 'line',
+        animations: {
+          enabled: true,
+          easing: 'linear',
+          dynamicAnimation: {
+            speed: 1000
+          }
+        },
+        toolbar: {
+          show: false
+        },
+        zoom: {
+          enabled: false
+        }
+      },
+      dataLabels: {
+        enabled: false
+      },
+      stroke: {
+        curve: 'smooth'
+      },
+      title: {
+        text: 'Dynamic Tuner Chart',
+        align: 'left'
+      },
+      markers: {
+        size: 0
+      },
+      xaxis: {
+        type: 'datetime'
+      },
+      yaxis: {
+        max: 100
+      },
+      legend: {
+        show: false
+      },
+};
+
+const RTTunerChart = new ApexCharts(document.querySelector("#RealTimeTunerChart"), RTT)
+const MFCChart = new ApexCharts(document.querySelector("#MFCChart"), MFCOptions)
+const RFPowerChart = new ApexCharts(document.querySelector("#RFPower"), RFOptions)
+const RFRefChart = new ApexCharts(document.querySelector("#RFRef"), RFRefOptions)
+const TempChart = new ApexCharts(document.querySelector("#Temp"), TempOptions)
+const TunerChart = new ApexCharts(document.querySelector("#Tuner"), TunerOptions)
+
+MFCChart.render();
+RFPowerChart.render();
+RFRefChart.render();
+TempChart.render();
+TunerChart.render();
+RTTunerChart.render();
+
+var twospot = false
+const plasmaBtn = document.querySelector("#plasmaBtn")
+const loadFileBtn = document.querySelector("#recipeLoadFile")
+
+const led1 = document.querySelector("#led1")
+const led2 = document.querySelector("#led2")
+const led3 = document.querySelector("#led3")
+const led4 = document.querySelector("#led4")
+const led5 = document.querySelector("#led5")
+const led6 = document.querySelector("#led6")
+const led7 = document.querySelector("#led7")
+const led8 = document.querySelector("#led8")
+const led9 = document.querySelector("#led9")
+const led10 = document.querySelector("#led10")
+const led11 = document.querySelector("#led11")
+const led12 = document.querySelector("#led12")
+const led13 = document.querySelector("#led13")
+const led14 = document.querySelector("#led14")
+const led15 = document.querySelector("#led15")
+const led16 = document.querySelector("#led16")
+
+const sled1 = document.querySelector("#stageled1")
+const sled2 = document.querySelector("#stageled2")
+const sled3 = document.querySelector("#stageled3")
+const sled4 = document.querySelector("#stageled4")
+const sled5 = document.querySelector("#stageled5")
+const sled6 = document.querySelector("#stageled6")
+const sled7 = document.querySelector("#stageled7")
+const sled8 = document.querySelector("#stageled8")
+const sled9 = document.querySelector("#stageled9")
+const sled10 = document.querySelector("#stageled10")
+const sled11 = document.querySelector("#stageled11")
+const sled12 = document.querySelector("#stageled12")
+const sled13 = document.querySelector("#stageled13")
+const sled14 = document.querySelector("#stageled14")
+const sled15 = document.querySelector("#stageled15")
+const sled16 = document.querySelector("#stageled16")
+
+
+var UIstageStatus = document.querySelector("#stageStatus")
+var UIXPosition = document.querySelector("#XPos")
+var UIYPosition = document.querySelector("#YPos")
+var UIZPosition = document.querySelector("#ZPos")
+
+
+var UIrecipeName = document.querySelector("#recipeName")
+var UIrecipeRF = document.querySelector("#recipeRF")
+var UIrecipeMB = document.querySelector("#recipeMB")
+var UIrecipeTunerMode = document.querySelector("#recipeTunerMode")
+var UIrecipeMFC1 = document.querySelector("#recipeMFC1")
+var UIrecipeMFC2 = document.querySelector("#recipeMFC2")
+var UIrecipeMFC3 = document.querySelector("#recipeMFC3")
+var UIrecipeMFC4 = document.querySelector("#recipeMFC4")
+
+const abortToast = document.getElementById("#abortToast")
+const abortToastBody = document.querySelector("#abortToastBody")
+
+
+window.addEventListener("load", (e) => {
+  console.log("hello")
+})
+
+plasmaBtn.addEventListener("click", () => { 
+  executeRecipe() 
+})
+
+reader.addEventListener("loadend", (e) => {
+  const text = e.srcElement.result
+  console.log(text)
+})
+
+websocket.onmessage = ({ data }) => {
+  const source = JSON.parse(data)
+  console.log(source)
+  parseCTL(source)
+
+  updateStatus()
+  updateStatusStage()
+  updateStageValues()
+
+  if (CTL.Recipe.loadRecipe === 1) {
+    updateGUIRecipeValues()
+    CTL.Recipe.loadRecipe = 0
+  }
+
+  MFCChart.updateSeries([CTL.MFC4.actualFlow, CTL.MFC3.actualFlow, CTL.MFC2.actualFlow, CTL.MFC1.actualFlow])
+  RFPowerChart.updateSeries([CTL.RFSupply.powerForward])
+  RFRefChart.updateSeries([CTL.RFSupply.powerReflected])
+  TunerChart.updateSeries([CTL.MBTuner.actualPosition])
+  TempChart.updateSeries([CTL.PlasmaHead.temp])
+}
+function updateStageValues() {
+  UIXPosition.value = CTL3AXIS.X.position
+  UIYPosition.value = CTL3AXIS.Y.position
+  UIZPosition.value = CTL3AXIS.Z.position
+}
+function getPorts() { 
+  websocket.send("get_ports")
+}
+function tuneDown() {
+  websocket.send("tune:0")
+}
+function tuneUp() {
+  websocket.send("tune:1")
+}
+function getAbortCode() {
+  websocket.send("get_abort_code")
+  //publishAbortCodes()
+}
+function publishAbortCodes() {
+  for (code in CTL.AbortCode) {
+    if (CTL.AbortCode[code] === True) {
+      abortToastBody.innerHTML = CTL.AbortCode[code]
+    }
+  }
+  abortToast.show()
+}
+function setLightTower() {
+  if (CTL.Recipe.executeRecipe === true) {
+    CTL.LightTower.Active = true
+    websocket.send("light:3")
+  }
+  else {
+    CTL.LightTower.Active = false
+    websocket.send("light:2")
+  }
+
+  for (code in CTL.AbortCode) {
+    if (CTL.AbortCode[code] === true) {
+      CTL.LightTower.error = true
+      websocket.send("light:1")
+    }
+  }
+  if (CTL.LightTower.error === false) {
+    CTL.LightTower.error = false
+    websocket.send("light:2")
+  }
+}
+function resetIt() {
+  console.log("reset")
+  websocket.send("reset")
+}
+function stopMotors() {
+  console.log("stop")
+  websocket.send("stop")
+}
+function initStage() {
+  console.log("init")
+  websocket.send("init")
+}
+function loadStage() {
+  console.log("load")
+  websocket.send("load")
+}
+function twoSpotStageOn() {
+  console.log("twospot on")
+  websocket.send("twospot:1")
+}
+function twoSpotStageOff() {
+  console.log("twospot off")
+  websocket.send("twospot:0")
+}
+function checkXYZ() {
+  if ((CTL3AXIS.Status.XYZSameState === True) && (CTL3AXIS.X.state < ASM_IDLE)) {
+    return true
+  }
+}
+function saveRecipeFile() {
+  saveRecipeInputs()
+  var fileName = CTL.Recipe.recipeName + ".json";
+  var file = new Blob([JSON.stringify(CTL.Recipe)], {type: "application/json"})
+
+  var url = window.URL || window.webkitURL
+  link = url.createObjectURL(file)
+  var a = document.createElement("a")
+  a.download = fileName
+  a.href = link 
+  document.body.appendChild(a)
+  a.style.display = 'none'
+  a.click()
+  document.body.removeChild(a)
+}
+function saveRecipeInputs() {
+   CTL.Recipe.recipeName = UIrecipeName.value 
+   CTL.Recipe.recipeRF = UIrecipeRF.value 
+   CTL.Recipe.recipeStartPos = UIrecipeMB.value
+   CTL.Recipe.autoMode = UIrecipeTunerMode.checked
+   CTL.Recipe.recipeFlow1 = UIrecipeMFC1.value  
+   CTL.Recipe.recipeFlow2 = UIrecipeMFC2.value 
+   CTL.Recipe.recipeFlow3 = UIrecipeMFC3.value 
+   CTL.Recipe.recipeFlow4 = UIrecipeMFC4.value 
+}
+function updateGUIRecipeValues() {
+   UIrecipeName.value = CTL.Recipe.recipeName
+   UIrecipeRF.value = CTL.Recipe.recipeRF 
+   UIrecipeMB.value = CTL.Recipe.recipeStartPos
+   UIrecipeTunerMode.checked = CTL.Recipe.autoMode
+   UIrecipeMFC1.value = CTL.Recipe.recipeFlow1
+   UIrecipeMFC2.value = CTL.Recipe.recipeFlow2
+   UIrecipeMFC3.value = CTL.Recipe.recipeFlow3
+   UIrecipeMFC4.value = CTL.Recipe.recipeFlow4
+}
+function loadRecipe() {
+  fileName = loadFileBtn.files[0].name
+  websocket.send("loadRecipe:" + fileName)
+  CTL.Recipe.loadRecipe = 1
+}
+function parseCTL(s) {
+  Object.keys(CTL).forEach(key => { 
+    CTL[key] = Object.assign(CTL[key], s[key])
+    console.log(CTL[key])
+  })
+  Object.keys(CTL3AXIS).forEach(key => { 
+    CTL3AXIS[key] = Object.assign(CTL3AXIS[key], s[key])
+    console.log(CTL3AXIS[key])
+  })
+}
+function plasmaOn() {
+  websocket.send("plasmaOn")
+}
+function plasmaOff() {
+  websocket.send("plasmaOff")
+}
+function stopPoll() { 
+  clearInterval(loop)
+}
+function pollRate(rate) {
+  if (loop != null) {
+    clearInterval(loop)
+  }
+  loop = setInterval(pollCTLs, rate)
+}
+function pollCTLs() {
+  websocket.send("poll")
+  //websocket.send("temp")
+}
+function updateStatus() {
+  if (CTL.PCBStatus.led_bit_0 === "on") {
+    led9.setAttribute("class", "btn btn-success") 
+  } 
+  else {
+    led9.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_1 === "on") {
+    led10.setAttribute("class", "btn btn-success") 
+  } 
+  else { 
+    led10.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_2 === "on") {
+    led11.setAttribute("class", "btn btn-success") 
+  }
+  else {
+    led11.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_3 === "on") {
+    led12.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    led12.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_4 === "on") {
+    led13.setAttribute("class", "btn btn-success") 
+  }
+  else {
+    led13.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_5 === "on") {
+    led14.setAttribute("class", "btn btn-success") 
+  }
+  else {
+    led14.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_6 === "on") {
+    led15.setAttribute("class", "btn btn-success") 
+  }
+  else {
+    led15.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_7 === "on") {
+    led16.setAttribute("class", "btn btn-success") 
+    //getAbortCode()
+  }
+  else { 
+    led16.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_8 === "on") {
+    led1.setAttribute("class", "btn btn-success") 
+  }
+  else {
+    led1.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_9 === "on") {
+    led2.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    led2.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_10 === "on") {
+    led3.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    led3.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_11 === "on") {
+    led4.setAttribute("class", "btn btn-success") 
+  }
+  else {
+    led4.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_12 === "on") {
+    led5.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    led5.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_13 === "on") {
+    led6.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    led6.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_14 === "on") {
+    led7.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    led7.setAttribute("class", "btn btn-light")
+  }
+  if (CTL.PCBStatus.led_bit_15 === "on") {
+    led8.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    led8.setAttribute("class", "btn btn-light")
+  }
+}
+function RFSet() {
+  let a = UIrecipeRF.value
+  if ((a != "") && (a >= 0) && (a <= CTL.RFSupply.maxPowerForward)) {
+    CTL.Recipe.recipeRF = parseInt(a)
+  }
+  websocket.send("RFSet:" + CTL.Recipe.recipeRF)
+}
+function MBSet() {
+  let a = UIrecipeMB.value
+  if ((a != "") && (a >= 0) && (a <= 99)) {
+    CTL.Recipe.recipeStartPos = parseFloat(a)
+  }
+  websocket.send("MBSet:" + CTL.Recipe.recipeStartPos)
+}
+function updateStatusStage() {
+  if (CTL3AXIS.LEDS.led_bit_0 === "on") {
+    sled1.setAttribute("class", "btn btn-success") 
+  } 
+  else {
+    sled1.setAttribute("class", "btn btn-secondary")
+  }
+  if (CTL3AXIS.LEDS.led_bit_1 === "on") {
+    sled2.setAttribute("class", "btn btn-success") 
+  } 
+  else { 
+    sled2.setAttribute("class", "btn btn-secondary")
+  }
+  if (CTL3AXIS.LEDS.led_bit_2 === "on") {
+    sled3.setAttribute("class", "btn btn-success") 
+  }
+  else {
+    sled3.setAttribute("class", "btn btn-secondary")
+  }
+  if (CTL3AXIS.LEDS.led_bit_3 === "on") {
+    sled4.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    sled4.setAttribute("class", "btn btn-secondary")
+  }
+  if (CTL3AXIS.LEDS.led_bit_4 === "on") {
+    sled5.setAttribute("class", "btn btn-success") 
+  }
+  else {
+    sled5.setAttribute("class", "btn btn-secondary")
+  }
+  if (CTL3AXIS.LEDS.led_bit_5 === "on") {
+    sled6.setAttribute("class", "btn btn-success") 
+  }
+  else {
+    sled6.setAttribute("class", "btn btn-secondary")
+  }
+  if (CTL3AXIS.LEDS.led_bit_6 === "on") {
+    sled7.setAttribute("class", "btn btn-success") 
+  }
+  else {
+    sled7.setAttribute("class", "btn btn-secondary")
+  }
+  if (CTL3AXIS.LEDS.led_bit_7 === "on") {
+    sled8.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    sled8.setAttribute("class", "btn btn-secondary")
+  }
+  if (CTL3AXIS.LEDS.led_bit_8 === "on") {
+    sled9.setAttribute("class", "btn btn-success") 
+  }
+  else {
+    sled9.setAttribute("class", "btn btn-secondary")
+  }
+  if (CTL3AXIS.LEDS.led_bit_9 === "on") {
+    sled10.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    sled10.setAttribute("class", "btn btn-secondary")
+  }
+  if (CTL3AXIS.LEDS.led_bit_10 === "on") {
+    sled11.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    sled11.setAttribute("class", "btn btn-secondary")
+  }
+  if (CTL3AXIS.LEDS.led_bit_11 === "on") {
+    sled12.setAttribute("class", "btn btn-success") 
+  }
+  else {
+    sled12.setAttribute("class", "btn btn-secondary")
+  }
+  if (CTL3AXIS.LEDS.led_bit_12 === "on") {
+    sled13.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    sled13.setAttribute("class", "btn btn-secondary")
+  }
+  if (CTL3AXIS.LEDS.led_bit_13 === "on") {
+    sled14.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    sled14.setAttribute("class", "btn btn-secondary")
+  }
+  if (CTL3AXIS.LEDS.led_bit_14 === "on") {
+    sled15.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    sled15.setAttribute("class", "btn btn-secondary")
+  }
+  if (CTL3AXIS.LEDS.led_bit_15 === "on") {
+    sled16.setAttribute("class", "btn btn-success") 
+  }
+  else { 
+    sled16.setAttribute("class", "btn btn-secondary")
+  }
+}
+
+function TunerModeSet() {
+  if (UIrecipeTunerMode.checked === true) { 
+    CTL.Recipe.autoMode = 1
+  }
+  else {
+    CTL.Recipe.autoMode = 0
+  }
+  websocket.send("tunerModeSet:" + CTL.Recipe.autoMode)
+}
+function setMFCs() {
+  //interface recipe values
+  let a = UIrecipeMFC1.value
+  let b = UIrecipeMFC2.value
+  let c = UIrecipeMFC3.value
+  let d = UIrecipeMFC4.value
+
+  if ((a != "") && (a >= 0) && (a <= 20.00)) {CTL.Recipe.recipeFlow1 = parseFloat(a)}
+  if ((b != "") && (b >= 0) && (b <= 20.00)) {CTL.Recipe.recipeFlow2 = parseFloat(b)}
+  if ((c != "") && (c >= 0) && (c <= 0.30)) {CTL.Recipe.recipeFlow3 = parseFloat(c)}
+  if ((d != "") && (d >= 0) && (d <= 0.30)) {CTL.Recipe.recipeFlow4 = parseFloat(d)}
+
+  websocket.send("setMFCs:" + "1:" + CTL.Recipe.recipeFlow1)
+  websocket.send("setMFCs:" + "2:" + CTL.Recipe.recipeFlow2)
+  websocket.send("setMFCs:" + "3:" + CTL.Recipe.recipeFlow3)
+  websocket.send("setMFCs:" + "4:" + CTL.Recipe.recipeFlow4)
+}
+function executeRecipe() {
+  if (CTL.Recipe.executeRecipe === false) { 
+    CTL.Recipe.executeRecipe = true
+    websocket.send("executeRecipe:1")
+    plasmaBtn.innerHTML = "PLASMA OFF"
+    pollRate(1000)
+  }
+  else { 
+    CTL.Recipe.executeRecipe = false
+    websocket.send("executeRecipe:0")
+    plasmaBtn.innerHTML = "PLASMA ON"
+  } 
+}
+function sendAllRecipeValuestoCTL() {
+  RFSet()
+  MBSet()
+  TunerModeSet()
+  setMFCs()
+}
+
+function toggleFullscreen() {
+  if (document.fullscreen) {
+    if (document.exitFullscreen) {
+        document.exitFullscreen()
+      } else if (document.webkitExitFullscreen) { /* Safari */
+        document.webkitExitFullscreen()
+      } else if (document.msExitFullscreen) { /* IE11 */
+        document.msExitFullscreen()
+      }
+    }
+  else {
+    if (elem.requestFullscreen) {
+        elem.requestFullscreen()
+      } else if (elem.webkitRequestFullscreen) { /* Safari */
+        elem.webkitRequestFullscreen()
+      } else if (elem.msRequestFullscreen) { /* IE11 */
+        elem.msRequestFullscreen()
+      }
+    }
+}
+
+</script>
+</body>
+</html>
+<!--
+        <div class="row">
+          <div class="input-group w-20 pb-2 border-bottom">
+            <button class="btn btn-secondary" type="button">MB Setpoint: </button>
+            <input type="text" class="form-control" id="mbset">
+            <span class="input-group-text">%</span>
+          </div>
+        </div>
+        <div class="row pt-3">
+          <div class="input-group ps-5">
+            <button class="btn btn-lg btn-primary" type="button">7</button>
+            <button class="btn btn-lg btn-primary" type="button">8</button>
+            <button class="btn btn-lg btn-primary" type="button">9</button>
+          </div>
+          <div class="input-group ps-5">
+            <button class="btn btn-lg btn-primary" type="button">4</button>
+            <button class="btn btn-lg btn-primary" type="button">5</button>
+            <button class="btn btn-lg btn-primary" type="button">6</button>
+          </div>
+          <div class="input-group ps-5">
+            <button class="btn btn-lg btn-primary" type="button">1</button>
+            <button class="btn btn-lg btn-primary" type="button">2</button>
+            <button class="btn btn-lg btn-primary" type="button">3</button>
+          </div>
+        </div>
+      </div>
+      -->
