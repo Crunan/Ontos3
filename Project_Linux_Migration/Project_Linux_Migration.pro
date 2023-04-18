@@ -1,4 +1,4 @@
-QT       += widgets serialport
+QT       += core gui widgets serialport
 
 greaterThan(QT_MAJOR_VERSION, 4)
 
@@ -16,13 +16,15 @@ SOURCES += \
 HEADERS += \
     logger.h \
     mainwindow.h \
-    settingsdialog.h
+    settingsdialog.h \
+    ui_settingsdialog.h
 
 FORMS += \
     mainwindow.ui \
     settingsdialog.ui
 
 RESOURCES += \
-    ATMOSGUI.qrc
+    ONTOS3.qrc
 
-DISTFILES +=
+DISTFILES += \
+    settingsdialog.o

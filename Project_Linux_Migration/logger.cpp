@@ -24,7 +24,7 @@ void Logger::init()
 
     //Create log file
     logFile = new QFile;
-    logFile->setFileName("./AtmosLog.log");
+    logFile->setFileName("./logs/ontos3.log");
     logFile->open(QIODevice::Append | QIODevice::Text);
 
     //Redirect logs to messageOutput
