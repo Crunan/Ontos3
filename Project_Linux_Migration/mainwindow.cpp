@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 #include "qvalidator.h"
 #include "ui_mainwindow.h"
 #include "settingsdialog.h"
@@ -271,7 +271,7 @@ enum TwoSpotAxesStates {
     TSSM_GET_SECOND
 };
 //Scan Axes SM
-enum ScanAxesStates {
+enum ScannerState {
     SASM_IDLE,
     SASM_STARTUP,
     SASM_SCAN,
@@ -279,7 +279,7 @@ enum ScanAxesStates {
     SASM_SHUTDOWN
 };
 //Scan Sub Axes SM
-enum ScanSubStates {
+enum ScannerSubState {
     SSSM_IDLE,
     SSSM_PARK_Z,
     SSSM_GO_XY_START,
@@ -669,235 +669,369 @@ struct HOMEAXESSTATEMACHINE {
     }
 } HomeSM;
 
-struct SCANAXESSTATEMACHINE {
-    private:
-    ScanAxesStates m_state;
-    ScanSubStates m_subState;
-    double m_minPerPH;
-    double m_maxPerPH;
-    double m_minXpos;
-    double m_maxXpos;
-    double m_minYpos;
-    double m_maxYpos;
-    double m_minZpos;
-    double m_maxZpos;
-    double m_rowXwidth;
-    double m_colYlength;
-    double m_startXpos;
-    double m_startYpos;
-    double m_endYpos;
-    double m_scanYspeed = 1;
-    int m_numXrows;
-    double m_Xremaining;
-    int m_thisXrow;
-    int m_thisCycleNum;
-    public:
-    void setState(ScanAxesStates state) {
-        m_state = state;
-    }
-    void setSubState(ScanSubStates state) {
-        m_subState = state;
-    }
-    void setMinPerPH(double value) {
-        m_minPerPH = value;
-    }
-    void setMaxPerPH(double value) {
-        m_maxPerPH = value;
-    }
-    void setXMinPos(double x) {
-        m_minXpos = x;
-    }
-    void setXMaxPos(double x) {
-        m_maxXpos = x;
-    }
-    void setYMinPos(double y) {
-        m_minYpos = y;
-    }
-    void setYMaxPos(double y) {
-        m_maxYpos = y;
-    }
-    void setZMinPos(double z) {
-        m_minZpos = z;
-    }
-    void setZMaxPos() {
+struct StageScanner {
+    ScannerState state = SASM_IDLE;
+    ScannerSubState subState = SSSM_IDLE;
+    int numRows = 0;
+    int currentRow = 0;
+    int currentCycle = 0;
+    int scanCycles = 0;
+    double X1 = 0.0;
+    double X2 = 0.0;
+    double Y1 = 0.0;
+    double Y2 = 0.0;
+    double Z1 = 0.0;
+    double Z2 = 0.0;
+    double minX = 0.0;
+    double maxX = 0.0;
+    double minY = 0.0;
+    double maxY = 0.0;
+    double minZ = 0.0;
+    double maxZ = 0.0;
+    double totalXScan = 0.0;
+    double totalYScan = 0.0;
+    double startingXPosition = 0.0;
+    double startingYPosition = 0.0;
+    double nextSweepStartingPosition = 0.0;
+    double endingYPosition = 0.0;
+    double remainingX = 0.0;
+    double scanSweep = 0.0;
+    double scanSpeed = 0.0;
+
+
+    ScannerState getState() const { return state; }
+    void setState(ScannerState value) { state = value; }
+
+    ScannerSubState getSubState() const { return subState; }
+    void setSubState(ScannerSubState value) { subState = value; }
+
+    QString getX1String() const { return QString::number(X1); }
+    double getX1() const { return X1; }
+    void setX1(double value) { X1 = value; }
+
+    QString getX2String() const { return QString::number(X2); }
+    double getX2() const { return X2; }
+    void setX2(double value) { X2 = value; }
+
+    QString getY1String() const { return QString::number(Y1); }
+    double getY1() const { return Y1; }
+    void setY1(double value) { Y1 = value; }
+
+    QString getY2String() const { return QString::number(Y2); }
+    double getY2() const { return Y2; }
+    void setY2(double value) { Y2 = value; }
+
+    double getZ1() const { return Z1; }
+    void setZ1(double value) { Z1 = value; }
+
+    QString getNumRowsString() const { return QString::number(numRows); }
+    int getNumRows() const { return numRows; }
+    void incrementNumRow() { numRows += 1; }
+
+    QString getCurrentRowString() const { return QString::number(currentRow); }
+    int getCurrentRow() const { return currentRow; }
+    void setCurrentRow(int value) { currentRow = value; }
+
+    QString getCurrentCycleString() const { return QString::number(currentCycle); }
+    int getCurrentCycle() const { return currentCycle; }
+    void setCurrentCycle(int value) { currentCycle = value; }
+    void incrementCurrentCycle() { currentCycle += 1; }
+
+    QString getScanSpeedString() const { return QString::number(scanSpeed); }
+    void setRecipeScanSpeed() {
         bool ok;
-        m_maxZpos = CoordParam.getZp2Base() - recipe.getThickness().toDouble(&ok) - recipe.getGap().toDouble(&ok);
-    }
-    void setXRowWidth(double val1, double val2) {
-        m_rowXwidth = val1 - val2;
-    }
-    void setXTotal() {
-        m_Xremaining = this->getXmax() - this->getXmin();
-    }
-    void setXRemaining() {
-        m_Xremaining = m_Xremaining - this->getRowWidth();
-    }
-    void setThisCycle(int thisCycle) {
-        m_thisCycleNum = thisCycle;
-    }
-    void setThisXRow(int row) {
-        m_thisXrow = row;
-    }
-    void setNumRows(int val) {
-        m_numXrows = val;
-    }
-    void setXNewStartPos(double pos1, double pos2) {
-        m_startXpos = pos1 - pos2;
-    }
-    void setYStartPos() {
-        m_startYpos = this->getYmax() + plasmahead.getPlasmaHeadSlitWidth();
-    }
-    void setYEndPos() {
-        m_endYpos = this->getYmin() + plasmahead.getPlasmaHeadSlitWidth();
-    }
-    void setYSpeed() {
-        bool ok;
-        m_scanYspeed = recipe.getSpeed().toDouble(&ok);
-    }
-    void incrementNumRows() {
-        this->m_numXrows = this->getNumXrows() + 1;
-    }
-    void incrementThisRow() {
-        this->m_thisXrow = this->getThisXRow() + 1;
-    }
-    void incrementCycles() {
-        m_thisCycleNum += 1;
+        scanSpeed = recipe.getSpeed().toDouble(&ok);
     }
 
-//    void checkXCoordinateSystem(double xmin, double xmax) {
-//        this->setMinPerPH(CoordParam.TranslateCoordXPH2Base(xmin));
-//        this->setMaxPerPH(CoordParam.TranslateCoordXPH2Base(xmax));
-//        this->checkXmmPerPH();
-//    }
-//    void checkYCoordinateSystem(double ymin, double ymax) {
-//        this->setMinPerPH(CoordParam.TranslateCoordYPH2Base(ymin));
-//        this->setMaxPerPH(CoordParam.TranslateCoordYPH2Base(ymax));
-//        this->checkYmmPerPH();
-//    }
-    void setXSinglePass() {
-        m_startXpos = (this->getXmax() + this->getXmin()) / 2;
+    QString getScanCyclesString() const { return QString::number(scanCycles); }
+    int getScanCycles() const { return scanCycles; }
+    void setRecipeScanCycles() {
+        bool ok;
+        scanCycles = recipe.getCycles().toInt(&ok);
     }
-    void setXMutltiplePass() {
-        m_startXpos = this->getXmax() - (this->getRowWidth() / 2);
+
+    QString getminXString() const { return QString::number(minX); }
+    QString getmaxXString() const { return QString::number(maxX); }
+    QString getminYString() const { return QString::number(minY); }
+    QString getmaxYString() const { return QString::number(maxY); }
+    void determineSubstrateArea() {
+        double x1 = CoordParam.TranslateCoordXPH2Base(X1);
+        double x2 = CoordParam.TranslateCoordXPH2Base(X2);
+        // Determine the minimum and maximum x values
+        minX = std::min(x1, x2);
+        maxX = std::max(x1, x2);
+
+        double y1 = CoordParam.TranslateCoordYPH2Base(Y1);
+        double y2 = CoordParam.TranslateCoordYPH2Base(Y2);
+        // Determine the minimum and maximum y values
+        minY = std::min(y1, y2);
+        maxY = std::max(y1, y2);
+
     }
-    void setSingleOrMultipleScan() {
-        if (this->getNumXrows() == 1) {
-            this->setXSinglePass();
+
+    QString getminZString() const { return QString::number(minZ); }
+    QString getmaxZString() const { return QString::number(maxZ); }
+    void determineStageZMinMax() {
+        bool ok;
+        // Determine the minimum and maximum z values
+        minZ = stage.getPinsBuriedPos();
+        maxZ = CoordParam.getZp2Base() - recipe.getThickness().toDouble(&ok) - recipe.getGap().toDouble(&ok);
+    }
+    QString getScanSweepString () const {
+        return QString::number(scanSweep);
+    }
+    void determineScanSweep() {
+        bool ok;
+        scanSweep = plasmahead.getPlasmaHeadSlitLength() - recipe.getOverlap().toDouble(&ok);
+    }
+
+    void calculateTotalScanXY() {
+        totalXScan = maxX - minX;
+        totalYScan = maxY - minY;
+    }
+
+    void calculateNumScanSweeps() {
+        remainingX = totalXScan;
+        while (remainingX > 0) {
+            incrementNumRow();
+            remainingX -= scanSweep;
+        }
+    }
+    QString getStartingXPositionString () const {
+        return QString::number(startingXPosition);
+    }
+    QString getStartingYPositionString () const {
+        return QString::number(startingYPosition);
+    }
+    QString getEndingYPositionString () const {
+        return QString::number(endingYPosition);
+    }
+    double getStartingXPosition() const { return startingXPosition; }
+    void calculateStartingPositions() {
+        if (totalXScan <= scanSweep) {
+            startingXPosition = (maxX + minX) / 2;
         }
         else {
-            this->setXMutltiplePass();
+            startingXPosition = maxX - (scanSweep / 2);
+        }
+        startingYPosition = maxY + plasmahead.getPlasmaHeadSlitLength();
+        endingYPosition = minY + plasmahead.getPlasmaHeadSlitLength();
+    }
+    double getNextSweepStartingPosition() const { return nextSweepStartingPosition; }
+    void setNextSweepStartingPosition() {
+        if (getCurrentRow() > 1) {
+            nextSweepStartingPosition = getStartingXPosition() - (scanSweep);
         }
     }
 
-    ScanAxesStates getState() {
-        return m_state;
-    }
-    ScanSubStates getSubState() {
-        return m_subState;
-    }
-    QString getXminQStr() {
-        return QString::number(m_minXpos);
-    }
-    QString getXmaxQStr() {
-        return QString::number(m_maxXpos);
-    }
-    QString getYminQStr() {
-        return QString::number(m_minYpos);
-    }
-    QString getYmaxQStr() {
-        return QString::number(m_maxYpos);
-    }
-    QString getXRemainingQStr() {
-        return QString::number(m_Xremaining);
-    }
-    QString getXNumRowsQStr() {
-        return QString::number(m_numXrows);
-    }
-    QString getXRowWidthQStr() {
-        return QString::number(m_rowXwidth);
-    }
-    QString getXThisRowQStr() {
-        return QString::number(m_thisXrow);
-    }
-    QString getXStartPosQStr() {
-        return QString::number(m_startXpos);
-    }
-    QString getYStartPosQStr() {
-        return QString::number(m_startYpos);
-    }
-    QString getYEndPosQStr() {
-        return QString::number(m_endYpos);
-    }
-    QString getScanYSpeedQStr() {
-        return QString::number(m_scanYspeed);
-    }
-    QString getThisCyclesQStr() {
-        return QString::number(m_thisCycleNum);
-    }
-    QString getZminQStr() {
-        return QString::number(m_minZpos);
-    }
-    QString getZmaxQStr() {
-        return QString::number(m_maxZpos);
-    }
-    double getXStartPos() {
-        return m_startXpos;
-    }
-    double getXRowWidth() {
-        return m_rowXwidth;
-    }
-    int getThisCycle() {
-        return m_thisCycleNum;
-    }
-
-    double getXmin() {
-        return m_minXpos;
-    }
-    double getXmax() {
-        return m_maxXpos;
-    }
-    double getYmin() {
-        return m_minYpos;
-    }
-    double getYmax() {
-        return m_maxYpos;
-    }
-    double getMinPerPH() {
-        return m_minPerPH;
-    }
-    double getMaxPerPH() {
-        return m_maxPerPH;
-    }
-    double getXremaining() {
-        return m_Xremaining;
-    }
-    double getNumXrows() {
-        return m_numXrows;
-    }
-    double getRowWidth() {
-        return m_rowXwidth;
-    }
-    int getThisXRow() {
-        return m_thisXrow;
-    }
     bool finishedScanning() {
-        if (this->getThisXRow() > this->getNumXrows()) {
+        if (getCurrentRow() > getNumRows()) {
             return true;
         }
         else {
             return false;
         }
     }
-    bool keepScanning() {
-        if (this->getThisCycle() >= recipe.getCyclesInt()) {
-            return true;
-        }
-        else {
-            return false;
-        }
+    bool shouldContinueScanning() {
+        return getCurrentCycle() >= getScanCycles();
     }
 
 } ScanSM;
+
+
+//    ScannerState state;
+//    ScannerSubState subState;
+//    double minX, maxX, minY, maxY, minZ, maxZ;
+
+//    double m_rowXwidth;
+//    double m_colYlength;
+//    double m_startXpos;
+//    double m_startYpos;
+//    double m_endYpos;
+//    double m_scanYspeed = 1;
+//    int m_numXrows;
+//    double m_Xremaining;
+//    int m_thisXrow;
+//    int m_thisCycleNum;
+
+
+
+
+//    void setZMinPos(double z) {
+//        m_minZpos = z;
+//    }
+//    void setZMaxPos() {
+//        bool ok;
+//        m_maxZpos = CoordParam.getZp2Base() - recipe.getThickness().toDouble(&ok) - recipe.getGap().toDouble(&ok);
+//    }
+//    void setXRowWidth(double val1, double val2) {
+//        m_rowXwidth = val1 - val2;
+//    }
+//    void setXTotal() {
+//        m_Xremaining = this->getXmax() - this->getXmin();
+//    }
+//    void setXRemaining() {
+//        m_Xremaining = m_Xremaining - this->getRowWidth();
+//    }
+//    void setThisCycle(int thisCycle) {
+//        m_thisCycleNum = thisCycle;
+//    }
+//    void setThisXRow(int row) {
+//        m_thisXrow = row;
+//    }
+//    void setNumRows(int val) {
+//        m_numXrows = val;
+//    }
+//    void setXNewStartPos(double pos1, double pos2) {
+//        m_startXpos = pos1 - pos2;
+//    }
+//    void setYStartPos() {
+//        m_startYpos = this->getYmax() + plasmahead.getPlasmaHeadSlitWidth();
+//    }
+//    void setYEndPos() {
+//        m_endYpos = this->getYmin() + plasmahead.getPlasmaHeadSlitWidth();
+//    }
+//    void setYSpeed() {
+//        bool ok;
+//        m_scanYspeed = recipe.getSpeed().toDouble(&ok);
+//    }
+//    void incrementNumRows() {
+//        this->m_numXrows = this->getNumXrows() + 1;
+//    }
+//    void incrementThisRow() {
+//        this->m_thisXrow = this->getThisXRow() + 1;
+//    }
+//    void incrementCycles() {
+//        m_thisCycleNum += 1;
+//    }
+
+
+//    void setXSinglePass() {
+//        m_startXpos = (this->getXmax() + this->getXmin()) / 2;
+//    }
+//    void setXMutltiplePass() {
+//        m_startXpos = this->getXmax() - (this->getRowWidth() / 2);
+//    }
+//    void setSingleOrMultipleScan() {
+//        if (this->getNumXrows() == 1) {
+//            this->setXSinglePass();
+//        }
+//        else {
+//            this->setXMutltiplePass();
+//        }
+//    }
+
+//    ScannerState getState() {
+//        return m_state;
+//    }
+//    ScannerSubState getSubState() {
+//        return m_subState;
+//    }
+//    QString getXminQStr() {
+//        return QString::number(m_minXpos);
+//    }
+//    QString getXmaxQStr() {
+//        return QString::number(m_maxXpos);
+//    }
+//    QString getYminQStr() {
+//        return QString::number(m_minYpos);
+//    }
+//    QString getYmaxQStr() {
+//        return QString::number(m_maxYpos);
+//    }
+//    QString getXRemainingQStr() {
+//        return QString::number(m_Xremaining);
+//    }
+//    QString getXNumRowsQStr() {
+//        return QString::number(m_numXrows);
+//    }
+//    QString getXRowWidthQStr() {
+//        return QString::number(m_rowXwidth);
+//    }
+//    QString getXThisRowQStr() {
+//        return QString::number(m_thisXrow);
+//    }
+//    QString getXStartPosQStr() {
+//        return QString::number(m_startXpos);
+//    }
+//    QString getYStartPosQStr() {
+//        return QString::number(m_startYpos);
+//    }
+//    QString getYEndPosQStr() {
+//        return QString::number(m_endYpos);
+//    }
+//    QString getScanYSpeedQStr() {
+//        return QString::number(m_scanYspeed);
+//    }
+//    QString getThisCyclesQStr() {
+//        return QString::number(m_thisCycleNum);
+//    }
+//    QString getZminQStr() {
+//        return QString::number(m_minZpos);
+//    }
+//    QString getZmaxQStr() {
+//        return QString::number(m_maxZpos);
+//    }
+//    double getXStartPos() {
+//        return m_startXpos;
+//    }
+//    double getXRowWidth() {
+//        return m_rowXwidth;
+//    }
+//    int getThisCycle() {
+//        return m_thisCycleNum;
+//    }
+
+//    double getXmin() {
+//        return m_minXpos;
+//    }
+//    double getXmax() {
+//        return m_maxXpos;
+//    }
+//    double getYmin() {
+//        return m_minYpos;
+//    }
+//    double getYmax() {
+//        return m_maxYpos;
+//    }
+//    double getMinPerPH() {
+//        return m_minPerPH;
+//    }
+//    double getMaxPerPH() {
+//        return m_maxPerPH;
+//    }
+//    double getXremaining() {
+//        return m_Xremaining;
+//    }
+//    double getNumXrows() {
+//        return m_numXrows;
+//    }
+//    double getRowWidth() {
+//        return m_rowXwidth;
+//    }
+//    int getThisXRow() {
+//        return m_thisXrow;
+//    }
+//    bool finishedScanning() {
+//        if (this->getThisXRow() > this->getNumXrows()) {
+//            return true;
+//        }
+//        else {
+//            return false;
+//        }
+//    }
+//    bool keepScanning() {
+//        if (this->getThisCycle() >= recipe.getCyclesInt()) {
+//            return true;
+//        }
+//        else {
+//            return false;
+//        }
+//    }
+
+//    determineScanArea
+
+
 
 struct TWOSPOTAXESSTATEMACHINE {
     TwoSpotAxesStates m_state;
@@ -943,22 +1077,22 @@ struct TWOSPOTAXESSTATEMACHINE {
     }
     void checkXDimensions() {
         if (m_firstXpos > m_secondXpos) {
-            ScanSM.setXMaxPos(this->getFirstX());
-            ScanSM.setXMinPos(this->getSecondX());
+            ScanSM.setX2(m_firstXpos);
+            ScanSM.setX1(m_secondXpos);
         }
         else {
-            ScanSM.setXMinPos(this->getFirstX());
-            ScanSM.setXMaxPos(this->getSecondX());
+            ScanSM.setX1(m_firstXpos);
+            ScanSM.setX2(m_secondXpos);
         }
     }
     void checkYDimensions() {
         if (m_firstYpos > m_secondYpos) {
-            ScanSM.setYMaxPos(this->getFirstY());
-            ScanSM.setYMinPos(this->getSecondY());
+            ScanSM.setY2(m_firstYpos);
+            ScanSM.setY1(m_secondYpos);
         }
         else {
-            ScanSM.setYMinPos(this->getFirstY());
-            ScanSM.setYMaxPos(this->getSecondY());
+            ScanSM.setY1(m_firstYpos);
+            ScanSM.setY2(m_secondYpos);
         }
     }
 } TwoSpotSM;
@@ -2029,10 +2163,10 @@ void MainWindow::setScanBtnText(QString text) {
     ui->scan_button->setText(text);
 }
 void MainWindow::updateTwoSpotXYText() {
-    ui->xmin_recipe->setText(ScanSM.getXminQStr());
-    ui->xmax_recipe->setText(ScanSM.getXmaxQStr());
-    ui->ymin_recipe->setText(ScanSM.getYminQStr());
-    ui->ymax_recipe->setText(ScanSM.getYmaxQStr());
+    ui->x1_recipe->setText(ScanSM.getminXString());
+    ui->x2_recipe->setText(ScanSM.getmaxXString());
+    ui->y1_recipe->setText(ScanSM.getminYString());
+    ui->y2_recipe->setText(ScanSM.getmaxYString());
 }
 double MainWindow::getThickness() {
     bool ok;
@@ -2051,16 +2185,16 @@ double MainWindow::getCycles() {
     return ui->cycles_recipe->toPlainText().toDouble(&ok);
 }
 QString MainWindow::getXminRecipeQStr() {
-    return ui->xmin_recipe->toPlainText();
+    return ui->x1_recipe->toPlainText();
 }
 QString MainWindow::getXmaxRecipeQStr() {
-    return ui->xmax_recipe->toPlainText();
+    return ui->x2_recipe->toPlainText();
 }
 QString MainWindow::getYminRecipeQStr() {
-    return ui->ymin_recipe->toPlainText();
+    return ui->y1_recipe->toPlainText();
 }
 QString MainWindow::getYmaxRecipeQStr() {
-    return ui->ymax_recipe->toPlainText();
+    return ui->y2_recipe->toPlainText();
 }
 QString MainWindow::getThicknessQStr() {
     return ui->thickness_recipe->toPlainText();
@@ -2427,34 +2561,34 @@ void MainWindow::on_n2_purge_button_toggled(bool checked) {
 }
 void MainWindow::on_x1_set_clicked() {
     bool ok;
-    double doubVal = QInputDialog::getDouble(this, "X minimum setpoint","X: (min) -" + CoordParam.getXp2BaseQStr() + " (max) " + CoordParam.getXp2BaseQStr(), 0, -CoordParam.getXp2Base(), CoordParam.getXp2Base(), 2, &ok,Qt::WindowFlags(), 1);
+    double value = QInputDialog::getDouble(this, "X1 setpoint","X: (min) -" + CoordParam.getXp2BaseQStr() + " (max) " + CoordParam.getXp2BaseQStr(), 0, -CoordParam.getXp2Base(), CoordParam.getXp2Base(), 2, &ok,Qt::WindowFlags(), 1);
     if (ok) {
-        ScanSM.setXMinPos(doubVal);
-        ui->xmin_recipe->setText(QString::number(doubVal));
+        ScanSM.setX1(value);
+        ui->x1_recipe->setText(QString::number(value));
     }
 }
 void MainWindow::on_x2_set_clicked() {
     bool ok;
-    double doubVal = QInputDialog::getDouble(this, "X maximum setpoint","X: (min) -" + CoordParam.getXp2BaseQStr() + " (max) " + CoordParam.getXp2BaseQStr(), 0, -CoordParam.getXp2Base(), CoordParam.getXp2Base(), 2, &ok,Qt::WindowFlags(), 1);
+    double value = QInputDialog::getDouble(this, "X2 setpoint","X: (min) -" + CoordParam.getXp2BaseQStr() + " (max) " + CoordParam.getXp2BaseQStr(), 0, -CoordParam.getXp2Base(), CoordParam.getXp2Base(), 2, &ok,Qt::WindowFlags(), 1);
     if (ok) {
-        ScanSM.setXMaxPos(doubVal);
-        ui->xmax_recipe->setText(QString::number(doubVal));
+        ScanSM.setX2(value);
+        ui->x2_recipe->setText(QString::number(value));
     }
 }
 void MainWindow::on_Y1_set_clicked() {
     bool ok;
-    double doubVal = QInputDialog::getDouble(this, "Y minimum setpoint","Y: (min) -" + CoordParam.getYp2BaseQStr() + " (max) " + CoordParam.getYp2BaseQStr(), 0, -CoordParam.getYp2Base(), CoordParam.getYp2Base(), 2, &ok,Qt::WindowFlags(), 1);
+    double value = QInputDialog::getDouble(this, "Y1 setpoint","Y: (min) -" + CoordParam.getYp2BaseQStr() + " (max) " + CoordParam.getYp2BaseQStr(), 0, -CoordParam.getYp2Base(), CoordParam.getYp2Base(), 2, &ok,Qt::WindowFlags(), 1);
     if (ok) {
-        ScanSM.setYMinPos(doubVal);
-        ui->ymin_recipe->setText(QString::number(doubVal));
+        ScanSM.setY1(value);
+        ui->y1_recipe->setText(QString::number(value));
     }
 }
 void MainWindow::on_Y2_set_clicked() {
     bool ok;
-    double doubVal = QInputDialog::getDouble(this, "Y maximum setpoint","Y: (min) -" + CoordParam.getYp2BaseQStr() + " (max) " + CoordParam.getYp2BaseQStr(), 0, -CoordParam.getYp2Base(), CoordParam.getYp2Base(), 2, &ok,Qt::WindowFlags(), 1);
+    double value = QInputDialog::getDouble(this, "Y2 setpoint","Y: (min) -" + CoordParam.getYp2BaseQStr() + " (max) " + CoordParam.getYp2BaseQStr(), 0, -CoordParam.getYp2Base(), CoordParam.getYp2Base(), 2, &ok,Qt::WindowFlags(), 1);
     if (ok) {
-        ScanSM.setYMaxPos(doubVal);
-        ui->ymax_recipe->setText(QString::number(doubVal));
+        ScanSM.setY2(value);
+        ui->y2_recipe->setText(QString::number(value));
     }
 }
 void MainWindow::on_load_RF_clicked() {
@@ -2620,7 +2754,7 @@ void MainWindow::on_load_autoscan_clicked() {
 void MainWindow::addCascadeFile() {
     QStringList StrVar;
     QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Add recipe to Cascade List"), "./cascade_recipes/",
+        tr("Add recipe to Cascade List"), "/home/oem/Ontos3/Project_Linux_Migration/cascade_recipes/",
         tr("Recipe List (*.rcp);;All Files (*)"));
         if (!fileName.contains(".rcp")) {fileName += ".rcp";}
         if (fileName.isEmpty())
@@ -2640,7 +2774,7 @@ void MainWindow::addCascadeFile() {
 void MainWindow::saveCascadeFile() {
     QStringList StrVar;
     QString fileName = QFileDialog::getSaveFileName(this,
-        tr("Save Current Cascade Recipe"), "./cascade_recipes/",
+        tr("Save Current Cascade Recipe"), "/home/oem/Ontos3/Project_Linux_Migration/cascade_recipes/",
         tr("Recipe List (*.crcp);;All Files (*)"));
         if (!fileName.contains(".crcp")) {fileName += ".crcp";}
         if (fileName.isEmpty())
@@ -2665,7 +2799,7 @@ void MainWindow::saveCascadeFile() {
 void MainWindow::loadCascadeFile() {
     QStringList cascade_recipe;
     QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Load Recipe from File"), "./cascade_recipes/",
+        tr("Load Recipe from File"), "/home/oem/Ontos3/Project_Linux_Migration/cascade_recipes/",
         tr("Recipe File (*.crcp);;All Files (*)"));
         if (fileName.isEmpty())
             return;
@@ -2689,7 +2823,7 @@ void MainWindow::loadCascadeFile() {
 void MainWindow::saveToFile() {
     QStringList StrVar;
     QString fileName = QFileDialog::getSaveFileName(this,
-        tr("Save Current Recipe"), "./recipes/",
+        tr("Save Current Recipe"), "/home/oem/Ontos3/Project_Linux_Migration/recipes/",
         tr("Recipe List (*.rcp);;All Files (*)"));
         if (!fileName.contains(".rcp")) {fileName += ".rcp";}
         if (fileName.isEmpty())
@@ -2714,10 +2848,10 @@ void MainWindow::saveToFile() {
                                    "OVERLAP:" + recipe.getOverlap() + '\n' +
                                    "SPEED:" + recipe.getSpeed() + '\n' +
                                    "CYCLES:" + recipe.getCycles() + '\n' +
-                                   "XMIN:" + ScanSM.getXminQStr() + '\n' +
-                                   "XMAX:" + ScanSM.getXmaxQStr() + '\n' +
-                                   "YMIN:" + ScanSM.getYminQStr() + '\n' +
-                                   "YMAX:" + ScanSM.getYmaxQStr() + '\n' +
+                                   "X1:" + ScanSM.getX1String() + '\n' +
+                                   "X2:" + ScanSM.getX2String() + '\n' +
+                                   "Y1:" + ScanSM.getY1String() + '\n' +
+                                   "Y2:" + ScanSM.getY2String() + '\n' +
                                    "PURGE:" + recipe.getPurgeQStr() + '\n' +
                                    "AUTOSCAN:" + recipe.getAutoScan();
 
@@ -2734,7 +2868,7 @@ void MainWindow::saveToFile() {
 void MainWindow::loadFromFile() {
     QStringList recipe;
     QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Load Recipe from File"), "./recipes/",
+        tr("Load Recipe from File"), "/home/oem/Ontos3/Project_Linux_Migration/recipes/",
         tr("Recipe File (*.rcp);;All Files (*)"));
         if (fileName.isEmpty())
             return;
@@ -2843,25 +2977,25 @@ void MainWindow::loadGUI(QStringList recipeData) {
         recipe.setCycles(Values[valueIndex].toInt(&ok));
         ui->cycles_recipe->setText(recipe.getCycles());
     }
-    if (Params.contains("XMAX")) {
-        valueIndex = Params.indexOf("XMAX");
-        ScanSM.setXMaxPos(Values[valueIndex].toDouble(&ok));
-        ui->xmax_recipe->setText(QString::number(XPos_RefB_2_RefPH(ScanSM.getXmax())));
+    if (Params.contains("X2")) {
+        valueIndex = Params.indexOf("X2");
+        ScanSM.setX2(Values[valueIndex].toDouble(&ok));
+        ui->x2_recipe->setText(QString::number(ScanSM.getX2()));
     }
-    if (Params.contains("XMIN")) {
-        valueIndex = Params.indexOf("XMIN");
-        ScanSM.setXMinPos(Values[valueIndex].toDouble(&ok));
-        ui->xmin_recipe->setText(QString::number(XPos_RefB_2_RefPH(ScanSM.getXmin())));
+    if (Params.contains("X1")) {
+        valueIndex = Params.indexOf("X1");
+        ScanSM.setX1(Values[valueIndex].toDouble(&ok));
+        ui->x1_recipe->setText(QString::number(ScanSM.getX1()));
     }
-    if (Params.contains("YMIN")) {
-        valueIndex = Params.indexOf("YMIN");
-        ScanSM.setYMinPos(Values[valueIndex].toDouble(&ok));
-        ui->ymin_recipe->setText(QString::number(YPos_RefB_2_RefPH(ScanSM.getYmin())));
+    if (Params.contains("Y1")) {
+        valueIndex = Params.indexOf("Y1");
+        ScanSM.setY1(Values[valueIndex].toDouble(&ok));
+        ui->y1_recipe->setText(QString::number(ScanSM.getY1()));
     }
-    if (Params.contains("YMAX")) {
-        valueIndex = Params.indexOf("YMAX");
-        ScanSM.setYMaxPos(Values[valueIndex].toDouble(&ok));
-        ui->ymax_recipe->setText(QString::number(YPos_RefB_2_RefPH(ScanSM.getYmax())));
+    if (Params.contains("Y2")) {
+        valueIndex = Params.indexOf("Y2");
+        ScanSM.setY2(Values[valueIndex].toDouble(&ok));
+        ui->y2_recipe->setText(QString::number(ScanSM.getY2()));
     }
     if (Params.contains("PURGE")) {
         valueIndex = Params.indexOf("PURGE");
@@ -2901,11 +3035,22 @@ void MainWindow::loadConfigGUI(QStringList value) {
 }
 void MainWindow::GetExeCfg() {
     QStringList Values;
-    QFile file("./config/default.cfg");
+    QString filePath = "/home/oem/Ontos3/Project_Linux_Migration/config/default.cfg";
 
-    if(!file.open(QIODevice::ReadOnly)) {
-        QMessageBox::information(0, "error", file.errorString());
+    // Check if the file exists
+    if(!QFileInfo::exists(filePath)) {
+        QMessageBox::information(0, "Error", "Configuration file does not exist");
+        return;
     }
+
+    QFile file(filePath);
+
+    //Try to open the file
+    if (!file.open(QIODevice::ReadOnly)) {QTextStream in(&file);
+        QMessageBox::information(0, "Error", file.errorString());
+        return;
+    }
+
     QTextStream in(&file);
 
     while(!in.atEnd()) {
@@ -3100,60 +3245,37 @@ void MainWindow::RunTwoSpotAxesSM() {
             break;
     }
 }
+void MainWindow::logStageScanInfo() {
+    if (ScanSM.getCurrentCycle() == 1) {
+            logInfo("-------------Scan Start-Up--------------"); }
+    else
+    {
+            logInfo("-------------Scan Recycle Start-Up--------------");
+            logInfo("This Cycle: " + ScanSM.getCurrentCycleString()); }
 
+    logInfo("Display MIN:(" + ScanSM.getminXString() + " , " + ScanSM.getminYString() + ") MAX:(" + ScanSM.getmaxXString() + " , " + ScanSM.getmaxYString()  + ")");
+    logInfo("Num Rows: " + ScanSM.getNumRowsString() + " Row Sweep: " + ScanSM.getScanSweepString());
+    logInfo("FirstX: " + ScanSM.getStartingXPositionString() + " StartY: " + ScanSM.getStartingYPositionString() + " EndY: " + ScanSM.getEndingYPositionString());
+    logInfo("Scan Speed: " + ScanSM.getScanSpeedString() + " Cycles: " + ScanSM.getScanCyclesString());
+}
 void MainWindow::RunScanAxesSM() {
     QString message;
-
-    bool ok;
 
     switch (ScanSM.getState()) {
         case SASM_STARTUP:
             setScanBtnText("STOP");
-            ScanSM.setMinPerPH(ScanSM.getXmin());
-            ScanSM.setMaxPerPH(ScanSM.getXmax());
 
-            if (ScanSM.getMaxPerPH() > ScanSM.getMinPerPH()) {
-                ScanSM.setXMaxPos(ScanSM.getMaxPerPH());
-                ScanSM.setXMinPos(ScanSM.getMinPerPH());
-            }
-            else {
-                ScanSM.setXMaxPos(ScanSM.getMinPerPH());
-                ScanSM.setXMinPos(ScanSM.getMaxPerPH());
-            }
-            ScanSM.setMinPerPH(ScanSM.getYmin());
-            ScanSM.setMaxPerPH(ScanSM.getYmax());
+            ScanSM.determineSubstrateArea();
+            ScanSM.determineStageZMinMax();
+            ScanSM.determineScanSweep();
+            ScanSM.calculateTotalScanXY();
+            ScanSM.calculateNumScanSweeps();
+            ScanSM.setCurrentRow(1);
+            ScanSM.setCurrentCycle(1);
+            ScanSM.calculateStartingPositions();
+            ScanSM.setRecipeScanSpeed();
+            logStageScanInfo();
 
-            if (ScanSM.getMaxPerPH() > ScanSM.getMinPerPH()) {
-                ScanSM.setYMaxPos(ScanSM.getMaxPerPH());
-                ScanSM.setYMinPos(ScanSM.getMinPerPH());
-            }
-            else {
-                ScanSM.setYMaxPos(ScanSM.getMinPerPH());
-                ScanSM.setYMinPos(ScanSM.getMaxPerPH());
-            }
-
-            ScanSM.setZMinPos(stage.getPinsBuriedPos());
-            ScanSM.setZMaxPos();
-            //Get the scan row info
-            ScanSM.setXRowWidth(plasmahead.getPlasmaHeadSlitLength(), recipe.getOverlap().toDouble(&ok));
-            ScanSM.setXTotal();
-            ScanSM.setNumRows(0);
-            while (ScanSM.getXremaining() >= 0) {
-                ScanSM.incrementNumRows();
-                ScanSM.setXRemaining();
-            }
-            ScanSM.setThisXRow(1);
-            ScanSM.setThisCycle(1);
-            ScanSM.setSingleOrMultipleScan();
-
-            ScanSM.setYStartPos();
-            ScanSM.setYEndPos();
-            ScanSM.setYSpeed();
-            logInfo("-------------Scan Start-Up--------------");
-            logInfo("Display MIN:(" + ScanSM.getXminQStr() + " , " + ScanSM.getYminQStr() + ") MAX:(" + ScanSM.getXmaxQStr()+ " , " + ScanSM.getYmaxQStr()  + ")");
-            logInfo("Num Rows: " + ScanSM.getXNumRowsQStr() + " Row Width: " + ScanSM.getXRowWidthQStr());
-            logInfo("FirstX: " + ScanSM.getXStartPosQStr() + " StartY: " + ScanSM.getYStartPosQStr() + " EndY: " + ScanSM.getYEndPosQStr());
-            logInfo("Scan Speed: " + recipe.getSpeed() + " Cycles: " + recipe.getCycles());
             ScanSM.setState(SASM_SCAN);
             ScanSM.setSubState(SSSM_PARK_Z);
             updateStageStatus("Scanning", "");
@@ -3166,7 +3288,7 @@ void MainWindow::RunScanAxesSM() {
                         if (ScanSM.finishedScanning()) {
                             ScanSM.setSubState(SSSM_IDLE); //for completeness
                             ScanSM.setState(SASM_RECYCLE); //All done!
-                            message = "End Cycle #" + ScanSM.getThisCyclesQStr() + " of " + recipe.getCycles();
+                            message = "End Cycle #" + ScanSM.getCurrentCycleString() + " of " + ScanSM.getScanCyclesString();
                             logInfo(message);
                             updateStageStatus("Scanning", message);
                             setScanBtnText("STOP");
@@ -3178,17 +3300,16 @@ void MainWindow::RunScanAxesSM() {
                             updateStageStatus("", message);
                             setScanBtnText("STOP");
                         }
-                        move("2", Param.getZMaxSpeedQStr(), ScanSM.getZminQStr());
+                        move("2", Param.getZMaxSpeedQStr(), ScanSM.getminZString());
                         break;                        
                     case SSSM_GO_XY_START:
-                        message = "Scan Cycle #" + ScanSM.getThisCyclesQStr() + " of " + recipe.getCycles() + " Traversal #" + ScanSM.getXThisRowQStr() + " of " + ScanSM.getXNumRowsQStr();
+                        message = "Scan Cycle #" + ScanSM.getCurrentCycleString() + " of " + ScanSM.getScanCyclesString() + " Traversal #" + ScanSM.getCurrentRowString() + " of " + ScanSM.getNumRowsString();
                         logInfo(message);
                         updateStageStatus("", message);
-                        if (ScanSM.getThisXRow() > 1) {
-                            ScanSM.setXNewStartPos(ScanSM.getXStartPos(), ScanSM.getXRowWidth());\
-                        }
-                        move("0", Param.getXMaxSpeedQStr(), ScanSM.getXStartPosQStr());
-                        move("1", Param.getYMaxSpeedQStr(), ScanSM.getYStartPosQStr());
+                        ScanSM.setNextSweepStartingPosition();
+
+                        move("0", Param.getXMaxSpeedQStr(), ScanSM.getStartingXPositionString());
+                        move("1", Param.getYMaxSpeedQStr(), ScanSM.getStartingYPositionString());
                         ScanSM.setSubState(SSSM_GO_Z_SCAN_POS);
                         break;
                     case SSSM_GO_Z_SCAN_POS:
@@ -3196,12 +3317,12 @@ void MainWindow::RunScanAxesSM() {
                             writeRequest("$C701%", 6); //SET_VALVE_2 $C70n% resp[!C70n#] n = 0, 1 (off, on)
                             readData();
                         }
-                        move("2", Param.getZMaxSpeedQStr(), ScanSM.getZmaxQStr());
+                        move("2", Param.getZMaxSpeedQStr(), ScanSM.getmaxZString());
                         ScanSM.setSubState(SSSM_SCAN_COL);
                         break;
                     case SSSM_SCAN_COL:
-                        move("1", ScanSM.getScanYSpeedQStr(), ScanSM.getYEndPosQStr());
-                        ScanSM.incrementThisRow();
+                        move("1", ScanSM.getScanSpeedString(), ScanSM.getEndingYPositionString());
+                        ScanSM.incrementNumRow();
                         ScanSM.setSubState(SSSM_PARK_Z);
                         break;
                     case SSSM_IDLE:
@@ -3211,7 +3332,7 @@ void MainWindow::RunScanAxesSM() {
             }
             break;
         case SASM_RECYCLE:
-            if (ScanSM.keepScanning()) {
+            if (ScanSM.shouldContinueScanning()) {
                 setValve2(0);
                 setScanBtnText("SCAN");
                 updateStageStatus("Scanning Completed", "");
@@ -3219,17 +3340,12 @@ void MainWindow::RunScanAxesSM() {
                 HomeSM.setState(HASM_STARTUP);
             }
             else {
-                ScanSM.incrementCycles();
-                ScanSM.setThisXRow(1);
-                ScanSM.setSingleOrMultipleScan();
+                ScanSM.incrementCurrentCycle();
+                ScanSM.setCurrentRow(1);
+                ScanSM.calculateStartingPositions();
                 ScanSM.setState(SASM_SCAN);
                 ScanSM.setSubState(SSSM_GO_XY_START);
-                logInfo("-------------Scan Recycle Start-Up--------------");
-                logInfo("This Cycle: " + ScanSM.getThisCyclesQStr());
-                logInfo("Display MIN:(" + ScanSM.getXminQStr() + " , " + ScanSM.getYminQStr() + ") MAX:(" + ScanSM.getXmaxQStr()+ " , " + ScanSM.getYmaxQStr()   + ")");
-                logInfo("Num Rows: " + ScanSM.getXNumRowsQStr() + " Row Width: " + ScanSM.getXRowWidthQStr());
-                logInfo("FirstX: " + ScanSM.getXStartPosQStr() + " StartY: " + ScanSM.getYStartPosQStr() + " EndY: " + ScanSM.getYEndPosQStr());
-                logInfo("Scan Speed: " + recipe.getSpeed() + " Cycles: " + recipe.getCycles());
+                logStageScanInfo();
             }
             break;
         case SASM_SHUTDOWN:
@@ -3240,7 +3356,7 @@ void MainWindow::RunScanAxesSM() {
                 updateStageStatus("Scanning Stopped - Parking Z", "");
                 stopMotors();
                 setValve2(0);
-                move("2", Param.getZMaxSpeedQStr(), ScanSM.getZminQStr());
+                move("2", Param.getZMaxSpeedQStr(), ScanSM.getminZString());
                 ScanSM.setState(SASM_IDLE);
                 ScanSM.setSubState(SSSM_IDLE);
                 updateStageStatus("Scanning Manually Stopped", "");
@@ -3262,21 +3378,21 @@ void MainWindow::RunDiameter() { //calculate scan recipe based on wafer diameter
         wafer_diameter = ui->wafer_diameter->currentText().toDouble(&ok);
         radius = wafer_diameter / 2.0;
         //find the points defining the box
-        ScanSM.setXMinPos(CoordParam.getXp2Base() - radius);
-        ScanSM.setXMaxPos(CoordParam.getXp2Base() + radius);
-        ScanSM.setYMinPos(CoordParam.getYp2Base() - radius);
-        ScanSM.setYMaxPos(CoordParam.getYp2Base() + radius);
+        ScanSM.setX1(CoordParam.getXp2Base() - radius);
+        ScanSM.setX2(CoordParam.getXp2Base() + radius);
+        ScanSM.setY1(CoordParam.getYp2Base() - radius);
+        ScanSM.setY2(CoordParam.getYp2Base() + radius);
 
         //update the "actual" display after coord sys translation
-        val = XPos_RefB_2_RefPH(ScanSM.getXmin());
-        ui->xmin_recipe->setText(QString::number(val));
-        val = XPos_RefB_2_RefPH(ScanSM.getXmax());
-        ui->xmax_recipe->setText(QString::number(val));
+        val = XPos_RefB_2_RefPH(ScanSM.getX1());
+        ui->x1_recipe->setText(QString::number(val));
+        val = XPos_RefB_2_RefPH(ScanSM.getX2());
+        ui->x2_recipe->setText(QString::number(val));
 
-        val = YPos_RefB_2_RefPH(ScanSM.getYmin());
-        ui->ymin_recipe->setText(QString::number(val));
-        val = YPos_RefB_2_RefPH(ScanSM.getYmax());
-        ui->ymax_recipe->setText(QString::number(val));
+        val = YPos_RefB_2_RefPH(ScanSM.getY1());
+        ui->y1_recipe->setText(QString::number(val));
+        val = YPos_RefB_2_RefPH(ScanSM.getY2());
+        ui->y2_recipe->setText(QString::number(val));
 
 
 }

@@ -842,7 +842,7 @@ font: 12pt &quot;Ubuntu Bold&quot;;
           </widget>
          </item>
          <item row="9" column="1" colspan="3">
-          <widget class="QTextEdit" name="xmin_recipe">
+          <widget class="QTextEdit" name="x1_recipe">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
              <horstretch>15</horstretch>
@@ -903,7 +903,7 @@ font: 14pt &quot;Ubuntu Bold&quot;;
           </widget>
          </item>
          <item row="11" column="1" colspan="3">
-          <widget class="QTextEdit" name="ymin_recipe">
+          <widget class="QTextEdit" name="y1_recipe">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
              <horstretch>15</horstretch>
@@ -1316,7 +1316,7 @@ font: 700 16pt &quot;Ubuntu Mono&quot;;</string>
           </widget>
          </item>
          <item row="10" column="1" colspan="3">
-          <widget class="QTextEdit" name="xmax_recipe">
+          <widget class="QTextEdit" name="x2_recipe">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
              <horstretch>15</horstretch>
@@ -1370,7 +1370,7 @@ font: 16pt &quot;Ubuntu Bold&quot;;
           </widget>
          </item>
          <item row="12" column="1" colspan="3">
-          <widget class="QTextEdit" name="ymax_recipe">
+          <widget class="QTextEdit" name="y2_recipe">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
              <horstretch>15</horstretch>

@@ -34,6 +34,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    void logStageScanInfo();
 protected slots:
     void parseStatus();
     double getGap();
