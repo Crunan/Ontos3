@@ -19,11 +19,6 @@ class MainWindow;
 }
 
 QT_END_NAMESPACE
-class GUIHANDLER;
-class PlasmaController;
-class AxisController;
-class Console;
-class SettingsDialog;
 
 class MainWindow : public QMainWindow
 {
@@ -35,9 +30,7 @@ public:
     ~MainWindow();
 
     void logStageScanInfo();
-protected slots:
-    void parseStatus();
-    double getGap();
+
 private slots:
     void openSerialPort();
     void closeSerialPort();
@@ -49,80 +42,7 @@ private slots:
     void loadFromFile();
 
 
-    void on_MB_Left_Button_clicked();
-    void on_MB_Right_Button_clicked();
-    void on_Send_CMD_button_clicked();
-    void on_Clear_Button_clicked();
 
-
-
-    void on_init_button_clicked();
-
-    void on_twospot_button_clicked();
-
-    void on_Home_button_clicked();
-
-    void on_Joystick_button_toggled(bool checked);
-
-    void on_Stagepins_button_toggled(bool checked);
-
-    void on_vac_button_toggled(bool checked);
-
-    void on_scan_button_clicked();
-
-    void on_n2_purge_button_toggled(bool checked);
-
-    void on_x1_set_clicked();
-
-    void on_x2_set_clicked();
-
-    void on_Y1_set_clicked();
-
-    void on_Y2_set_clicked();
-
-    void on_load_RF_clicked();
-
-    void on_load_MB_clicked();
-
-    void on_load_MFC4_clicked();
-
-    void on_load_MFC3_clicked();
-
-    void on_load_MFC2_clicked();
-
-    void on_load_MFC1_clicked();
-
-    void on_batchID_checkBox_stateChanged(int arg1);
-
-    void on_diameter_button_clicked();
-
-    void on_Heater_Button_toggled(bool checked);
-
-    void on_load_thick_clicked();
-
-    void on_load_gap_clicked();
-
-    void on_load_overlap_clicked();
-
-    void on_load_speed_clicked();
-
-    void on_load_cycles_clicked();
-
-    void on_plsmaBtn_toggled(bool checked);
-
-    void on_load_recipe_button_clicked();
-
-    void on_save_recipe_button_clicked();
-
-    void on_load_autotune_clicked();
-
-    void on_load_autoscan_clicked();
-
-    void on_save_cascade_recipe_button_clicked();
-
-    void on_add_cascade_recipe_button_clicked();
-
-    void on_load_cascade_recipe_button_clicked();
 private:
     Ui::MainWindow *ui = nullptr;
     QTimer *timer = nullptr;
@@ -223,13 +143,7 @@ private:
     void writeFromCMDbox();
     void resetCTL();
     //RCV
-    QString RCV;
-    QString PCBStatus;
 
-    bool CTLstatusChanged = false;
-    bool HandshakeStatusChanged = false;
-    int HandshakeStatusBits{};
-    int HandshakeStatusBitsWas{};
 
     char * responseChar{};
     void StatusBitsStrToHex();
@@ -276,22 +190,22 @@ private:
 
     double XPos_RefB_2_RefPH(double x);
     double YPos_RefB_2_RefPH(double y);
-    double ZPos_RefB_2_RefPH(double z);
+    double TranslateCoordZBase2PH(double z);
     double XPos_RefPH_2_RefB(double x);
     double YPos_RefPH_2_RefB(double y);
     double ZPos_RefPH_2_RefB(double z);
-    double Ys_PH(double y);
+    double TranslateCoordYLaser2PH(double y);
     void RunDiameter();
 
     void AxisStartup();
     void getZMaxSpeed();
     void getYMaxSpeed();
     void getXMaxSpeed();
-    void getZp2Base();
-    void getYp2Base();
-    void getXp2Base();
-    void getXs2PH();
-    void getYs2PH();
+    void getPlasmaHeadZCoordinate();
+    void getPlasmaHeadYCoordinate();
+    void getPlasmaHeadXCoordinate();
+    void getPlasmaLaserXCoordinate();
+    void getPlasmaLaserYCoordinate();
     void getPHSlitLength();
     void getPHSlitWidth();
     void getPHSafetyZGap();

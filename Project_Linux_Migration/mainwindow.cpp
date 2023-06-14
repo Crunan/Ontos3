@@ -3,6 +3,7 @@
 #include "ui_mainwindow.h"
 #include "settingsdialog.h"
 #include "logger.h"
+#include "coordinate.h"
 
 #include <math.h>
 #include <QRegularExpression>
@@ -14,829 +15,390 @@
 
 using namespace std::literals;
 
-struct TEMP {
-public:
-    double Value;
-} ThermoCouple;
-
-struct configuration {
-    QString ExeConfigPath = "./config/";
-    QString ExeConfigPathFileName = "default";
-    QString MFC1;
-    QString MFC2;
-    QString MFC3;
-    QString MFC4;
-
-    public:
-    QString getMFC1() const;
-    QString getMFC2() const;
-    QString getMFC3() const;
-    QString getMFC4() const;
-
-    void setMFC1(const QString &newMFC1);
-    void setMFC2(const QString &newMFC2);
-    void setMFC3(const QString &newMFC3);
-    void setMFC4(const QString &newMFC4);
-    QString getExeConfigPath() const;
-    QString getExeConfigPathFileName() const;
-
-} config;
-
-struct MFController {
-public:
-    double m_actualFlow;
-    double m_loadedFlow;
-    double m_range;
-    bool m_readyToLoad;
-
-    public:
-
-    void setReadyToLoad(bool toggle) {
-        m_readyToLoad = toggle;
-    }
-    bool getReadyToLoad() {
-        return m_readyToLoad;
-    }
-    void setLoadedFlow(QString flow) {
-        bool ok;
-        m_loadedFlow = flow.toDouble(&ok);
-        this->setReadyToLoad(true);
-    }   
-    void setRange(QString range) {
-        bool ok;
-        m_range = range.toDouble(&ok);
-    }
-    void setActualFlow(QString flow) {
-        bool ok;
-        m_actualFlow = flow.toDouble(&ok);
-    }
-    QString getLoadedFlowQStr() {
-        return QString::number(m_loadedFlow, 'f', 2);
-    }
-    QString getRange() {
-        return QString::number(m_range, 'f', 2);
-    }
-    QString getActualFlow() {
-        return QString::number(m_actualFlow, 'f', 2);
-    }
-    int getActualFlowInt() {
-        return int(m_actualFlow);
-    }
-    double getLoadedFlow() {
-        return m_loadedFlow;
-    }
-
-} MFC[5];
-
-struct PWR {
-    public:
-    int m_loadedSetPoint;
-    int m_actualPForward;
-    int m_actualPReflected;
-    int m_maxWatts;
-    bool m_readyToLoad;
-
-
-    public:
-    void setReadyToLoad(bool toggle) {
-        m_readyToLoad = toggle;
-    }
-    bool getReadyToLoad() {
-        return m_readyToLoad;
-    }
-    void setLoadedSetPoint(QString value) {
-        bool ok;
-        m_loadedSetPoint = value.toInt(&ok);
-        this->setReadyToLoad(true);
-    }
-    void setMaxWatts(QString max) {
-        bool ok;
-        m_maxWatts = max.toInt(&ok);
-    }
-    void setActualWatts(QString watts) {
-        bool ok;
-        m_actualPForward = watts.toInt(&ok, 10);
-    }
-    void setActualRefWatts(QString watts) {
-        bool ok;
-        m_actualPReflected = watts.toInt(&ok, 10);
-    }
-    int getLoadedSetPoint() {
-        return m_loadedSetPoint;
-    }
-    QString getLoadedSetPointQStr() {
-        return QString::number(m_loadedSetPoint);
-    }
-    int getActualWatts() {
-        return m_actualPForward;
-    }
-    int getReflectedWatts() {
-        return m_actualPReflected;
-    }
-} RF;
-
-struct TUNER_POS {
-    public:
-    double m_loadedSP;
-    double m_actualPos;
-    double m_actualPosPct;
-    bool m_autoTune;
-    bool m_autoTuneCMDFlag;
-    bool m_readyToLoad;
-
-    public:
-    void setReadyToLoad(bool toggle) {
-        m_readyToLoad = toggle;
-    }
-    bool getReadyToLoad() {
-        return m_readyToLoad;
-    }
-    void setAutoTuneCMDFlag(bool toggle) {
-        m_autoTuneCMDFlag = toggle;
-    }
-    void setLoadedValue(QString value) {
-        bool ok;
-        m_loadedSP = value.toDouble(&ok);
-        this->setReadyToLoad(true);
-    }
-    void setAutoMode(QString value) {
-        bool ok;
-        m_autoTune = value.toInt(&ok);
-        this->setAutoTuneCMDFlag(true);
-    }
-    void setActualPosition(QString pos) {
-        bool ok;
-        m_actualPos = pos.toDouble(&ok);
-    }
-
-    double getLoadedSP() {
-        return m_loadedSP;
-    }
-    int getLoadedSPInteger() {
-        return int(m_loadedSP);
-    }
-    bool getAutoTune() {
-        return m_autoTune;
-    }
-    double getActualPosition() {
-        return m_actualPos;
-    }
-    QString getLoadedSPQStr() {
-        return QString::number(m_loadedSP);
-    }
-    QString getAutoTuneQStr() {
-        return QString::number(m_autoTune);
-    }
-    bool getAutoTuneCMDFlag() {
-        return m_autoTuneCMDFlag;
-    }
-} TUNER;
-
-struct PlasmaHead {
-
-    double m_safetyGap;  //Distance between plasma head & chuck when z at max height
-    double m_plasmaHeadSlitLength; //Plasma head slit length
-    double m_plasmaHeadSlitWidth;  //Plasma head slit width
-    double m_headTemp;
-
-    public:
-    void setHeadTemp(QString temp) {
-        bool ok;
-        m_headTemp = temp.toDouble(&ok);
-    }
-    void setSafetyGap(QString gap) {
-        bool ok;
-        m_safetyGap = gap.toDouble(&ok);
-    }
-    void setPlasmaHeadSlitLength(QString length) {
-        bool ok;
-        m_plasmaHeadSlitLength = length.toDouble(&ok);
-    }
-    void setPlasmaHeadSlitWidth(QString width) {
-        bool ok;
-        m_plasmaHeadSlitWidth = width.toDouble(&ok);
-    }
-    double getPlasmaHeadSlitLength() {
-        return m_plasmaHeadSlitLength;
-    }
-    double getPlasmaHeadSlitWidth() {
-        return m_plasmaHeadSlitWidth;
-    }
-    double getSafetyGap() {
-        return m_safetyGap;
-    }
-    double getHeadTemp() {
-        return m_headTemp;
-    }
-    double getHeadTempInt() {
-        return int(m_headTemp);
-    }
-
-
-} plasmahead;
-//Axes SM
-enum AxisStates {
-    ASM_IDLE = 0x10,
-    ASM_ABS_START = 0x11,
-    ASM_ABS_WAIT = 0x12,
-    ASM_REL_START = 0x13,
-    ASM_REL_WAIT = 0x14,
-    ASM_JOY_ON = 0x15
-};
-//Init Axes SM
-enum InitStates {
-    IASM_IDLE,
-    IASM_STARTUP,
-    IASM_WAIT_FOR_DONE,
-    IASM_INITIALIZED
-};
-//Home Axes SM
-enum HomeAxesStates {
-    HASM_STARTUP,
-    HASM_WAIT_PARK_Z,
-    HASM_HOME_XY,
-    HASM_WAIT_HOME_XY,
-    HASM_HOME_Z,
-    HASM_WAIT_HOME_Z,
-    HASM_SHUTDOWN,
-    HASM_IDLE
-};
-//Two Spot SM
-enum TwoSpotAxesStates {
-    TSSM_SHUTDOWN,
-    TSSM_IDLE,
-    TSSM_STARTUP,
-    TSSM_GET_FIRST,
-    TSSM_WAIT_JOY_BTN_OFF,
-    TSSM_GET_SECOND
-};
-//Scan Axes SM
-enum ScannerState {
-    SASM_IDLE,
-    SASM_STARTUP,
-    SASM_SCAN,
-    SASM_RECYCLE,
-    SASM_SHUTDOWN
-};
-//Scan Sub Axes SM
-enum ScannerSubState {
-    SSSM_IDLE,
-    SSSM_PARK_Z,
-    SSSM_GO_XY_START,
-    SSSM_GO_Z_SCAN_POS,
-    SSSM_SCAN_COL
-};
-//Light SM
-enum lightstate {
-    INACTIVE,
-    ERROR,
-    READY,
-    ACTIVE
-};
-//Main SM
-enum MachineStateMachine {
-    STARTUP,
-    POLLING,
-    IDLE,
-    SHUTDOWN
-};
-
-struct LIGHTSM {
-    lightstate state;
-
-    public:
-    void setState(lightstate state) {
-        this->state = state;
-    }
-} LightTower;
-
-struct STATEMACHINE {
-    MachineStateMachine m_state = IDLE;
-
-    void setState(MachineStateMachine state) {
-        m_state = state;
-    }
-    MachineStateMachine getState() {
-        return m_state;
-    }
-} MainStateMachine;
-
-struct PARAMETERS {
-    int m_numMFCs;
-    bool m_batchLogging;
-    double m_maxXPos;
-    double m_maxXSpeed;
-    double m_homeXPos;
-    double m_maxYPos;
-    double m_maxYSpeed;
-    double m_homeYPos;
-    double m_maxZPos;
-    double m_maxZSpeed;
-    double m_homeZPos;
-
-    public:
-    void setMFCs(QString num) {
-        bool ok;
-        m_numMFCs = num.toInt(&ok);
-    }
-    void setBatchLogging(QString toggle) {
-        bool ok;
-        m_batchLogging = toggle.toInt(&ok);
-    }
-    void setXMaxPos(QString x) {
-        bool ok;
-        m_maxXPos = x.toDouble((&ok));
-    }
-    void setYMaxPos(QString y) {
-        bool ok;
-        m_maxYPos = y.toDouble((&ok));
-    }
-    void setZMaxPos(QString z) {
-        bool ok;
-        m_maxZPos = z.toDouble((&ok));
-    }
-
-    void setXHomePos(QString x) {
-        bool ok;
-        m_homeXPos = x.toDouble((&ok));
-    }
-    void setYHomePos(QString y) {
-        bool ok;
-        m_homeYPos = y.toDouble((&ok));
-    }
-    void setZHomePos(QString z) {
-        bool ok;
-        m_homeZPos = z.toDouble((&ok));
-    }
-
-    void setXMaxSpeed(QString speed) {
-        bool ok;
-        m_maxXSpeed = speed.toDouble((&ok));
-    }
-    void setYMaxSpeed(QString speed) {
-        bool ok;
-        m_maxYSpeed = speed.toDouble((&ok));
-    }
-    void setZMaxSpeed(QString speed) {
-        bool ok;
-        m_maxZSpeed = speed.toDouble((&ok));
-    }
-    double getXMaxPos() {
-        return m_maxXPos;
-    }
-    double getYMaxPos() {
-        return m_maxYPos;
-    }
-    double getZMaxPos() {
-        return m_maxZPos;
-    }
-
-    double getXHomePos() {
-        return m_homeXPos;
-    }
-    double getYHomePos() {
-        return m_homeYPos;
-    }
-    double getZHomePos() {
-        return m_homeZPos;
-    }
-    double getXMaxSpeed() {
-        return m_maxXSpeed;
-    }
-    double getYMaxSpeed() {
-        return m_maxYSpeed;
-    }
-    double getZMaxSpeed() {
-        return m_maxZSpeed;
-    }
-    QString getXMaxSpeedQStr() {
-        return QString::number(m_maxXSpeed, 'f', 2);
-    }
-    QString getYMaxSpeedQStr() {
-        return QString::number(m_maxYSpeed, 'f', 2);
-    }
-    QString getZMaxSpeedQStr() {
-        return QString::number(m_maxZSpeed, 'f', 2);
-    }
-    QString getXHomePosQStr() {
-        return QString::number(m_homeXPos);
-    }
-    QString getYHomePosQStr() {
-        return QString::number(m_homeYPos);
-    }
-    QString getZHomePosQStr() {
-        return QString::number(m_homeZPos);
-    }
-} Param;
-
-struct RECIPE {
-    private:
-        double m_thickness;
-        double m_gap;
-        double m_overlap;
-        double m_speed;
-        int m_cycles = 1;
-        bool m_autoScan;
-        bool m_N2PurgeRecipe;
-        bool m_autoScanFlag;
-
-    public:
-    void setAutoScanFlag(bool toggle) {
-        m_autoScanFlag = toggle;
-    }
-    bool getAutoScanFlag() {
-        return m_autoScanFlag;
-    }
-    void setAutoScan(bool toggle) {
-        m_autoScan = toggle;
-    }
-    void setPurge(bool toggle) {
-        m_N2PurgeRecipe = toggle;
-    }
-    void setCycles(int cycles) {
-        m_cycles = cycles;
-    }
-    void setSpeed(double speed) {
-        m_speed = speed;
-    }
-    void setOverlap(double overlap) {
-        m_overlap = overlap;
-    }
-    void setGap(double gap) {
-        m_gap = gap;
-    }
-    void setThickness(double thickness) {
-        m_thickness = thickness;
-    }
-
-    QString getCycles() {
-        return QString::number(m_cycles);
-    }
-    int getCyclesInt() {
-        return m_cycles;
-    }
-    QString getSpeed() {
-        return QString::number(m_speed);
-    }
-    QString getOverlap() {
-        return QString::number(m_overlap);
-    }
-    QString getGap() {
-        return QString::number(m_gap);
-    }
-    QString getThickness() {
-        return QString::number(m_thickness);
-    }
-    QString getAutoScan() {
-        return QString::number(m_autoScan);
-    }
-
-    QString getPurgeQStr() {
-        return QString::number(m_N2PurgeRecipe);
-    }
-    bool getAutoScanBool() {
-        return m_autoScan;
-    }
-    bool getPurge() {
-        return m_N2PurgeRecipe;
-    }
-
-} recipe;
-struct STAGE {
-    private:
-    double m_pinsBuriedPos;  //Distance in Z from reset-0 to bury the lift pins
-    double m_pinsExposedPos; //Distance in Z from reset-0 to expose the lift pins
-    public:
-    void setPinsBuried(QString pos) {
-        bool ok;
-        this->m_pinsBuriedPos = pos.toDouble(&ok);
-    }
-    void setPinsExposed(QString pos) {
-        bool ok;
-        this->m_pinsExposedPos = pos.toDouble(&ok);
-    }
-    double getPinsBuriedPos() {
-        return m_pinsBuriedPos;
-    }
-    double getPinsExposedPos() {
-        return m_pinsExposedPos;
-    }
-    QString getPinsBuriedPosQStr() {
-        return QString::number(m_pinsBuriedPos);
-    }
-    QString getPinsExposedPosQStr() {
-        return QString::number(m_pinsExposedPos);
-    }
-
-} stage;
-
-struct COORD_SYS {
-    //coordinates relative to stage base
-    double m_Xp_2_base;
-    double m_Yp_2_base;
-    double m_Zp_2_base;
-
-    double m_laserYpos;
-    double m_laserXpos;
-
-    public:
-    //translate displayed PH X,Y,Z to the Base PH X,Y,Z (for motor moves)
-    double TranslateCoordXPH2Base(double x) {
-        return (m_Xp_2_base - x);
-    }
-    double TranslateCoordYPH2Base(double y) {
-        return (m_Yp_2_base - y);
-    }
-    double TranslateCoordZPH2Base(double z) {
-        return (z - m_Zp_2_base);
-    }
-    void setXp2Base(QString x) {
-        bool ok;
-        m_Xp_2_base = x.toDouble((&ok));
-    }
-    void setYp2Base(QString y) {
-        bool ok;
-        m_Yp_2_base = y.toDouble((&ok));
-    }
-    void setZp2Base(QString z) {
-        bool ok;
-        m_Zp_2_base = z.toDouble((&ok));
-    }
-    void setlaserX2Base(QString x) {
-        bool ok;
-        m_laserXpos = x.toDouble((&ok));
-    }
-    void setlaserY2Base(QString y) {
-        bool ok;
-        m_laserYpos = y.toDouble((&ok));
-    }
-    double getXp2Base() {
-        return m_Xp_2_base;
-        }
-    double getYp2Base() {
-        return m_Yp_2_base;
-    }
-    double getZp2Base() {
-        return m_Zp_2_base;
-    }
-    QString getXp2BaseQStr() {
-        return QString::number(m_Xp_2_base);
-        }
-    QString getYp2BaseQStr() {
-        return QString::number(m_Yp_2_base);
-    }
-    QString getZp2BaseQStr() {
-        return QString::number(m_Zp_2_base);
-    }
-    double getYLaser2Base() {
-        return m_laserYpos;
-    }
-
-} CoordParam;
-
-struct AXIS {
-    private:
-    int m_state;
-    int m_error;
-    double m_currentPos;
-
-    public:
-    void setState(QString state) {
-        bool ok;
-        m_state = state.toInt(&ok, 16);
-    }
-    void setError(QString error) {
-        bool ok;
-        m_error = error.toInt(&ok, 16);
-    }
-    void setPosition(QString pos) {
-        bool ok;
-        m_currentPos = pos.toDouble(&ok);
-    }
-    int getState() {
-        return m_state;
-    }
-    int getError() {
-        return m_error;
-    }
-    double getPosition() {
-        return m_currentPos;
-    }
-    QString getQStrPosition() {
-        return QString::number(m_currentPos);
-    }
-
-} X, Y, Z;
-
-
-class AxisController {
-    private:
-    QString m_unparsedStatus;
-    QStringList m_axisStatus;
-    int m_LEDstates;
-    bool m_statusChanged = false;
-    bool m_doorsOpen;
-    bool m_joystickOn;
-    bool sameStateXYZ;
-    bool m_vacuumOn;
-    bool m_nitrogenPurgeOn;
-
-} AxisCTL;
-
-
-//Init Axes SM
-struct INITAXESSTATEMACHINE {
-    private:
-    InitStates m_state;
-    public:
-    InitStates getState() {
-        return m_state;
-    }
-    void setState(InitStates state) {
-        m_state = state;
-    }
-} InitSM;
-
-struct HOMEAXESSTATEMACHINE {
-    private:
-    HomeAxesStates m_state;
-    public:
-    HomeAxesStates getState() {
-        return m_state;
-    }
-    void setState(HomeAxesStates state) {
-        m_state = state;
-    }
-} HomeSM;
-
-struct StageScanner {
-    ScannerState state = SASM_IDLE;
-    ScannerSubState subState = SSSM_IDLE;
-    int numRows = 0;
-    int currentRow = 0;
-    int currentCycle = 0;
-    int scanCycles = 0;
-    double X1 = 0.0;
-    double X2 = 0.0;
-    double Y1 = 0.0;
-    double Y2 = 0.0;
-    double Z1 = 0.0;
-    double Z2 = 0.0;
-    double minX = 0.0;
-    double maxX = 0.0;
-    double minY = 0.0;
-    double maxY = 0.0;
-    double minZ = 0.0;
-    double maxZ = 0.0;
-    double totalXScan = 0.0;
-    double totalYScan = 0.0;
-    double startingXPosition = 0.0;
-    double startingYPosition = 0.0;
-    double nextSweepStartingPosition = 0.0;
-    double endingYPosition = 0.0;
-    double remainingX = 0.0;
-    double scanSweep = 0.0;
-    double scanSpeed = 0.0;
-
-
-    ScannerState getState() const { return state; }
-    void setState(ScannerState value) { state = value; }
-
-    ScannerSubState getSubState() const { return subState; }
-    void setSubState(ScannerSubState value) { subState = value; }
-
-    QString getX1String() const { return QString::number(X1); }
-    double getX1() const { return X1; }
-    void setX1(double value) { X1 = value; }
-
-    QString getX2String() const { return QString::number(X2); }
-    double getX2() const { return X2; }
-    void setX2(double value) { X2 = value; }
-
-    QString getY1String() const { return QString::number(Y1); }
-    double getY1() const { return Y1; }
-    void setY1(double value) { Y1 = value; }
-
-    QString getY2String() const { return QString::number(Y2); }
-    double getY2() const { return Y2; }
-    void setY2(double value) { Y2 = value; }
-
-    double getZ1() const { return Z1; }
-    void setZ1(double value) { Z1 = value; }
-
-    QString getNumRowsString() const { return QString::number(numRows); }
-    int getNumRows() const { return numRows; }
-    void incrementNumRow() { numRows += 1; }
-
-    QString getCurrentRowString() const { return QString::number(currentRow); }
-    int getCurrentRow() const { return currentRow; }
-    void setCurrentRow(int value) { currentRow = value; }
-
-    QString getCurrentCycleString() const { return QString::number(currentCycle); }
-    int getCurrentCycle() const { return currentCycle; }
-    void setCurrentCycle(int value) { currentCycle = value; }
-    void incrementCurrentCycle() { currentCycle += 1; }
-
-    QString getScanSpeedString() const { return QString::number(scanSpeed); }
-    void setRecipeScanSpeed() {
-        bool ok;
-        scanSpeed = recipe.getSpeed().toDouble(&ok);
-    }
-
-    QString getScanCyclesString() const { return QString::number(scanCycles); }
-    int getScanCycles() const { return scanCycles; }
-    void setRecipeScanCycles() {
-        bool ok;
-        scanCycles = recipe.getCycles().toInt(&ok);
-    }
-
-    QString getminXString() const { return QString::number(minX); }
-    QString getmaxXString() const { return QString::number(maxX); }
-    QString getminYString() const { return QString::number(minY); }
-    QString getmaxYString() const { return QString::number(maxY); }
-    void determineSubstrateArea() {
-        double x1 = CoordParam.TranslateCoordXPH2Base(X1);
-        double x2 = CoordParam.TranslateCoordXPH2Base(X2);
-        // Determine the minimum and maximum x values
-        minX = std::min(x1, x2);
-        maxX = std::max(x1, x2);
-
-        double y1 = CoordParam.TranslateCoordYPH2Base(Y1);
-        double y2 = CoordParam.TranslateCoordYPH2Base(Y2);
-        // Determine the minimum and maximum y values
-        minY = std::min(y1, y2);
-        maxY = std::max(y1, y2);
-
-    }
-
-    QString getminZString() const { return QString::number(minZ); }
-    QString getmaxZString() const { return QString::number(maxZ); }
-    void determineStageZMinMax() {
-        bool ok;
-        // Determine the minimum and maximum z values
-        minZ = stage.getPinsBuriedPos();
-        maxZ = CoordParam.getZp2Base() - recipe.getThickness().toDouble(&ok) - recipe.getGap().toDouble(&ok);
-    }
-    QString getScanSweepString () const {
-        return QString::number(scanSweep);
-    }
-    void determineScanSweep() {
-        bool ok;
-        scanSweep = plasmahead.getPlasmaHeadSlitLength() - recipe.getOverlap().toDouble(&ok);
-    }
-
-    void calculateTotalScanXY() {
-        totalXScan = maxX - minX;
-        totalYScan = maxY - minY;
-    }
-
-    void calculateNumScanSweeps() {
-        remainingX = totalXScan;
-        while (remainingX > 0) {
-            incrementNumRow();
-            remainingX -= scanSweep;
-        }
-    }
-    QString getStartingXPositionString () const {
-        return QString::number(startingXPosition);
-    }
-    QString getStartingYPositionString () const {
-        return QString::number(startingYPosition);
-    }
-    QString getEndingYPositionString () const {
-        return QString::number(endingYPosition);
-    }
-    double getStartingXPosition() const { return startingXPosition; }
-    void calculateStartingPositions() {
-        if (totalXScan <= scanSweep) {
-            startingXPosition = (maxX + minX) / 2;
-        }
-        else {
-            startingXPosition = maxX - (scanSweep / 2);
-        }
-        startingYPosition = maxY + plasmahead.getPlasmaHeadSlitLength();
-        endingYPosition = minY + plasmahead.getPlasmaHeadSlitLength();
-    }
-    double getNextSweepStartingPosition() const { return nextSweepStartingPosition; }
-    void setNextSweepStartingPosition() {
-        if (getCurrentRow() > 1) {
-            nextSweepStartingPosition = getStartingXPosition() - (scanSweep);
-        }
-    }
-
-    bool finishedScanning() {
-        if (getCurrentRow() > getNumRows()) {
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-    bool shouldContinueScanning() {
-        return getCurrentCycle() >= getScanCycles();
-    }
-
-} ScanSM;
+MainWindow::MainWindow(QWidget *parent):
+    QMainWindow(parent),
+    ui(new Ui::MainWindow),
+    timer(new QTimer(this)),
+    status(new QLabel),
+    settings(new SettingsDialog),
+    serial(new QSerialPort(this))
+{
+
+    ui->setupUi(this);
+
+    this->setWindowTitle("ONTOS3 INTERFACE");
+
+    ui->actionConnect->setEnabled(true);
+    ui->actionDisconnect->setEnabled(false);
+    ui->actionQuit->setEnabled(true);
+    ui->actionConfigure->setEnabled(true);
+
+    ui->statusBar->addWidget(status);
+
+    ui->tabWidget->setCurrentIndex(0);
+    timer->start(100ms);
+
+    initActionsConnections();
+
+    connect(serial, &QSerialPort::errorOccurred, this, &MainWindow::handleError);
+
+    connect(timer, &QTimer::timeout, this, &MainWindow::mainLoopTick);
+
+    //connect(serial, &QSerialPort::readyRead, this, &MainWindow::readData);
+
+}
+MainWindow::~MainWindow() {
+    delete settings;
+    delete ui;
+}
+
+
+//struct configuration {
+//    QString ExeConfigPath = "./config/";
+//    QString ExeConfigPathFileName = "default";
+//    QString MFC1;
+//    QString MFC2;
+//    QString MFC3;
+//    QString MFC4;
+
+//    public:
+//    QString getMFC1() const;
+//    QString getMFC2() const;
+//    QString getMFC3() const;
+//    QString getMFC4() const;
+
+//    void setMFC1(const QString &newMFC1);
+//    void setMFC2(const QString &newMFC2);
+//    void setMFC3(const QString &newMFC3);
+//    void setMFC4(const QString &newMFC4);
+//    QString getExeConfigPath() const;
+//    QString getExeConfigPathFileName() const;
+
+//} config;
+
+//struct MFController {
+//public:
+//    double m_actualFlow;
+//    double m_loadedFlow;
+//    double m_range;
+//    bool m_readyToLoad;
+
+//    public:
+
+//    void setReadyToLoad(bool toggle) {
+//        m_readyToLoad = toggle;
+//    }
+//    bool getReadyToLoad() {
+//        return m_readyToLoad;
+//    }
+//    void setLoadedFlow(QString flow) {
+//        bool ok;
+//        m_loadedFlow = flow.toDouble(&ok);
+//        this->setReadyToLoad(true);
+//    }
+//    void setRange(QString range) {
+//        bool ok;
+//        m_range = range.toDouble(&ok);
+//    }
+//    void setActualFlow(QString flow) {
+//        bool ok;
+//        m_actualFlow = flow.toDouble(&ok);
+//    }
+//    QString getLoadedFlowQStr() {
+//        return QString::number(m_loadedFlow, 'f', 2);
+//    }
+//    QString getRange() {
+//        return QString::number(m_range, 'f', 2);
+//    }
+//    QString getActualFlow() {
+//        return QString::number(m_actualFlow, 'f', 2);
+//    }
+//    int getActualFlowInt() {
+//        return int(m_actualFlow);
+//    }
+//    double getLoadedFlow() {
+//        return m_loadedFlow;
+//    }
+
+//} MFC[5];
+
+//struct PWR {
+//    public:
+//    int m_loadedSetPoint;
+//    int m_actualPForward;
+//    int m_actualPReflected;
+//    int m_maxWatts;
+//    bool m_readyToLoad;
+
+
+//    public:
+//    void setReadyToLoad(bool toggle) {
+//        m_readyToLoad = toggle;
+//    }
+//    bool getReadyToLoad() {
+//        return m_readyToLoad;
+//    }
+//    void setLoadedSetPoint(QString value) {
+//        bool ok;
+//        m_loadedSetPoint = value.toInt(&ok);
+//        this->setReadyToLoad(true);
+//    }
+//    void setMaxWatts(QString max) {
+//        bool ok;
+//        m_maxWatts = max.toInt(&ok);
+//    }
+//    void setActualWatts(QString watts) {
+//        bool ok;
+//        m_actualPForward = watts.toInt(&ok, 10);
+//    }
+//    void setActualRefWatts(QString watts) {
+//        bool ok;
+//        m_actualPReflected = watts.toInt(&ok, 10);
+//    }
+//    int getLoadedSetPoint() {
+//        return m_loadedSetPoint;
+//    }
+//    QString getLoadedSetPointQStr() {
+//        return QString::number(m_loadedSetPoint);
+//    }
+//    int getActualWatts() {
+//        return m_actualPForward;
+//    }
+//    int getReflectedWatts() {
+//        return m_actualPReflected;
+//    }
+//} RF;
+
+//struct TUNER_POS {
+//    public:
+//    double m_loadedSP;
+//    double m_actualPos;
+//    double m_actualPosPct;
+//    bool m_autoTune;
+//    bool m_autoTuneCMDFlag;
+//    bool m_readyToLoad;
+
+//    public:
+//    void setReadyToLoad(bool toggle) {
+//        m_readyToLoad = toggle;
+//    }
+//    bool getReadyToLoad() {
+//        return m_readyToLoad;
+//    }
+//    void setAutoTuneCMDFlag(bool toggle) {
+//        m_autoTuneCMDFlag = toggle;
+//    }
+//    void setLoadedValue(QString value) {
+//        bool ok;
+//        m_loadedSP = value.toDouble(&ok);
+//        this->setReadyToLoad(true);
+//    }
+//    void setAutoMode(QString value) {
+//        bool ok;
+//        m_autoTune = value.toInt(&ok);
+//        this->setAutoTuneCMDFlag(true);
+//    }
+//    void setActualPosition(QString pos) {
+//        bool ok;
+//        m_actualPos = pos.toDouble(&ok);
+//    }
+
+//    double getLoadedSP() {
+//        return m_loadedSP;
+//    }
+//    int getLoadedSPInteger() {
+//        return int(m_loadedSP);
+//    }
+//    bool getAutoTune() {
+//        return m_autoTune;
+//    }
+//    double getActualPosition() {
+//        return m_actualPos;
+//    }
+//    QString getLoadedSPQStr() {
+//        return QString::number(m_loadedSP);
+//    }
+//    QString getAutoTuneQStr() {
+//        return QString::number(m_autoTune);
+//    }
+//    bool getAutoTuneCMDFlag() {
+//        return m_autoTuneCMDFlag;
+//    }
+//} TUNER;
+
+
+////Init Axes SM
+//enum InitStates {
+//    IASM_IDLE,
+//    IASM_STARTUP,
+//    IASM_WAIT_FOR_DONE,
+//    IASM_INITIALIZED
+//};
+////Home Axes SM
+//enum HomeAxesStates {
+//    HASM_STARTUP,
+//    HASM_WAIT_PARK_Z,
+//    HASM_HOME_XY,
+//    HASM_WAIT_HOME_XY,
+//    HASM_HOME_Z,
+//    HASM_WAIT_HOME_Z,
+//    HASM_SHUTDOWN,
+//    HASM_IDLE
+//};
+////Two Spot SM
+//enum TwoSpotAxesStates {
+//    TSSM_SHUTDOWN,
+//    TSSM_IDLE,
+//    TSSM_STARTUP,
+//    TSSM_GET_FIRST,
+//    TSSM_WAIT_JOY_BTN_OFF,
+//    TSSM_GET_SECOND
+//};
+
+
+//struct PARAMETERS {
+//    int m_numMFCs;
+//    bool m_batchLogging;
+//    double m_maxXPos;
+//    double m_maxXSpeed;
+//    double m_homeXPos;
+//    double m_maxYPos;
+//    double m_maxYSpeed;
+//    double m_homeYPos;
+//    double m_maxZPos;
+//    double m_maxZSpeed;
+//    double m_homeZPos;
+
+//    public:
+//    void setMFCs(QString num) {
+//        bool ok;
+//        m_numMFCs = num.toInt(&ok);
+//    }
+//    void setBatchLogging(QString toggle) {
+//        bool ok;
+//        m_batchLogging = toggle.toInt(&ok);
+//    }
+//    void setXMaxPos(QString x) {
+//        bool ok;
+//        m_maxXPos = x.toDouble((&ok));
+//    }
+//    void setYMaxPos(QString y) {
+//        bool ok;
+//        m_maxYPos = y.toDouble((&ok));
+//    }
+//    void setZMaxPos(QString z) {
+//        bool ok;
+//        m_maxZPos = z.toDouble((&ok));
+//    }
+
+//    void setXHomePos(QString x) {
+//        bool ok;
+//        m_homeXPos = x.toDouble((&ok));
+//    }
+//    void setYHomePos(QString y) {
+//        bool ok;
+//        m_homeYPos = y.toDouble((&ok));
+//    }
+//    void setZHomePos(QString z) {
+//        bool ok;
+//        m_homeZPos = z.toDouble((&ok));
+//    }
+
+//    void setXMaxSpeed(QString speed) {
+//        bool ok;
+//        m_maxXSpeed = speed.toDouble((&ok));
+//    }
+//    void setYMaxSpeed(QString speed) {
+//        bool ok;
+//        m_maxYSpeed = speed.toDouble((&ok));
+//    }
+//    void setZMaxSpeed(QString speed) {
+//        bool ok;
+//        m_maxZSpeed = speed.toDouble((&ok));
+//    }
+//    double getXMaxPos() {
+//        return m_maxXPos;
+//    }
+//    double getYMaxPos() {
+//        return m_maxYPos;
+//    }
+//    double getZMaxPos() {
+//        return m_maxZPos;
+//    }
+
+//    double getXHomePos() {
+//        return m_homeXPos;
+//    }
+//    double getYHomePos() {
+//        return m_homeYPos;
+//    }
+//    double getZHomePos() {
+//        return m_homeZPos;
+//    }
+//    double getXMaxSpeed() {
+//        return m_maxXSpeed;
+//    }
+//    double getYMaxSpeed() {
+//        return m_maxYSpeed;
+//    }
+//    double getZMaxSpeed() {
+//        return m_maxZSpeed;
+//    }
+//    QString getXMaxSpeedQStr() {
+//        return QString::number(m_maxXSpeed, 'f', 2);
+//    }
+//    QString getYMaxSpeedQStr() {
+//        return QString::number(m_maxYSpeed, 'f', 2);
+//    }
+//    QString getZMaxSpeedQStr() {
+//        return QString::number(m_maxZSpeed, 'f', 2);
+//    }
+//    QString getXHomePosQStr() {
+//        return QString::number(m_homeXPos);
+//    }
+//    QString getYHomePosQStr() {
+//        return QString::number(m_homeYPos);
+//    }
+//    QString getZHomePosQStr() {
+//        return QString::number(m_homeZPos);
+//    }
+//} Param;
+
+
+
+
+
+
+
+
+
+
+////Init Axes SM
+//struct INITAXESSTATEMACHINE {
+//    private:
+//    InitStates m_state;
+//    public:
+//    InitStates getState() {
+//        return m_state;
+//    }
+//    void setState(InitStates state) {
+//        m_state = state;
+//    }
+//} InitSM;
+
+//struct HOMEAXESSTATEMACHINE {
+//    private:
+//    HomeAxesStates m_state;
+//    public:
+//    HomeAxesStates getState() {
+//        return m_state;
+//    }
+//    void setState(HomeAxesStates state) {
+//        m_state = state;
+//    }
+//} HomeSM;
+
+
 
 
 //    ScannerState state;
@@ -1033,1452 +595,371 @@ struct StageScanner {
 
 
 
-struct TWOSPOTAXESSTATEMACHINE {
-    TwoSpotAxesStates m_state;
-    TwoSpotAxesStates external_new_state;
-    bool external_state_change;
+//struct TWOSPOTAXESSTATEMACHINE {
+//    TwoSpotAxesStates m_state;
+//    TwoSpotAxesStates external_new_state;
+//    bool external_state_change;
 
-    double m_firstXpos;
-    double m_firstYpos;
-    double m_secondXpos;
-    double m_secondYpos;
+//    double m_firstXpos;
+//    double m_firstYpos;
+//    double m_secondXpos;
+//    double m_secondYpos;
 
-    TwoSpotAxesStates getState() {
-        return this->m_state;
-    }
-    void setState(TwoSpotAxesStates state) {
-        this->m_state = state;
-    }
-
-    public:
-    double getFirstX() {
-        return m_firstXpos;
-    }
-    double getFirstY() {
-        return m_firstYpos;
-    }
-    double getSecondX() {
-        return m_secondXpos;
-    }
-    double getSecondY() {
-        return m_secondYpos;
-    }
-    void setFirstX(double x) {
-        m_firstXpos = x;
-    }
-    void setFirstY(double y) {
-        m_firstYpos = y;
-    }
-    void setSecondX(double x) {
-        m_secondXpos = x;
-    }
-    void setSecondY(double y) {
-        m_secondYpos = y;
-    }
-    void checkXDimensions() {
-        if (m_firstXpos > m_secondXpos) {
-            ScanSM.setX2(m_firstXpos);
-            ScanSM.setX1(m_secondXpos);
-        }
-        else {
-            ScanSM.setX1(m_firstXpos);
-            ScanSM.setX2(m_secondXpos);
-        }
-    }
-    void checkYDimensions() {
-        if (m_firstYpos > m_secondYpos) {
-            ScanSM.setY2(m_firstYpos);
-            ScanSM.setY1(m_secondYpos);
-        }
-        else {
-            ScanSM.setY1(m_firstYpos);
-            ScanSM.setY2(m_secondYpos);
-        }
-    }
-} TwoSpotSM;
-
-
-
-MainWindow::MainWindow(QWidget *parent):
-    QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    timer(new QTimer(this)),
-    status(new QLabel),
-    settings(new SettingsDialog),
-    serial(new QSerialPort(this))
-{
-
-    ui->setupUi(this);
-
-    this->setWindowTitle("ONTOS3 INTERFACE");
-
-    ui->actionConnect->setEnabled(true);
-    ui->actionDisconnect->setEnabled(false);
-    ui->actionQuit->setEnabled(true);
-    ui->actionConfigure->setEnabled(true);
-
-    ui->statusBar->addWidget(status);
-
-    ui->tabWidget->setCurrentIndex(0);
-    timer->start(100ms);
-
-    initActionsConnections();
-
-    connect(serial, &QSerialPort::errorOccurred, this, &MainWindow::handleError);
-
-    connect(timer, &QTimer::timeout, this, &MainWindow::mainLoopTick);
-
-    //connect(serial, &QSerialPort::readyRead, this, &MainWindow::readData);
-
-}
-MainWindow::~MainWindow() {
-    delete settings;
-    delete ui;
-}
-
-
-void MainWindow::handleError(QSerialPort::SerialPortError error) {
-    if (error == QSerialPort::ResourceError) {
-        QMessageBox::critical(this, tr("Critical Error"), serial->errorString());
-        closeSerialPort();
-    }
-}
-void MainWindow::closeSerialPort() {
-    MainStateMachine.setState(SHUTDOWN);
-    if (serial->isOpen()) {
-        resetCTL();
-        resetAxes();
-        serial->close();
-    }
-
-    ui->actionConnect->setEnabled(true);
-    ui->actionDisconnect->setEnabled(false);
-    ui->actionConfigure->setEnabled(true);
-    logInfo("Port Disconnected");
-    showStatusMessage(tr("Disconnected"));
-}
-void MainWindow::openSerialPort() {
-    const SettingsDialog::Settings p = settings->settings();
-    serial->setPortName(p.name);
-    serial->setBaudRate(p.baudRate);
-    serial->setDataBits(p.dataBits);
-    serial->setParity(p.parity);
-    serial->setStopBits(p.stopBits);
-    serial->setFlowControl(p.flowControl);
-    if (serial->open(QIODevice::ReadWrite)) {
-        ui->actionConnect->setEnabled(false);
-        ui->actionDisconnect->setEnabled(true);
-        ui->actionConfigure->setEnabled(false);
-        resetAxes();
-        resetCTL();
-        CTLResetTimeOut = 2500ms / timer->interval();
-        (DEBUG_MODE) ? MainStateMachine.setState(IDLE) : MainStateMachine.setState(STARTUP);
-        Logger::init();
-        showStatusMessage(tr("Connected to %1 : %2, %3, %4, %5, %6")
-                          .arg(p.name).arg(p.stringBaudRate).arg(p.stringDataBits)
-                          .arg(p.stringParity).arg(p.stringStopBits).arg(p.stringFlowControl));
-    } else {
-        QMessageBox::critical(this, tr("Error"), serial->errorString());
-        showStatusMessage(tr("Open Port error"));
-    }
-}
-
-void MainWindow::mainLoopTick() {
-    static bool mainLoopRunning;
-    if (mainLoopRunning)
-        return;
-
-    mainLoopRunning = true;
-
-    runstateMachine();
-
-    mainLoopRunning = false;
-}
-void MainWindow::shutDownProgram() {
-    closeSerialPort();
-    Logger::clean();
-    MainWindow::close();
-}
-void MainWindow::runstateMachine() {
-    switch(MainStateMachine.getState()) {
-      case STARTUP:
-        if (CTLResetTimeOut > 0ms) {
-            CTLResetTimeOut -= 1ms;
-            break;
-        }
-        else {
-            logInfo("Main State Machine Start Up");
-            RunStartup();
-            MainStateMachine.setState(POLLING);
-            UpdateStatus();
-            break;
-        }
-      case POLLING:
-        RunCheckInput();
-
-        SM_PollCounter += 1;
-        if (SM_PollCounter >= SM_POLL_PERIOD) {
-            SM_PollCounter = 0;
-            RunPolling();
-            UpdateStatus();
-            setLightTower();
-            RunInitAxesSM();
-            RunTwoSpotAxesSM();
-            RunHomeAxesSM();
-            RunScanAxesSM();
-
-        }
-        break;
-      case IDLE:
-        break;
-      case SHUTDOWN:
-        break;
-        UpdateStatus(0);
-    }
-}
-void MainWindow::CTLStartup() {
-    howManyMFCs();
-    getBatchIDLogging();
-    getRecipeMBPosition();
-    getRecipeRFPosition();
-    getRecipeMFC4Flow();
-    getRecipeMFC3Flow();
-    getRecipeMFC2Flow();
-    getRecipeMFC1Flow();
-    getMFC4Range();
-    getMFC3Range();
-    getMFC2Range();
-    getMFC1Range();
-    getMaxRFPowerForward();
-    getAutoMan();
-    turnOffExecRecipe();
-    getTemp();
-    setCTLStateMachinesIdle();
-}
-void MainWindow::RunStartup() {
-    GetExeCfg();
-    CTLStartup();
-    AxisStartup();
-}
-
-void MainWindow::AxisStartup() {
-    getXMaxSpeed();
-    getYMaxSpeed();
-    getZMaxSpeed();
-    getXp2Base();
-    getYp2Base();
-    getZp2Base();
-    getXs2PH();
-    getYs2PH();
-    getPHSlitLength();
-    getPHSlitWidth();
-    getPHSafetyZGap();
-    getZPinsBuried();
-    getZPinsExposed();
-    getLoadX2Base();
-    getLoadY2Base();
-    getLoadZ2Base();
-    setAxisStateMachinesIdle();
-}
-void MainWindow::RunPolling() {
-    getCTLStatus();
-    //didCTLStatusChange(); //is this for logging?
-    splitRCV();
-    //! [0]
-    setStatusBitsFromPoll();
-    UpdateStatus();
-    //! [1]
-    setTunerPosition();
-    displayTunerPosition();
-    //! [2]
-    setRFPower();
-    displayRFValue();
-    //! [3]
-    setReflectedPower();
-    displayReflectedPower();
-    //! [4]
-    //! setExecRecipe()
-    //! [5]
-    setMFC1();
-    MFC1ActualFlow();
-    //! [6]
-    setMFC2();
-    MFC2ActualFlow();
-    //! [7]
-    setMFC3();
-    MFC3ActualFlow();
-    //! [8]
-    setMFC4();
-    MFC4ActualFlow();
-    //! [9]
-    setTempValue();
-    getHeadTemp();
-    //! [10]
-    //UpdateHandshakeStatus();
-    //! [11]
-    getAxisStatus();
-}
-//CTL Startup
-void MainWindow::howManyMFCs() {
-    writeRequest("$2A002%", 7);
-    readData();
-    if (RCV.length() > 7) {
-        QString StrVar = RCV.mid(7,1); //GET Number of MFCs (1-4) $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
-        if (StringIsValidIntChars(StrVar)) {
-            Param.setMFCs(StrVar);
-            logInfo("Number of MFC's: " + StrVar + "");
-        }
-    }
-    else
-        logCritical("Could Not set # of MFCs, last requestData: " + requestData );
-
-}
-void MainWindow::getBatchIDLogging() {
-    writeRequest("$2A011%", 7); //GET BatchIDLogging $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
-    readData();
-    if (RCV.length() > 7) {
-        QString StrVar = RCV.mid(7, 1);
-        if (StringIsValidIntChars(StrVar)) {
-            Param.setBatchLogging(StrVar);
-            logInfo("Batch Logging On/Off: " + StrVar);
-        }
-    }
-    else
-        logCritical("Could Not retrieve Batch Logging, last requestData sent: " + requestData );
-}
-void MainWindow::getRecipeMBPosition() {
-    writeRequest("$2A606%", 7); //GET RECIPE MB Start Position () $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
-    readData();
-    if (RCV.length() > 7) {
-        QString StrVar = RCV.mid(7, 7);
-        if (StringIsValidDoubleChars(StrVar)) {
-            TUNER.setLoadedValue(StrVar);
-            setRecipeMB();
-            logInfo("Loaded MB Setpoint: " + StrVar + " %");
-        }
-    }
-    else
-        logCritical("Could Not retrieve MB tuner setpoint, last requestData sent: " + requestData );
-}
-void MainWindow::getRecipeRFPosition() {
-    writeRequest("$2A605%", 7); //GET RECIPE RF PWR Setpoint (Watts) $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
-    readData();
-    if (RCV.length() > 7) {
-        QString StrVar = RCV.mid(7, 4);
-        if (StringIsValidIntChars(StrVar)) {
-            RF.setLoadedSetPoint(StrVar);
-            setRecipeRF();
-            logInfo("Loaded RF Setpoint: " + StrVar);
-        }
-    }
-    else
-        logCritical("Could Not retrieve RF setpoint, last requestData sent: " + requestData );
-}
-void MainWindow::getRecipeMFC4Flow() {
-    writeRequest("$2A604%", 7); //GET RECIPE MFC4 Flow (SLPM) $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
-    readData();
-    if (RCV.length() > 7) {
-        QString StrVar = RCV.mid(7, (RCV.length() - 8));
-        if (StringIsValidDoubleChars(StrVar)) {
-            MFC[4].setLoadedFlow(StrVar);
-            MFC4RecipeFlow();
-            logInfo("Loaded MFC 4 Flow Rate: " + StrVar);
-        }
-    }
-    else
-        logCritical("Could Not retrieve MFC 4 setpoint, last requestData sent: " + requestData );
-}
-void MainWindow::getRecipeMFC3Flow() {
-    writeRequest("$2A603%", 7); //GET RECIPE MFC3 Flow (SLPM) $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
-    readData();
-    if (RCV.length() > 7) {
-        QString StrVar = RCV.mid(7, (RCV.length() - 8));
-        if (StringIsValidDoubleChars(StrVar)) {
-            MFC[3].setLoadedFlow(StrVar);
-            MFC3RecipeFlow();
-            logInfo("Loaded MFC 3 Flow Rate: " + StrVar);
-        }
-    }
-    else
-        logCritical("Could Not retrieve MFC 3 setpoint, last requestData sent: " + requestData );
-}
-void MainWindow::getRecipeMFC2Flow() {
-    writeRequest("$2A602%", 7); //GET RECIPE MFC2 Flow (SLPM) $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
-    readData();
-    if (RCV.length() > 7) {
-        QString StrVar = RCV.mid(7, (RCV.length() - 8));
-        if (StringIsValidDoubleChars(StrVar)) {
-            MFC[2].setLoadedFlow(StrVar);
-            MFC2RecipeFlow();
-            logInfo("Loaded MFC 2 Flow Rate: " + StrVar);
-        }
-    }
-    else
-        logCritical("Could Not retrieve MFC 2 setpoint, last requestData sent: " + requestData );
-}
-void MainWindow::getRecipeMFC1Flow() {
-    writeRequest("$2A601%", 7); //GET RECIPE MFC1 Flow (SLPM) $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
-    readData();
-    if (RCV.length() > 7) {
-        QString StrVar = RCV.mid(7, (RCV.length() - 8));
-        if (StringIsValidDoubleChars(StrVar)) {
-            MFC[1].setLoadedFlow(StrVar);
-            MFC1RecipeFlow();
-            logInfo("Loaded MFC 1 Flow Rate: " + StrVar);
-        }
-    }
-    else
-        logCritical("Could Not retrieve MFC 1 setpoint, last requestData sent: " + requestData );
-}
-void MainWindow::getMFC4Range() {
-    writeRequest("$8504%", 6); //GET_MFC_RANGE $850m% 1<=m<=4; resp[!850xxx.yy#]
-    readData();
-    if (RCV.length() > 6) {
-        QString StrVar = RCV.mid(5, (RCV.length() - 6));
-        if (StringIsValidDoubleChars(StrVar)) {
-            MFC[4].setRange(StrVar);
-            logInfo("Loaded MFC 4 Range: " + StrVar);
-        }
-    }
-    else
-        logCritical("Could Not retrieve MFC 4 range, last requestData sent: " + requestData );
-}
-void MainWindow::getMFC3Range() {
-    writeRequest("$8503%", 6); //GET_MFC_RANGE $850m% 1<=m<=4; resp[!850xxx.yy#]
-    readData();
-    if (RCV.length() > 6) {
-        QString StrVar = RCV.mid(5, (RCV.length() - 6));
-        if (StringIsValidDoubleChars(StrVar)) {
-            MFC[3].setRange(StrVar);
-            logInfo("Loaded MFC 3 Range: " + StrVar);
-        }
-    }
-    else
-        logCritical("Could Not retrieve MFC 3 range, last requestData sent: " + requestData );
-}
-void MainWindow::getMFC2Range() {
-    writeRequest("$8502%", 6); //GET_MFC_RANGE $850m% 1<=m<=4; resp[!850xxx.yy#]
-    readData();
-    if (RCV.length() > 6) {
-        QString StrVar = RCV.mid(5, (RCV.length() - 6));
-        if (StringIsValidDoubleChars(StrVar)) {
-            MFC[2].setRange(StrVar);
-            logInfo("Loaded MFC 2 Range: " + StrVar);
-        }
-    }
-    else
-        logCritical("Could Not retrieve MFC 2 range, last requestData sent: " + requestData );
-}
-void MainWindow::getMFC1Range() {
-    writeRequest("$8501%", 6); //GET_MFC_RANGE $850m% 1<=m<=4; resp[!850xxx.yy#]
-    readData();
-    if (RCV.length() > 6) {
-        QString StrVar = RCV.mid(5, (RCV.length() - 6));
-        if (StringIsValidDoubleChars(StrVar)) {
-            MFC[1].setRange(StrVar);
-            logInfo("Loaded MFC 1 Range: " + StrVar);
-        }
-    }
-    else
-        logCritical("Could Not retrieve MFC 1 range, last requestData sent: " + requestData );
-}
-void MainWindow::getMaxRFPowerForward() {
-    writeRequest("$2A705%", 7); //Get Max RF power forward  $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
-    readData();
-    if (RCV.length() > 7) {
-        QString StrVar = RCV.mid(7, 3);
-        if (StringIsValidIntChars(StrVar)) {
-            RF.setMaxWatts(StrVar);
-            logInfo("Loaded Max RF Forward: " + StrVar);
-        }
-    }
-    else
-        logCritical("Could Not retrieve MFC 1 range, last requestData sent: " + requestData );
-}
-void MainWindow::getAutoMan() {
-    writeRequest("$89%", 4); //GET_AUTO_MAN   $89%; resp [!890p#] p=1 AutoMode, p=0 ManualMode
-    readData();
-    if (RCV.length() > 3) {
-        QString StrVar = RCV.mid(3, 2);
-        if (StringIsValidHexChars(StrVar)) {
-            TUNER.setAutoMode(StrVar);
-            if (TUNER.getAutoTune()) {
-                toggleAutoTuneOn();
-            }
-            else {
-                toggleAutoTuneOff();
-            }
-            logInfo("Loaded Tuner Auto Setting: " + StrVar);
-        }
-    }
-    else
-        logCritical("Could Not retrieve Auto/Manual setting, last requestData sent: " + requestData );
-}
-void MainWindow::getTemp() {
-    writeRequest("$8C%", 4);
-    readData();
-    if (RCV.length() > 3) {
-        QString StrVar = RCV.mid(3, 4);
-        if (StringIsValidDoubleChars(StrVar)) {
-            plasmahead.setHeadTemp(StrVar);
-            getHeadTemp();
-            logInfo("Loaded current temperature: " + StrVar);
-        }
-    else
-        logCritical("Could Not retrieve temperature, last requestData sent: " + requestData );
-    }
-}
-void MainWindow::setCTLStateMachinesIdle() {
-    LightTower.setState(INACTIVE);
-}
-//CTL Commands
-void MainWindow::resetCTL() {
-    writeRequest("$90%", 4);
-    readData();
-}
-
-void MainWindow::turnOnExecRecipe() {
-    writeRequest("$8701%", 6); //SET_EXEC_RECIPE  $870p% p=1 Execute Recipe, p=0 RF off, Recipe off
-    readData();
-    ui->plsmaBtn->setText("PLASMA OFF");
-    logInfo("Execute Recipe : Enabled");
-}
-void MainWindow::turnOffExecRecipe() {
-    writeRequest("$8700%", 6); //SET_EXEC_RECIPE  $870p% p=1 Execute Recipe, p=0 RF off, Recipe off
-    readData();
-    ui->plsmaBtn->setText("START PLASMA");
-    logInfo("Execute Recipe : Disabled");
-}
-void MainWindow::getCTLStatus() {
-    writeRequest("$91%", 4); //GET_STATUS    $91% ; resp[!91LLRR#] LL = left LEDS, RR = right LEDS
-    readData();
-}
-void MainWindow::splitRCV() {
-    PCBStatus = RCV;
-    CTLparametersAndValues = RCV.split(QLatin1Char(';'));
-}
-void MainWindow::setStatusBitsFromPoll() {
-    bool ok;    
-    QString StrVar = CTLparametersAndValues[0].mid(3);
-    StatusBits = StrVar.toInt(&ok, 16);
-}
-void MainWindow::didStatusBitsChange() {
-    if (StatusBits != StatusBitsWas)
-        logInfo("Status Bits Change from " + QString::number(StatusBitsWas) + " to " + QString::number(StatusBits));
-}
-void MainWindow::UpdateStatus() {
-        didStatusBitsChange();
-        StatusBitsWas = StatusBits;
-
-        (StatusBits & 0x0100) > 0 ? ui->actionGAS_1->setChecked(true) : ui->actionGAS_1->setChecked(false);
-        (StatusBits & 0x0200) > 0 ? ui->actionGAS_2->setChecked(true) : ui->actionGAS_2->setChecked(false);
-        (StatusBits & 0x0400) > 0 ? ui->actionGAS_3->setChecked(true) : ui->actionGAS_3->setChecked(false);
-        (StatusBits & 0x0800) > 0 ? ui->actionGAS_4->setChecked(true) : ui->actionGAS_4->setChecked(false);
-
-        (StatusBits & 0x1000) > 0 ? ui->actionV5->setChecked(true) : ui->actionV5->setChecked(false);
-        (StatusBits & 0x2000) > 0 ? ui->actionV6->setChecked(true) : ui->actionV6->setChecked(false);
-        (StatusBits & 0x4000) > 0 ? ui->actionV7->setChecked(true) : ui->actionV7->setChecked(false);
-        (StatusBits & 0x8000) > 0 ? ui->actionRF_ENABLED->setChecked(true) : ui->actionRF_ENABLED->setChecked(false);
-
-        (StatusBits & 0x0001) > 0 ? ui->actionPLASMA_ON->setChecked(true) : ui->actionPLASMA_ON->setChecked(false);
-        (StatusBits & 0x0002) > 0 ? ui->actionTUNING->setChecked(true) : ui->actionTUNING->setChecked(false);
-        (StatusBits & 0x0004) > 0 ? ui->actionAUTO_MODE->setChecked(true) : ui->actionAUTO_MODE->setChecked(false);
-        (StatusBits & 0x0008) > 0 ? ui->actionEXECUTE_RECIPE->setChecked(true) : ui->actionEXECUTE_RECIPE->setChecked(false);
-
-        (StatusBits & 0x0010) > 0 ? ui->actionESTOP_ON->setChecked(true) : ui->actionESTOP_ON->setChecked(false);
-        (StatusBits & 0x0020) > 0 ? ui->actionDO_CMD->setChecked(true) : ui->actionDO_CMD->setChecked(false);
-        (StatusBits & 0x0040) > 0 ? ui->actionHE_SIG->setChecked(true) : ui->actionHE_SIG->setChecked(false);
-        (StatusBits & 0x0080) > 0 ? ui->actionPROCESS_ABORT->setChecked(true) : ui->actionPROCESS_ABORT->setChecked(false);
-
-        if (ui->actionEXECUTE_RECIPE->isChecked()) {
-            RunRecipeOn = true;
-        }
-        else {
-            RunRecipeOn= false;
-        }
-
-}
-
-void MainWindow::setMFC4() {
-    if (StringIsValidDoubleChars(CTLparametersAndValues[8])) {
-        MFC[4].setActualFlow(CTLparametersAndValues[8]);
-    };
-}
-void MainWindow::setMFC3() {
-    if (StringIsValidDoubleChars(CTLparametersAndValues[7])) {
-        MFC[3].setActualFlow(CTLparametersAndValues[7]);
-    };
-}
-void MainWindow::setMFC2() {
-    if (StringIsValidDoubleChars(CTLparametersAndValues[6])) {
-        MFC[2].setActualFlow(CTLparametersAndValues[6]);
-    };
-}
-void MainWindow::setMFC1() {
-    if (StringIsValidDoubleChars(CTLparametersAndValues[5])) {
-        MFC[1].setActualFlow(CTLparametersAndValues[5]);
-    };
-}
-void MainWindow::setReflectedPower() {
-    if (StringIsValidDoubleChars(CTLparametersAndValues[3])) {
-        RF.setActualRefWatts(CTLparametersAndValues[3]);
-    };
-}
-void MainWindow::setRFPower() {
-    if (StringIsValidDoubleChars(CTLparametersAndValues[2])) {
-        RF.setActualWatts(CTLparametersAndValues[2]);
-    };
-}
-void MainWindow::setTunerPosition() {
-    if (StringIsValidDoubleChars(CTLparametersAndValues[1])) {
-        TUNER.setActualPosition(CTLparametersAndValues[1]);
-    };
-}
-void MainWindow::setTempValue() {
-    plasmahead.setHeadTemp(CTLparametersAndValues[9]);
-}
-void MainWindow::setHandshakeStatus() {
-    bool ok;
-    if (StringIsValidHexChars(CTLparametersAndValues[10])) {
-        HandshakeStatusBits = CTLparametersAndValues[10].toInt(&ok, 16);
-    };
-}
-
-void MainWindow::UpdateHandshakeStatus(int myHandshakeStatusBits) {
-    if (myHandshakeStatusBits != HandshakeStatusBitsWas) {
-        logInfo("Handshake Status Bits Change from " + BinInt2String(HandshakeStatusBitsWas) + " to " + BinInt2String(myHandshakeStatusBits));
-
-        HandshakeStatusBitsWas = myHandshakeStatusBits;
-
-        if ((myHandshakeStatusBits & 0x0001) > 0)
-            ui->actionP_RDY->toggle();
-        if ((myHandshakeStatusBits & 0x0002) > 0)
-            ui->actionP_AVAIL->toggle();
-        if ((myHandshakeStatusBits & 0x0004) > 0)
-            ui->actionRUN_P->toggle();
-    }
-}
-void MainWindow::setLEDstate(QString firstHexStrNibble, QString secondHexStrNibble) {
-    bool ok;
-    LEDstates = firstHexStrNibble.toInt(&ok, 16); //First byte
-    LEDstates = LEDstates<<8;
-    LEDstates += secondHexStrNibble.toInt(&ok, 16); //First byte
-}
-
-//Axis Startup
-void MainWindow::getXMaxSpeed() {
-    writeRequest("$DA107%", 7); //GET_X_MAX_SPEED  $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value
-    readData();
-    if (RCV.length() > 7) {
-        QString StrVar = RCV.mid(7, (RCV.length() - 8));
-        if (StringIsValidDoubleChars(StrVar)) {
-            Param.setXMaxSpeed(StrVar);
-            logInfo("X Max Speed: " + StrVar + "");
-        }
-    }
-    else
-        logCritical("Could Not get max speed for X, last requestData: " + requestData );
-}
-
-void MainWindow::getYMaxSpeed() {
-    writeRequest("$DA207%", 7); //GET_Y_MAX_SPEED  $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value
-    readData();
-    if (RCV.length() > 7) {
-        QString StrVar = RCV.mid(7, (RCV.length() - 8));
-        if (StringIsValidDoubleChars(StrVar)) {
-            Param.setYMaxSpeed(StrVar);
-            logInfo("Y Max Speed: " + StrVar + "");
-        }
-    }
-    else
-        logCritical("Could Not get max speed for Y, last requestData: " + requestData );
-}
-void MainWindow::getZMaxSpeed() {
-    writeRequest("$DA307%", 7); //GET_Z_MAX_SPEED  $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value
-    readData();
-    if (RCV.length() > 7) {
-        QString StrVar = RCV.mid(7, (RCV.length() - 8));
-        if (StringIsValidDoubleChars(StrVar)) {
-            Param.setZMaxSpeed(StrVar);
-            logInfo("Z Max Speed: " + StrVar + "");
-        }
-    }
-    else
-        logCritical("Could Not get max speed for Z, last requestData: " + requestData );
-}
-void MainWindow::getXp2Base() {
-    writeRequest("$DA510%", 7); //GET Xp_2Base  $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value
-    readData();
-    if (RCV.length() > 7) {
-        QString StrVar = RCV.mid(7, (RCV.length() - 8));
-        if (StringIsValidDoubleChars(StrVar)) {
-            CoordParam.setXp2Base(StrVar);
-            logInfo("Xp to Base: " + StrVar + "");
-        }
-    }
-    else
-        logCritical("Could Not get X relative to Base, last requestData: " + requestData );
-}
-void MainWindow::getYp2Base() {
-    writeRequest("$DA520%", 7); //GET Yp_2Base  $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value
-    readData();
-    if (RCV.length() > 7) {
-        QString StrVar = RCV.mid(7, (RCV.length() - 8));
-        if (StringIsValidDoubleChars(StrVar)) {
-            CoordParam.setYp2Base(StrVar);
-            logInfo("Yp to Base: " + StrVar + "");
-        }
-    }
-    else
-        logCritical("Could Not get Y relative to Base, last requestData: " + requestData );
-}
-void MainWindow::getZp2Base() {
-    writeRequest("$DA530%", 7); //GET Zp_2Base  $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value
-    readData();
-    if (RCV.length() > 7) {
-        QString StrVar = RCV.mid(7, (RCV.length() - 8));
-        if (StringIsValidDoubleChars(StrVar)) {
-            CoordParam.setZp2Base(StrVar);
-            logInfo("Zp to Base: " + StrVar + "");
-        }
-    }
-    else
-        logCritical("Could Not get Z relative to Base, last requestData: " + requestData );
-}
-void MainWindow::getXs2PH() {
-    writeRequest("$DA511%", 7); //GET Xs_2_PH  $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value
-    readData();
-    if (RCV.length() > 7) {
-        QString StrVar = RCV.mid(7, (RCV.length() - 8));
-        if (StringIsValidDoubleChars(StrVar)) {
-            CoordParam.setlaserX2Base(StrVar);
-            logInfo("Xs to Plasma Head: " + StrVar + "");
-        }
-    }
-    else
-        logCritical("Could Not get X relative to Plasma head, last requestData: " + requestData );
-}
-void MainWindow::getYs2PH() {
-    writeRequest("$DA521%", 7); //GET Ys_2_PH  $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value
-    readData();
-    if (RCV.length() > 7) {
-        QString StrVar = RCV.mid(7, (RCV.length() - 8));
-        if (StringIsValidDoubleChars(StrVar)) {
-            CoordParam.setlaserY2Base(StrVar);
-            logInfo("Ys to Plasma Head: " + StrVar + "");
-        }
-    }
-    else
-        logCritical("Could Not get Y relative to Plasma head, last requestData: " + requestData );
-}
-void MainWindow::getPHSlitLength() {
-    writeRequest("$DA540%", 7); //GET Plasma Head Slit Length (mm)  $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value
-    readData();
-    if (RCV.length() > 7) {
-        QString StrVar = RCV.mid(7, (RCV.length() - 8));
-        if (StringIsValidDoubleChars(StrVar)) {
-            plasmahead.setPlasmaHeadSlitLength(StrVar);
-            logInfo("Plasma Head Slit Length: " + StrVar + " (mm)");
-        }
-    }
-    else
-        logCritical("Could Not get Plasma head slit length, last requestData: " + requestData );
-}
-void MainWindow::getPHSlitWidth() {
-    writeRequest("$DA541%", 7); //GET Plasma Head Slit Width (mm)  $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value
-    readData();
-    if (RCV.length() > 7) {
-        QString StrVar = RCV.mid(7, (RCV.length() - 8));
-        if (StringIsValidDoubleChars(StrVar)) {
-            plasmahead.setPlasmaHeadSlitWidth(StrVar);
-            logInfo("Plasma Head Slit Width: " + StrVar + " (mm)");
-        }
-    }
-    else
-        logCritical("Could Not get Plasma head slit width, last requestData: " + requestData );
-}
-void MainWindow::getPHSafetyZGap() {
-    writeRequest("$DA542%", 7); //GET Plasma Head Safety Gap $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value
-    readData();
-    if (RCV.length() > 7) {
-        QString StrVar = RCV.mid(7, (RCV.length() - 8));
-        if (StringIsValidDoubleChars(StrVar)) {
-            plasmahead.setSafetyGap(StrVar);
-            logInfo("Plasma Head Z Safety Gap: " + StrVar + " (mm)");
-        }
-    }
-    else
-        logCritical("Could Not get Plasma Head Z Safety Gap, last requestData: " + requestData );
-}
-void MainWindow::getZPinsBuried() {
-    writeRequest("$DA543%", 7); //GET Z Pins Buried Pos (mm) $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value
-    readData();
-    if (RCV.length() > 7) {
-        QString StrVar = RCV.mid(7, (RCV.length() - 8));
-        if (StringIsValidDoubleChars(StrVar)) {
-            stage.setPinsBuried(StrVar);
-            logInfo("Z Pins Buried Position: " + StrVar + " (mm)");
-        }
-    }
-    else
-        logCritical("Could Not get Z Pins Buried Position, last requestData: " + requestData );
-}
-void MainWindow::getZPinsExposed() {
-    writeRequest("$DA544%", 7); //GET Z Pins Exposed Pos (mm) $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value
-    readData();
-    if (RCV.length() > 7) {
-        QString StrVar = RCV.mid(7, (RCV.length() - 8));
-        if (StringIsValidDoubleChars(StrVar)) {
-            stage.setPinsExposed(StrVar);
-            logInfo("Z Pins Exposed Position: " + StrVar + " (mm)");
-        }
-    }
-    else
-        logCritical("Could Not get Z Pins Exposed Position, last requestData: " + requestData );
-}
-void MainWindow::getLoadX2Base() {
-    writeRequest("$DA512%", 7); //GET Load_X_2Base  $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value
-    readData();
-    if (RCV.length() > 7) {
-        QString StrVar = RCV.mid(7, (RCV.length() - 8));
-        if (StringIsValidDoubleChars(StrVar)) {
-            Param.setXHomePos(StrVar);
-            logInfo("X Load Position: " + StrVar + "");
-        }
-    }
-    else
-        logCritical("Could Not get X Load position, last requestData: " + requestData );
-}
-void MainWindow::getLoadY2Base() {
-    writeRequest("$DA522%", 7); //GET Load_Y_2Base  $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value
-    readData();
-    if (RCV.length() > 7) {
-        QString StrVar = RCV.mid(7, (RCV.length() - 8));
-        if (StringIsValidDoubleChars(StrVar)) {
-            Param.setYHomePos(StrVar);
-            logInfo("Y Load Position: " + StrVar + "");
-        }
-    }
-    else
-        logCritical("Could Not get Y Load position, last requestData: " + requestData );
-}
-void MainWindow::getLoadZ2Base() {
-    writeRequest("$DA532%", 7); //GET Load_Z_2Base  $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value
-    readData();
-    if (RCV.length() > 7) {
-        QString StrVar = RCV.mid(7, (RCV.length() - 8));
-        if (StringIsValidDoubleChars(StrVar)) {
-            Param.setZHomePos(StrVar);
-            logInfo("Z Load Position: " + StrVar + "");
-        }
-    }
-    else
-        logCritical("Could Not get Z Load position, last requestData: " + requestData );
-}
-void MainWindow::setAxisStateMachinesIdle() {
-    InitSM.setState(IASM_IDLE);
-    HomeSM.setState(HASM_IDLE);
-    TwoSpotSM.setState(TSSM_IDLE);
-    ScanSM.setState(SASM_IDLE);
-    ScanSM.setSubState(SSSM_IDLE);
-}
-//Axis Commands
-void MainWindow::setDoors() {
-    doorsOpen = isBitSet(LEDstates, 6);
-}
-void MainWindow::setJoyBtnOn() {
-    joystickOn = isBitSet(LEDstates, 14);
-}
-void MainWindow::setVacOn() {
-    vacuumOn = isBitSet(LEDstates, 12);
-}
-void MainWindow::setN2PurgeOn() {
-    nitrogenPurgeOn = isBitSet(LEDstates, 11);
-}
-bool MainWindow::isJoyStickOn() {
-    return joystickOn;
-}
-void MainWindow::updateAxisStatus() {
-    //handle LED status
-    setLEDstate(axisStatus[0], axisStatus[1]);
-    //X
-    X.setState(axisStatus[2]);
-    X.setError(axisStatus[3]);
-    X.setPosition(axisStatus[4]);
-    //Y
-    Y.setState(axisStatus[5]);
-    Y.setError(axisStatus[6]);
-    Y.setPosition(axisStatus[7]);
-    //Z
-    Z.setState(axisStatus[8]);
-    Z.setError(axisStatus[9]);
-    Z.setPosition(axisStatus[10]);
-    //XYZ same? (probably stopped)
-    setSameStateXYZsame();
-    //update GUI positions
-    updateAxisPosition();
-    //set doors
-    setDoors();
-    setJoyBtnOn();
-    setVacOn();
-    setN2PurgeOn();
-    //log any change
-//    if (didStatusChange()) {
-//        logAxesStatus();
+//    TwoSpotAxesStates getState() {
+//        return this->m_state;
 //    }
-}
+//    void setState(TwoSpotAxesStates state) {
+//        this->m_state = state;
+//    }
 
-void MainWindow::parseStatus() {
-    QString statusToParse = RCV;
-    statusToParse = statusToParse.mid(3); //remove the first 3 chars
-    statusToParse = statusToParse.mid(0, statusToParse.length() -1); //remove # from response before split
-    axisStatus = statusToParse.split(QLatin1Char(';')); //split string up
-    updateAxisStatus();
-}
-void MainWindow::getAxisStatus() {
-    writeRequest("$C0%", 4); //GET_STATUS $C0%; resp[!C0nn;nn;X state;X error;X pos; Y state; Y error, Y pos; Z state; Z error; Z pos#]
-    readData();
-    parseStatus();
-}
+//    public:
+//    double getFirstX() {
+//        return m_firstXpos;
+//    }
+//    double getFirstY() {
+//        return m_firstYpos;
+//    }
+//    double getSecondX() {
+//        return m_secondXpos;
+//    }
+//    double getSecondY() {
+//        return m_secondYpos;
+//    }
+//    void setFirstX(double x) {
+//        m_firstXpos = x;
+//    }
+//    void setFirstY(double y) {
+//        m_firstYpos = y;
+//    }
+//    void setSecondX(double x) {
+//        m_secondXpos = x;
+//    }
+//    void setSecondY(double y) {
+//        m_secondYpos = y;
+//    }
+//    void checkXDimensions() {
+//        if (m_firstXpos > m_secondXpos) {
+//            ScanSM.setX2(m_firstXpos);
+//            ScanSM.setX1(m_secondXpos);
+//        }
+//        else {
+//            ScanSM.setX1(m_firstXpos);
+//            ScanSM.setX2(m_secondXpos);
+//        }
+//    }
+//    void checkYDimensions() {
+//        if (m_firstYpos > m_secondYpos) {
+//            ScanSM.setY2(m_firstYpos);
+//            ScanSM.setY1(m_secondYpos);
+//        }
+//        else {
+//            ScanSM.setY1(m_firstYpos);
+//            ScanSM.setY2(m_secondYpos);
+//        }
+//    }
+//} TwoSpotSM;
 
-void MainWindow::setSameStateXYZsame() {
-    if ((X.getState() == Y.getState()) && (X.getState() == Z.getState())) {
-        sameStateXYZ = true;
-    }
-    else {
-        sameStateXYZ = false;
-    }
-}
-bool MainWindow::nextStateReady() {
-        if ((sameStateXYZ == true) && (X.getState() >= ASM_IDLE)) {
-            return true;
-        }
-        else {
-            return false;
-        }
-}
-void MainWindow::setValve2(QString toggle) {
-    writeRequest("$C70" + toggle + "%", 6); //SET_VALVE_2 $C70n% resp[!C70n#] n = 0, 1 (off, on)
-    readData();
-}
-void MainWindow::stopMotors() {
-    writeRequest("$B3%", 4); //stop all motors
-    readData();
-}
-void MainWindow::sendInitCMD() {
-    writeRequest("$B500%", 6); //start initializing X axis
-    readData();
-    writeRequest("$B501%", 6); //start initializing Y axis
-    readData();
-    writeRequest("$B502%", 6); //start initializing Z axis
-    readData();
-}
-void MainWindow::enableJoy() {
-    writeRequest("$BE%", 4); //ENABLE_JOY $BE%; resp [!BE#];
-    readData();
-}
-void MainWindow::disableJoy() {
-    writeRequest("$BF%", 4); //DISABLE_JOY $BF%; resp [!BF#];
-    readData();
-}
-void MainWindow::setSpeed(QString axis, QString speed) {
-    QString command;
-    command = "$B40" + axis + speed + "%";
-    writeRequest(command, command.length());
-    readData();
-    logInfo("Move " + axis + " Speed: " + speed + " /sec ");
-}
-void MainWindow::setAbsMove(QString axis, QString position) {
-    QString command;
-    command = "$B60" + axis + position + "%";
-    writeRequest(command, command.length());
-    readData();
-    logInfo("Move " + axis + " to: " + position);
-}
-void MainWindow::move(QString axis, QString speed, QString position) {
-    setSpeed(axis, speed);
-    setAbsMove(axis, position);
-}
-void MainWindow::resetAxes() {
-    writeRequest("$A9%", 4);
-    readData();
-}
-double MainWindow::getXCoord() {
-    return XPos_RefB_2_RefPH(X.getPosition());
-}
-double MainWindow::getYCoord() {
-    return YPos_RefB_2_RefPH(Y.getPosition());;
-}
 
-void MainWindow::logAxesStatus() {
-    QString LogStr{};
-    LogStr = "LED: " + axisStatus[0] + axisStatus[1];
-    LogStr += " XSt: " + axisStatus[2];
-    LogStr += " XPos: " + axisStatus[3];
-    LogStr += " YSt: " + axisStatus[5];
-    LogStr += " YPos: " + axisStatus[6];
-    LogStr += " ZSt: " + axisStatus[8];
-    LogStr += " ZPos: " + axisStatus[9];
-    logInfo(LogStr);
-}
-//READ/WRITE
-void MainWindow::writeRequest(QString CMD_Str, qint64 CMD_Len) {
-    lastRequest = CMD_Str;
-    RCV = "";
-    ui->textCMDbox->appendPlainText(CMD_Str);
-    serial->write(CMD_Str.toUtf8(), CMD_Len);
-}
 
-void MainWindow::readData() {
-    if (serial->waitForReadyRead(1000)) {
-        RCV = serial->readAll();
-        while (serial->waitForReadyRead(100)) {
-            if (!RCV.contains('#')) {
-                RCV += serial->readAll();
-            }
-        }
-        //logInfo(RCV);
-        ui->textRCVbox->appendPlainText(RCV);
-    }
-}
+
+
+
+//void MainWindow::closeSerialPort() {
+//    MainStateMachine.setState(SHUTDOWN);
+//    if (serial->isOpen()) {
+//        resetCTL();
+//        resetAxes();
+//        serial->close();
+//    }
+
+//    ui->actionConnect->setEnabled(true);
+//    ui->actionDisconnect->setEnabled(false);
+//    ui->actionConfigure->setEnabled(true);
+//    logInfo("Port Disconnected");
+//    showStatusMessage(tr("Disconnected"));
+//}
+
+//CTL Startup
+
+
+
+
+
 
 //UI
-void MainWindow::RunCheckInput() {
-    if (RunRecipeOn && recipe.getAutoScanBool()) {
-        ScanSM.setState(SASM_STARTUP);
-    }
-    if (!TUNER.getAutoTune() || !RunRecipeOn) {
-        if (TUNER.getActualPosition() > 98) {
-            ui->MB_Right_Button->setEnabled(false);
-        }
-        else if (TUNER.getActualPosition() < 2) {
-            ui->MB_Left_Button->setEnabled(false);
-        }
-        else {
-            ui->MB_Right_Button->setEnabled(true);
-            ui->MB_Left_Button->setEnabled(true);
-        }
-    }
-    if (TUNER.getAutoTune() && UIHidden == false) {
-        ui->MB_Right_Button->hide();
-        ui->MB_Left_Button->hide();
-        ui->stepSizeBox->hide();
-        ui->stepLabel->hide();
-        UIHidden = true;
-    }
-    if (!TUNER.getAutoTune() && UIHidden == true) {
-        ui->MB_Right_Button->show();
-        ui->MB_Left_Button->show();
-        ui->stepSizeBox->show();
-        ui->stepLabel->show();
-        UIHidden = false;
-    }
+//void MainWindow::RunCheckInput() {
+//    if (RunRecipeOn && recipe.getAutoScanBool()) {
+//        ScanSM.setState(SASM_STARTUP);
+//    }
+//    if (!TUNER.getAutoTune() || !RunRecipeOn) {
+//        if (TUNER.getActualPosition() > 98) {
+//            ui->MB_Right_Button->setEnabled(false);
+//        }
+//        else if (TUNER.getActualPosition() < 2) {
+//            ui->MB_Left_Button->setEnabled(false);
+//        }
+//        else {
+//            ui->MB_Right_Button->setEnabled(true);
+//            ui->MB_Left_Button->setEnabled(true);
+//        }
+//    }
+//    if (TUNER.getAutoTune() && UIHidden == false) {
+//        ui->MB_Right_Button->hide();
+//        ui->MB_Left_Button->hide();
+//        ui->stepSizeBox->hide();
+//        ui->stepLabel->hide();
+//        UIHidden = true;
+//    }
+//    if (!TUNER.getAutoTune() && UIHidden == true) {
+//        ui->MB_Right_Button->show();
+//        ui->MB_Left_Button->show();
+//        ui->stepSizeBox->show();
+//        ui->stepLabel->show();
+//        UIHidden = false;
+//    }
 
-    if (TUNER.getAutoTuneCMDFlag()) {
-        if (TUNER.getAutoTune()) {
-            writeRequest("$8601%", 6); //SET_AUTO_MAN 0x86 //$860p% p=1 AutoMode, p=0 ManualMode
-            readData();
-            TUNER.setAutoTuneCMDFlag(false);
-            logInfo("Auto Tune : enabled");
-            ui->autotune_recipe->setText("ON");
-            ui->autotune_recipe->setStyleSheet("QPushButton { "
-                                               "font: 16pt 'Ubuntu Bold';"
-                                               "color: rgb(115, 210, 22);"
-                                               "}");
+//    if (TUNER.getAutoTuneCMDFlag()) {
+//        if (TUNER.getAutoTune()) {
+//            writeRequest("$8601%", 6); //SET_AUTO_MAN 0x86 //$860p% p=1 AutoMode, p=0 ManualMode
+//            readData();
+//            TUNER.setAutoTuneCMDFlag(false);
+//            logInfo("Auto Tune : enabled");
+//            ui->autotune_recipe->setText("ON");
+//            ui->autotune_recipe->setStyleSheet("QPushButton { "
+//                                               "font: 16pt 'Ubuntu Bold';"
+//                                               "color: rgb(115, 210, 22);"
+//                                               "}");
 
-        }
-        else {
-            writeRequest("$8600%", 6);
-            readData();
-            TUNER.setAutoTuneCMDFlag(false);
-            logInfo("Auto Tune : disabled");
-            ui->autotune_recipe->setText("OFF");
-            ui->autotune_recipe->setStyleSheet("QPushButton { "
-                                                "font: 16pt 'Ubuntu Bold';"
-                                                "color: rgb(220, 0, 20);"
-                                                "}");
+//        }
+//        else {
+//            writeRequest("$8600%", 6);
+//            readData();
+//            TUNER.setAutoTuneCMDFlag(false);
+//            logInfo("Auto Tune : disabled");
+//            ui->autotune_recipe->setText("OFF");
+//            ui->autotune_recipe->setStyleSheet("QPushButton { "
+//                                                "font: 16pt 'Ubuntu Bold';"
+//                                                "color: rgb(220, 0, 20);"
+//                                                "}");
 
-        }
-    }
-    if (RF.getReadyToLoad()) {
-        QString command;
-        command = "$42" +RF.getLoadedSetPointQStr() + "%";
-        writeRequest(command, command.length()); //SET_RCP_RF_WATTS  $42xxxx% xxxx = Watts; resp[!42xxxx#]
-        readData();
-        RF.setReadyToLoad(false);
-    }
-    if (TUNER.getReadyToLoad()) {
-        QString command;
-        command = "$43" + TUNER.getLoadedSPQStr() + "%";
-        writeRequest(command, command.length()); //SET_RCP_MS_POS  $43xxxx$ xxxx = Base10 MB Motor Pos; resp[!43xxxx#]
-        readData();
-        TUNER.setReadyToLoad(false);
-    }
-    if (MFC[1].getReadyToLoad()) {
-        QString command;
-        command = "$4101" + MFC[1].getLoadedFlowQStr() + "%";
-        writeRequest(command, command.length()); //SET_RCP_MFC_FLOW   $410mxxx.yy% 1<=m<=4, xxx.yy = flow rate; resp[!410mxxx.yy#]
-        readData();
-        MFC[1].setReadyToLoad(false);
-    }
-    if (MFC[2].getReadyToLoad()) {
-        QString command;
-        command = "$4102" + MFC[2].getLoadedFlowQStr() + "%";
-        writeRequest(command, command.length()); //SET_RCP_MFC_FLOW   $410mxxx.yy% 1<=m<=4, xxx.yy = flow rate; resp[!410mxxx.yy#]
-        readData();
-        MFC[2].setReadyToLoad(false);
-    }
-    if (MFC[3].getReadyToLoad()) {
-        QString command;
-        command = "$4103" + MFC[3].getLoadedFlowQStr() + "%";
-        writeRequest(command, command.length()); //SET_RCP_MFC_FLOW   $410mxxx.yy% 1<=m<=4, xxx.yy = flow rate; resp[!410mxxx.yy#]
-        readData();
-        MFC[3].setReadyToLoad(false);
-    }
-    if (MFC[4].getReadyToLoad()) {
-        QString command;
-        command = "$4104" + MFC[4].getLoadedFlowQStr() + "%";
-        writeRequest(command, command.length()); //SET_RCP_MFC_FLOW   $410mxxx.yy% 1<=m<=4, xxx.yy = flow rate; resp[!410mxxx.yy#]
-        readData();
-        MFC[4].setReadyToLoad(false);
-    }
+//        }
+//    }
+//    if (RF.getReadyToLoad()) {
+//        QString command;
+//        command = "$42" +RF.getLoadedSetPointQStr() + "%";
+//        writeRequest(command, command.length()); //SET_RCP_RF_WATTS  $42xxxx% xxxx = Watts; resp[!42xxxx#]
+//        readData();
+//        RF.setReadyToLoad(false);
+//    }
+//    if (TUNER.getReadyToLoad()) {
+//        QString command;
+//        command = "$43" + TUNER.getLoadedSPQStr() + "%";
+//        writeRequest(command, command.length()); //SET_RCP_MS_POS  $43xxxx$ xxxx = Base10 MB Motor Pos; resp[!43xxxx#]
+//        readData();
+//        TUNER.setReadyToLoad(false);
+//    }
+//    if (MFC[1].getReadyToLoad()) {
+//        QString command;
+//        command = "$4101" + MFC[1].getLoadedFlowQStr() + "%";
+//        writeRequest(command, command.length()); //SET_RCP_MFC_FLOW   $410mxxx.yy% 1<=m<=4, xxx.yy = flow rate; resp[!410mxxx.yy#]
+//        readData();
+//        MFC[1].setReadyToLoad(false);
+//    }
+//    if (MFC[2].getReadyToLoad()) {
+//        QString command;
+//        command = "$4102" + MFC[2].getLoadedFlowQStr() + "%";
+//        writeRequest(command, command.length()); //SET_RCP_MFC_FLOW   $410mxxx.yy% 1<=m<=4, xxx.yy = flow rate; resp[!410mxxx.yy#]
+//        readData();
+//        MFC[2].setReadyToLoad(false);
+//    }
+//    if (MFC[3].getReadyToLoad()) {
+//        QString command;
+//        command = "$4103" + MFC[3].getLoadedFlowQStr() + "%";
+//        writeRequest(command, command.length()); //SET_RCP_MFC_FLOW   $410mxxx.yy% 1<=m<=4, xxx.yy = flow rate; resp[!410mxxx.yy#]
+//        readData();
+//        MFC[3].setReadyToLoad(false);
+//    }
+//    if (MFC[4].getReadyToLoad()) {
+//        QString command;
+//        command = "$4104" + MFC[4].getLoadedFlowQStr() + "%";
+//        writeRequest(command, command.length()); //SET_RCP_MFC_FLOW   $410mxxx.yy% 1<=m<=4, xxx.yy = flow rate; resp[!410mxxx.yy#]
+//        readData();
+//        MFC[4].setReadyToLoad(false);
+//    }
 
-}
-void MainWindow::updateAxisPosition() {
-    ui->X_relative_PH->setText(X.getQStrPosition());
-    ui->Y_relative_PH->setText(Y.getQStrPosition());
-    ui->Z_relative_PH->setText(Z.getQStrPosition());
-}
-void MainWindow::updateStageStatus(QString statusNow, QString statusNext) {
-    ui->axisstatus->setText(statusNow);
-    ui->axisstatus_2->setText(statusNext);
-}
-void MainWindow::setHomeBtnText(QString text) {
-    ui->Home_button->setText(text);
-}
-void MainWindow::setTwoSpotBtnText(QString text) {
-    ui->twospot_button->setText(text);
-}
-void MainWindow::setScanBtnText(QString text) {
-    ui->scan_button->setText(text);
-}
-void MainWindow::updateTwoSpotXYText() {
-    ui->x1_recipe->setText(ScanSM.getminXString());
-    ui->x2_recipe->setText(ScanSM.getmaxXString());
-    ui->y1_recipe->setText(ScanSM.getminYString());
-    ui->y2_recipe->setText(ScanSM.getmaxYString());
-}
-double MainWindow::getThickness() {
-    bool ok;
-    return ui->thickness_recipe->toPlainText().toDouble(&ok);
-}
-double MainWindow::getGap() {
-    bool ok;
-    return ui->gap_recipe->toPlainText().toDouble(&ok);
-}
-double MainWindow::getOverlap() {
-    bool ok;
-    return ui->overlap_recipe->toPlainText().toDouble(&ok);
-}
-double MainWindow::getCycles() {
-    bool ok;
-    return ui->cycles_recipe->toPlainText().toDouble(&ok);
-}
-QString MainWindow::getXminRecipeQStr() {
-    return ui->x1_recipe->toPlainText();
-}
-QString MainWindow::getXmaxRecipeQStr() {
-    return ui->x2_recipe->toPlainText();
-}
-QString MainWindow::getYminRecipeQStr() {
-    return ui->y1_recipe->toPlainText();
-}
-QString MainWindow::getYmaxRecipeQStr() {
-    return ui->y2_recipe->toPlainText();
-}
-QString MainWindow::getThicknessQStr() {
-    return ui->thickness_recipe->toPlainText();
-}
-QString MainWindow::getGapQStr() {
-    return ui->gap_recipe->toPlainText();
-}
-QString MainWindow::getOverlapQStr() {
-    return ui->overlap_recipe->toPlainText();
-}
-QString MainWindow::getCyclesQStr() {
-    return ui->cycles_recipe->toPlainText();
-}
-void MainWindow::initActionsConnections() {
-    connect(ui->actionConnect, &QAction::triggered, this, &MainWindow::openSerialPort);
-    connect(ui->actionDisconnect, &QAction::triggered, this, &MainWindow::closeSerialPort);
-    connect(ui->actionQuit, &QAction::triggered, this, &MainWindow::shutDownProgram);
-    connect(ui->actionConfigure, &QAction::triggered, settings, &SettingsDialog::show);
-    connect(ui->actionDebug_Mode, &QAction::triggered, this, &MainWindow::debugMode);
-}
-void MainWindow::about() {
-    QMessageBox::about(this, tr("About Ontos 3 Interface"),
-                   tr("The <b>Ontos3 Interface</b> is the latest"
-                      "modern GUI for Plasma applications."));
-}
-void MainWindow::showStatusMessage(const QString &message) {
-    status->setText(message);
-}
-void MainWindow::setRecipeMB() {
-    ui->mb_recipe->setText(TUNER.getLoadedSPQStr());
-}
-void MainWindow::setRecipeRF() {
-    ui->RF_recipe->setText(RF.getLoadedSetPointQStr());
-}
-void MainWindow::MFC4RecipeFlow() {
-    ui->gas4_recipe_SLPM->setText(MFC[4].getLoadedFlowQStr());
-    ui->mfc4_recipe->setText(MFC[4].getLoadedFlowQStr());
-}
-void MainWindow::MFC3RecipeFlow() {
-    ui->gas3_recipe_SLPM->setText(MFC[3].getLoadedFlowQStr());
-    ui->mfc3_recipe->setText(MFC[3].getLoadedFlowQStr());
-}
-void MainWindow::MFC2RecipeFlow() {
-    ui->gas2_recipe_SLPM->setText(MFC[2].getLoadedFlowQStr());
-    ui->mfc2_recipe->setText(MFC[2].getLoadedFlowQStr());
-}
-void MainWindow::MFC1RecipeFlow() {
-    ui->gas1_recipe_SLPM->setText(MFC[1].getLoadedFlowQStr());
-    ui->mfc1_recipe->setText(MFC[1].getLoadedFlowQStr());
-}
-void MainWindow::getHeadTemp() {
-    ui->temp_LCD->display(plasmahead.getHeadTemp());
-    ui->Temp_bar->setValue(plasmahead.getHeadTempInt());
-}
-void MainWindow::MFC4ActualFlow() {
-    ui->gas4_actual_SLPM->setText(MFC[4].getActualFlow());
-    ui->gas4_progressbar->setValue(MFC[4].getActualFlowInt());
-}
-void MainWindow::MFC3ActualFlow() {
-    ui->gas3_actual_SLPM->setText(MFC[3].getActualFlow());
-    ui->gas3_progessbar->setValue(MFC[3].getActualFlowInt());
-}
+//}
+//void MainWindow::updateAxisPosition() {
+//    ui->X_relative_PH->setText(X.getQStrPosition());
+//    ui->Y_relative_PH->setText(Y.getQStrPosition());
+//    ui->Z_relative_PH->setText(Z.getQStrPosition());
+//}
+//void MainWindow::updateStageStatus(QString statusNow, QString statusNext) {
+//    ui->axisstatus->setText(statusNow);
+//    ui->axisstatus_2->setText(statusNext);
+//}
+//void MainWindow::setHomeBtnText(QString text) {
+//    ui->Home_button->setText(text);
+//}
+//void MainWindow::setTwoSpotBtnText(QString text) {
+//    ui->twospot_button->setText(text);
+//}
+//void MainWindow::setScanBtnText(QString text) {
+//    ui->scan_button->setText(text);
+//}
+//void MainWindow::updateTwoSpotXYText() {
+//    ui->x1_recipe->setText(ScanSM.getminXString());
+//    ui->x2_recipe->setText(ScanSM.getmaxXString());
+//    ui->y1_recipe->setText(ScanSM.getminYString());
+//    ui->y2_recipe->setText(ScanSM.getmaxYString());
+//}
+//double MainWindow::getThickness() {
+//    bool ok;
+//    return ui->thickness_recipe->toPlainText().toDouble(&ok);
+//}
+//double MainWindow::getGap() {
+//    bool ok;
+//    return ui->gap_recipe->toPlainText().toDouble(&ok);
+//}
+//double MainWindow::getOverlap() {
+//    bool ok;
+//    return ui->overlap_recipe->toPlainText().toDouble(&ok);
+//}
+//double MainWindow::getCycles() {
+//    bool ok;
+//    return ui->cycles_recipe->toPlainText().toDouble(&ok);
+//}
+//QString MainWindow::getXminRecipeQStr() {
+//    return ui->x1_recipe->toPlainText();
+//}
+//QString MainWindow::getXmaxRecipeQStr() {
+//    return ui->x2_recipe->toPlainText();
+//}
+//QString MainWindow::getYminRecipeQStr() {
+//    return ui->y1_recipe->toPlainText();
+//}
+//QString MainWindow::getYmaxRecipeQStr() {
+//    return ui->y2_recipe->toPlainText();
+//}
+//QString MainWindow::getThicknessQStr() {
+//    return ui->thickness_recipe->toPlainText();
+//}
+//QString MainWindow::getGapQStr() {
+//    return ui->gap_recipe->toPlainText();
+//}
+//QString MainWindow::getOverlapQStr() {
+//    return ui->overlap_recipe->toPlainText();
+//}
+//QString MainWindow::getCyclesQStr() {
+//    return ui->cycles_recipe->toPlainText();
+//}
+//void MainWindow::initActionsConnections() {
+//    connect(ui->actionConnect, &QAction::triggered, this, &MainWindow::openSerialPort);
+//    connect(ui->actionDisconnect, &QAction::triggered, this, &MainWindow::closeSerialPort);
+//    connect(ui->actionQuit, &QAction::triggered, this, &MainWindow::shutDownProgram);
+//    connect(ui->actionConfigure, &QAction::triggered, settings, &SettingsDialog::show);
+//    connect(ui->actionDebug_Mode, &QAction::triggered, this, &MainWindow::debugMode);
+//}
+//void MainWindow::about() {
+//    QMessageBox::about(this, tr("About Ontos 3 Interface"),
+//                   tr("The <b>Ontos3 Interface</b> is the latest"
+//                      "modern GUI for Plasma applications."));
+//}
+//void MainWindow::showStatusMessage(const QString &message) {
+//    status->setText(message);
+//}
+//void MainWindow::setRecipeMB() {
+//    ui->mb_recipe->setText(TUNER.getLoadedSPQStr());
+//}
+//void MainWindow::setRecipeRF() {
+//    ui->RF_recipe->setText(RF.getLoadedSetPointQStr());
+//}
+//void MainWindow::MFC4RecipeFlow() {
+//    ui->gas4_recipe_SLPM->setText(MFC[4].getLoadedFlowQStr());
+//    ui->mfc4_recipe->setText(MFC[4].getLoadedFlowQStr());
+//}
+//void MainWindow::MFC3RecipeFlow() {
+//    ui->gas3_recipe_SLPM->setText(MFC[3].getLoadedFlowQStr());
+//    ui->mfc3_recipe->setText(MFC[3].getLoadedFlowQStr());
+//}
+//void MainWindow::MFC2RecipeFlow() {
+//    ui->gas2_recipe_SLPM->setText(MFC[2].getLoadedFlowQStr());
+//    ui->mfc2_recipe->setText(MFC[2].getLoadedFlowQStr());
+//}
+//void MainWindow::MFC1RecipeFlow() {
+//    ui->gas1_recipe_SLPM->setText(MFC[1].getLoadedFlowQStr());
+//    ui->mfc1_recipe->setText(MFC[1].getLoadedFlowQStr());
+//}
+//void MainWindow::getHeadTemp() {
+//    ui->temp_LCD->display(plasmahead.getHeadTemp());
+//    ui->Temp_bar->setValue(plasmahead.getHeadTempInt());
+//}
+//void MainWindow::MFC4ActualFlow() {
+//    ui->gas4_actual_SLPM->setText(MFC[4].getActualFlow());
+//    ui->gas4_progressbar->setValue(MFC[4].getActualFlowInt());
+//}
+//void MainWindow::MFC3ActualFlow() {
+//    ui->gas3_actual_SLPM->setText(MFC[3].getActualFlow());
+//    ui->gas3_progessbar->setValue(MFC[3].getActualFlowInt());
+//}
 
-void MainWindow::MFC2ActualFlow() {
-    ui->gas2_actual_SLPM->setText(MFC[2].getActualFlow());
-    ui->gas2_progressbar->setValue(MFC[2].getActualFlowInt());
-}
+//void MainWindow::MFC2ActualFlow() {
+//    ui->gas2_actual_SLPM->setText(MFC[2].getActualFlow());
+//    ui->gas2_progressbar->setValue(MFC[2].getActualFlowInt());
+//}
 
-void MainWindow::MFC1ActualFlow() {
-    ui->gas1_actual_SLPM->setText(MFC[1].getActualFlow());
-    ui->gas1_progressbar->setValue(MFC[1].getActualFlowInt());
-}
+//void MainWindow::MFC1ActualFlow() {
+//    ui->gas1_actual_SLPM->setText(MFC[1].getActualFlow());
+//    ui->gas1_progressbar->setValue(MFC[1].getActualFlowInt());
+//}
 
-void MainWindow::displayReflectedPower() {
-    if (RunRecipeOn) {
-        ui->RefRF_Actual_LCD->display(RF.getReflectedWatts());
-        ui->RefRF_bar->setValue(RF.getReflectedWatts());
-    }
-    else {
-        ui->RefRF_Actual_LCD->display(0);
-        ui->RefRF_bar->setValue(0);
-    }
-}
+//void MainWindow::displayReflectedPower() {
+//    if (RunRecipeOn) {
+//        ui->RefRF_Actual_LCD->display(RF.getReflectedWatts());
+//        ui->RefRF_bar->setValue(RF.getReflectedWatts());
+//    }
+//    else {
+//        ui->RefRF_Actual_LCD->display(0);
+//        ui->RefRF_bar->setValue(0);
+//    }
+//}
 
-void MainWindow::displayRFValue() {
-    if (RunRecipeOn) {
-        ui->RF_Actual_LCD->display(RF.getActualWatts());
-        ui->RF_bar->setValue(RF.getActualWatts());
-    }
-    else {
-        ui->RF_Actual_LCD->display(0);
-        ui->RF_bar->setValue(0);
-    }
+//void MainWindow::displayRFValue() {
+//    if (RunRecipeOn) {
+//        ui->RF_Actual_LCD->display(RF.getActualWatts());
+//        ui->RF_bar->setValue(RF.getActualWatts());
+//    }
+//    else {
+//        ui->RF_Actual_LCD->display(0);
+//        ui->RF_bar->setValue(0);
+//    }
 
-}
-void MainWindow::displayTunerPosition() {
-    if (RunRecipeOn) {
-        ui->MB_Actual_LCD->display(TUNER.getActualPosition());
-        ui->MB_Pos_Bar->setValue(TUNER.getActualPosition());
-    }
-    else {
-        ui->MB_Actual_LCD->display(0);
-        ui->MB_Pos_Bar->setValue(0);
-    }
-}
+//}
+//void MainWindow::displayTunerPosition() {
+//    if (RunRecipeOn) {
+//        ui->MB_Actual_LCD->display(TUNER.getActualPosition());
+//        ui->MB_Pos_Bar->setValue(TUNER.getActualPosition());
+//    }
+//    else {
+//        ui->MB_Actual_LCD->display(0);
+//        ui->MB_Pos_Bar->setValue(0);
+//    }
+//}
 
-//translate BASE X,Y,Z to the display-able PH X,Y,Z (for display)
-double MainWindow::XPos_RefB_2_RefPH(double x) {
-    return (CoordParam.getXp2Base() - x);
-}
-double MainWindow::YPos_RefB_2_RefPH(double y) {
-    return (CoordParam.getYp2Base() - y);
-}
-double MainWindow::ZPos_RefB_2_RefPH(double z) {
-    return (z - CoordParam.getZp2Base());
-}
 
-double MainWindow::Ys_PH(double y) {
-    return (CoordParam.getYLaser2Base() - y);
-}
 
-//VALIDATORS & CONVERTERS
-QString MainWindow::BinInt2String(int Bits16) {
-    QString rtn;
-    Bits16 = Bits16 | 0x10000; //for bit 16 high
-    rtn = QString::number(Bits16,2);
-    return rtn.mid(1);
-}
-bool MainWindow::StringIsValidIntChars(QString testString) const {
-    QIntValidator intValidator;
-    int necessaryVariable{0};
-    if (intValidator.validate(testString, necessaryVariable) == QIntValidator::Acceptable)
-        return true;
-    else
-        return false;
-}
-bool MainWindow::StringIsValidDoubleChars(QString testString) const {
-    QDoubleValidator DblValidator;
-    int necessaryVariable{0};
-    return DblValidator.validate(testString, necessaryVariable);
-}
-bool MainWindow::StringIsValidHexChars(QString testString) const {
-    QRegularExpression HexChars("0123456789ABCDEF");
-    QRegularExpressionValidator HexValidator(HexChars);
-    int necessaryVariable{0};
-    return HexValidator.validate(testString, necessaryVariable);
-}
-QString MainWindow::DecIntToDecStr(int DecInt, int numChar) {
-    QString DecStr;
-    DecStr = DecStr.setNum(DecInt, 10);
 
-    while (DecStr.length() < numChar)
-        DecStr = "0" + DecStr;
-
-    return DecStr;
-}
-bool MainWindow::isBitSet(int test_int, int bit_pos) {
-    int bitmask{};
-
-    bitmask = 1<<bit_pos;
-    if (test_int & bitmask) {
-        return true;
-    }
-    else {
-        return false;
-    }
-}
 // LOGGING
-void MainWindow::logDebug(QString debugMsg) const {
-    qDebug() << debugMsg;
-}
-void MainWindow::logInfo(QString infoMsg) const {
-    qInfo() << infoMsg;
-}
-void MainWindow::logWarning(QString warningMsg) const {
-    qWarning() << warningMsg;
-}
-void MainWindow::logCritical(QString criticalMsg) const {
-    qCritical() << criticalMsg;
-}
-void MainWindow::logFatal() const {
-    qFatal("Fatal Log!");
-}
-//BUTTONS
-void MainWindow::on_MB_Left_Button_clicked() {
-    QString MBLeftSpeed = "$110000" + ui->stepSizeBox->currentText() + "%";
-    writeRequest(MBLeftSpeed, MBLeftSpeed.length()); //$110dxxxx%  d=1,0 xxxx = num steps; resp[!110dxxxx#] when move STARTED
-    readData();
-}
 
-void MainWindow::on_MB_Right_Button_clicked() {
-    QString MBRightSpeed = "$110100" + ui->stepSizeBox->currentText() + "%";
-    writeRequest(MBRightSpeed, MBRightSpeed.length()); //$110dxxxx%  d=1,0 xxxx = num steps; resp[!110dxxxx#] when move STARTED
-    readData();
-}
-void MainWindow::on_Send_CMD_button_clicked() {
-    QString StrVar = ui->text2sendCMDbox->toPlainText().toLocal8Bit();
-    ui->text2sendCMDbox->clear();
-    writeRequest(StrVar, StrVar.length());
-    StrVar.clear();
-}
-void MainWindow::on_Clear_Button_clicked() {
-    ui->textCMDbox->clear();
-    ui->text2sendCMDbox->clear();
-    ui->textRCVbox->clear();
-}
+//BUTTONS
+
+
 void MainWindow::debugMode() {
     DEBUG_MODE = !DEBUG_MODE;
 }
-void MainWindow::toggleHeaterOn() {
-    writeRequest("$CE35.0%", 8);
-    readData();
-    logInfo("Heater : enabled");
-}
 
-void MainWindow::toggleHeaterOff() {
-    writeRequest("$CE00.0%", 8);
-    readData();
-    logInfo("Heater : disabled");
-}
-void MainWindow::toggleVacOn() {
-    writeRequest("$C801%", 6); //SET_VALVE_3 $C80n% resp[!C80n#] n =0, 1 (off, on)
-    readData();
-    logInfo("Vac : enabled");
-}
 
-void MainWindow::toggleVacOff() {
-    writeRequest("$C800%", 6); //SET_VALVE_3 $C80n% resp[!C80n#] n =0, 1 (off, on)
-    readData();
-    logInfo("Vac : disabled");
-}
-void MainWindow::toggleJoystickOn() {
-    writeRequest("$BE%", 4);
-    readData();
-    logInfo("Joystick : enabled");
-}
 
-void MainWindow::toggleJoystickOff() {
-    writeRequest("$BF%", 4);
-    readData();
-    logInfo("Joystick : disabled");
-}
 
-void MainWindow::toggleN2PurgeOn() {
-    recipe.setPurge(true);
-    logInfo("Recipe N2 purge : enabled");
-}
-void MainWindow::toggleN2PurgeOff() {
-    recipe.setPurge(false);
-    logInfo("Recipe N2 purge : disabled");
-}
-void MainWindow::togglePinsOn() {
-    QString StrCmd{};
-    QString pin_pos = QString::number(stage.getPinsExposedPos());
-    StrCmd = "$B602" +  pin_pos + "%";
-    writeRequest(StrCmd, StrCmd.length());
-    readData();
-    logInfo("Stage Pins : enabled");
-}
-void MainWindow::togglePinsOff() {
-    QString StrCmd{};
-    QString pin_pos = QString::number(stage.getPinsBuriedPos());
-    StrCmd = "$B602" +  pin_pos + "%";
-    writeRequest(StrCmd, StrCmd.length());
-    readData();
-    logInfo("Stage Pins : disabled");
-}
-void MainWindow::toggleBatchIDOn() {
-    writeRequest("$28011;1%", 9);
-    readData();
-    logInfo("Batch ID logging : enabled");
-}
-void MainWindow::toggleBatchIDOff() {
-    writeRequest("$28011;0%", 9);
-    readData();
-    logInfo("Batch ID logging : disabled");
-}
-void MainWindow::toggleAutoTuneOn() {
-    TUNER.setAutoMode("1");
-}
-void MainWindow::toggleAutoTuneOff() {
-    TUNER.setAutoMode("0");
-
-}
 void MainWindow::toggleAutoScanOn() {
     recipe.setAutoScan(true);
     recipe.setAutoScanFlag(true);
@@ -2561,7 +1042,7 @@ void MainWindow::on_n2_purge_button_toggled(bool checked) {
 }
 void MainWindow::on_x1_set_clicked() {
     bool ok;
-    double value = QInputDialog::getDouble(this, "X1 setpoint","X: (min) -" + CoordParam.getXp2BaseQStr() + " (max) " + CoordParam.getXp2BaseQStr(), 0, -CoordParam.getXp2Base(), CoordParam.getXp2Base(), 2, &ok,Qt::WindowFlags(), 1);
+    double value = QInputDialog::getDouble(this, "X1 setpoint","X: (min) -" + stageBaseCoordinates.getXQStr() + " (max) " + stageBaseCoordinates.getXQStr(), 0, -stageBaseCoordinates.getXp2Base(), stageBaseCoordinates.getXp2Base(), 2, &ok,Qt::WindowFlags(), 1);
     if (ok) {
         ScanSM.setX1(value);
         ui->x1_recipe->setText(QString::number(value));
@@ -2569,7 +1050,7 @@ void MainWindow::on_x1_set_clicked() {
 }
 void MainWindow::on_x2_set_clicked() {
     bool ok;
-    double value = QInputDialog::getDouble(this, "X2 setpoint","X: (min) -" + CoordParam.getXp2BaseQStr() + " (max) " + CoordParam.getXp2BaseQStr(), 0, -CoordParam.getXp2Base(), CoordParam.getXp2Base(), 2, &ok,Qt::WindowFlags(), 1);
+    double value = QInputDialog::getDouble(this, "X2 setpoint","X: (min) -" + stageBaseCoordinates.getXQStr() + " (max) " + stageBaseCoordinates.getXQStr(), 0, -stageBaseCoordinates.getXp2Base(), stageBaseCoordinates.getXp2Base(), 2, &ok,Qt::WindowFlags(), 1);
     if (ok) {
         ScanSM.setX2(value);
         ui->x2_recipe->setText(QString::number(value));
@@ -2577,7 +1058,7 @@ void MainWindow::on_x2_set_clicked() {
 }
 void MainWindow::on_Y1_set_clicked() {
     bool ok;
-    double value = QInputDialog::getDouble(this, "Y1 setpoint","Y: (min) -" + CoordParam.getYp2BaseQStr() + " (max) " + CoordParam.getYp2BaseQStr(), 0, -CoordParam.getYp2Base(), CoordParam.getYp2Base(), 2, &ok,Qt::WindowFlags(), 1);
+    double value = QInputDialog::getDouble(this, "Y1 setpoint","Y: (min) -" + stageBaseCoordinates.getYQStr() + " (max) " + stageBaseCoordinates.getYQStr(), 0, -stageBaseCoordinates.getY(), stageBaseCoordinates.getY(), 2, &ok,Qt::WindowFlags(), 1);
     if (ok) {
         ScanSM.setY1(value);
         ui->y1_recipe->setText(QString::number(value));
@@ -2585,7 +1066,7 @@ void MainWindow::on_Y1_set_clicked() {
 }
 void MainWindow::on_Y2_set_clicked() {
     bool ok;
-    double value = QInputDialog::getDouble(this, "Y2 setpoint","Y: (min) -" + CoordParam.getYp2BaseQStr() + " (max) " + CoordParam.getYp2BaseQStr(), 0, -CoordParam.getYp2Base(), CoordParam.getYp2Base(), 2, &ok,Qt::WindowFlags(), 1);
+    double value = QInputDialog::getDouble(this, "Y2 setpoint","Y: (min) -" + stageBaseCoordinates.getYQStr() + " (max) " + stageBaseCoordinates.getYQStr(), 0, -stageBaseCoordinates.getY(), stageBaseCoordinates.getY(), 2, &ok,Qt::WindowFlags(), 1);
     if (ok) {
         ScanSM.setY2(value);
         ui->y2_recipe->setText(QString::number(value));
@@ -2771,125 +1252,7 @@ void MainWindow::addCascadeFile() {
             ui->cascadeList->addItem(StrVar.takeLast());
         }
 }
-void MainWindow::saveCascadeFile() {
-    QStringList StrVar;
-    QString fileName = QFileDialog::getSaveFileName(this,
-        tr("Save Current Cascade Recipe"), "/home/oem/Ontos3/Project_Linux_Migration/cascade_recipes/",
-        tr("Recipe List (*.crcp);;All Files (*)"));
-        if (!fileName.contains(".crcp")) {fileName += ".crcp";}
-        if (fileName.isEmpty())
-            return;
-        else {
-            QFile file(fileName);
-            if (!file.open(QIODevice::WriteOnly)) {
-                QMessageBox::information(this, tr("Unable to open file"),
-                    file.errorString());
-                return;
 
-            }
-            QTextStream out(&file);
-            for(int i = 0; i > ui->cascadeList->count(); i++) {
-                out<<ui->cascadeList->item(i);
-            }
-            file.close();
-            StrVar = fileName.split("/");
-            ui->cascade_recipe_name->setText(StrVar.takeLast());
-        }
-}
-void MainWindow::loadCascadeFile() {
-    QStringList cascade_recipe;
-    QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Load Recipe from File"), "/home/oem/Ontos3/Project_Linux_Migration/cascade_recipes/",
-        tr("Recipe File (*.crcp);;All Files (*)"));
-        if (fileName.isEmpty())
-            return;
-        else {
-            QFile file(fileName);
-            if (!file.open(QIODevice::ReadOnly)) {
-                QMessageBox::information(this, tr("Unable to open file"),
-                    file.errorString());
-                return;
-            }
-            QTextStream in(&file);
-            while(!in.atEnd()) {
-                QString line = in.readLine();
-                cascade_recipe += line;
-            }
-            file.close();
-
-            ui->cascadeList->addItems(cascade_recipe);
-    }
-}
-void MainWindow::saveToFile() {
-    QStringList StrVar;
-    QString fileName = QFileDialog::getSaveFileName(this,
-        tr("Save Current Recipe"), "/home/oem/Ontos3/Project_Linux_Migration/recipes/",
-        tr("Recipe List (*.rcp);;All Files (*)"));
-        if (!fileName.contains(".rcp")) {fileName += ".rcp";}
-        if (fileName.isEmpty())
-            return;
-        else {
-            QFile file(fileName);
-            if (!file.open(QIODevice::WriteOnly)) {
-                QMessageBox::information(this, tr("Unable to open file"),
-                    file.errorString());
-                return;
-
-            }
-            QString RecipeString = "MFC1:" + MFC[1].getLoadedFlowQStr() + '\n' +
-                                   "MFC2:" + MFC[2].getLoadedFlowQStr() + '\n' +
-                                   "MFC3:" + MFC[3].getLoadedFlowQStr() + '\n' +
-                                   "MFC4:" + MFC[4].getLoadedFlowQStr() + '\n' +
-                                   "PWR:" + RF.getLoadedSetPointQStr() + '\n' +
-                                   "TUNER:" + TUNER.getLoadedSPQStr() + '\n' +
-                                   "AUTOTUNE:" + TUNER.getAutoTuneQStr() + '\n' +
-                                   "THICKNESS:" + recipe.getThickness() + '\n' +
-                                   "GAP:" + recipe.getGap() + '\n' +
-                                   "OVERLAP:" + recipe.getOverlap() + '\n' +
-                                   "SPEED:" + recipe.getSpeed() + '\n' +
-                                   "CYCLES:" + recipe.getCycles() + '\n' +
-                                   "X1:" + ScanSM.getX1String() + '\n' +
-                                   "X2:" + ScanSM.getX2String() + '\n' +
-                                   "Y1:" + ScanSM.getY1String() + '\n' +
-                                   "Y2:" + ScanSM.getY2String() + '\n' +
-                                   "PURGE:" + recipe.getPurgeQStr() + '\n' +
-                                   "AUTOSCAN:" + recipe.getAutoScan();
-
-
-            QTextStream out(&file);
-            logInfo("Saved " + fileName + " : " + RecipeString);
-            out << RecipeString.toUtf8();
-            file.close();
-            StrVar = fileName.split("/");
-            ui->name_recipe->setText(StrVar.takeLast());
-        }
-}
-
-void MainWindow::loadFromFile() {
-    QStringList recipe;
-    QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Load Recipe from File"), "/home/oem/Ontos3/Project_Linux_Migration/recipes/",
-        tr("Recipe File (*.rcp);;All Files (*)"));
-        if (fileName.isEmpty())
-            return;
-        else {
-            QFile file(fileName);
-            if (!file.open(QIODevice::ReadOnly)) {
-                QMessageBox::information(this, tr("Unable to open file"),
-                    file.errorString());
-                return;
-            }
-            QTextStream in(&file);
-            while(!in.atEnd()) {
-                QString line = in.readLine();
-                recipe += line;
-            }
-            recipe += "NAME:" + file.fileName();
-            file.close();            
-            loadGUI(recipe);
-            showStatusMessage(tr("Loaded Recipe"));
-    }
-}
 
 void MainWindow::loadGUI(QStringList recipeData) {
     bool ok = false;
@@ -3033,72 +1396,9 @@ void MainWindow::loadConfigGUI(QStringList value) {
     ui->gas4_label->setText(config.getMFC4());
 
 }
-void MainWindow::GetExeCfg() {
-    QStringList Values;
-    QString filePath = "/home/oem/Ontos3/Project_Linux_Migration/config/default.cfg";
 
-    // Check if the file exists
-    if(!QFileInfo::exists(filePath)) {
-        QMessageBox::information(0, "Error", "Configuration file does not exist");
-        return;
-    }
-
-    QFile file(filePath);
-
-    //Try to open the file
-    if (!file.open(QIODevice::ReadOnly)) {QTextStream in(&file);
-        QMessageBox::information(0, "Error", file.errorString());
-        return;
-    }
-
-    QTextStream in(&file);
-
-    while(!in.atEnd()) {
-        QString line = in.readLine();
-        Values += line.split(">");
-    }
-
-    file.close();
-
-    loadConfigGUI(Values);
-
-}
 //State machines
-void MainWindow::setLightTower() {
-    if ( ((GlobalmyStatusBits && 0x80) > 0) || (doorsOpen) ) {
-        LightTower.state = ERROR;
-    }
-    else if ( (!doorsOpen) && (RunRecipeOn) ) {
-        LightTower.state = ACTIVE;
-    }
-    else {
-        if (LightTower.state != READY) {
-            LightTower.state = READY;
-        }
-    }
 
-    switch (LightTower.state) {
-        case ERROR:
-            writeRequest("$CB01%", 6); //$CB0n% resp[!CB0n#] n = 0,1,2,3 (none, red, amber, green)
-            readData();
-            LightTower.state = INACTIVE;
-            break;
-        case READY:
-            writeRequest("$CB02%", 6);
-            readData();
-            LightTower.state = INACTIVE;
-            break;
-        case ACTIVE:
-            writeRequest("$CB03%", 6);
-            readData();
-            LightTower.state = INACTIVE;
-            break;
-        case INACTIVE:
-            //Do nothing
-            break;
-
-    }
-}
 void MainWindow::RunInitAxesSM() {
     switch (InitSM.getState()) {
         case IASM_STARTUP:
@@ -3208,8 +1508,8 @@ void MainWindow::RunTwoSpotAxesSM() {
         case TSSM_GET_FIRST:
             if (joystickOn) {
                 ui->axisstatus_2->setText("Release JoyStick Button");
-                TwoSpotSM.setFirstX(CoordParam.TranslateCoordXPH2Base(getXCoord()));
-                TwoSpotSM.setFirstY(CoordParam.TranslateCoordYPH2Base(getYCoord()));
+                TwoSpotSM.setFirstX(X.getPositionRelative2Base());
+                TwoSpotSM.setFirstY(Y.getPositionRelative2Base());
                 logInfo("TwoSpotSM Got First");
                 TwoSpotSM.setState(TSSM_WAIT_JOY_BTN_OFF);
             }
@@ -3223,8 +1523,8 @@ void MainWindow::RunTwoSpotAxesSM() {
             break;
         case TSSM_GET_SECOND:
             if (joystickOn) {
-                TwoSpotSM.setSecondX(CoordParam.TranslateCoordXPH2Base(getXCoord()));
-                TwoSpotSM.setSecondY(CoordParam.TranslateCoordYPH2Base(getYCoord()));
+                TwoSpotSM.setSecondX(X.getPositionRelative2Base());
+                TwoSpotSM.setSecondY(Y.getPositionRelative2Base());
                 //determine box orientation and corners
                 TwoSpotSM.checkXDimensions();
                 TwoSpotSM.checkYDimensions();
@@ -3378,10 +1678,10 @@ void MainWindow::RunDiameter() { //calculate scan recipe based on wafer diameter
         wafer_diameter = ui->wafer_diameter->currentText().toDouble(&ok);
         radius = wafer_diameter / 2.0;
         //find the points defining the box
-        ScanSM.setX1(CoordParam.getXp2Base() - radius);
-        ScanSM.setX2(CoordParam.getXp2Base() + radius);
-        ScanSM.setY1(CoordParam.getYp2Base() - radius);
-        ScanSM.setY2(CoordParam.getYp2Base() + radius);
+        ScanSM.setX1(stageBaseCoordinates.getXp2Base() - radius);
+        ScanSM.setX2(stageBaseCoordinates.getXp2Base() + radius);
+        ScanSM.setY1(stageBaseCoordinates.getY() - radius);
+        ScanSM.setY2(stageBaseCoordinates.getY() + radius);
 
         //update the "actual" display after coord sys translation
         val = XPos_RefB_2_RefPH(ScanSM.getX1());
@@ -3451,3 +1751,72 @@ QString configuration::getExeConfigPathFileName() const
     return ExeConfigPathFileName;
 }
 
+
+double StageBaseCoordinate::getPlasmaHeadZ() const
+{
+    return PlasmaHeadZ;
+}
+
+void StageBaseCoordinate::setPlasmaHeadZ(double newPlasmaHeadZ)
+{
+    PlasmaHeadZ = newPlasmaHeadZ;
+}
+
+double StageBaseCoordinate::getStageBaseY() const
+{
+    return stageBaseY;
+}
+
+void StageBaseCoordinate::setStageBaseY(double newStageBaseY)
+{
+    stageBaseY = newStageBaseY;
+}
+
+double StageBaseCoordinate::getStageBaseZ() const
+{
+    return stageBaseZ;
+}
+
+void StageBaseCoordinate::setStageBaseZ(double newStageBaseZ)
+{
+    stageBaseZ = newStageBaseZ;
+}
+
+double StageBaseCoordinate::getStageBaseX() const
+{
+    return stageBaseX;
+}
+
+void StageBaseCoordinate::setStageBaseX(double newStageBaseX)
+{
+    stageBaseX = newStageBaseX;
+}
+
+double LaserCoordinates::getLaser() const
+{
+    return Laser;
+}
+
+double LaserCoordinates::getPosition() const
+{
+    return position;
+}
+double getPosition() const;
+
+double LaserCoordinates::getPosition() const
+{
+    return position;
+}
+
+double Coordinate::getPosition() const
+{
+    return position;
+}
+
+void Coordinate::setPosition(double newPosition)
+{
+    if (qFuzzyCompare(position, newPosition))
+            return;
+    position = newPosition;
+    emit positionChanged();
+}

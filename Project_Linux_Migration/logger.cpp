@@ -63,4 +63,30 @@ void Logger::messageOutput(QtMsgType type, const QMessageLogContext& context, co
     logFile->flush();
 }
 
+void Logger::logDebug(QString debugMsg) const {
+    qDebug() << debugMsg;
+}
+void Logger::logInfo(QString infoMsg) const {
+    qInfo() << infoMsg;
+}
+void Logger::logWarning(QString warningMsg) const {
+    qWarning() << warningMsg;
+}
+void Logger::logCritical(QString criticalMsg) const {
+    qCritical() << criticalMsg;
+}
+void Logger::logFatal() const {
+    qFatal("Fatal Log!");
+}
 
+void Logger::logAxesStatus() {
+    QString LogStr{};
+    LogStr = "LED: " + axisStatus[0] + axisStatus[1];
+    LogStr += " XSt: " + axisStatus[2];
+    LogStr += " XPos: " + axisStatus[3];
+    LogStr += " YSt: " + axisStatus[5];
+    LogStr += " YPos: " + axisStatus[6];
+    LogStr += " ZSt: " + axisStatus[8];
+    LogStr += " ZPos: " + axisStatus[9];
+    logInfo(LogStr);
+}
