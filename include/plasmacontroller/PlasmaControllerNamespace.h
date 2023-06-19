@@ -4,9 +4,9 @@
 namespace CTL {
 // Plasma Controller -specific header files
 #include "mfc.h"
-#include "commands.h"
+#include "plasmacommands.h"
 #include "plasmahead.h"
-#include "controller.h"
+#include "plasmacontroller.h"
 #include "pwr.h"
 #include "tuner.h"
 

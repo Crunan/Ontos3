@@ -8,14 +8,13 @@ MainWindow::MainWindow(MainLoop& loop, Logger& logger, QWidget *parent) :
     ui(new Ui::MainWindow),
     status(new QLabel),
     settings(new SettingsDialog),
-    serial(new SerialComms(this)),
+    serial(nullptr),
     recipe(nullptr)
 {
     ui->setupUi(this);
     this->setWindowTitle("ONTOS3 INTERFACE");
     // Make signal/slot connections here
-    connect(serial, &SerialComms::serialPortOpened, this, &MainWindow::SerialPortConnectedSetupFunctions);
-    connect(serial, &SerialComms::errorOccured, this, &MainWindow::handleSerialPortError);
+    //mainLoop.start();
     initActionsConnections();
 }
 MainWindow::~MainWindow() {
@@ -26,10 +25,13 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::initActionsConnections() {
-    connect(ui->actionConnect, &QAction::triggered, serial, &SerialComms::openSerialPort);
+    connect(ui->actionConnect, &QAction::triggered, this, [this]() {
+        // Call the openSerialPort slot with the settings object
+        serial->openSerialPort(settings->settings());
+    });
     connect(ui->actionDisconnect, &QAction::triggered, serial, &SerialComms::closeSerialPort);
-    connect(ui->actionQuit, &QAction::triggered, this, &MainWindow::shutDownProgram);
     connect(ui->actionConfigure, &QAction::triggered, settings, &SettingsDialog::show);
+    connect(ui->actionQuit, &QAction::triggered, this, &MainWindow::shutDownProgram);
 }
 
 void MainWindow::about() {
@@ -51,29 +53,15 @@ void MainWindow::handleSerialPortError() {
     QMessageBox::critical(this, tr("Serial Communication Error"), serial->getError());
     log.logCritical(serial->getError());
 }
-void MainWindow::SerialPortConnectedSetupFunctions() {
-    adjustButtonAvailabilityOnSerialConnect();
-    displayStatusSerialPortConnected();
-}
 
-void MainWindow::displayStatusSerialPortConnected() {
-    status->showStatusMessage(tr("Connected to %1 : %2, %3, %4, %5, %6")
-                                  .arg(settings.name).arg(settings.stringBaudRate).arg(settings.stringDataBits)
-                                  .arg(settings.stringParity).arg(settings.stringStopBits).arg(settings.stringFlowControl));
-}
-void MainWindow::adjustButtonAvailabilityOnSerialConnect() {
-    ui->actionConnect->setEnabled(false);
-    ui->actionDisconnect->setEnabled(true);
-    ui->actionConfigure->setEnabled(false);
-}
-void MainWindow::createRecipe() {
-    // Delete the previous recipe if one exists
-    delete recipe;
+//void MainWindow::createRecipe() {
+//    // Delete the previous recipe if one exists
+//    delete recipe;
 
-    // Create a new recipe object
-    recipe = new Recipe();
-    // Initialize the recipe object or perform other operations
-}
-Recipe* MainWindow::getRecipe() const{
-    return recipe;
-}
+//    // Create a new recipe object
+//    recipe = new Recipe();
+//    // Initialize the recipe object or perform other operations
+//}
+//Recipe* MainWindow::getRecipe() const{
+//    return recipe;
+//}

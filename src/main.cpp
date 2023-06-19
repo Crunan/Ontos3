@@ -10,8 +10,9 @@ int main(int argc, char *argv[]) {
 
     // Create our main loop
     // Contains our Event loop and Timer
-    MainLoop mainLoop;
-    mainLoop.start();
+    QObject* parent = nullptr;
+    MainLoop mainLoop(parent);
+
 
     // Create our logger
     Logger log;

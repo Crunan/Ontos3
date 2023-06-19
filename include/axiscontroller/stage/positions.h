@@ -3,7 +3,7 @@
 
 #include "../coordinate.h"
 
-struct Positions {
+class Positions {
 private:
     // Coordinates relative to stage base
     Coordinate base;

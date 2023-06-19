@@ -27,11 +27,11 @@ public:
                               const QString& msg);
 
 
-    static void logDebug(QString debugMsg) const;
-    static void logInfo(QString infoMsg) const;
-    static void logWarning(QString warningMsg) const;
-    static void logCritical(QString criticalMsg) const;
-    static void logFatal() const;
+    static void logDebug(QString debugMsg);
+    static void logInfo(QString infoMsg);
+    static void logWarning(QString warningMsg);
+    static void logCritical(QString criticalMsg);
+    static void logFatal();
 };
 
 #endif // LOGGER_H

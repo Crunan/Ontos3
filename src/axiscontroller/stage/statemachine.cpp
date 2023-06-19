@@ -1,24 +1,26 @@
 #include "include/axiscontroller/stage/statemachine.h"
 
-Positions::StateMachine()
-    :currentState(IDLE)
+StateMachine::StateMachine(QObject* parent)
+    : QObject(parent), currentState(IDLE)
 {
+
 }
 
-Positions::~StateMachine()
+StateMachine::~StateMachine()
 {
+
 }
 
-auto StateMachine::getState() const
+StateMachine::StageState StateMachine::getState() const
 {
     return currentState;
 }
 
 void StateMachine::setState(StageState state)
 {
-    if (currentState != state) {
+    if (currentState != state)
+    {
         currentState = state;
         emit stateChanged();
     }
 }
-

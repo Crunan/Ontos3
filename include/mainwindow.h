@@ -5,11 +5,12 @@
 
 #include "include/mainloop.h"
 #include "include/settingsdialog.h"
-#include "include/recipe.h"ontos3
+#include "include/recipe.h"
 #include "include/logger.h"
 #include "include/serialcomms.h"
 #include <QMainWindow>
 #include <QMessageBox>
+#include <QLabel>
 
 
 namespace Ui {
@@ -31,13 +32,13 @@ public:
     void createRecipe();
 
 private:
-    Ui::MainWindow *ui = nullptr;
-    QLabel* status = nullptr;
-    SettingsDialog* settings = nullptr;
     // Reference to the MainLoop object
     MainLoop& mainLoop;
     // Reference to the logger
     Logger& log;
+    Ui::MainWindow* ui = nullptr;
+    QLabel* status = nullptr;
+    SettingsDialog* settings = nullptr;
     // Pointer to Serial Communications
     SerialComms* serial;
     // Pointer to the Recipe object
@@ -49,15 +50,14 @@ private:
     void about();
     void shutDownProgram();
     // Serial Port methodsRecipe*
-    void SerialPortConnectedSetupFunctions();
-    void adjustButtonAvailabilityOnSerialConnect();
-    void displayStatusSerialPortConnected();
+    void handleSerialPortError();
+
     // Recipe methods
-    void createRecipe();
-    Recipe* getRecipe() const;
+    //void createRecipe();
+    //Recipe* getRecipe() const;
 
 
-private slots:
+public slots:
 
 };
 #endif // MAINWINDOW_H

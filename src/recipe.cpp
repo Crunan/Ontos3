@@ -2,174 +2,174 @@
 
 Recipe::Recipe(QObject* parent) : QObject(parent) {
     // Initialize member variables with default values
-    substrateThickness = 0.0;
-    plasmaHeadGap = 0.0;
-    substrateOverlap = 0.0;
-    stageSpeed = 0.0;
-    numCycles = 1;
-    autoScanOn = false;
-    N2PurgeOn = false;
-    gas1Setpoint = 0.0;
-    gas2Setpoint = 0.0;
-    gas3Setpoint = 0.0;
-    gas4Setpoint = 0.0;
-    RfSetpoint = 0.0;
-    tunerSetpoint = 0.0;
-    autoTuneOn = false;
+    m_substrateThickness = 0.0;
+    m_plasmaHeadGap = 0.0;
+    m_substrateOverlap = 0.0;
+    m_stageSpeed = 0.0;
+    m_numCycles = 1;
+    m_autoScanOn = false;
+    m_N2PurgeOn = false;
+    m_gas1Setpoint = 0.0;
+    m_gas2Setpoint = 0.0;
+    m_gas3Setpoint = 0.0;
+    m_gas4Setpoint = 0.0;
+    m_RfSetpoint = 0;
+    m_tunerSetpoint = 0.0;
+    m_autoTuneOn = false;
 }
 
 Recipe::~Recipe() {}
 
 double Recipe::getSubstrateThickness() const {
-    return substrateThickness;
+    return m_substrateThickness;
 }
 
 void Recipe::setSubstrateThickness(double thickness) {
-    if (substrateThickness != thickness) {
-        substrateThickness = thickness;
+    if (m_substrateThickness != thickness) {
+        m_substrateThickness = thickness;
         emit substrateThicknessChanged();
     }
 }
 
 double Recipe::getPlasmaHeadGap() const {
-    return plasmaHeadGap;
+    return m_plasmaHeadGap;
 }
 
 void Recipe::setPlasmaHeadGap(double gap) {
-    if (plasmaHeadGap != gap) {
-        plasmaHeadGap = gap;
+    if (m_plasmaHeadGap != gap) {
+        m_plasmaHeadGap = gap;
         emit plasmaHeadGapChanged();
     }
 }
 
 double Recipe::getSubstrateOverlap() const {
-    return substrateOverlap;
+    return m_substrateOverlap;
 }
 
 void Recipe::setSubstrateOverlap(double overlap) {
-    if (substrateOverlap != overlap) {
-        substrateOverlap = overlap;
+    if (m_substrateOverlap != overlap) {
+        m_substrateOverlap = overlap;
         emit substrateOverlapChanged();
     }
 }
 
 double Recipe::getStageSpeed() const {
-    return stageSpeed;
+    return m_stageSpeed;
 }
 
 void Recipe::setStageSpeed(double speed) {
-    if (stageSpeed != speed) {
-        stageSpeed = speed;
+    if (m_stageSpeed != speed) {
+        m_stageSpeed = speed;
         emit stageSpeedChanged();
     }
 }
 
 int Recipe::getNumCycles() const {
-    return numCycles;
+    return m_numCycles;
 }
 
 void Recipe::setNumCycles(int cycles) {
-    if (numCycles != cycles) {
-        numCycles = cycles;
+    if (m_numCycles != cycles) {
+        m_numCycles = cycles;
         emit numCyclesChanged();
     }
 }
 
 bool Recipe::isAutoScanOn() const {
-    return autoScanOn;
+    return m_autoScanOn;
 }
 
 void Recipe::setAutoScanOn(bool enabled) {
-    if (autoScanOn != enabled) {
-        autoScanOn = enabled;
+    if (m_autoScanOn != enabled) {
+        m_autoScanOn = enabled;
         emit autoScanOnChanged();
     }
 }
 
 bool Recipe::isN2PurgeOn() const {
-    return N2PurgeOn;
+    return m_N2PurgeOn;
 }
 
 void Recipe::setN2PurgeOn(bool enabled) {
-    if (N2PurgeOn != enabled) {
-        N2PurgeOn = enabled;
+    if (m_N2PurgeOn != enabled) {
+        m_N2PurgeOn = enabled;
         emit N2PurgeOnChanged();
     }
 }
 
-double Recipe::gas1Setpoint() const {
-    return gas1Setpoint;
+double Recipe::getGas1Setpoint() const {
+    return m_gas1Setpoint;
 }
 
 void Recipe::setGas1Setpoint(double setpoint) {
-    if (gas1Setpoint != setpoint) {
-        gas1Setpoint = setpoint;
+    if (m_gas1Setpoint != setpoint) {
+        m_gas1Setpoint = setpoint;
         emit gas1SetpointChanged();
     }
 }
 
-double Recipe::gas2Setpoint() const {
-    return gas2Setpoint;
+double Recipe::getGas2Setpoint() const {
+    return m_gas2Setpoint;
 }
 
 void Recipe::setGas2Setpoint(double setpoint) {
-    if (gas2Setpoint != setpoint) {
-        gas2Setpoint = setpoint;
+    if (m_gas2Setpoint != setpoint) {
+        m_gas2Setpoint = setpoint;
         emit gas2SetpointChanged();
     }
 }
 
-double Recipe::gas3Setpoint() const {
-    return gas3Setpoint;
+double Recipe::getGas3Setpoint() const {
+    return m_gas3Setpoint;
 }
 
 void Recipe::setGas3Setpoint(double setpoint) {
-    if (gas3Setpoint != setpoint) {
-        gas3Setpoint = setpoint;
+    if (m_gas3Setpoint != setpoint) {
+        m_gas3Setpoint = setpoint;
         emit gas3SetpointChanged();
     }
 }
 
-double Recipe::gas4Setpoint() const {
-    return gas4Setpoint;
+double Recipe::getGas4Setpoint() const {
+    return m_gas4Setpoint;
 }
 
 void Recipe::setGas4Setpoint(double setpoint) {
-    if (gas4Setpoint != setpoint) {
-        gas4Setpoint = setpoint;
+    if (m_gas4Setpoint != setpoint) {
+        m_gas4Setpoint = setpoint;
         emit gas4SetpointChanged();
     }
 }
 
-double Recipe::RfSetpoint() const {
-    return RfSetpoint;
+int Recipe::getRfSetpoint() const {
+    return m_RfSetpoint;
 }
 
-void Recipe::setRfSetpoint(double setpoint) {
-    if (RfSetpoint != setpoint) {
-        RfSetpoint = setpoint;
+void Recipe::setRfSetpoint(int setpoint) {
+    if (m_RfSetpoint != setpoint) {
+        m_RfSetpoint = setpoint;
         emit RfSetpointChanged();
     }
 }
 
-double Recipe::tunerSetpoint() const {
-    return tunerSetpoint;
+double Recipe::getTunerSetpoint() const {
+    return m_tunerSetpoint;
 }
 
 void Recipe::setTunerSetpoint(double setpoint) {
-    if (tunerSetpoint != setpoint) {
-        tunerSetpoint = setpoint;
+    if (m_tunerSetpoint != setpoint) {
+        m_tunerSetpoint = setpoint;
         emit tunerSetpointChanged();
     }
 }
 
 bool Recipe::isAutoTuneOn() const {
-    return autoTuneOn;
+    return m_autoTuneOn;
 }
 
 void Recipe::setAutoTuneOn(bool enabled) {
-    if (autoTuneOn != enabled) {
-        autoTuneOn = enabled;
+    if (m_autoTuneOn != enabled) {
+        m_autoTuneOn = enabled;
         emit autoTuneOnChanged();
     }
 }

@@ -1,6 +1,7 @@
 #ifndef LIGHTTOWERSTATEMACHINE_H
 #define LIGHTTOWERSTATEMACHINE_H
 
+#include <QObject>
 
 struct LightTowerStateMachine : public QObject {
 

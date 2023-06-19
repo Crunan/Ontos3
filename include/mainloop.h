@@ -23,8 +23,8 @@ private slots:
     void handleTimer();
 
 private:
-    QEventLoop *loop;
-    QTimer *timer;
+    QEventLoop* loop;
+    QTimer* timer;
 
 };
 

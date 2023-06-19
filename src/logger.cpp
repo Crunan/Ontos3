@@ -63,19 +63,19 @@ void Logger::messageOutput(QtMsgType type, const QMessageLogContext& context, co
     logFile->flush();
 }
 
-void Logger::logDebug(QString debugMsg) const {
+void Logger::logDebug(QString debugMsg) {
     qDebug() << debugMsg;
 }
-void Logger::logInfo(QString infoMsg) const {
+void Logger::logInfo(QString infoMsg) {
     qInfo() << infoMsg;
 }
-void Logger::logWarning(QString warningMsg) const {
+void Logger::logWarning(QString warningMsg) {
     qWarning() << warningMsg;
 }
-void Logger::logCritical(QString criticalMsg) const {
+void Logger::logCritical(QString criticalMsg) {
     qCritical() << criticalMsg;
 }
-void Logger::logFatal() const {
+void Logger::logFatal() {
     qFatal("Fatal Log!");
 }
 

@@ -10,8 +10,8 @@ CONFIG += c++17
 
 SOURCES += \
     src/axiscontroller/axis.cpp \
-    src/axiscontroller/commands.cpp \
-    src/axiscontroller/controller.cpp \
+    src/axiscontroller/axiscommands.cpp \
+    src/axiscontroller/axiscontroller.cpp \
     src/axiscontroller/stage/diameter.cpp \
     src/axiscontroller/stage/initialize.cpp \
     src/axiscontroller/stage/load.cpp \
@@ -27,9 +27,9 @@ SOURCES += \
     src/mainstatemachine.cpp \
     src/mainwindow.cpp \
     src/axiscontroller/stage/maneuvers.cpp \
-    src/plasmacontroller/commands.cpp \
-    src/plasmacontroller/controller.cpp \
     src/plasmacontroller/mfc.cpp \
+    src/plasmacontroller/plasmacommands.cpp \
+    src/plasmacontroller/plasmacontroller.cpp \
     src/plasmacontroller/plasmahead.cpp \
     src/plasmacontroller/pwr.cpp \
     src/recipe.cpp \
@@ -41,8 +41,8 @@ SOURCES += \
 
 HEADERS += \
     include/axiscontroller/AxisControllerNamespace.h \
-    include/axiscontroller/commands.h \
-    include/axiscontroller/controller.h \
+    include/axiscontroller/axiscommands.h \
+    include/axiscontroller/axiscontroller.h \
     include/axiscontroller/stage/StageNamespace.h \
     include/axiscontroller/axis.h \
     include/axiscontroller/stage/diameter.h \
@@ -54,11 +54,12 @@ HEADERS += \
     include/lighttowerstatemachine.h \
     include/logger.h \
     include/mainwindow.h \
+    include/mainloop.h \
     include/axiscontroller/stage/maneuvers.h \
     include/plasmacontroller/PlasmaControllerNamespace.h \
-    include/plasmacontroller/commands.h \
-    include/plasmacontroller/controller.h \
     include/plasmacontroller/mfc.h \
+    include/plasmacontroller/plasmacommands.h \
+    include/plasmacontroller/plasmacontroller.h \
     include/plasmacontroller/plasmahead.h \
     include/plasmacontroller/pwr.h \
     include/recipe.h \
@@ -67,9 +68,8 @@ HEADERS += \
     include/settingsdialog.h \
     include/axiscontroller/stage/statemachine.h \
     include/plasmacontroller/tuner.h \
-    include/ui_settingsdialog.h \
-    src/axiscontroller/stage/initialize.h \
-    src/axiscontroller/stage/twospot.h
+    include/axiscontroller/stage/initialize.h \
+    include/axiscontroller/stage/twospot.h
 
 FORMS += \
     ui/mainwindow.ui \

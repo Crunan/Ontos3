@@ -6,12 +6,12 @@
 class Recipe : public QObject {
     Q_OBJECT
     //Recipe Part 1 - Plasma
-    Q_PROPERTY(double gas1Setpoint READ gas1Setpoint WRITE setGas1Setpoint NOTIFY gas1SetpointChanged)
-    Q_PROPERTY(double gas2Setpoint READ gas2Setpoint WRITE setGas2Setpoint NOTIFY gas2SetpointChanged)
-    Q_PROPERTY(double gas3Setpoint READ gas3Setpoint WRITE setGas3Setpoint NOTIFY gas3SetpointChanged)
-    Q_PROPERTY(double gas4Setpoint READ gas4Setpoint WRITE setGas4Setpoint NOTIFY gas4SetpointChanged)
-    Q_PROPERTY(int RfSetpoint READ RfSetpoint WRITE setRfSetpoint NOTIFY RfSetpointChanged)
-    Q_PROPERTY(double tunerSetpoint READ tunerSetpoint WRITE setTunerSetpoint NOTIFY tunerSetpointChanged)
+    Q_PROPERTY(double gas1Setpoint READ getGas1Setpoint WRITE setGas1Setpoint NOTIFY gas1SetpointChanged)
+    Q_PROPERTY(double gas2Setpoint READ getGas2Setpoint WRITE setGas2Setpoint NOTIFY gas2SetpointChanged)
+    Q_PROPERTY(double gas3Setpoint READ getGas3Setpoint WRITE setGas3Setpoint NOTIFY gas3SetpointChanged)
+    Q_PROPERTY(double gas4Setpoint READ getGas4Setpoint WRITE setGas4Setpoint NOTIFY gas4SetpointChanged)
+    Q_PROPERTY(int RfSetpoint READ getRfSetpoint WRITE setRfSetpoint NOTIFY RfSetpointChanged)
+    Q_PROPERTY(double tunerSetpoint READ getTunerSetpoint WRITE setTunerSetpoint NOTIFY tunerSetpointChanged)
     Q_PROPERTY(bool autoTuneOn READ isAutoTuneOn WRITE setAutoTuneOn NOTIFY autoTuneOnChanged)
 
     //Recipe Part 2 - Stage & Substrate
@@ -22,45 +22,46 @@ class Recipe : public QObject {
     Q_PROPERTY(int numCycles READ getNumCycles WRITE setNumCycles NOTIFY numCyclesChanged)
     Q_PROPERTY(bool autoScanOn READ isAutoScanOn WRITE setAutoScanOn NOTIFY autoScanOnChanged)
     Q_PROPERTY(bool N2PurgeOn READ isN2PurgeOn WRITE setN2PurgeOn NOTIFY N2PurgeOnChanged)
+
 private:
     //Recipe Part 1 - Plasma
-    double gas1Setpoint;
-    double gas2Setpoint;
-    double gas3Setpoint;
-    double gas4Setpoint;
-    int RfSetpoint;
-    double tunerSetpoint;
-    bool autoTuneOn;
+    double m_gas1Setpoint;
+    double m_gas2Setpoint;
+    double m_gas3Setpoint;
+    double m_gas4Setpoint;
+    int m_RfSetpoint;
+    double m_tunerSetpoint;
+    bool m_autoTuneOn;
     //Recipe Part 2 - Stage & Substrate
-    double substrateThickness;
-    double plasmaHeadGap;
-    double substrateOverlap;
-    double stageSpeed;
-    int numCycles;
-    bool autoScanOn;
-    bool N2PurgeOn;
+    double m_substrateThickness;
+    double m_plasmaHeadGap;
+    double m_substrateOverlap;
+    double m_stageSpeed;
+    int m_numCycles;
+    bool m_autoScanOn;
+    bool m_N2PurgeOn;
 
 public:
     Recipe(QObject* parent = nullptr);
     ~Recipe();
 
     //Recipe Part 1 - Plasma
-    double gas1Setpoint() const;
+    double getGas1Setpoint() const;
     void setGas1Setpoint(double setpoint);
 
-    double gas2Setpoint() const;
+    double getGas2Setpoint() const;
     void setGas2Setpoint(double setpoint);
 
-    double gas3Setpoint() const;
+    double getGas3Setpoint() const;
     void setGas3Setpoint(double setpoint);
 
-    double gas4Setpoint() const;
+    double getGas4Setpoint() const;
     void setGas4Setpoint(double setpoint);
 
-    int RfSetpoint() const;
+    int getRfSetpoint() const;
     void setRfSetpoint(int setpoint);
 
-    double tunerSetpoint() const;
+    double getTunerSetpoint() const;
     void setTunerSetpoint(double setpoint);
 
     bool isAutoTuneOn() const;
@@ -87,6 +88,7 @@ public:
 
     bool isN2PurgeOn() const;
     void setN2PurgeOn(bool enabled);
+
 signals:
     //Recipe Part 1 - Plasma
     void gas1SetpointChanged();

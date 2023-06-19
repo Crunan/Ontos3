@@ -1,12 +1,10 @@
 #include "include/serialcomms.h"
-
 SerialComms::SerialComms(QObject *parent)
     : QObject(parent)
 {
     serial = new QSerialPort(this);
     connect(serial, &QSerialPort::readyRead, this, &SerialComms::getIncomingData);
-    connect(serial, static_cast<void (QSerialPort::*)(QSerialPort::SerialPortError)>(&QSerialPort::error),
-            this, &SerialComms::handleError);
+    connect(serial, &QSerialPort::errorOccurred, this, &SerialComms::handleError);
 }
 
 SerialComms::~SerialComms() {
@@ -27,7 +25,7 @@ void SerialComms::setOutgoingData(const QString &data) {
     }
 }
 
-QString SerialComms::getIncomingData() const {
+QString SerialComms::getIncomingData() {
     QByteArray newData = serial->readAll();
 
     if (newData != incomingData) {
@@ -42,51 +40,33 @@ QString SerialComms::getError() const {
     return error;
 }
 
+void SerialComms::openSerialPort(const SettingsDialog::Settings& p) {
+    if (serial->isOpen()) {
+        return;
+    }
 
-void SerialComms::setSerialSettings() {
-    const SettingsDialog::Settings p = settings->settings();
     serial->setPortName(p.name);
     serial->setBaudRate(p.baudRate);
     serial->setDataBits(p.dataBits);
     serial->setParity(p.parity);
     serial->setStopBits(p.stopBits);
     serial->setFlowControl(p.flowControl);
-}
 
-void SerialComms::openSerialPort() {
-    setSerialSettings();
     serial->open(QIODevice::ReadWrite);
     // Serial port opened successfully
     emit serialPortOpened();
 }
 
-void SerialComms::handleError(QSerialPort::SerialPortError error)
-{
-    // Error handling logic
-    if (error == QSerialPort::ResourceError) {
-        this->error = serial->errorString();
-        emit errorOccured();
-    }else if (error == QSerialPort::ReadError) {
-        // Handle read error
-    } else if (error == QSerialPort::WriteError) {
-        // Handle write error
-    } else if (error == QSerialPort::TimeoutError) {
-        // Handle timeout error
-    }
-    // ...
+void SerialComms::handleError() {
+    this->error = serial->errorString();
+    emit errorOccurred();
 }
 
 void SerialComms::closeSerialPort() {
-//    MainStateMachine.setState(SHUTDOWN);
-//    if (serial->isOpen()) {
+    if (serial->isOpen()) {
 //        resetCTL();
 //        resetAxes();
-//        serial->close();
+        serial->close();
+        emit serialPortClosed();
+    }
 }
-
-//    ui->actionConnect->setEnabled(true);
-//    ui->actionDisconnect->setEnabled(false);
-//    ui->actionConfigure->setEnabled(true);
-//    logInfo("Port Disconnected");
-//    showStatusMessage(tr("Disconnected"));
-//}

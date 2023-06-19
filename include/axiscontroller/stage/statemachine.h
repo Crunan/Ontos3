@@ -3,8 +3,6 @@
 
 #include <QObject>
 
-namespace Positions {
-
 
 class StateMachine : public QObject
 {
@@ -33,5 +31,5 @@ signals:
     void stateChanged();
 };
 
-}
+
 #endif // STATEMACHINE_H

@@ -6,8 +6,8 @@ namespace AxisCTL {
     namespace Stage
 
 #include "axis.h"
-#include "commands.h"
-#include "controller.h"
+#include "axiscommands.h"
+#include "axiscontroller.h"
 #include "coordinate.h"
 
 // Other declarations and definitions related to the Axis Controller

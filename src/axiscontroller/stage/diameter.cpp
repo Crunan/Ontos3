@@ -1,10 +1,12 @@
 #include "include/axiscontroller/stage/diameter.h"
 
+
 Diameter::Diameter()
 
 {
 
 }
+
 //void MainWindow::RunDiameter() { //calculate scan recipe based on wafer diameter selected
 //    double wafer_diameter;
 //    double radius;

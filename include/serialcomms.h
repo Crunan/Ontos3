@@ -4,11 +4,13 @@
 #include <QObject>
 #include <QSerialPort>
 
+#include "include/settingsdialog.h"
+
 class SerialComms : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString outgoingData READ getOutgoingData CONSTANT WRITE setOutgoingData NOTIFY outgoingDataChanged)
-    Q_PROPERTY(QString incomingData READ getIncomingData CONSTANT NOTIFY incomingDataChanged)
+    Q_PROPERTY(QString outgoingData READ getOutgoingData  WRITE setOutgoingData NOTIFY outgoingDataChanged)
+    Q_PROPERTY(QString incomingData READ getIncomingData NOTIFY incomingDataChanged)
     Q_PROPERTY(QString error READ getError CONSTANT)
 
 private:
@@ -24,19 +26,20 @@ public:
     QString getOutgoingData() const;
     void setOutgoingData(const QString &data);
 
-    QString getIncomingData() const;
-
+    QString getIncomingData();
     QString getError() const;
-
-
-    void handleError();
-    void setSerialSettings();
 
 signals:
     void serialPortOpened();
+    void serialPortClosed();
     void outgoingDataChanged();
     void incomingDataChanged();
-    void errorOccured();
+    void errorOccurred();
+
+public slots:
+    void handleError();
+    void openSerialPort(const SettingsDialog::Settings& p);
+    void closeSerialPort();
 };
 
 #endif // SERIALCOMMS_H

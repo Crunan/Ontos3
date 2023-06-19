@@ -17,8 +17,8 @@ enum AxisState {
 
 class Axis : public QObject {
     Q_OBJECT
-    Q_PROPERTY(AxisState currentState READ getCurrentState CONSTANT WRITE setCurrentState NOTIFY currentStateChanged)
-    Q_PROPERTY(int error READ getError CONSTANT NOTIFY errorChanged)
+    Q_PROPERTY(AxisState currentState READ getCurrentState WRITE setCurrentState NOTIFY currentStateChanged)
+    Q_PROPERTY(int error READ getError NOTIFY errorChanged)
 
 private:
     AxisState currentState;

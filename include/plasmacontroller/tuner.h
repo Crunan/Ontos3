@@ -1,37 +1,37 @@
-#ifndef TUNER_H
-#define TUNER_H
+//#ifndef TUNER_H
+//#define TUNER_H
 
-#include <QObject>
+//#include <QObject>
 
-struct Tuner : public QObject {
+//struct Tuner : public QObject {
 
-    Q_OBJECT
-    Q_PROPERTY(double currentPosition READ getPosition CONSTANT WRITE setPosition NOTIFY positionChanged)
-    Q_PROPERTY(double loadedSetpoint READ getSetpoint CONSTANT WRITE setSetpoint NOTIFY setpointChanged)
-    Q_PROPERTY(double autoTune READ getAutoTune CONSTANT WRITE toggleAutoTune NOTIFY autoTuneChanged)
+//    Q_OBJECT
+//    Q_PROPERTY(double currentPosition READ getPosition CONSTANT WRITE setPosition NOTIFY positionChanged)
+//    Q_PROPERTY(double loadedSetpoint READ getSetpoint CONSTANT WRITE setSetpoint NOTIFY setpointChanged)
+//    Q_PROPERTY(double autoTune READ getAutoTune CONSTANT WRITE toggleAutoTune NOTIFY autoTuneChanged)
 
-public:
-    Tuner();
+//public:
+//    Tuner();
 
-    double currentPosition;
-    double loadedSetpoint;
-    bool autoTune;
+//    double currentPosition;
+//    double loadedSetpoint;
+//    bool autoTune;
 
-public:
-    double getPosition() const;
-    void setPosition(double position);
+//public:
+//    double getPosition() const;
+//    void setPosition(double position);
 
-    double getSetpoint() const;
-    void setSetpoint(double setpoint);
+//    double getSetpoint() const;
+//    void setSetpoint(double setpoint);
 
-    double getAutoTune() const;
-    void toggleAutoTune();
+//    double getAutoTune() const;
 
-signals:
-    void positionChanged();
-    void setpointChanged();
-    void autoTuneChanged();
+//signals:
+//    void positionChanged();
+//    void setpointChanged();
+//    void autoTuneChanged();
+//public slots:
+//    void toggleAutoTune(double value);
 
-
-};
-#endif // TUNER_H
+//};
+//#endif // TUNER_H
