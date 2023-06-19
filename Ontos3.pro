@@ -40,7 +40,6 @@ SOURCES += \
     src/axiscontroller/stage/twospot.cpp
 
 HEADERS += \
-    include/axiscontroller/AxisControllerNamespace.h \
     include/axiscontroller/axiscommands.h \
     include/axiscontroller/axiscontroller.h \
     include/axiscontroller/stage/StageNamespace.h \
@@ -56,7 +55,6 @@ HEADERS += \
     include/mainwindow.h \
     include/mainloop.h \
     include/axiscontroller/stage/maneuvers.h \
-    include/plasmacontroller/PlasmaControllerNamespace.h \
     include/plasmacontroller/mfc.h \
     include/plasmacontroller/plasmacommands.h \
     include/plasmacontroller/plasmacontroller.h \

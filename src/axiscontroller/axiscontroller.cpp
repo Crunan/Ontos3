@@ -1,99 +1,99 @@
 #include "include/axiscontroller/axiscontroller.h"
 
-//Controller::Controller(QObject* parent) : QObject(parent) {
-//    // Initialize member variables
-//    currentStatus = "";
-//    ledStates = 0;
-//    doorsOpen = false;
-//    joystickOn = false;
-//    vacuumOn = false;
-//    nitrogenPurgeOn = false;
-//}
+AxisController::AxisController(QObject* parent) : QObject(parent) {
+    // Initialize member variables
+    currentStatus = "";
+    ledStates = 0;
+    doorsOpen = false;
+    joystickOn = false;
+    vacuumOn = false;
+    nitrogenPurgeOn = false;
+}
 
-//Controller::~Controller() {
-//    // Destructor
-//}
+AxisController::~AxisController() {
+    // Destructor
+}
 
-//QString Controller::getCurrentStatus() const {
-//    return currentStatus;
-//}
+QString AxisController::getCurrentStatus() const {
+    return currentStatus;
+}
 
-//void Controller::setCurrentStatus(const QString &status) {
-//    if (currentStatus != status) {
-//        currentStatus = status;
-//        emit currentStatusChanged();
-//    }
-//}
+void AxisController::setCurrentStatus(const QString &status) {
+    if (currentStatus != status) {
+        currentStatus = status;
+        emit currentStatusChanged();
+    }
+}
 
-//QStringList Controller::getAxisStatus() const {
-//    return axisStatus;
-//}
+QStringList AxisController::getAxisStatus() const {
+    return axisStatus;
+}
 
-//void Controller::setAxisStatus(const QStringList &statusList) {
-//    if (axisStatus != statusList) {
-//        axisStatus = statusList;
-//        emit axisStatusChanged();
-//    }
-//}
+void AxisController::setAxisStatus(const QStringList &statusList) {
+    if (axisStatus != statusList) {
+        axisStatus = statusList;
+        emit axisStatusChanged();
+    }
+}
 
-//int Controller::getLedStates() const {
-//    return ledStates;
-//}
+int AxisController::getLedStates() const {
+    return ledStates;
+}
 
-//void Controller::setLedStates(int states) {
-//    if (ledStates != states) {
-//        ledStates = states;
-//        emit ledStatesChanged();
-//    }
-//}
+void AxisController::setLedStates(int states) {
+    if (ledStates != states) {
+        ledStates = states;
+        emit ledStatesChanged();
+    }
+}
 
-//bool Controller::areDoorsOpen() const {
-//    return doorsOpen;
-//}
+bool AxisController::areDoorsOpen() const {
+    return doorsOpen;
+}
 
-//void Controller::setDoorsOpen(bool isOpen) {
-//    if (doorsOpen != isOpen) {
-//        doorsOpen = isOpen;
-//        emit doorsOpenChanged();
-//    }
-//}
+void AxisController::setDoorsOpen(bool isOpen) {
+    if (doorsOpen != isOpen) {
+        doorsOpen = isOpen;
+        emit doorsOpenChanged();
+    }
+}
 
-//bool Controller::isJoystickOn() const {
-//    return joystickOn;
-//}
+bool AxisController::isJoystickOn() const {
+    return joystickOn;
+}
 
-//void Controller::setJoystickOn(bool isOn) {
-//    if (joystickOn != isOn) {
-//        joystickOn = isOn;
-//        emit joystickOnChanged();
-//    }
-//}
+void AxisController::setJoystickOn(bool isOn) {
+    if (joystickOn != isOn) {
+        joystickOn = isOn;
+        emit joystickOnChanged();
+    }
+}
 
-//bool Controller::isVacuumOn() const {
-//    return vacuumOn;
-//}
+bool AxisController::isVacuumOn() const {
+    return vacuumOn;
+}
 
-//void Controller::setVacuumOn(bool isOn) {
-//    if (vacuumOn != isOn) {
-//        vacuumOn = isOn;
-//        emit vacuumOnChanged();
-//    }
-//}
+void AxisController::setVacuumOn(bool isOn) {
+    if (vacuumOn != isOn) {
+        vacuumOn = isOn;
+        emit vacuumOnChanged();
+    }
+}
 
-//bool Controller::isNitrogenPurgeOn() const {
-//    return nitrogenPurgeOn;
-//}
+bool AxisController::isNitrogenPurgeOn() const {
+    return nitrogenPurgeOn;
+}
 
-//void Controller::setNitrogenPurgeOn(bool isOn) {
-//    if (nitrogenPurgeOn != isOn) {
-//        nitrogenPurgeOn = isOn;
-//        emit nitrogenPurgeOnChanged();
-//    }
-//}
+void AxisController::setNitrogenPurgeOn(bool isOn) {
+    if (nitrogenPurgeOn != isOn) {
+        nitrogenPurgeOn = isOn;
+        emit nitrogenPurgeOnChanged();
+    }
+}
 
-//bool Controller::sameStateXYZ() {
-//    return false;
-//}
+bool AxisController::sameStateXYZ() {
+    return false;
+}
 
 ////void Controller::AxisStartup() {
 ////    command.getXMaxSpeed();

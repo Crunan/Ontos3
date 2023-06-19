@@ -1,9 +1,24 @@
 #include "include/plasmacontroller/plasmacontroller.h"
 
-//PlasmaController::PlasmaController()
-//{
+PlasmaController::PlasmaController(SerialComms* port, QWidget* parent) :
+    QObject(parent),
+    serial(port),
+    plasmaHead(),
+    pwr(),
+    tuner(),
+    mfc(),
+    command(),
+    config(),
+    axisCTL(nullptr)
+{
+    // Add startup data gathering methods.
 
-//}
+}
+
+PlasmaController::~PlasmaController()
+{
+
+}
 
 //void PlasmaController::RunPolling() {
 //    getCTLStatus();

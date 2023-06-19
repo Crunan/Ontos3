@@ -14,7 +14,7 @@ MainWindow::MainWindow(MainLoop& loop, Logger& logger, QWidget *parent) :
     ui->setupUi(this);
     this->setWindowTitle("ONTOS3 INTERFACE");
     // Make signal/slot connections here
-    //mainLoop.start();
+
     initActionsConnections();
 }
 MainWindow::~MainWindow() {
