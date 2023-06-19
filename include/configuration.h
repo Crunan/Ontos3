@@ -1,28 +1,30 @@
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
+#include <QCoreApplication>
 #include <QString>
+#include <QMap>
+#include <QStringList>
 
-struct Configuration {
-    QString ExeConfigPath = "./config/";
-    QString ExeConfigPathFileName = "default";
-    QString MFC1;
-    QString MFC2;
-    QString MFC3;
-    QString MFC4;
-
+class Configuration
+{
 public:
-    QString getMFC1() const;
-    QString getMFC2() const;
-    QString getMFC3() const;
-    QString getMFC4() const;
+    Configuration();
 
-    void setMFC1(const QString& newMFC1);
-    void setMFC2(const QString& newMFC2);
-    void setMFC3(const QString& newMFC3);
-    void setMFC4(const QString& newMFC4);
     QString getExeConfigPath() const;
-    QString getExeConfigPathFileName() const;
+    QString getExeConfigFileName() const;
+    QString getValueForKey(const QString& key) const;
+    QStringList getAllKeys() const;
+
+private:
+    void readConfigFile();
+
+    QString execonfigPath;
+    QString execonfigFileName;
+    QMap<QString, QString> configDictionary;
+
+signals:
+    void configFileError();
 };
 
 #endif // CONFIGURATION_H

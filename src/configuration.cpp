@@ -1,144 +1,75 @@
-#include "include/configuration.h"
+#include "configuration.h"
 
-QString Configuration::getMFC1() const {
-    return MFC1;
+#include <QFile>
+#include <QTextStream>
+#include <QStringList>
+
+Configuration::Configuration()
+{
+    // Get the build directory path
+    QString buildDir = QCoreApplication::applicationDirPath();
+
+    // Set the execonfigPath to the "config" folder in the build directory
+    execonfigPath = buildDir + "/config";
+
+    // Set the execonfigFileName to the desired file name
+    execonfigFileName = "config.ini";
+
+    // Read the configuration file and populate the dictionary
+    readConfigFile();
 }
 
-QString Configuration::getMFC2() const {
-    return MFC2;
+void Configuration::readConfigFile()
+{
+    // Open the configuration file for reading
+    QString filePath = execonfigPath + "/" + execonfigFileName;
+    QFile configFile(filePath);
+    if (!configFile.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        // Handle the error if the file cannot be opened
+        return;
+        emit configFileError();
+    }
+
+    // Read the file line by line and populate the dictionary
+    QTextStream in(&configFile);
+    while (!in.atEnd())
+    {
+        QString line = in.readLine().trimmed();
+        QStringList parts = line.split('=');
+        if (parts.size() == 2)
+        {
+            QString key = parts[0].trimmed();
+            QString value = parts[1].trimmed();
+            configDictionary[key] = value;
+        }
+    }
+
+    // Close the configuration file
+    configFile.close();
+}
+QString Configuration::getValueForKey(const QString& key) const
+{
+    if (configDictionary.contains(key))
+    {
+        return configDictionary.value(key);
+    }
+
+    // Return an empty string if the key is not found
+    return QString();
 }
 
-QString Configuration::getMFC3() const {
-    return MFC3;
+QStringList Configuration::getAllKeys() const
+{
+    return configDictionary.keys();
 }
 
-QString Configuration::getMFC4() const {
-    return MFC4;
+QString Configuration::getExeConfigPath() const
+{
+    return execonfigPath;
 }
 
-void Configuration::setMFC1(const QString& newMFC1) {
-    MFC1 = newMFC1;
+QString Configuration::getExeConfigFileName() const
+{
+    return execonfigFileName;
 }
-
-void Configuration::setMFC2(const QString& newMFC2) {
-    MFC2 = newMFC2;
-}
-
-void Configuration::setMFC3(const QString& newMFC3) {
-    MFC3 = newMFC3;
-}
-
-void Configuration::setMFC4(const QString& newMFC4) {
-    MFC4 = newMFC4;
-}
-
-QString Configuration::getExeConfigPath() const {
-    return ExeConfigPath;
-}
-
-QString Configuration::getExeConfigPathFileName() const {
-    return ExeConfigPathFileName;
-}
-//void Configuration::GetExeCfg() {
-//    QStringList Values;
-//    QString filePath = "/home/oem/Ontos3/Project_Linux_Migration/config/default.cfg";
-
-//    // Check if the file exists
-//    if(!QFileInfo::exists(filePath)) {
-//        QMessageBox::information(0, "Error", "Configuration file does not exist");
-//        return;
-//    }
-
-//    QFile file(filePath);
-
-//    //Try to open the file
-//    if (!file.open(QIODevice::ReadOnly)) {QTextStream in(&file);
-//        QMessageBox::information(0, "Error", file.errorString());
-//        return;
-//    }
-
-//    QTextStream in(&file);
-
-//    while(!in.atEnd()) {
-//        QString line = in.readLine();
-//        Values += line.split(">");
-//    }
-
-//    file.close();
-
-//    loadConfigGUI(Values);
-
-//}
-
-//struct configuration {
-//    QString ExeConfigPath = "./config/";
-//    QString ExeConfigPathFileName = "default";
-//    QString MFC1;
-//    QString MFC2;
-//    QString MFC3;
-//    QString MFC4;
-
-//    public:
-//    QString getMFC1() const;
-//    QString getMFC2() const;
-//    QString getMFC3() const;
-//    QString getMFC4() const;
-
-//    void setMFC1(const QString &newMFC1);
-//    void setMFC2(const QString &newMFC2);
-//    void setMFC3(const QString &newMFC3);
-//    void setMFC4(const QString &newMFC4);
-//    QString getExeConfigPath() const;
-//    QString getExeConfigPathFileName() const;
-
-//} config;
-
-//QString configuration::getMFC2() const
-//{
-//    return MFC2;
-//}
-
-//void configuration::setMFC2(const QString &newMFC2)
-//{
-//    MFC2 = newMFC2;
-//}
-
-//QString configuration::getMFC1() const
-//{
-//    return MFC1;
-//}
-
-//void configuration::setMFC1(const QString &newMFC1)
-//{
-//    MFC1 = newMFC1;
-//}
-
-//QString configuration::getMFC3() const
-//{
-//    return MFC3;
-//}
-
-//void configuration::setMFC3(const QString &newMFC3)
-//{
-//    MFC3 = newMFC3;
-//}
-
-//QString configuration::getMFC4() const
-//{
-//    return MFC4;
-//}
-
-//void configuration::setMFC4(const QString &newMFC4)
-//{
-//    MFC4 = newMFC4;
-//}
-
-//QString configuration::getExeConfigPath() const
-//{
-//    return ExeConfigPath;
-//}
-
-//QString configuration::getExeConfigPathFileName() const
-//{
-//    return ExeConfigPathFileName;
-//}
