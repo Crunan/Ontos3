@@ -5,11 +5,12 @@
 #include <QString>
 #include <QMap>
 #include <QStringList>
+#include <QObject>
 
-class Configuration
+class Configuration : public QObject
 {
 public:
-    Configuration();
+    Configuration(QObject *parent = nullptr);
 
     QString getExeConfigPath() const;
     QString getExeConfigFileName() const;

@@ -3,11 +3,11 @@
 PlasmaController::PlasmaController(SerialComms* port, QWidget* parent) :
     QObject(parent),
     serial(port),
-    plasmaHead(),
+    plasmaHead(0.0,0.0,0.0,0.0),
     pwr(),
     tuner(),
     mfc(),
-    command(),
+    //command(),
     config(),
     axisCTL(nullptr)
 {
@@ -20,6 +20,9 @@ PlasmaController::~PlasmaController()
 
 }
 
+//PlasmaController::getPlasmaHead() {
+//    //serial->setOutgoingData(command.getCommandString(""));
+//}
 //void PlasmaController::RunPolling() {
 //    getCTLStatus();
 //    //didCTLStatusChange(); //is this for logging?

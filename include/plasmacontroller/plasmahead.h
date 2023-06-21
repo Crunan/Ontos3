@@ -3,27 +3,31 @@
 
 #include <QObject>
 
-class PlasmaHead : public QObject {
+class PlasmaHead : public QObject
+{
+    Q_OBJECT
+    Q_PROPERTY(double safetyGap READ getSafetyGap CONSTANT)
+    Q_PROPERTY(double slitLength READ getSlitLength CONSTANT)
+    Q_PROPERTY(double slitWidth READ getSlitWidth CONSTANT)
+    Q_PROPERTY(double temp READ getTemp WRITE setTemp NOTIFY tempChanged)
 
-    double safetyGap;  //Distance between plasma head & chuck when z at max height
-    double slitLength; //Plasma head slit length
-    double slitWidth;  //Plasma head slit width
+private:
+    double safetyGap;  // Distance between plasma head & chuck when z at max height
+    double slitLength; // Plasma head slit length
+    double slitWidth;  // Plasma head slit width
     double currentTemp;
 
 public:
-    PlasmaHead();
+    PlasmaHead(double initialSafetyGap, double initialSlitLength, double initialSlitWidth, double initialTemp);
 
-//    double getTemp() const { return currentTemp; }
-//    void setTemp(double temp) {}
+    double getSafetyGap() const;
+    double getSlitLength() const;
+    double getSlitWidth() const;
+    double getTemp() const;
+    void setTemp(double temp);
 
-//    double getSafetyGap() const { return safetyGap; }
-//    void setSafetyGap(double gap) {}
-
-//    double getSlitLength() const { return slitLength; }
-//    void setSlitLength(double length) {}
-
-//    double getSlitWidth() const { return slitWidth; }
-//    void setSlitWidth(double width) {}
-
+signals:
+    void tempChanged();
 };
+
 #endif // PLASMAHEAD_H

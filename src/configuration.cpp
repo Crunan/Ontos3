@@ -4,7 +4,7 @@
 #include <QTextStream>
 #include <QStringList>
 
-Configuration::Configuration()
+Configuration::Configuration(QObject *parent) : QObject(parent)
 {
     // Get the build directory path
     QString buildDir = QCoreApplication::applicationDirPath();

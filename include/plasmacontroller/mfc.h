@@ -3,13 +3,15 @@
 
 #include <QObject>
 
+#include "commandhandler.h"
+#include "commandmap.h"
+
 class MFC : public QObject {
 
     Q_OBJECT
     Q_PROPERTY(double loadedSetpoint READ getSetpoint WRITE setSetpoint NOTIFY setpointChanged)
     Q_PROPERTY(double actualFlow READ getFlow NOTIFY flowChanged)
-    Q_PROPERTY(double range READ getRange)
-
+    Q_PROPERTY(double range READ getRange CONSTANT)
 
     double loadedSetpoint;
     double actualFlow;
@@ -28,6 +30,10 @@ signals:
     void setpointChanged();
     void flowChanged();
 
+private:
+    CommandHandler<double> setpointCommandHandler;
+    CommandHandler<double> flowCommandHandler;
+    CommandHandler<double> rangeCommandHandler;
 
 };
 

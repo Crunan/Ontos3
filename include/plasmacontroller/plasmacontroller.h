@@ -6,8 +6,8 @@
 #include "include/plasmacontroller/pwr.h"
 #include "include/plasmacontroller/tuner.h"
 #include "include/plasmacontroller/mfc.h"
-#include "include/plasmacontroller/plasmacommands.h"
 #include "include/configuration.h"
+#include "include/commandhandler.h"
 #include "include/axiscontroller/axiscontroller.h"
 
 #include <QObject>
@@ -29,7 +29,7 @@ private:
     PWR pwr;
     Tuner tuner;
     QList<MFC> mfc;
-    PlasmaCommands command;
+    //CommandHandler command;
     Configuration config;
     AxisController* axisCTL;  // Optional, can be nullptr
 

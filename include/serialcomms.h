@@ -7,6 +7,11 @@
 #include "include/settingsdialog.h"
 
 class SerialComms : public QObject
+/* This class will handle the communication with the serial
+ * device. It should provide methods for sending
+ * and receiving data over the serial connection.
+ */
+
 {
     Q_OBJECT
     Q_PROPERTY(QString outgoingData READ getOutgoingData  WRITE setOutgoingData NOTIFY outgoingDataChanged)
