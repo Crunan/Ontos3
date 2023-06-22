@@ -14,13 +14,30 @@ SerialComms::~SerialComms() {
     delete serial;
 }
 
-QString SerialComms::getOutgoingData() const {
+QString SerialComms::getOutgoingData() const
+{
     return outgoingData;
 }
 
-void SerialComms::setOutgoingData(const QString &data) {
-    if (outgoingData != data) {
-        outgoingData = data;
+void SerialComms::writeOutgoingData()
+{
+    QByteArray data = outgoingData.toUtf8(); // Convert QString to QByteArray
+
+    if (serial && serial->isOpen())
+    {
+        // Write the data to the serial port
+        serial->write(data);
+
+        // handle any errors or perform additional operations here
+    }
+}
+void SerialComms::setOutgoingData(const QVariant &data)
+{
+    // Convert the data to QString
+    QString convertedData = data.toString();
+
+    if (outgoingData != convertedData) {
+        outgoingData = convertedData;
         emit outgoingDataChanged();
     }
 }

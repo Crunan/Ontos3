@@ -29,11 +29,12 @@ public:
     ~SerialComms();
 
     QString getOutgoingData() const;
-    void setOutgoingData(const QString &data);
+    void setOutgoingData(const QVariant &data);
 
     QString getIncomingData();
     QString getError() const;
 
+    void writeOutgoingData();
 signals:
     void serialPortOpened();
     void serialPortClosed();

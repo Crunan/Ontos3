@@ -27,9 +27,14 @@ PlasmaController::~PlasmaController()
 
 void PlasmaController::handleSetMFC1SetpointCommand(double setpoint)
 {
-    // Implementation for handling the SetMFCSetpoint command
-    // You can access the MFC object here and perform necessary actions
-
+//    // Implementation for handling the SetMFCSetpoint command
+//    // You can access the MFC object here and perform necessary actions
+//    for command in commandMap_
+//        {
+//            if command
+//        }
+//    serialComm_->setOutgoingData(data);
+//    serialComm_->writeOutgoingData();
 }
 
 //PlasmaController::getPlasmaHead() {
