@@ -14,7 +14,7 @@
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QLabel>
-
+#include <memory>
 
 namespace Ui {
 class MainWindow;
@@ -43,11 +43,10 @@ private:
     QLabel* status = nullptr;
     SettingsDialog* settings = nullptr;
     // Pointer to Serial Communications
-    SerialComms* serial;
+    std::shared_ptr<SerialComms> serial;
     // Pointer to the Recipe object
     Recipe* recipe;
     PlasmaController CTL;
-    CommandFileReader commandFile;
 
     // Action Button methods
     void initActionsConnections();

@@ -8,21 +8,19 @@ MainWindow::MainWindow(MainLoop& loop, Logger& logger, QWidget *parent) :
     ui(new Ui::MainWindow),
     status(new QLabel),
     settings(new SettingsDialog),
-    serial(nullptr),
+    serial(std::make_shared<SerialComms>()),
     recipe(nullptr),
-    CTL(),
-    commandFile("commands/", "commands.ini")
+    CTL(*serial)
 {
     ui->setupUi(this);
     this->setWindowTitle("ONTOS3 INTERFACE");
     // Make signal/slot connections here
-    commandFile.readCommandsFromFile();
+
     initActionsConnections();
 }
 MainWindow::~MainWindow() {
     delete ui;
     delete settings;
-    delete serial;
     delete recipe;
 }
 
@@ -31,7 +29,7 @@ void MainWindow::initActionsConnections() {
         // Call the openSerialPort slot with the settings object
         serial->openSerialPort(settings->settings());
     });
-    connect(ui->actionDisconnect, &QAction::triggered, serial, &SerialComms::closeSerialPort);
+    connect(ui->actionDisconnect, &QAction::triggered, serial.get(), &SerialComms::closeSerialPort);
     connect(ui->actionConfigure, &QAction::triggered, settings, &SettingsDialog::show);
     connect(ui->actionQuit, &QAction::triggered, this, &MainWindow::shutDownProgram);
 }

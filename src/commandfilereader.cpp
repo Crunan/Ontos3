@@ -6,8 +6,8 @@
 #include <QRegularExpression>
 #include <QCoreApplication>
 
-CommandFileReader::CommandFileReader(QString filePath, QString fileName)
-    : commandFilePath_(filePath), commandFileName_(fileName)
+CommandFileReader::CommandFileReader()
+    : commandFilePath_(""), commandFileName_("")
 {
 }
 

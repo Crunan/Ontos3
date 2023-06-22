@@ -18,7 +18,7 @@ private:
     double range_;
 
 public:
-    MFC();
+    MFC(int number);
 
     int getIdentifier() const;
     void setIdentifier(int number);

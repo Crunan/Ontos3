@@ -1,39 +1,35 @@
 #include "include/plasmacontroller/plasmacontroller.h"
 
-PlasmaController::PlasmaController(QWidget* parent)
+PlasmaController::PlasmaController(SerialComms& serialComm, QWidget* parent)
   : QObject(parent),
     plasmaHead_(),
     pwr_(),
     tuner_(),
     commandMap_(),
     config_(),
-    axisCTL_(nullptr)
+    axisCTL_(nullptr),
+    serialComm_(serialComm)
 {
     // Add startup data gathering methods.
 
-    // Initialize the MFC objects
+    // Initialize the MFC objects using smart pointers!
     int numberOfMFCs = 4;
-    for (int i = 0; i < numberOfMFCs; i++) {
-        MFC* mfc = new MFC();
-        mfc_.append(mfc);
+    for (int i = 1; i < numberOfMFCs; i++) {
+        std::unique_ptr<MFC> mfc = std::make_unique<MFC>(i);
+        mfcList_.push_back(std::move(mfc));
     }
-
-
-
 }
 
 PlasmaController::~PlasmaController()
 {
-    // Delete the dynamically allocated MFC objects
-    for (MFC* mfc : mfc_) {
-        delete mfc;
-    }
+
 }
 
-void PlasmaController::handleSetMFCSetpointCommand(double setpoint)
+void PlasmaController::handleSetMFC1SetpointCommand(double setpoint)
 {
     // Implementation for handling the SetMFCSetpoint command
     // You can access the MFC object here and perform necessary actions
+
 }
 
 //PlasmaController::getPlasmaHead() {

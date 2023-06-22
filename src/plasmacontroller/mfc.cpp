@@ -1,7 +1,7 @@
 #include "include/plasmacontroller/mfc.h"
 
-MFC::MFC()
-    : identifier_(0), loadedSetpoint_(0.0), actualFlow_(0.0), range_(0.0)
+MFC::MFC(int number)
+    : identifier_(number), loadedSetpoint_(0.0), actualFlow_(0.0), range_(0.0)
 {
 
 }

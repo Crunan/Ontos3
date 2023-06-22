@@ -12,7 +12,7 @@ class CommandFileReader
  */
 {
 public:
-    CommandFileReader(QString filePath, QString fileName);
+    CommandFileReader(  );
 
     const QMap<QString, QPair<QString, QString>>& getCommandMap() const;
     QMap<QString, QPair<QString, QString>> readCommandsFromFile();

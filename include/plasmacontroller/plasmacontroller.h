@@ -8,11 +8,13 @@
 #include "include/plasmacontroller/mfc.h"
 #include "include/configuration.h"
 #include "include/commandhandler.h"
-#include "include/commandmap.h"
+#include "include/commandfilereader.h"
 #include "include/axiscontroller/axiscontroller.h"
+#include "include/serialcomms.h"
 
 #include <QObject>
-#include <QList>
+#include <vector>
+#include <memory>
 
 namespace CTL {
 class PlasmaController;
@@ -21,21 +23,22 @@ class PlasmaController;
 class PlasmaController : public QObject
 {
 public:
-    explicit PlasmaController(QWidget* parent = nullptr);
+    explicit PlasmaController(SerialComms& serialComm, QWidget* parent = nullptr);
     ~PlasmaController();
 
 public slots:
     // Define slots for each command logic
-    void handleSetMFCSetpointCommand(double setpoint);
+    void handleSetMFC1SetpointCommand(double setpoint);
 
 private:
     PlasmaHead plasmaHead_;
     PWR pwr_;
     Tuner tuner_;
-    QList<MFC*> mfc_;
-    CommandMap commandMap_;
+    std::vector<std::unique_ptr<MFC>> mfcList_;
+    CommandFileReader commandMap_;
     Configuration config_;
     AxisController* axisCTL_;  // Optional, can be nullptr
+    SerialComms& serialComm_;  // Reference to SerialComm object
 
 };
 
