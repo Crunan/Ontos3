@@ -1,55 +1,54 @@
 #include "include/plasmacontroller/tuner.h"
 
 Tuner::Tuner()
-  : currentPosition(0.0),
-    loadedSetpoint(0.0),
-    autoTune(false)
+    : currentPosition_(0.0), loadedSetpoint_(0.0), autoTune_(false)
 {
 }
 
-double Tuner::getPosition() const
+double Tuner::getCurrentPosition() const
 {
-    return currentPosition;
+    return currentPosition_;
 }
 
-void Tuner::setPosition(double position)
+void Tuner::setCurrentPosition(double position)
 {
-    if (currentPosition != position)
+    if (currentPosition_ != position)
     {
-        currentPosition = position;
+        currentPosition_ = position;
         emit positionChanged();
     }
 }
 
-double Tuner::getSetpoint() const
+double Tuner::getLoadedSetpoint() const
 {
-    return loadedSetpoint;
+    return loadedSetpoint_;
 }
 
-void Tuner::setSetpoint(double setpoint)
+void Tuner::setLoadedSetpoint(double setpoint)
 {
-    if (loadedSetpoint != setpoint)
+    if (loadedSetpoint_ != setpoint)
     {
-        loadedSetpoint = setpoint;
+        loadedSetpoint_ = setpoint;
         emit setpointChanged();
     }
 }
 
 bool Tuner::getAutoTune() const
 {
-    return autoTune;
+    return autoTune_;
 }
 
 void Tuner::setAutoTune(bool state)
 {
-    if (autoTune != state)
+    if (autoTune_ != state)
     {
-        autoTune = state;
+        autoTune_ = state;
         emit autoTuneChanged();
     }
 }
+
 void Tuner::toggleAutoTune()
 {
-    autoTune = !autoTune;
+    autoTune_ = !autoTune_;
     emit autoTuneChanged();
 }

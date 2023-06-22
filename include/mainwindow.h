@@ -4,10 +4,12 @@
 #pragma once
 
 #include "include/mainloop.h"
+#include "include/commandfilereader.h"
 #include "include/settingsdialog.h"
 #include "include/recipe.h"
 #include "include/logger.h"
 #include "include/serialcomms.h"
+#include "include/plasmacontroller/plasmacontroller.h"
 
 #include <QMainWindow>
 #include <QMessageBox>
@@ -44,6 +46,8 @@ private:
     SerialComms* serial;
     // Pointer to the Recipe object
     Recipe* recipe;
+    PlasmaController CTL;
+    CommandFileReader commandFile;
 
     // Action Button methods
     void initActionsConnections();

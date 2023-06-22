@@ -8,6 +8,7 @@
 #include "include/plasmacontroller/mfc.h"
 #include "include/configuration.h"
 #include "include/commandhandler.h"
+#include "include/commandmap.h"
 #include "include/axiscontroller/axiscontroller.h"
 
 #include <QObject>
@@ -20,18 +21,21 @@ class PlasmaController;
 class PlasmaController : public QObject
 {
 public:
-    explicit PlasmaController(SerialComms* port, QWidget* parent = nullptr);
+    explicit PlasmaController(QWidget* parent = nullptr);
     ~PlasmaController();
 
+public slots:
+    // Define slots for each command logic
+    void handleSetMFCSetpointCommand(double setpoint);
+
 private:
-    SerialComms* serial;
-    PlasmaHead plasmaHead;
-    PWR pwr;
-    Tuner tuner;
-    QList<MFC> mfc;
-    //CommandHandler command;
-    Configuration config;
-    AxisController* axisCTL;  // Optional, can be nullptr
+    PlasmaHead plasmaHead_;
+    PWR pwr_;
+    Tuner tuner_;
+    QList<MFC*> mfc_;
+    CommandMap commandMap_;
+    Configuration config_;
+    AxisController* axisCTL_;  // Optional, can be nullptr
 
 };
 

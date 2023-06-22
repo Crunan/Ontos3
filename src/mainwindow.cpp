@@ -9,12 +9,14 @@ MainWindow::MainWindow(MainLoop& loop, Logger& logger, QWidget *parent) :
     status(new QLabel),
     settings(new SettingsDialog),
     serial(nullptr),
-    recipe(nullptr)
+    recipe(nullptr),
+    CTL(),
+    commandFile("commands/", "commands.ini")
 {
     ui->setupUi(this);
     this->setWindowTitle("ONTOS3 INTERFACE");
     // Make signal/slot connections here
-
+    commandFile.readCommandsFromFile();
     initActionsConnections();
 }
 MainWindow::~MainWindow() {

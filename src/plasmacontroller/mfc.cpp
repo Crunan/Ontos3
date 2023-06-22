@@ -1,33 +1,44 @@
 #include "include/plasmacontroller/mfc.h"
 
 MFC::MFC()
-    : loadedSetpoint(0.0), actualFlow(0.0), range(0.0),
-    setpointCommandHandler(0.0), flowCommandHandler(0.0), rangeCommandHandler(0.0)
+    : identifier_(0), loadedSetpoint_(0.0), actualFlow_(0.0), range_(0.0)
 {
 
 }
 
-double MFC::getSetpoint() const
+int MFC::getIdentifier() const
 {
-    return loadedSetpoint;
+    return identifier_;
 }
 
-void MFC::setSetpoint(double value)
+void MFC::setIdentifier(int number)
 {
-    if (loadedSetpoint != value)
+    if (identifier_ != number) {
+        identifier_ = number;
+        emit identifierChanged();
+    }
+}
+
+double MFC::getLoadedSetpoint() const
+{
+    return loadedSetpoint_;
+}
+
+void MFC::setLoadedSetpoint(double value)
+{
+    if (loadedSetpoint_ != value)
     {
-        loadedSetpoint = value;
+        loadedSetpoint_ = value;
         emit setpointChanged();
     }
 }
 
 double MFC::getRange() const
 {
-    return range;
+    return range_;
 }
 
-double MFC::getFlow() const
+double MFC::getActualFlow() const
 {
-    return actualFlow;
+    return actualFlow_;
 }
-

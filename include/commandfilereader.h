@@ -2,6 +2,8 @@
 #define COMMANDFILEREADER_H
 
 #include <QString>
+#include <QMap>
+#include <QPair>
 
 class CommandFileReader
 /* This class handles reading the command definitions,
@@ -12,6 +14,7 @@ class CommandFileReader
 public:
     CommandFileReader(QString filePath, QString fileName);
 
+    const QMap<QString, QPair<QString, QString>>& getCommandMap() const;
     QMap<QString, QPair<QString, QString>> readCommandsFromFile();
 
     QString getCommandFilePath() const;
@@ -21,8 +24,9 @@ public:
     void setCommandFileName(QString fileName);
 
 private:
-    QString commandFilePath;
-    QString commandFileName;
+    QString commandFilePath_;
+    QString commandFileName_;
+    QMap<QString, QPair<QString, QString>> commandMap_;
 };
 
 

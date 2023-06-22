@@ -3,10 +3,10 @@
 
 #include "commandhandler.h"
 
+// CommandMap.h
 #include <QString>
 #include <QMap>
 #include <functional>
-#include <memory>
 
 class CommandMap
 {
@@ -15,9 +15,11 @@ public:
     ~CommandMap() = default;
 
     template <typename CommandType>
-    void registerCommand(const QString& commandName, const CommandType& command)
+    void registerCommand(const QString& commandName, const std::function<void(QString)>& commandHandler)
     {
-        commandHandlers_[commandName] = std::make_shared<CommandHandler<CommandType>>(command);
+        commandHandlers_[commandName] = [commandHandler](QVariant arg) {
+            commandHandler(arg.toString());
+        };
     }
 
     void unregisterCommand(const QString& commandName)
@@ -30,12 +32,12 @@ public:
         return commandHandlers_.contains(commandName);
     }
 
-    void executeCommand(const QString& commandName)
+    void executeCommand(const QString& commandName, QVariant argument)
     {
         auto it = commandHandlers_.find(commandName);
         if (it != commandHandlers_.end())
         {
-            it.value()->handleCommand();
+            it.value()(argument);
         }
         else
         {
@@ -44,7 +46,7 @@ public:
     }
 
 private:
-    QMap<QString, std::shared_ptr<CommandHandlerBase>> commandHandlers_;
+    QMap<QString, std::function<void(QVariant)>> commandHandlers_;
 };
 
 #endif // COMMANDMAP_H

@@ -1,40 +1,33 @@
 #ifndef COMMANDHANDLERFACTORY_H
 #define COMMANDHANDLERFACTORY_H
 
-#include "commandfilereader.h"
-#include "commandhandler.h"
-
 #include <memory>
 #include <unordered_map>
 #include <functional>
+#include "commandmap.h"
 
 class CommandHandlerFactory
 {
 public:
     template <typename CommandType>
-    void registerCommandHandler(const std::string& commandName)
+    void registerCommand(const QString& commandName, const std::function<void(CommandType)>& commandHandler)
     {
-        commandHandlerRegistry_[commandName] = []() {
-            return std::make_unique<CommandHandler<CommandType>>(CommandType{});
-        };
+        commandMap_.registerCommand(commandName, commandHandler);
     }
 
-    std::unique_ptr<CommandHandlerBase> createCommandHandler(const std::string& commandName)
+    void unregisterCommand(const QString& commandName)
     {
-        if (commandHandlerRegistry_.count(commandName) > 0)
-        {
-            return commandHandlerRegistry_[commandName]();
-        }
+        commandMap_.unregisterCommand(commandName);
+    }
 
-        // Handle the case when the command name is not registered
-        // Return a default command handler or throw an exception
-        // based on your specific requirements
-
-        return nullptr;
+    CommandMap& getCommandMap()
+    {
+        return commandMap_;
     }
 
 private:
-    std::unordered_map<std::string, std::function<std::unique_ptr<CommandHandlerBase>()>> commandHandlerRegistry_;
+    CommandMap commandMap_;
 };
+
 
 #endif // COMMANDHANDLERFACTORY_H

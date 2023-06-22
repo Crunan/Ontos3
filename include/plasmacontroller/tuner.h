@@ -6,23 +6,18 @@
 class Tuner : public QObject {
 
     Q_OBJECT
-    Q_PROPERTY(double currentPosition READ getPosition WRITE setPosition NOTIFY positionChanged)
-    Q_PROPERTY(double loadedSetpoint READ getSetpoint WRITE setSetpoint NOTIFY setpointChanged)
+    Q_PROPERTY(double currentPosition READ getCurrentPosition WRITE setCurrentPosition NOTIFY positionChanged)
+    Q_PROPERTY(double loadedSetpoint READ getLoadedSetpoint WRITE setLoadedSetpoint NOTIFY setpointChanged)
     Q_PROPERTY(bool autoTune READ getAutoTune WRITE setAutoTune NOTIFY autoTuneChanged)
 
 public:
     Tuner();
 
-    double currentPosition;
-    double loadedSetpoint;
-    bool autoTune;
+    double getCurrentPosition() const;
+    void setCurrentPosition(double position);
 
-
-    double getPosition() const;
-    void setPosition(double position);
-
-    double getSetpoint() const;
-    void setSetpoint(double setpoint);
+    double getLoadedSetpoint() const;
+    void setLoadedSetpoint(double setpoint);
 
     bool getAutoTune() const;
     void setAutoTune(bool state);
@@ -32,7 +27,11 @@ signals:
     void positionChanged();
     void setpointChanged();
     void autoTuneChanged();
-public slots:
 
+private:
+    double currentPosition_;
+    double loadedSetpoint_;
+    bool autoTune_;
 };
+
 #endif // TUNER_H

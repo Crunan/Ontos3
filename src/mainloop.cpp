@@ -21,11 +21,15 @@ MainLoop::~MainLoop() {
 }
 
 void MainLoop::start() {
-    //Stop the event loop
+    // Start the timer
+    timer->start();
+
+    // Start the event loop
     loop->exec();
 }
 
 void MainLoop::stop() {
+    timer->stop();
     loop->quit();
 }
 
@@ -39,4 +43,5 @@ void MainLoop::handleTimer() {
     // Perform actions here on time timeout
     // Emit custom signals if needed!
     // mostly poll here signal.
+    loop->exit();
 }

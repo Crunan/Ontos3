@@ -3,39 +3,41 @@
 
 #include <QObject>
 
-#include "commandhandler.h"
-#include "commandmap.h"
-
 class MFC : public QObject {
 
     Q_OBJECT
-    Q_PROPERTY(double loadedSetpoint READ getSetpoint WRITE setSetpoint NOTIFY setpointChanged)
-    Q_PROPERTY(double actualFlow READ getFlow NOTIFY flowChanged)
+    Q_PROPERTY(int identifier READ getIdentifier WRITE setIdentifier NOTIFY identifierChanged)
+    Q_PROPERTY(double loadedSetpoint READ getLoadedSetpoint WRITE setLoadedSetpoint NOTIFY setpointChanged)
+    Q_PROPERTY(double actualFlow READ getActualFlow NOTIFY flowChanged)
     Q_PROPERTY(double range READ getRange CONSTANT)
 
-    double loadedSetpoint;
-    double actualFlow;
-    double range;
+private:
+    int identifier_;  // Private member variable for identifier
+    double loadedSetpoint_;  // Private member variable for loadedSetpoint
+    double actualFlow_;  // Private member variable for actualFlow
+    double range_;
 
 public:
     MFC();
 
-    double getSetpoint() const;
-    void setSetpoint(double value);
+    int getIdentifier() const;
+    void setIdentifier(int number);
 
-    double getFlow() const;
+    double getLoadedSetpoint() const;
+    void setLoadedSetpoint(double value);
+
+    double getActualFlow() const;
     double getRange() const;
 
 signals:
+    void setpointCommandReceived(double setpoint);
+
     void setpointChanged();
     void flowChanged();
+    void identifierChanged();
 
-private:
-    CommandHandler<double> setpointCommandHandler;
-    CommandHandler<double> flowCommandHandler;
-    CommandHandler<double> rangeCommandHandler;
+public slots:
 
 };
-
 
 #endif // MFC_H
