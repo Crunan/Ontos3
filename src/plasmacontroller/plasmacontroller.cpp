@@ -14,7 +14,7 @@ PlasmaController::PlasmaController(SerialComms& serialComm, QWidget* parent)
 
     // Initialize the MFC objects using smart pointers!
     int numberOfMFCs = 4;
-    for (int i = 1; i < numberOfMFCs; i++) {
+    for (int i = 1; i <= numberOfMFCs; i++) {
         std::unique_ptr<MFC> mfc = std::make_unique<MFC>(i);
         mfcList_.push_back(std::move(mfc));
     }
@@ -25,6 +25,14 @@ PlasmaController::~PlasmaController()
 
 }
 
+void PlasmaController::setCommandMap(const QMap<QString, QPair<QString, QString>>& map)
+{
+    commandMap_.setCommandMap(map);
+}
+//void PlasmaController::prepareControllerCommand()
+//{
+//    for command in commandMap_
+//}
 void PlasmaController::handleSetMFC1SetpointCommand(double setpoint)
 {
 //    // Implementation for handling the SetMFCSetpoint command

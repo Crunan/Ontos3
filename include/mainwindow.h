@@ -47,6 +47,7 @@ private:
     // Pointer to the Recipe object
     Recipe* recipe;
     PlasmaController CTL;
+    CommandFileReader commandFileReader;
 
     // Action Button methods
     void initActionsConnections();

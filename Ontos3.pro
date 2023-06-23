@@ -8,7 +8,7 @@ CONFIG += c++17
 # In order to do so, uncomment the following line.
 # DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-SOURCES += \    
+SOURCES += \         
     src/axiscontroller/axis.cpp \
     src/axiscontroller/axiscommands.cpp \
     src/axiscontroller/axiscontroller.cpp \
@@ -18,6 +18,7 @@ SOURCES += \
     src/axiscontroller/stage/positions.cpp \
     src/axiscontroller/stage/statemachine.cpp \
     src/commandfilereader.cpp \
+    src/commandmap.cpp \
     src/configuration.cpp \
     src/axiscontroller/coordinate.cpp \
     src/controllerinterface.cpp \
@@ -72,7 +73,7 @@ HEADERS += \
     include/axiscontroller/stage/statemachine.h \
     include/plasmacontroller/tuner.h \
     include/axiscontroller/stage/initialize.h \
-    include/axiscontroller/stage/twospot.h \
+    include/axiscontroller/stage/twospot.h 
 
 
 

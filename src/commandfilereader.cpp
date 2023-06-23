@@ -11,11 +11,6 @@ CommandFileReader::CommandFileReader()
 {
 }
 
-const QMap<QString, QPair<QString, QString>>& CommandFileReader::getCommandMap() const
-{
-    return commandMap_;
-}
-
 QMap<QString, QPair<QString, QString>> CommandFileReader::readCommandsFromFile()
 {
     /*
@@ -64,8 +59,6 @@ QMap<QString, QPair<QString, QString>> CommandFileReader::readCommandsFromFile()
     }
 
     file.close();
-
-    commandMap_ = commandMap;
 
     return commandMap;
 }

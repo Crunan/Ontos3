@@ -14,7 +14,6 @@ class CommandFileReader
 public:
     CommandFileReader(  );
 
-    const QMap<QString, QPair<QString, QString>>& getCommandMap() const;
     QMap<QString, QPair<QString, QString>> readCommandsFromFile();
 
     QString getCommandFilePath() const;
@@ -25,8 +24,7 @@ public:
 
 private:
     QString commandFilePath_;
-    QString commandFileName_;
-    QMap<QString, QPair<QString, QString>> commandMap_;
+    QString commandFileName_;    
 };
 
 

@@ -10,12 +10,16 @@ MainWindow::MainWindow(MainLoop& loop, Logger& logger, QWidget *parent) :
     settings(new SettingsDialog),
     serial(std::make_shared<SerialComms>()),
     recipe(nullptr),
-    CTL(*serial)
+    CTL(*serial),
+    commandFileReader()
 {
     ui->setupUi(this);
     this->setWindowTitle("ONTOS3 INTERFACE");
     // Make signal/slot connections here
-
+    commandFileReader.setCommandFilePath("commands/");
+    commandFileReader.setCommandFileName("commands.ini");
+    QMap CTLCommands = commandFileReader.readCommandsFromFile();
+    CTL.setCommandMap(CTLCommands);
     initActionsConnections();
 }
 MainWindow::~MainWindow() {
