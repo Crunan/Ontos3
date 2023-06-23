@@ -1,23 +1,11 @@
 #include "include/plasmacontroller/mfc.h"
 
-MFC::MFC(int number)
-    : identifier_(number), loadedSetpoint_(0.0), actualFlow_(0.0), range_(0.0)
+MFC::MFC()
+    : loadedSetpoint_(0.0), actualFlow_(0.0), range_(0.0)
 {
 
 }
 
-int MFC::getIdentifier() const
-{
-    return identifier_;
-}
-
-void MFC::setIdentifier(int number)
-{
-    if (identifier_ != number) {
-        identifier_ = number;
-        emit identifierChanged();
-    }
-}
 
 double MFC::getLoadedSetpoint() const
 {

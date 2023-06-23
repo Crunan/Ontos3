@@ -14,7 +14,7 @@ const QMap<QString, QPair<QString, QString>>& CommandMap::getCommandMap() const
     return commandMap_;
 }
 
-const QString CommandMap::findCommand(const QString& command) const
+const QString CommandMap::findCommandValue(const QString& command) const
 {
     if (commandMap_.contains(command)) {
         const QPair<QString, QString>& pair = commandMap_.value(command);

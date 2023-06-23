@@ -13,6 +13,7 @@
 #include <QtGui/QAction>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QMainWindow>
+#include <QtWidgets/QPushButton>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QToolBar>
 #include <QtWidgets/QWidget>
@@ -27,6 +28,7 @@ public:
     QAction *actionQuit;
     QAction *actionConfigure;
     QWidget *centralwidget;
+    QPushButton *pushButton;
     QStatusBar *statusBar;
     QToolBar *toolBar;
 
@@ -94,6 +96,9 @@ public:
         actionConfigure->setIcon(icon3);
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
+        pushButton = new QPushButton(centralwidget);
+        pushButton->setObjectName(QString::fromUtf8("pushButton"));
+        pushButton->setGeometry(QRect(280, 190, 80, 23));
         MainWindow->setCentralWidget(centralwidget);
         statusBar = new QStatusBar(MainWindow);
         statusBar->setObjectName(QString::fromUtf8("statusBar"));
@@ -137,6 +142,7 @@ public:
 #if QT_CONFIG(tooltip)
         actionConfigure->setToolTip(QCoreApplication::translate("MainWindow", "Configuration settings", nullptr));
 #endif // QT_CONFIG(tooltip)
+        pushButton->setText(QCoreApplication::translate("MainWindow", "Set MFC 1", nullptr));
         toolBar->setWindowTitle(QCoreApplication::translate("MainWindow", "toolBar_2", nullptr));
     } // retranslateUi
 

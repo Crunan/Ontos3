@@ -20,6 +20,8 @@ MainWindow::MainWindow(MainLoop& loop, Logger& logger, QWidget *parent) :
     commandFileReader.setCommandFileName("commands.ini");
     QMap CTLCommands = commandFileReader.readCommandsFromFile();
     CTL.setCommandMap(CTLCommands);
+    connect(ui->pushButton, &QPushButton::clicked, this, &MainWindow::openRecipeWindowMFC1);
+
     initActionsConnections();
 }
 MainWindow::~MainWindow() {
@@ -28,6 +30,20 @@ MainWindow::~MainWindow() {
     delete recipe;
 }
 
+void MainWindow::openRecipeWindowMFC1()
+{
+    bool ok;
+    QString recipe = QInputDialog::getText(nullptr, "MFC 1 Setpoint", "Please enter a setpoint for MFC 1:", QLineEdit::Normal, "", &ok);
+
+    if (ok && !recipe.isEmpty()) {
+        // User entered a string and clicked OK
+        CTL.mfc1.setLoadedSetpoint(recipe.toDouble(&ok));
+    } else {
+        // User either clicked Cancel or did not enter any string
+        // Handle accordingly
+        return;
+    }
+}
 void MainWindow::initActionsConnections() {
     connect(ui->actionConnect, &QAction::triggered, this, [this]() {
         // Call the openSerialPort slot with the settings object

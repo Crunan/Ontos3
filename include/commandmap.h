@@ -13,7 +13,7 @@ public:
     const QMap<QString, QPair<QString, QString>>& getCommandMap() const;
     void setCommandMap(const QMap<QString, QPair<QString, QString>>& map);
 
-    const QString findCommand(const QString& command) const;
+    const QString findCommandValue(const QString& command) const;
 
 private:
     QMap<QString, QPair<QString, QString>> commandMap_;

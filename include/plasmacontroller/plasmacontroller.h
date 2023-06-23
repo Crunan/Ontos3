@@ -25,19 +25,27 @@ public:
     explicit PlasmaController(SerialComms& serialComm, QWidget* parent = nullptr);
     ~PlasmaController();
 
+    PlasmaHead plasmaHead;
+    PWR pwr;
+    Tuner tuner;
+    MFC mfc1;
+    MFC mfc2;
+    MFC mfc3;
+    MFC mfc4;
+    CommandMap commandMap;
+    // CTL Commands
     void setCommandMap(const QMap<QString, QPair<QString, QString>>& map);
+    QString findCommandValue(QString command) const;
+    QString prepareCommand(QString cmd, const QString& setpoint);
 
+    // Serial Functions
+    void sendSerialCommand(const QString& data);
 public slots:
 
     // Define slots for each command logic
-    void handleSetMFC1SetpointCommand(double setpoint);
+    void handleSetMFC1SetpointCommand();
 
 private:
-    PlasmaHead plasmaHead_;
-    PWR pwr_;
-    Tuner tuner_;
-    std::vector<std::unique_ptr<MFC>> mfcList_;
-    CommandMap commandMap_;
     Configuration config_;
     AxisController* axisCTL_;  // Optional, can be nullptr
     SerialComms& serialComm_;  // Reference to SerialComm object

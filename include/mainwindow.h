@@ -15,6 +15,9 @@
 #include <QMessageBox>
 #include <QLabel>
 #include <memory>
+#include <QInputDialog>
+#include <QLineEdit>
+
 
 namespace Ui {
 class MainWindow;
@@ -64,5 +67,6 @@ private:
 
 public slots:
 
+    void openRecipeWindowMFC1();
 };
 #endif // MAINWINDOW_H
