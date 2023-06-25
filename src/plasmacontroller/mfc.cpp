@@ -1,25 +1,36 @@
 #include "include/plasmacontroller/mfc.h"
 
-MFC::MFC(QString mfcNumber)
+MFC::MFC(int mfcNumber)
     : QObject(nullptr),
     mfcNumber_(mfcNumber),
-    loadedSetpoint_("0.0"),
-    actualFlow_("0.0"),
-    range_("0.0")
+    loadedSetpoint_(0.0),
+    actualFlow_(0.0),
+    range_(0.0)
 {
 
 }
 
-QString MFC::getMFCNumber() const
+QString MFC::getMFCNumberAsString() const
+{
+    return QString::number(mfcNumber_);
+}
+
+int MFC::getMFCNumber() const
 {
     return mfcNumber_;
 }
-QString MFC::getLoadedSetpoint() const
+
+QString MFC::getLoadedSetpointAsString() const
+{
+    return QString::number(loadedSetpoint_);
+}
+
+double MFC::getLoadedSetpoint() const
 {
     return loadedSetpoint_;
 }
 
-void MFC::setLoadedSetpoint(QString value)
+void MFC::setLoadedSetpoint(double value)
 {
     if (loadedSetpoint_ != value)
     {
@@ -28,12 +39,30 @@ void MFC::setLoadedSetpoint(QString value)
     }
 }
 
-QString MFC::getActualFlow() const
+double MFC::getActualFlow() const
 {
     return actualFlow_;
 }
 
-QString MFC::getRange() const
+void MFC::setActualFlow(double value)
+{
+    if (actualFlow_ != value)
+    {
+        actualFlow_ = value;
+        emit flowChanged(mfcNumber_, actualFlow_);
+    }
+}
+
+double MFC::getRange() const
 {
     return range_;
+}
+
+void MFC::setRange(double value)
+{
+    if (range_ != value)
+    {
+        range_ = value;
+        emit rangeChanged();
+    }
 }

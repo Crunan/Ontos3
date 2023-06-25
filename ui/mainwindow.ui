@@ -61,7 +61,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="1" column="1">
-       <widget class="QProgressBar" name="progressBar_3">
+       <widget class="QProgressBar" name="flowBar_2">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -87,7 +87,7 @@
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QProgressBar" name="progressBar">
+       <widget class="QProgressBar" name="flowBar">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -100,7 +100,7 @@
        </widget>
       </item>
       <item row="1" column="2">
-       <widget class="QProgressBar" name="progressBar_2">
+       <widget class="QProgressBar" name="flowBar_3">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -113,7 +113,7 @@
        </widget>
       </item>
       <item row="1" column="3">
-       <widget class="QProgressBar" name="progressBar_4">
+       <widget class="QProgressBar" name="flowBar_4">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
           <horstretch>0</horstretch>

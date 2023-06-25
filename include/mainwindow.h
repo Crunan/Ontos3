@@ -55,19 +55,23 @@ private:
     // Action Button methods
     void initActionsConnections();
     void showStatusMessage(const QString &message);
-    void about();
-    void shutDownProgram();
-    // Serial Port methodsRecipe*
-    void handleSerialPortError();
+    // Serial Port methods
 
     // GUI signal Slot connections
-    void connectMFCButtons();
-    void connectMFCButton(QPushButton* button, const QString& mfcNumber);
+    void connectMFCRecipeButtons();
+    void connectMFCFlowBars();
+    void connectMFCRecipeButton(QPushButton* button, const int &mfcNumber);
 
     // MFC functions
-    MFC* findMFCByNumber(const QString& mfcNumber);
+    MFC* findMFCByNumber(const int &mfcNumber);
+
+private slots:
+    void updateFlowBar(const int& mfcNumber, const double& flow);
 
 public slots:
+    void about();
+    void shutDownProgram();
     void openRecipeWindowMFC();
+    void handleSerialPortError();
 };
 #endif // MAINWINDOW_H

@@ -35,11 +35,11 @@ public:
     QGroupBox *groupBox;
     QWidget *gridLayoutWidget;
     QGridLayout *gridLayout;
-    QProgressBar *progressBar_3;
+    QProgressBar *flowBar_2;
     QPushButton *pushButton_2;
-    QProgressBar *progressBar;
-    QProgressBar *progressBar_2;
-    QProgressBar *progressBar_4;
+    QProgressBar *flowBar;
+    QProgressBar *flowBar_3;
+    QProgressBar *flowBar_4;
     QPushButton *pushButton_4;
     QPushButton *pushButton_3;
     QPushButton *pushButton;
@@ -101,16 +101,16 @@ public:
         gridLayout = new QGridLayout(gridLayoutWidget);
         gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
         gridLayout->setContentsMargins(0, 0, 0, 0);
-        progressBar_3 = new QProgressBar(gridLayoutWidget);
-        progressBar_3->setObjectName(QString::fromUtf8("progressBar_3"));
+        flowBar_2 = new QProgressBar(gridLayoutWidget);
+        flowBar_2->setObjectName(QString::fromUtf8("flowBar_2"));
         QSizePolicy sizePolicy1(QSizePolicy::Expanding, QSizePolicy::Preferred);
         sizePolicy1.setHorizontalStretch(0);
         sizePolicy1.setVerticalStretch(0);
-        sizePolicy1.setHeightForWidth(progressBar_3->sizePolicy().hasHeightForWidth());
-        progressBar_3->setSizePolicy(sizePolicy1);
-        progressBar_3->setValue(24);
+        sizePolicy1.setHeightForWidth(flowBar_2->sizePolicy().hasHeightForWidth());
+        flowBar_2->setSizePolicy(sizePolicy1);
+        flowBar_2->setValue(24);
 
-        gridLayout->addWidget(progressBar_3, 1, 1, 1, 1);
+        gridLayout->addWidget(flowBar_2, 1, 1, 1, 1);
 
         pushButton_2 = new QPushButton(gridLayoutWidget);
         pushButton_2->setObjectName(QString::fromUtf8("pushButton_2"));
@@ -122,29 +122,29 @@ public:
 
         gridLayout->addWidget(pushButton_2, 2, 1, 1, 1);
 
-        progressBar = new QProgressBar(gridLayoutWidget);
-        progressBar->setObjectName(QString::fromUtf8("progressBar"));
-        sizePolicy1.setHeightForWidth(progressBar->sizePolicy().hasHeightForWidth());
-        progressBar->setSizePolicy(sizePolicy1);
-        progressBar->setValue(24);
+        flowBar = new QProgressBar(gridLayoutWidget);
+        flowBar->setObjectName(QString::fromUtf8("flowBar"));
+        sizePolicy1.setHeightForWidth(flowBar->sizePolicy().hasHeightForWidth());
+        flowBar->setSizePolicy(sizePolicy1);
+        flowBar->setValue(24);
 
-        gridLayout->addWidget(progressBar, 1, 0, 1, 1);
+        gridLayout->addWidget(flowBar, 1, 0, 1, 1);
 
-        progressBar_2 = new QProgressBar(gridLayoutWidget);
-        progressBar_2->setObjectName(QString::fromUtf8("progressBar_2"));
-        sizePolicy1.setHeightForWidth(progressBar_2->sizePolicy().hasHeightForWidth());
-        progressBar_2->setSizePolicy(sizePolicy1);
-        progressBar_2->setValue(24);
+        flowBar_3 = new QProgressBar(gridLayoutWidget);
+        flowBar_3->setObjectName(QString::fromUtf8("flowBar_3"));
+        sizePolicy1.setHeightForWidth(flowBar_3->sizePolicy().hasHeightForWidth());
+        flowBar_3->setSizePolicy(sizePolicy1);
+        flowBar_3->setValue(24);
 
-        gridLayout->addWidget(progressBar_2, 1, 2, 1, 1);
+        gridLayout->addWidget(flowBar_3, 1, 2, 1, 1);
 
-        progressBar_4 = new QProgressBar(gridLayoutWidget);
-        progressBar_4->setObjectName(QString::fromUtf8("progressBar_4"));
-        sizePolicy1.setHeightForWidth(progressBar_4->sizePolicy().hasHeightForWidth());
-        progressBar_4->setSizePolicy(sizePolicy1);
-        progressBar_4->setValue(24);
+        flowBar_4 = new QProgressBar(gridLayoutWidget);
+        flowBar_4->setObjectName(QString::fromUtf8("flowBar_4"));
+        sizePolicy1.setHeightForWidth(flowBar_4->sizePolicy().hasHeightForWidth());
+        flowBar_4->setSizePolicy(sizePolicy1);
+        flowBar_4->setValue(24);
 
-        gridLayout->addWidget(progressBar_4, 1, 3, 1, 1);
+        gridLayout->addWidget(flowBar_4, 1, 3, 1, 1);
 
         pushButton_4 = new QPushButton(gridLayoutWidget);
         pushButton_4->setObjectName(QString::fromUtf8("pushButton_4"));

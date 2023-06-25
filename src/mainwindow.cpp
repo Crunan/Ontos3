@@ -23,8 +23,8 @@ MainWindow::MainWindow(MainLoop& loop, Logger& logger, QWidget *parent) :
     CTL.setCommandMap(CTLCommands);
 
     // Make signal/slot connections here
-    connectMFCButtons();
-
+    connectMFCRecipeButtons();
+    connectMFCFlowBars();
     initActionsConnections();
 }
 MainWindow::~MainWindow() {
@@ -33,15 +33,24 @@ MainWindow::~MainWindow() {
     delete recipe;
 }
 
-void MainWindow::connectMFCButtons()
+void MainWindow::connectMFCFlowBars()
 {
-    connectMFCButton(ui->pushButton, "1");
-    connectMFCButton(ui->pushButton_2, "2");
-    connectMFCButton(ui->pushButton_3, "3");
-    connectMFCButton(ui->pushButton_4, "4");
+    // This will connect the flowchanged signal along with its passed params
+    // to the GUI updateFlowbars function.
+    for (int i = 0; i < CTL.mfcs.size(); ++i) {
+        connect(CTL.mfcs[i], &MFC::flowChanged, this, &MainWindow::updateFlowBar);
+    }
 }
 
-void MainWindow::connectMFCButton(QPushButton* button, const QString& mfcNumber)
+void MainWindow::connectMFCRecipeButtons()
+{
+    connectMFCRecipeButton(ui->pushButton, 1);
+    connectMFCRecipeButton(ui->pushButton_2, 2);
+    connectMFCRecipeButton(ui->pushButton_3, 3);
+    connectMFCRecipeButton(ui->pushButton_4, 4);
+}
+
+void MainWindow::connectMFCRecipeButton(QPushButton* button, const int& mfcNumber)
 {
     button->setProperty("MFCNumber", mfcNumber);  // Store the MFC index in the button's property
     connect(button, &QPushButton::clicked, this, &MainWindow::openRecipeWindowMFC);
@@ -50,18 +59,19 @@ void MainWindow::connectMFCButton(QPushButton* button, const QString& mfcNumber)
 void MainWindow::openRecipeWindowMFC()
 {
     bool ok;
-    QString recipe = QInputDialog::getText(nullptr, "MFC Setpoint", "Please enter a setpoint for the MFC:", QLineEdit::Normal, "", &ok);
+    QString recipeStr = QInputDialog::getText(nullptr, "MFC Setpoint", "Please enter a setpoint for the MFC:", QLineEdit::Normal, "", &ok);
 
-    if (ok && !recipe.isEmpty()) {
+    if (ok && !recipeStr.isEmpty()) {
         // User entered a string and clicked OK
         if (!CTL.mfcs.isEmpty()) {
             QPushButton* button = qobject_cast<QPushButton*>(sender());
             if (button) {
 
                 // Retrieve the MFC number from the button's property
-                QString mfcNumber = button->property("MFCNumber").toString();  // Retrieve the MFC index from the button's property
+                int mfcNumber = button->property("MFCNumber").toInt();  // Retrieve the MFC index from the button's property
                 MFC* mfc = findMFCByNumber(mfcNumber);
                 if (mfc) {
+                    double recipe = recipeStr.toDouble();
                     mfc->setLoadedSetpoint(recipe);
                 }
             }
@@ -73,7 +83,20 @@ void MainWindow::openRecipeWindowMFC()
     }
 }
 
-MFC* MainWindow::findMFCByNumber(const QString& mfcNumber)
+void MainWindow::updateFlowBar(const int& mfcNumber, const double& flow)
+{
+    if (mfcNumber == 1) {
+        ui->flowBar->setValue(flow);
+    } else if (mfcNumber == 2) {
+        ui->flowBar_2->setValue(flow);
+    } else if (mfcNumber == 3) {
+        ui->flowBar_3->setValue(flow);
+    } else if (mfcNumber == 4) {
+        ui->flowBar_4->setValue(flow);
+    }
+
+}
+MFC* MainWindow::findMFCByNumber(const int& mfcNumber)
 {
     for (MFC* mfc : CTL.mfcs) {
         if (mfc->getMFCNumber() == mfcNumber) {

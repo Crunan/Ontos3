@@ -2,33 +2,42 @@
 #define MFC_H
 
 #include <QObject>
+#include <QProgressBar>
 
 class MFC : public QObject {
 
     Q_OBJECT
-    Q_PROPERTY(QString loadedSetpoint READ getLoadedSetpoint WRITE setLoadedSetpoint NOTIFY setpointChanged)
-    Q_PROPERTY(QString actualFlow READ getActualFlow NOTIFY flowChanged)
-    Q_PROPERTY(QString range READ getRange CONSTANT)
+    Q_PROPERTY(double loadedSetpoint READ getLoadedSetpoint WRITE setLoadedSetpoint NOTIFY setpointChanged)
+    Q_PROPERTY(double actualFlow READ getActualFlow WRITE setActualFlow NOTIFY flowChanged)
+    Q_PROPERTY(double range READ getRange WRITE setRange NOTIFY rangeChanged)
 
 private:
-    QString mfcNumber_;
-    QString loadedSetpoint_;  // Private member variable for loadedSetpoint
-    QString actualFlow_;  // Private member variable for actualFlow
-    QString range_;
+    int mfcNumber_;
+    double loadedSetpoint_;  // Private member variable for loadedSetpoint
+    double actualFlow_;  // Private member variable for actualFlow
+    double range_;
 
 public:
-    MFC(QString mfcNumber);
+    MFC(int mfcNumber);
 
-    QString getMFCNumber() const;
-    QString getLoadedSetpoint() const;
-    void setLoadedSetpoint(QString value);
+    QString getMFCNumberAsString() const;
+    int getMFCNumber() const;
 
-    QString getActualFlow() const;
-    QString getRange() const;
+    QString getLoadedSetpointAsString() const;
+    double getLoadedSetpoint() const;
+    void setLoadedSetpoint(double value);
 
-signals:   
+    double getActualFlow() const;
+    void setActualFlow(double value);
+
+    double getRange() const;
+    void setRange(double value);
+
+signals:
     void setpointChanged();
-    void flowChanged();
+    void flowChanged(const int mfcNumber, double flow);
+    void rangeChanged();
+
 };
 
 #endif // MFC_H

@@ -5,7 +5,7 @@ PlasmaController::PlasmaController(SerialComms& serialComm, QWidget* parent)
     plasmaHead(),
     pwr(),
     tuner(),
-    mfcs({ new MFC("1"), new MFC("2"), new MFC("3"), new MFC("4") }),
+    mfcs({ new MFC(1), new MFC(2), new MFC(3), new MFC(4) }),
     commandMap(),
     config_(),
     axisCTL_(nullptr),
@@ -54,11 +54,12 @@ void PlasmaController::sendSerialCommand(const QString& data)
 void PlasmaController::handleSetMFCSetpointCommand()
 {
     MFC* mfc = qobject_cast<MFC*>(sender());
-    QString setpoint = mfc->getLoadedSetpoint();
-    QString command = "$2A60" + mfc->getMFCNumber() + "%";
+    QString setpoint = mfc->getLoadedSetpointAsString();
+    QString command = "$2A60" + mfc->getMFCNumberAsString() + "%";
     command = prepareCommand(command, setpoint);
     sendSerialCommand(command);
 }
+
 
 //PlasmaController::getPlasmaHead() {
 //    //serial->setOutgoingData(command.getCommandString(""));

@@ -21,7 +21,6 @@ SOURCES += \
     src/commandmap.cpp \
     src/configuration.cpp \
     src/axiscontroller/coordinate.cpp \
-    src/controllerinterface.cpp \
     src/functions.cpp \
     src/lighttowerstatemachine.cpp \
     src/logger.cpp \
@@ -50,11 +49,8 @@ HEADERS += \
     include/axiscontroller/stage/load.h \
     include/axiscontroller/stage/positions.h \
     include/commandfilereader.h \
-    include/commandhandler.h \
-    include/commandhandlerfactory.h \
     include/commandmap.h \
     include/configuration.h \
-    include/controllerinterface.h \
     include/axiscontroller/coordinate.h \
     include/functions.h \
     include/lighttowerstatemachine.h \
