@@ -5,20 +5,16 @@ PlasmaController::PlasmaController(SerialComms& serialComm, QWidget* parent)
     plasmaHead(),
     pwr(),
     tuner(),
-    mfc1(),
-    mfc2(),
-    mfc3(),
-    mfc4(),
+    mfcs({ new MFC("MFC1"), new MFC("MFC2"), new MFC("MFC3"), new MFC("MFC4") }),
     commandMap(),
     config_(),
     axisCTL_(nullptr),
     serialComm_(serialComm)
 {
     // Add startup data gathering methods.
-    connect(&mfc1, &MFC::setpointChanged, this, &PlasmaController::handleSetMFC1SetpointCommand);
-
-
-
+    for (MFC* mfc: mfcs) {
+        connect(mfc, &MFC::setpointChanged, this, &PlasmaController::handleSetMFCSetpointCommand);
+    }
 }
 
 PlasmaController::~PlasmaController()
@@ -32,7 +28,7 @@ void PlasmaController::setCommandMap(const QMap<QString, QPair<QString, QString>
 }
 QString PlasmaController::findCommandValue(QString command) const
 {
-    commandMap.findCommandValue(command);
+    return commandMap.findCommandValue(command);
 }
 
 QString PlasmaController::prepareCommand(QString cmd, const QString& setpoint)
@@ -55,11 +51,13 @@ void PlasmaController::sendSerialCommand(const QString& data)
     serialComm_.writeOutgoingData();
 }
 
-void PlasmaController::handleSetMFC1SetpointCommand()
+void PlasmaController::handleSetMFCSetpointCommand()
 {
-    QString setpoint = QString::number(mfc1.getLoadedSetpoint());
-    QString StrVar = prepareCommand("$2A601%", setpoint);
-    sendSerialCommand(StrVar);
+    MFC* mfc = qobject_cast<MFC*>(sender());
+    QString setpoint = mfc->getLoadedSetpoint();
+    QString command = "$2A60" + mfc->getMFCNumber() + "%";
+    command = prepareCommand(command, setpoint);
+    sendSerialCommand(command);
 }
 
 //PlasmaController::getPlasmaHead() {

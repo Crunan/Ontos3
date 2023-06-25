@@ -5,33 +5,30 @@
 
 class MFC : public QObject {
 
-    Q_OBJECT  
-    Q_PROPERTY(double loadedSetpoint READ getLoadedSetpoint WRITE setLoadedSetpoint NOTIFY setpointChanged)
-    Q_PROPERTY(double actualFlow READ getActualFlow NOTIFY flowChanged)
-    Q_PROPERTY(double range READ getRange CONSTANT)
+    Q_OBJECT
+    Q_PROPERTY(QString loadedSetpoint READ getLoadedSetpoint WRITE setLoadedSetpoint NOTIFY setpointChanged)
+    Q_PROPERTY(QString actualFlow READ getActualFlow NOTIFY flowChanged)
+    Q_PROPERTY(QString range READ getRange CONSTANT)
 
 private:
-    double loadedSetpoint_;  // Private member variable for loadedSetpoint
-    double actualFlow_;  // Private member variable for actualFlow
-    double range_;
+    QString mfcNumber_;
+    QString loadedSetpoint_;  // Private member variable for loadedSetpoint
+    QString actualFlow_;  // Private member variable for actualFlow
+    QString range_;
 
 public:
-    MFC();
+    MFC(QString mfcNumber);
 
-    double getLoadedSetpoint() const;
-    void setLoadedSetpoint(double value);
+    QString getMFCNumber() const;
+    QString getLoadedSetpoint() const;
+    void setLoadedSetpoint(QString value);
 
-    double getActualFlow() const;
-    double getRange() const;
+    QString getActualFlow() const;
+    QString getRange() const;
 
-signals:
-    void setpointCommandReceived(double setpoint);
-
+signals:   
     void setpointChanged();
     void flowChanged();
-
-public slots:
-
 };
 
 #endif // MFC_H

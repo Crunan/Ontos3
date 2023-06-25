@@ -28,22 +28,19 @@ public:
     PlasmaHead plasmaHead;
     PWR pwr;
     Tuner tuner;
-    MFC mfc1;
-    MFC mfc2;
-    MFC mfc3;
-    MFC mfc4;
+    QList<MFC*> mfcs; //Store the MFCs in a list
     CommandMap commandMap;
     // CTL Commands
     void setCommandMap(const QMap<QString, QPair<QString, QString>>& map);
     QString findCommandValue(QString command) const;
-    QString prepareCommand(QString cmd, const QString& setpoint);
 
     // Serial Functions
+    QString prepareCommand(QString cmd, const QString& setpoint);
     void sendSerialCommand(const QString& data);
 public slots:
 
     // Define slots for each command logic
-    void handleSetMFC1SetpointCommand();
+    void handleSetMFCSetpointCommand();
 
 private:
     Configuration config_;

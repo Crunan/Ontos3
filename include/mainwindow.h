@@ -60,13 +60,14 @@ private:
     // Serial Port methodsRecipe*
     void handleSerialPortError();
 
-    // Recipe methods
-    //void createRecipe();
-    //Recipe* getRecipe() const;
+    // GUI signal Slot connections
+    void connectMFCButtons();
+    void connectMFCButton(QPushButton* button, const QString& mfcNumber);
 
+    // MFC functions
+    MFC* findMFCByNumber(const QString& mfcNumber);
 
 public slots:
-
-    void openRecipeWindowMFC1();
+    void openRecipeWindowMFC();
 };
 #endif // MAINWINDOW_H

@@ -1,18 +1,25 @@
 #include "include/plasmacontroller/mfc.h"
 
-MFC::MFC()
-    : loadedSetpoint_(0.0), actualFlow_(0.0), range_(0.0)
+MFC::MFC(QString mfcNumber)
+    : QObject(nullptr),
+    mfcNumber_(mfcNumber),
+    loadedSetpoint_("0.0"),
+    actualFlow_("0.0"),
+    range_("0.0")
 {
 
 }
 
-
-double MFC::getLoadedSetpoint() const
+QString MFC::getMFCNumber() const
+{
+    return mfcNumber_;
+}
+QString MFC::getLoadedSetpoint() const
 {
     return loadedSetpoint_;
 }
 
-void MFC::setLoadedSetpoint(double value)
+void MFC::setLoadedSetpoint(QString value)
 {
     if (loadedSetpoint_ != value)
     {
@@ -21,12 +28,12 @@ void MFC::setLoadedSetpoint(double value)
     }
 }
 
-double MFC::getRange() const
-{
-    return range_;
-}
-
-double MFC::getActualFlow() const
+QString MFC::getActualFlow() const
 {
     return actualFlow_;
+}
+
+QString MFC::getRange() const
+{
+    return range_;
 }
