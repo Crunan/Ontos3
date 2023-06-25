@@ -35,10 +35,10 @@ MainWindow::~MainWindow() {
 
 void MainWindow::connectMFCButtons()
 {
-    connectMFCButton(ui->pushButton, "MFC1");
-    connectMFCButton(ui->pushButton_2, "MFC2");
-    connectMFCButton(ui->pushButton_3, "MFC3");
-    connectMFCButton(ui->pushButton_4, "MFC4");
+    connectMFCButton(ui->pushButton, "1");
+    connectMFCButton(ui->pushButton_2, "2");
+    connectMFCButton(ui->pushButton_3, "3");
+    connectMFCButton(ui->pushButton_4, "4");
 }
 
 void MainWindow::connectMFCButton(QPushButton* button, const QString& mfcNumber)

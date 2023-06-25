@@ -5,7 +5,7 @@ PlasmaController::PlasmaController(SerialComms& serialComm, QWidget* parent)
     plasmaHead(),
     pwr(),
     tuner(),
-    mfcs({ new MFC("MFC1"), new MFC("MFC2"), new MFC("MFC3"), new MFC("MFC4") }),
+    mfcs({ new MFC("1"), new MFC("2"), new MFC("3"), new MFC("4") }),
     commandMap(),
     config_(),
     axisCTL_(nullptr),
