@@ -14,6 +14,7 @@ PlasmaController::PlasmaController(SerialComms& serialComm, QWidget* parent)
     // Add startup data gathering methods.
     for (MFC* mfc: mfcs) {
         connect(mfc, &MFC::setpointChanged, this, &PlasmaController::handleSetMFCSetpointCommand);
+        connect(mfc, &MFC::rangeChanged, this, &PlasmaController::handleSetMFCRangeCommand);
     }
 }
 
@@ -51,15 +52,21 @@ void PlasmaController::sendSerialCommand(const QString& data)
     serialComm_.writeOutgoingData();
 }
 
-void PlasmaController::handleSetMFCSetpointCommand()
+void PlasmaController::handleSetMFCSetpointCommand(const int mfcNumber, const double loadedSetpoint)
 {
-    MFC* mfc = qobject_cast<MFC*>(sender());
-    QString setpoint = mfc->getLoadedSetpointAsString();
-    QString command = "$2A60" + mfc->getMFCNumberAsString() + "%";
+    QString setpoint = QString::number(loadedSetpoint);
+    QString command = "$2A60" + QString::number(mfcNumber) + "%";
     command = prepareCommand(command, setpoint);
     sendSerialCommand(command);
 }
 
+void PlasmaController::handleSetMFCRangeCommand(const int mfcNumber, const double range)
+{
+    QString setpoint = QString::number(range);
+    QString command = "$2A" + QString::number(mfcNumber) + "02%";
+    command = prepareCommand(command, setpoint);
+    sendSerialCommand(command);
+}
 
 //PlasmaController::getPlasmaHead() {
 //    //serial->setOutgoingData(command.getCommandString(""));

@@ -35,7 +35,7 @@ void MFC::setLoadedSetpoint(double value)
     if (loadedSetpoint_ != value)
     {
         loadedSetpoint_ = value;
-        emit setpointChanged();
+        emit setpointChanged(mfcNumber_, loadedSetpoint_);
     }
 }
 
@@ -63,6 +63,5 @@ void MFC::setRange(double value)
     if (range_ != value)
     {
         range_ = value;
-        emit rangeChanged();
-    }
+        emit rangeChanged(mfcNumber_, range_);    }
 }

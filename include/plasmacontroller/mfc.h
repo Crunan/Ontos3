@@ -7,6 +7,7 @@
 class MFC : public QObject {
 
     Q_OBJECT
+    Q_PROPERTY(int mfcNumber READ getMFCNumber CONSTANT)
     Q_PROPERTY(double loadedSetpoint READ getLoadedSetpoint WRITE setLoadedSetpoint NOTIFY setpointChanged)
     Q_PROPERTY(double actualFlow READ getActualFlow WRITE setActualFlow NOTIFY flowChanged)
     Q_PROPERTY(double range READ getRange WRITE setRange NOTIFY rangeChanged)
@@ -18,7 +19,7 @@ private:
     double range_;
 
 public:
-    MFC(int mfcNumber);
+    MFC(int mfcNum);
 
     QString getMFCNumberAsString() const;
     int getMFCNumber() const;
@@ -34,9 +35,9 @@ public:
     void setRange(double value);
 
 signals:
-    void setpointChanged();
+    void setpointChanged(const int mfcNumber, double loadedSetpoint);
     void flowChanged(const int mfcNumber, double flow);
-    void rangeChanged();
+    void rangeChanged(const int mfcNumber, double range);
 
 };
 

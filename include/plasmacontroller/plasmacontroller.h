@@ -37,10 +37,12 @@ public:
     // Serial Functions
     QString prepareCommand(QString cmd, const QString& setpoint);
     void sendSerialCommand(const QString& data);
-public slots:
 
+private slots:
     // Define slots for each command logic
-    void handleSetMFCSetpointCommand();
+    void handleSetMFCSetpointCommand(const int mfcNumber, double loadedSetpoint);
+    void handleSetMFCRangeCommand(const int mfcNumber, double range);
+
 
 private:
     Configuration config_;
