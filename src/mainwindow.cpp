@@ -38,7 +38,7 @@ void MainWindow::connectMFCFlowBars()
     // This will connect the flowchanged signal along with its passed params
     // to the GUI updateFlowbars function.
     for (int i = 0; i < CTL.mfcs.size(); ++i) {
-        connect(CTL.mfcs[i], &MFC::flowChanged, this, &MainWindow::updateFlowBar);
+        connect(CTL.mfcs[i], &MFC::actualFlowChanged, this, &MainWindow::updateFlowBar);
     }
 }
 
@@ -72,7 +72,7 @@ void MainWindow::openRecipeWindowMFC()
                 MFC* mfc = findMFCByNumber(mfcNumber);
                 if (mfc) {
                     double recipe = recipeStr.toDouble();
-                    mfc->setLoadedSetpoint(recipe);
+                    mfc->setRecipeFlow(recipe);
                 }
             }
         }
@@ -147,3 +147,5 @@ void MainWindow::handleSerialPortError() {
 //Recipe* MainWindow::getRecipe() const{
 //    return recipe;
 //}
+
+

@@ -38,11 +38,17 @@ public:
     QString prepareCommand(QString cmd, const QString& setpoint);
     void sendSerialCommand(const QString& data);
 
-private slots:
+public slots:
     // Define slots for each command logic
-    void handleSetMFCSetpointCommand(const int mfcNumber, double loadedSetpoint);
-    void handleSetMFCRangeCommand(const int mfcNumber, double range);
+    // MFCs
+    void handleSetMFCRecipeFlowCommand(const int mfcNumber, const double recipeFlow);
+    void handleSetMFCDefaultRecipeCommand(const int mfcNumber, const double recipeFlow);
+    void handleSetMFCRangeCommand(const int mfcNumber, const double range);
 
+    // Tuner
+    void handleSetTunerDefaultRecipeCommand(const double defaultPosition);
+    void handleSetTunerRecipePositionCommand(const double recipePosition);
+    void handleSetTunerAutoTuneCommand(const bool value);
 
 private:
     Configuration config_;

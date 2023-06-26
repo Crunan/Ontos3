@@ -1,35 +1,49 @@
 #include "include/plasmacontroller/tuner.h"
 
 Tuner::Tuner()
-    : currentPosition_(0.0), loadedSetpoint_(0.0), autoTune_(false)
+    : actualPosition_(0.0), recipePosition_(0.0), defaultRecipe_(0.0), autoTune_(false)
 {
 }
 
-double Tuner::getCurrentPosition() const
+double Tuner::getActualPosition() const
 {
-    return currentPosition_;
+    return actualPosition_;
 }
 
-void Tuner::setCurrentPosition(double position)
+void Tuner::setActualPosition(double position)
 {
-    if (currentPosition_ != position)
+    if (actualPosition_ != position)
     {
-        currentPosition_ = position;
-        emit positionChanged();
+        actualPosition_ = position;
+        emit actualPositionChanged(actualPosition_);
     }
 }
 
-double Tuner::getLoadedSetpoint() const
+double Tuner::getRecipePosition() const
 {
-    return loadedSetpoint_;
+    return recipePosition_;
 }
 
-void Tuner::setLoadedSetpoint(double setpoint)
+void Tuner::setRecipePosition(double setpoint)
 {
-    if (loadedSetpoint_ != setpoint)
+    if (recipePosition_ != setpoint)
     {
-        loadedSetpoint_ = setpoint;
-        emit setpointChanged();
+        recipePosition_ = setpoint;
+        emit recipePositionChanged(recipePosition_);
+    }
+}
+
+double Tuner::getDefaultRecipe() const
+{
+    return defaultRecipe_;
+}
+
+void Tuner::setDefaultRecipe(double setpoint)
+{
+    if (defaultRecipe_ != setpoint)
+    {
+        defaultRecipe_ = setpoint;
+        emit defaultRecipeChanged(defaultRecipe_);
     }
 }
 
@@ -43,12 +57,12 @@ void Tuner::setAutoTune(bool state)
     if (autoTune_ != state)
     {
         autoTune_ = state;
-        emit autoTuneChanged();
+        emit autoTuneChanged(autoTune_);
     }
 }
 
 void Tuner::toggleAutoTune()
 {
     autoTune_ = !autoTune_;
-    emit autoTuneChanged();
+    emit autoTuneChanged(autoTune_);
 }

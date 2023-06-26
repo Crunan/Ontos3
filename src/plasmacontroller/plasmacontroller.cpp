@@ -13,9 +13,13 @@ PlasmaController::PlasmaController(SerialComms& serialComm, QWidget* parent)
 {
     // Add startup data gathering methods.
     for (MFC* mfc: mfcs) {
-        connect(mfc, &MFC::setpointChanged, this, &PlasmaController::handleSetMFCSetpointCommand);
+        connect(mfc, &MFC::defaultRecipeChanged, this, &PlasmaController::handleSetMFCDefaultRecipeCommand);
+        connect(mfc, &MFC::recipeFlowChanged, this, &PlasmaController::handleSetMFCRecipeFlowCommand);
         connect(mfc, &MFC::rangeChanged, this, &PlasmaController::handleSetMFCRangeCommand);
     }
+    connect(&tuner, &Tuner::defaultRecipeChanged, this, &PlasmaController::handleSetTunerDefaultRecipeCommand);
+    connect(&tuner, &Tuner::recipePositionChanged, this, &PlasmaController::handleSetTunerRecipePositionCommand);
+    connect(&tuner, &Tuner::autoTuneChanged, this, &PlasmaController::handleSetTunerAutoTuneCommand);
 }
 
 PlasmaController::~PlasmaController()
@@ -52,9 +56,18 @@ void PlasmaController::sendSerialCommand(const QString& data)
     serialComm_.writeOutgoingData();
 }
 
-void PlasmaController::handleSetMFCSetpointCommand(const int mfcNumber, const double loadedSetpoint)
+// MFC
+void PlasmaController::handleSetMFCRecipeFlowCommand(const int mfcNumber, const double recipeFlow)
 {
-    QString setpoint = QString::number(loadedSetpoint);
+    QString setpoint = QString::number(recipeFlow);
+    QString command = "$820" + QString::number(mfcNumber) + "%";
+    command = prepareCommand(command, setpoint);
+    sendSerialCommand(command);
+}
+
+void PlasmaController::handleSetMFCDefaultRecipeCommand(const int mfcNumber, const double recipeFlow)
+{
+    QString setpoint = QString::number(recipeFlow);
     QString command = "$2A60" + QString::number(mfcNumber) + "%";
     command = prepareCommand(command, setpoint);
     sendSerialCommand(command);
@@ -67,6 +80,26 @@ void PlasmaController::handleSetMFCRangeCommand(const int mfcNumber, const doubl
     command = prepareCommand(command, setpoint);
     sendSerialCommand(command);
 }
+
+// TUNER
+void PlasmaController::handleSetTunerRecipePositionCommand(const double recipePosition)
+{
+    QString command = "$43" + QString::number(recipePosition) + "%";
+    sendSerialCommand(command);
+}
+
+void PlasmaController::handleSetTunerDefaultRecipeCommand(const double defaultPosition)
+{
+    QString command = "$2A606" + QString::number(defaultPosition) + "%";
+    sendSerialCommand(command);
+}
+
+void PlasmaController::handleSetTunerAutoTuneCommand(const bool value)
+{
+    QString command = "$860" + QString::number(value) + "%";
+    sendSerialCommand(command);
+}
+
 
 //PlasmaController::getPlasmaHead() {
 //    //serial->setOutgoingData(command.getCommandString(""));

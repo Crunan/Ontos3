@@ -3,9 +3,10 @@
 MFC::MFC(int mfcNumber)
     : QObject(nullptr),
     mfcNumber_(mfcNumber),
-    loadedSetpoint_(0.0),
+    recipeFlow_(0.0),
     actualFlow_(0.0),
-    range_(0.0)
+    range_(0.0),
+    defaultRecipe_(0.0)
 {
 
 }
@@ -20,22 +21,22 @@ int MFC::getMFCNumber() const
     return mfcNumber_;
 }
 
-QString MFC::getLoadedSetpointAsString() const
+QString MFC::getRecipeFlowAsString() const
 {
-    return QString::number(loadedSetpoint_);
+    return QString::number(recipeFlow_);
 }
 
-double MFC::getLoadedSetpoint() const
+double MFC::getRecipeFlow() const
 {
-    return loadedSetpoint_;
+    return recipeFlow_;
 }
 
-void MFC::setLoadedSetpoint(double value)
+void MFC::setRecipeFlow(double value)
 {
-    if (loadedSetpoint_ != value)
+    if (recipeFlow_ != value)
     {
-        loadedSetpoint_ = value;
-        emit setpointChanged(mfcNumber_, loadedSetpoint_);
+        recipeFlow_ = value;
+        emit recipeFlowChanged(mfcNumber_, recipeFlow_);
     }
 }
 
@@ -49,7 +50,7 @@ void MFC::setActualFlow(double value)
     if (actualFlow_ != value)
     {
         actualFlow_ = value;
-        emit flowChanged(mfcNumber_, actualFlow_);
+        emit actualFlowChanged(mfcNumber_, actualFlow_);
     }
 }
 
@@ -64,4 +65,17 @@ void MFC::setRange(double value)
     {
         range_ = value;
         emit rangeChanged(mfcNumber_, range_);    }
+}
+
+double MFC::getDefaultRecipe() const
+{
+    return defaultRecipe_;
+}
+
+void MFC::setDefaultRecipe(double value)
+{
+    if (defaultRecipe_!= value)
+    {
+        defaultRecipe_ = value;
+        emit defaultRecipeChanged(mfcNumber_, defaultRecipe_);    }
 }

@@ -35,18 +35,22 @@ public:
     QGroupBox *groupBox;
     QWidget *gridLayoutWidget;
     QGridLayout *gridLayout;
+    QProgressBar *flowBar;
     QProgressBar *flowBar_2;
     QPushButton *pushButton_2;
-    QProgressBar *flowBar;
-    QProgressBar *flowBar_3;
-    QProgressBar *flowBar_4;
+    QPushButton *pushButton_7;
+    QPushButton *pushButton_8;
     QPushButton *pushButton_4;
-    QPushButton *pushButton_3;
-    QPushButton *pushButton;
     QLabel *label;
-    QLabel *label_2;
+    QPushButton *pushButton_3;
     QLabel *label_3;
+    QLabel *label_2;
+    QProgressBar *flowBar_4;
     QLabel *label_4;
+    QPushButton *pushButton_6;
+    QPushButton *pushButton;
+    QProgressBar *flowBar_3;
+    QPushButton *pushButton_5;
     QStatusBar *statusBar;
     QToolBar *toolBar;
 
@@ -91,21 +95,29 @@ public:
         centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
         groupBox = new QGroupBox(centralwidget);
         groupBox->setObjectName(QString::fromUtf8("groupBox"));
-        groupBox->setGeometry(QRect(80, 70, 471, 191));
+        groupBox->setGeometry(QRect(80, 70, 551, 211));
         groupBox->setAlignment(Qt::AlignCenter);
         groupBox->setFlat(false);
         groupBox->setCheckable(false);
         gridLayoutWidget = new QWidget(groupBox);
         gridLayoutWidget->setObjectName(QString::fromUtf8("gridLayoutWidget"));
-        gridLayoutWidget->setGeometry(QRect(30, 40, 421, 131));
+        gridLayoutWidget->setGeometry(QRect(30, 40, 493, 131));
         gridLayout = new QGridLayout(gridLayoutWidget);
         gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
         gridLayout->setContentsMargins(0, 0, 0, 0);
-        flowBar_2 = new QProgressBar(gridLayoutWidget);
-        flowBar_2->setObjectName(QString::fromUtf8("flowBar_2"));
+        flowBar = new QProgressBar(gridLayoutWidget);
+        flowBar->setObjectName(QString::fromUtf8("flowBar"));
         QSizePolicy sizePolicy1(QSizePolicy::Expanding, QSizePolicy::Preferred);
         sizePolicy1.setHorizontalStretch(0);
         sizePolicy1.setVerticalStretch(0);
+        sizePolicy1.setHeightForWidth(flowBar->sizePolicy().hasHeightForWidth());
+        flowBar->setSizePolicy(sizePolicy1);
+        flowBar->setValue(24);
+
+        gridLayout->addWidget(flowBar, 1, 0, 1, 1);
+
+        flowBar_2 = new QProgressBar(gridLayoutWidget);
+        flowBar_2->setObjectName(QString::fromUtf8("flowBar_2"));
         sizePolicy1.setHeightForWidth(flowBar_2->sizePolicy().hasHeightForWidth());
         flowBar_2->setSizePolicy(sizePolicy1);
         flowBar_2->setValue(24);
@@ -122,21 +134,47 @@ public:
 
         gridLayout->addWidget(pushButton_2, 2, 1, 1, 1);
 
-        flowBar = new QProgressBar(gridLayoutWidget);
-        flowBar->setObjectName(QString::fromUtf8("flowBar"));
-        sizePolicy1.setHeightForWidth(flowBar->sizePolicy().hasHeightForWidth());
-        flowBar->setSizePolicy(sizePolicy1);
-        flowBar->setValue(24);
+        pushButton_7 = new QPushButton(gridLayoutWidget);
+        pushButton_7->setObjectName(QString::fromUtf8("pushButton_7"));
 
-        gridLayout->addWidget(flowBar, 1, 0, 1, 1);
+        gridLayout->addWidget(pushButton_7, 3, 2, 1, 1);
 
-        flowBar_3 = new QProgressBar(gridLayoutWidget);
-        flowBar_3->setObjectName(QString::fromUtf8("flowBar_3"));
-        sizePolicy1.setHeightForWidth(flowBar_3->sizePolicy().hasHeightForWidth());
-        flowBar_3->setSizePolicy(sizePolicy1);
-        flowBar_3->setValue(24);
+        pushButton_8 = new QPushButton(gridLayoutWidget);
+        pushButton_8->setObjectName(QString::fromUtf8("pushButton_8"));
 
-        gridLayout->addWidget(flowBar_3, 1, 2, 1, 1);
+        gridLayout->addWidget(pushButton_8, 3, 3, 1, 1);
+
+        pushButton_4 = new QPushButton(gridLayoutWidget);
+        pushButton_4->setObjectName(QString::fromUtf8("pushButton_4"));
+        sizePolicy2.setHeightForWidth(pushButton_4->sizePolicy().hasHeightForWidth());
+        pushButton_4->setSizePolicy(sizePolicy2);
+
+        gridLayout->addWidget(pushButton_4, 2, 3, 1, 1);
+
+        label = new QLabel(gridLayoutWidget);
+        label->setObjectName(QString::fromUtf8("label"));
+        label->setAlignment(Qt::AlignCenter);
+
+        gridLayout->addWidget(label, 0, 0, 1, 1);
+
+        pushButton_3 = new QPushButton(gridLayoutWidget);
+        pushButton_3->setObjectName(QString::fromUtf8("pushButton_3"));
+        sizePolicy2.setHeightForWidth(pushButton_3->sizePolicy().hasHeightForWidth());
+        pushButton_3->setSizePolicy(sizePolicy2);
+
+        gridLayout->addWidget(pushButton_3, 2, 2, 1, 1);
+
+        label_3 = new QLabel(gridLayoutWidget);
+        label_3->setObjectName(QString::fromUtf8("label_3"));
+        label_3->setAlignment(Qt::AlignCenter);
+
+        gridLayout->addWidget(label_3, 0, 2, 1, 1);
+
+        label_2 = new QLabel(gridLayoutWidget);
+        label_2->setObjectName(QString::fromUtf8("label_2"));
+        label_2->setAlignment(Qt::AlignCenter);
+
+        gridLayout->addWidget(label_2, 0, 1, 1, 1);
 
         flowBar_4 = new QProgressBar(gridLayoutWidget);
         flowBar_4->setObjectName(QString::fromUtf8("flowBar_4"));
@@ -146,19 +184,16 @@ public:
 
         gridLayout->addWidget(flowBar_4, 1, 3, 1, 1);
 
-        pushButton_4 = new QPushButton(gridLayoutWidget);
-        pushButton_4->setObjectName(QString::fromUtf8("pushButton_4"));
-        sizePolicy2.setHeightForWidth(pushButton_4->sizePolicy().hasHeightForWidth());
-        pushButton_4->setSizePolicy(sizePolicy2);
+        label_4 = new QLabel(gridLayoutWidget);
+        label_4->setObjectName(QString::fromUtf8("label_4"));
+        label_4->setAlignment(Qt::AlignCenter);
 
-        gridLayout->addWidget(pushButton_4, 2, 3, 1, 1);
+        gridLayout->addWidget(label_4, 0, 3, 1, 1);
 
-        pushButton_3 = new QPushButton(gridLayoutWidget);
-        pushButton_3->setObjectName(QString::fromUtf8("pushButton_3"));
-        sizePolicy2.setHeightForWidth(pushButton_3->sizePolicy().hasHeightForWidth());
-        pushButton_3->setSizePolicy(sizePolicy2);
+        pushButton_6 = new QPushButton(gridLayoutWidget);
+        pushButton_6->setObjectName(QString::fromUtf8("pushButton_6"));
 
-        gridLayout->addWidget(pushButton_3, 2, 2, 1, 1);
+        gridLayout->addWidget(pushButton_6, 3, 1, 1, 1);
 
         pushButton = new QPushButton(gridLayoutWidget);
         pushButton->setObjectName(QString::fromUtf8("pushButton"));
@@ -167,29 +202,18 @@ public:
 
         gridLayout->addWidget(pushButton, 2, 0, 1, 1);
 
-        label = new QLabel(gridLayoutWidget);
-        label->setObjectName(QString::fromUtf8("label"));
-        label->setAlignment(Qt::AlignCenter);
+        flowBar_3 = new QProgressBar(gridLayoutWidget);
+        flowBar_3->setObjectName(QString::fromUtf8("flowBar_3"));
+        sizePolicy1.setHeightForWidth(flowBar_3->sizePolicy().hasHeightForWidth());
+        flowBar_3->setSizePolicy(sizePolicy1);
+        flowBar_3->setValue(24);
 
-        gridLayout->addWidget(label, 0, 0, 1, 1);
+        gridLayout->addWidget(flowBar_3, 1, 2, 1, 1);
 
-        label_2 = new QLabel(gridLayoutWidget);
-        label_2->setObjectName(QString::fromUtf8("label_2"));
-        label_2->setAlignment(Qt::AlignCenter);
+        pushButton_5 = new QPushButton(gridLayoutWidget);
+        pushButton_5->setObjectName(QString::fromUtf8("pushButton_5"));
 
-        gridLayout->addWidget(label_2, 0, 1, 1, 1);
-
-        label_3 = new QLabel(gridLayoutWidget);
-        label_3->setObjectName(QString::fromUtf8("label_3"));
-        label_3->setAlignment(Qt::AlignCenter);
-
-        gridLayout->addWidget(label_3, 0, 2, 1, 1);
-
-        label_4 = new QLabel(gridLayoutWidget);
-        label_4->setObjectName(QString::fromUtf8("label_4"));
-        label_4->setAlignment(Qt::AlignCenter);
-
-        gridLayout->addWidget(label_4, 0, 3, 1, 1);
+        gridLayout->addWidget(pushButton_5, 3, 0, 1, 1);
 
         MainWindow->setCentralWidget(centralwidget);
         statusBar = new QStatusBar(MainWindow);
@@ -236,13 +260,17 @@ public:
 #endif // QT_CONFIG(tooltip)
         groupBox->setTitle(QCoreApplication::translate("MainWindow", "Gasses", nullptr));
         pushButton_2->setText(QCoreApplication::translate("MainWindow", "Set MFC 1", nullptr));
+        pushButton_7->setText(QCoreApplication::translate("MainWindow", "Set Def Recipe", nullptr));
+        pushButton_8->setText(QCoreApplication::translate("MainWindow", "Set Def Recipe", nullptr));
         pushButton_4->setText(QCoreApplication::translate("MainWindow", "Set MFC 1", nullptr));
-        pushButton_3->setText(QCoreApplication::translate("MainWindow", "Set MFC 1", nullptr));
-        pushButton->setText(QCoreApplication::translate("MainWindow", "Set MFC 1", nullptr));
         label->setText(QCoreApplication::translate("MainWindow", "MFC 1", nullptr));
-        label_2->setText(QCoreApplication::translate("MainWindow", "MFC 1", nullptr));
+        pushButton_3->setText(QCoreApplication::translate("MainWindow", "Set MFC 1", nullptr));
         label_3->setText(QCoreApplication::translate("MainWindow", "MFC 1", nullptr));
+        label_2->setText(QCoreApplication::translate("MainWindow", "MFC 1", nullptr));
         label_4->setText(QCoreApplication::translate("MainWindow", "MFC 1", nullptr));
+        pushButton_6->setText(QCoreApplication::translate("MainWindow", "Set Def Recipe", nullptr));
+        pushButton->setText(QCoreApplication::translate("MainWindow", "Set MFC 1", nullptr));
+        pushButton_5->setText(QCoreApplication::translate("MainWindow", "Set Def Recipe", nullptr));
         toolBar->setWindowTitle(QCoreApplication::translate("MainWindow", "toolBar_2", nullptr));
     } // retranslateUi
 
