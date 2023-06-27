@@ -7,9 +7,9 @@ PlasmaController::PlasmaController(SerialComms& serialComm, QWidget* parent)
     tuner(),
     mfcs({ new MFC(1), new MFC(2), new MFC(3), new MFC(4) }),
     commandMap(),
-    config_(),
-    axisCTL_(nullptr),
-    serialComm_(serialComm)
+    config(),
+    axisCTL(nullptr),
+    serial(serialComm)
 {
     // Add startup data gathering methods.
     for (MFC* mfc: mfcs) {
@@ -24,7 +24,10 @@ PlasmaController::PlasmaController(SerialComms& serialComm, QWidget* parent)
 
 PlasmaController::~PlasmaController()
 {
-
+    // Clean up the MFC objects
+    for (MFC* mfc : mfcs) {
+        delete mfc;
+    }
 }
 
 void PlasmaController::setCommandMap(const QMap<QString, QPair<QString, QString>>& map)
@@ -36,68 +39,68 @@ QString PlasmaController::findCommandValue(QString command) const
     return commandMap.findCommandValue(command);
 }
 
-QString PlasmaController::prepareCommand(QString cmd, const QString& setpoint)
-{
-    // Remove the trailing '%' character
-    cmd.chop(1);
 
-    // Add the setpoint to the command
-    cmd += setpoint;
-
-    // Add the '%' character back to the command
-    cmd += "%";
-
-    return cmd;
-}
-
-void PlasmaController::sendSerialCommand(const QString& data)
-{
-    serialComm_.setOutgoingData(data);
-    serialComm_.writeOutgoingData();
-}
 
 // MFC
 void PlasmaController::handleSetMFCRecipeFlowCommand(const int mfcNumber, const double recipeFlow)
 {
     QString setpoint = QString::number(recipeFlow);
     QString command = "$820" + QString::number(mfcNumber) + "%";
-    command = prepareCommand(command, setpoint);
-    sendSerialCommand(command);
+    command = serial.prepareCommand(command, setpoint);
+    serial.send(command);
 }
 
 void PlasmaController::handleSetMFCDefaultRecipeCommand(const int mfcNumber, const double recipeFlow)
 {
     QString setpoint = QString::number(recipeFlow);
     QString command = "$2A60" + QString::number(mfcNumber) + "%";
-    command = prepareCommand(command, setpoint);
-    sendSerialCommand(command);
+    command = serial.prepareCommand(command, setpoint);
+    serial.send(command);
 }
 
 void PlasmaController::handleSetMFCRangeCommand(const int mfcNumber, const double range)
 {
     QString setpoint = QString::number(range);
     QString command = "$2A" + QString::number(mfcNumber) + "02%";
-    command = prepareCommand(command, setpoint);
-    sendSerialCommand(command);
+    command = serial.prepareCommand(command, setpoint);
+    serial.send(command);
 }
 
 // TUNER
 void PlasmaController::handleSetTunerRecipePositionCommand(const double recipePosition)
 {
     QString command = "$43" + QString::number(recipePosition) + "%";
-    sendSerialCommand(command);
+    serial.send(command);
 }
 
 void PlasmaController::handleSetTunerDefaultRecipeCommand(const double defaultPosition)
 {
     QString command = "$2A606" + QString::number(defaultPosition) + "%";
-    sendSerialCommand(command);
+    serial.send(command);
 }
 
 void PlasmaController::handleSetTunerAutoTuneCommand(const bool value)
 {
     QString command = "$860" + QString::number(value) + "%";
-    sendSerialCommand(command);
+    serial.send(command);
+}
+
+void PlasmaController::handleSetPWRDefaultRecipeCommand(const double defaultWatts)
+{
+    QString command = "$2A605" + QString::number(defaultWatts) + "%";
+    serial.send(command);
+}
+
+void PlasmaController::handleSetPWRRecipeWattsCommand(const double recipeWatts)
+{
+    QString command = "$42" + QString::number(recipeWatts) + "%";
+    serial.send(command);
+}
+
+void PlasmaController::handleSetPWRMaxWattsCommand(const double maxWatts)
+{
+    QString command = "$2A705" + QString::number(maxWatts) + "%";
+    serial.send(command);
 }
 
 

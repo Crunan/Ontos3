@@ -8,7 +8,7 @@
 #include "include/settingsdialog.h"
 #include "include/recipe.h"
 #include "include/logger.h"
-#include "include/serialcomms.h"
+#include "include/serialportmanager.h"
 #include "include/plasmacontroller/plasmacontroller.h"
 
 #include <QMainWindow>

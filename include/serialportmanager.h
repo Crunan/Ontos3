@@ -1,8 +1,9 @@
-#ifndef SERIALCOMMS_H
-#define SERIALCOMMS_H
+#ifndef SERIALPORTMANAGER_H
+#define SERIALPORTMANAGER_H
 
 #include <QObject>
 #include <QSerialPort>
+#include <functional>
 
 #include "include/settingsdialog.h"
 
@@ -24,17 +25,21 @@ private:
     QString error;
     QSerialPort *serial;
 
+    void setOutgoingData(const QVariant &data);
+    void writeOutgoingData();
+
 public:
     SerialComms(QObject *parent = nullptr);
     ~SerialComms();
 
     QString getOutgoingData() const;
-    void setOutgoingData(const QVariant &data);
-
     QString getIncomingData();
     QString getError() const;
 
-    void writeOutgoingData();
+    QString prepareCommand(QString cmd, const QString& setpoint);
+    using ResponseHandler = std::function<void(const QString&)>;
+    void send(const QString& data, ResponseHandler callback = nullptr);
+
 signals:
     void serialPortOpened();
     void serialPortClosed();
@@ -42,10 +47,12 @@ signals:
     void incomingDataChanged();
     void errorOccurred();
 
+    void awaitingResponse(ResponseHandler callback = nullptr);
+
 public slots:
     void handleError();
     void openSerialPort(const SettingsDialog::Settings& p);
     void closeSerialPort();
 };
 
-#endif // SERIALCOMMS_H
+#endif // SERIALPORTMANAGER_H

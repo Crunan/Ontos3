@@ -1,10 +1,10 @@
-#include "include/serialcomms.h"
+#include "include/serialportmanager.h"
 SerialComms::SerialComms(QObject *parent)
     : QObject(parent)
 {
     serial = new QSerialPort(this);
     connect(serial, &QSerialPort::readyRead, this, &SerialComms::getIncomingData);
-    connect(serial, &QSerialPort::errorOccurred, this, &SerialComms::handleError);
+    connect(serial, &QSerialPort::errorOccurred, this, &SerialComms::handleError);    
 }
 
 SerialComms::~SerialComms() {
@@ -19,18 +19,6 @@ QString SerialComms::getOutgoingData() const
     return outgoingData;
 }
 
-void SerialComms::writeOutgoingData()
-{
-    QByteArray data = outgoingData.toUtf8(); // Convert QString to QByteArray
-
-    if (serial && serial->isOpen())
-    {
-        // Write the data to the serial port
-        serial->write(data);
-
-        // handle any errors or perform additional operations here
-    }
-}
 void SerialComms::setOutgoingData(const QVariant &data)
 {
     // Convert the data to QString
@@ -42,6 +30,40 @@ void SerialComms::setOutgoingData(const QVariant &data)
     }
 }
 
+void SerialComms::writeOutgoingData()
+{
+    QByteArray data = outgoingData.toUtf8(); // Convert QString to QByteArray
+
+    if (serial && serial->isOpen())
+    {
+        // Write the data to the serial port
+        serial->write(data);
+        serial->flush();
+        // handle any errors or perform additional operations here
+    }
+}
+
+QString SerialComms::prepareCommand(QString cmd, const QString& setpoint)
+{
+    // Remove the trailing '%' character
+    cmd.chop(1);
+
+    // Add the setpoint to the command
+    cmd += setpoint;
+
+    // Add the '%' character back to the command
+    cmd += "%";
+
+    return cmd;
+}
+
+void SerialComms::send(const QString& data, ResponseHandler callback)
+{
+    setOutgoingData(data);
+    writeOutgoingData();
+
+    emit awaitingResponse(callback);
+}
 QString SerialComms::getIncomingData() {
     QByteArray newData = serial->readAll();
 

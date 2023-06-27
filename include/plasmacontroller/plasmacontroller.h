@@ -1,7 +1,7 @@
 #ifndef PLASMACONTROLLER_H
 #define PLASMACONTROLLER_H
 
-#include "include/serialcomms.h"
+#include "include/serialportmanager.h"
 #include "include/plasmacontroller/plasmahead.h"
 #include "include/plasmacontroller/pwr.h"
 #include "include/plasmacontroller/tuner.h"
@@ -9,18 +9,15 @@
 #include "include/commandmap.h"
 #include "include/configuration.h"
 #include "include/axiscontroller/axiscontroller.h"
-#include "include/serialcomms.h"
 
 #include <QObject>
 #include <vector>
 #include <memory>
 
-namespace CTL {
-class PlasmaController;
-}
 
 class PlasmaController : public QObject
 {
+    Q_OBJECT
 public:
     explicit PlasmaController(SerialComms& serialComm, QWidget* parent = nullptr);
     ~PlasmaController();
@@ -30,13 +27,17 @@ public:
     Tuner tuner;
     QList<MFC*> mfcs; //Store the MFCs in a list
     CommandMap commandMap;
+    Configuration config;
+    AxisController* axisCTL;  // Optional, can be nullptr
+    SerialComms& serial;  // Reference to SerialComm object
+
     // CTL Commands
     void setCommandMap(const QMap<QString, QPair<QString, QString>>& map);
     QString findCommandValue(QString command) const;
 
     // Serial Functions
     QString prepareCommand(QString cmd, const QString& setpoint);
-    void sendSerialCommand(const QString& data);
+
 
 public slots:
     // Define slots for each command logic
@@ -50,10 +51,10 @@ public slots:
     void handleSetTunerRecipePositionCommand(const double recipePosition);
     void handleSetTunerAutoTuneCommand(const bool value);
 
-private:
-    Configuration config_;
-    AxisController* axisCTL_;  // Optional, can be nullptr
-    SerialComms& serialComm_;  // Reference to SerialComm object
+    // PWR
+    void handleSetPWRDefaultRecipeCommand(const double defaultWatts);
+    void handleSetPWRRecipeWattsCommand(const double recipeWatts);
+    void handleSetPWRMaxWattsCommand(const double maxWatts);
 
 };
 
