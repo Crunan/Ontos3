@@ -1,20 +1,16 @@
-# Template page
-
-{% hint style="info" %}
-Duplicate this page for every day you want to track.
-{% endhint %}
+# 1 Jul - Fri
 
 ## Today's stuff
 
-<table data-header-hidden><thead><tr><th width="80" data-type="checkbox"></th><th width="120" data-type="select">Type</th><th>Action</th></tr></thead><tbody><tr><td>false</td><td></td><td>A meeting I'm attending</td></tr><tr><td>false</td><td></td><td>A task I should do</td></tr></tbody></table>
+<table data-header-hidden><thead><tr><th width="80" data-type="checkbox"></th><th width="120" data-type="select">Type</th><th>Action</th></tr></thead><tbody><tr><td>false</td><td></td><td>😇 1:1 with Gloria</td></tr><tr><td>false</td><td></td><td>🧠 Brainstorm brand ideas</td></tr><tr><td>false</td><td></td><td>👩🏽‍💻 Code up new homepage</td></tr><tr><td>false</td><td></td><td>🐶 Walk the pooch</td></tr></tbody></table>
 
 ## Notes & ideas
 
 <details>
 
-<summary>Notes: A meeting I’m attending</summary>
+<summary></summary>
 
-Start taking notes…
+
 
 </details>
 
