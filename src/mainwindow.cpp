@@ -8,9 +8,9 @@ MainWindow::MainWindow(MainLoop& loop, Logger& logger, QWidget *parent) :
     ui(new Ui::MainWindow),
     status(new QLabel),
     settings(new SettingsDialog),
-    serial(std::make_shared<SerialComms>()),
-    recipe(nullptr),
-    CTL(*serial),
+    recipe(),
+    CTL(),
+    serial(nullptr),
     commandFileReader()
 {
     ui->setupUi(this);
@@ -22,6 +22,11 @@ MainWindow::MainWindow(MainLoop& loop, Logger& logger, QWidget *parent) :
     QMap CTLCommands = commandFileReader.readCommandsFromFile();
     CTL.setCommandMap(CTLCommands);
 
+    // MFC Startup
+    for (int i = 1, i >= CTL.numberOfMFCs(), i++) {
+
+    }
+    CTL.mfcs
     // Make signal/slot connections here
     connectMFCRecipeButtons();
     connectMFCFlowBars();
@@ -30,8 +35,20 @@ MainWindow::MainWindow(MainLoop& loop, Logger& logger, QWidget *parent) :
 MainWindow::~MainWindow() {
     delete ui;
     delete settings;
-    delete recipe;
 }
+
+void MainWindow::connectSerialPort()
+{
+    // Get the current settings from the SettingsDialog
+    SettingsDialog::Settings portSettings = settings->settings();
+
+    // Call the openSerialPort function of CTL.serial and pass the settings
+    CTL.serial.openSerialPort(portSettings);
+
+    // Set serial CTL object for the mainwindow to use.
+    this->serial = CTL.getSerialPortManager();
+}
+
 
 void MainWindow::connectMFCFlowBars()
 {
@@ -69,7 +86,7 @@ void MainWindow::openRecipeWindowMFC()
 
                 // Retrieve the MFC number from the button's property
                 int mfcNumber = button->property("MFCNumber").toInt();  // Retrieve the MFC index from the button's property
-                MFC* mfc = findMFCByNumber(mfcNumber);
+                MFC* mfc = CTL.findMFCByNumber(mfcNumber);
                 if (mfc) {
                     double recipe = recipeStr.toDouble();
                     mfc->setRecipeFlow(recipe);
@@ -96,22 +113,10 @@ void MainWindow::updateFlowBar(const int& mfcNumber, const double& flow)
     }
 
 }
-MFC* MainWindow::findMFCByNumber(const int& mfcNumber)
-{
-    for (MFC* mfc : CTL.mfcs) {
-        if (mfc->getMFCNumber() == mfcNumber) {
-            return mfc;
-        }
-    }
-    return nullptr;
-}
 
 void MainWindow::initActionsConnections() {
-    connect(ui->actionConnect, &QAction::triggered, this, [this]() {
-        // Call the openSerialPort slot with the settings object
-        serial->openSerialPort(settings->settings());
-    });
-    connect(ui->actionDisconnect, &QAction::triggered, serial.get(), &SerialComms::closeSerialPort);
+    connect(ui->actionDisconnect, &QAction::triggered, &CTL.serial, &SerialPortManager::closeSerialPort);
+    connect(ui->actionConnect, &QAction::triggered, this, &MainWindow::connectSerialPort);
     connect(ui->actionConfigure, &QAction::triggered, settings, &SettingsDialog::show);
     connect(ui->actionQuit, &QAction::triggered, this, &MainWindow::shutDownProgram);
 }

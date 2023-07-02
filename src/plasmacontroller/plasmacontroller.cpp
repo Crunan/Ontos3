@@ -1,6 +1,6 @@
 #include "include/plasmacontroller/plasmacontroller.h"
 
-PlasmaController::PlasmaController(SerialComms& serialComm, QWidget* parent)
+PlasmaController::PlasmaController(QWidget* parent)
   : QObject(parent),
     plasmaHead(),
     pwr(),
@@ -9,7 +9,7 @@ PlasmaController::PlasmaController(SerialComms& serialComm, QWidget* parent)
     commandMap(),
     config(),
     axisCTL(nullptr),
-    serial(serialComm)
+    serial()
 {
     // Add startup data gathering methods.
     for (MFC* mfc: mfcs) {
@@ -30,6 +30,7 @@ PlasmaController::~PlasmaController()
     }
 }
 
+
 void PlasmaController::setCommandMap(const QMap<QString, QPair<QString, QString>>& map)
 {
     commandMap.setCommandMap(map);
@@ -39,68 +40,135 @@ QString PlasmaController::findCommandValue(QString command) const
     return commandMap.findCommandValue(command);
 }
 
+SerialPortManager* PlasmaController::getSerialPortManager()
+{
+    return &serial;
+}
 
+QString PlasmaController::formatSerialCommand(QString cmd, const QString& setpoint)
+{
+    // Remove the trailing '%' character
+    cmd.chop(1);
+
+    // Add the setpoint to the command
+    cmd += setpoint;
+
+    // Add the '%' character back to the command
+    cmd += "%";
+
+    return cmd;
+}
+
+MFC* PlasmaController::findMFCByNumber(int& mfcNumber)
+{
+    for (MFC* mfc : mfcs) {
+        if (mfc->getMFCNumber() == mfcNumber) {
+            return mfc;
+        }
+    }
+    return nullptr;
+}
+
+int PlasmaController::numberOfMFCs()
+{
+    serial.commandHandler.setOutgoingData("$30%");
+    int numMFCs = handleGetNumberOfMFCsCommand(serial.commandHandler.getIncomingData());
+    return numMFCs;
+}
+
+int PlasmaController::handleGetNumberOfMFCsCommand(QString& responseStr)
+{
+    //_ $30%; resp[!300m#], m = number of MFCs
+    int numMFCIndex = 5;
+
+    // Extract the number of MFCs substring
+    QString numMFCsStr = responseStr.mid(1, numMFCIndex - 1);
+
+    // Convert the MFC number and flow to integers
+    int numMFCs = numMFCsStr.toInt();
+
+    // Output the extracted data (for demonstration purposes)
+    qDebug() << "Number of MFC's:" << numMFCs;
+
+    return numMFCs;
+
+}
+double PlasmaController::handleGetMFCRecipeFlowCommand(QString& responseStr)
+{
+    int mfcIndex = 5;
+    int flowIndex = 6;
+    // Extract the MFC number substring ('m')
+    QString mfcNumberStr = responseStr.mid(1, mfcIndex - 1);
+
+    // Extract the flow substring (characters after 'm')
+    QString flowStr = responseStr.mid(4, flowIndex - 1);
+
+    // Convert the MFC number and flow to integers
+    int mfcNumber = mfcNumberStr.toInt();
+    int flow = flowStr.toInt();
+
+    // Going to set the mfc data, find which mfc is updated
+    MFC* mfc = findMFCByNumber(mfcNumber);
+
+    // Set the data in the mfc structure
+    mfc->setRecipeFlow(flow);
+
+    // Output the extracted data (for demonstration purposes)
+    qDebug() << "MFC Number:" << mfcNumber;
+    qDebug() << "Flow:" << flow;
+
+    // Call the getter for the mfc structure
+    return mfc->getRecipeFlow();
+}
 
 // MFC
 void PlasmaController::handleSetMFCRecipeFlowCommand(const int mfcNumber, const double recipeFlow)
 {
-    QString setpoint = QString::number(recipeFlow);
-    QString command = "$820" + QString::number(mfcNumber) + "%";
-    command = serial.prepareCommand(command, setpoint);
-    serial.send(command);
-}
 
+}
 void PlasmaController::handleSetMFCDefaultRecipeCommand(const int mfcNumber, const double recipeFlow)
 {
-    QString setpoint = QString::number(recipeFlow);
-    QString command = "$2A60" + QString::number(mfcNumber) + "%";
-    command = serial.prepareCommand(command, setpoint);
-    serial.send(command);
-}
 
+}
 void PlasmaController::handleSetMFCRangeCommand(const int mfcNumber, const double range)
 {
-    QString setpoint = QString::number(range);
-    QString command = "$2A" + QString::number(mfcNumber) + "02%";
-    command = serial.prepareCommand(command, setpoint);
-    serial.send(command);
-}
 
+}
 // TUNER
 void PlasmaController::handleSetTunerRecipePositionCommand(const double recipePosition)
 {
     QString command = "$43" + QString::number(recipePosition) + "%";
-    serial.send(command);
+    //serial.commandHandler.send(command);
 }
 
 void PlasmaController::handleSetTunerDefaultRecipeCommand(const double defaultPosition)
 {
     QString command = "$2A606" + QString::number(defaultPosition) + "%";
-    serial.send(command);
+    //serial.commandHandler.send(command);
 }
 
 void PlasmaController::handleSetTunerAutoTuneCommand(const bool value)
 {
     QString command = "$860" + QString::number(value) + "%";
-    serial.send(command);
+    //serial.commandHandler.send(command);
 }
 
 void PlasmaController::handleSetPWRDefaultRecipeCommand(const double defaultWatts)
 {
     QString command = "$2A605" + QString::number(defaultWatts) + "%";
-    serial.send(command);
+    //serial.commandHandler.send(command);
 }
 
 void PlasmaController::handleSetPWRRecipeWattsCommand(const double recipeWatts)
 {
     QString command = "$42" + QString::number(recipeWatts) + "%";
-    serial.send(command);
+    //serial.commandHandler.send(command);
 }
 
 void PlasmaController::handleSetPWRMaxWattsCommand(const double maxWatts)
 {
     QString command = "$2A705" + QString::number(maxWatts) + "%";
-    serial.send(command);
+    //serial.commandHandler.send(command);
 }
 
 

@@ -38,19 +38,6 @@ public:
     void createRecipe();
 
 private:
-    // Reference to the MainLoop object
-    MainLoop& mainLoop;
-    // Reference to the logger
-    Logger& log;
-    Ui::MainWindow* ui = nullptr;
-    QLabel* status = nullptr;
-    SettingsDialog* settings = nullptr;
-    // Pointer to Serial Communications
-    std::shared_ptr<SerialComms> serial;
-    // Pointer to the Recipe object
-    Recipe* recipe;
-    PlasmaController CTL;
-    CommandFileReader commandFileReader;
 
     // Action Button methods
     void initActionsConnections();
@@ -62,16 +49,28 @@ private:
     void connectMFCFlowBars();
     void connectMFCRecipeButton(QPushButton* button, const int &mfcNumber);
 
-    // MFC functions
-    MFC* findMFCByNumber(const int &mfcNumber);
+
 
 private slots:
     void updateFlowBar(const int& mfcNumber, const double& flow);
+    void connectSerialPort();
 
 public slots:
     void about();
     void shutDownProgram();
-    void openRecipeWindowMFC();
+    void openRecipeWindowMFC();    
     void handleSerialPortError();
+public:
+    // Reference to the MainLoop object
+    MainLoop& mainLoop;
+    // Reference to the logger
+    Logger& log;
+    Ui::MainWindow* ui = nullptr;
+    QLabel* status = nullptr;
+    SettingsDialog* settings = nullptr;
+    Recipe recipe;
+    PlasmaController CTL;
+    SerialPortManager* serial = nullptr;
+    CommandFileReader commandFileReader;
 };
 #endif // MAINWINDOW_H
