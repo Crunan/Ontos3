@@ -1,4 +1,4 @@
-QT       += core gui widgets serialport
+QT += core gui widgets serialport
 
 greaterThan(QT_MAJOR_VERSION, 4)
 
@@ -18,6 +18,7 @@ SOURCES += \
     src/axiscontroller/stage/maneuvers.cpp \
     src/axiscontroller/stage/positions.cpp \
     src/axiscontroller/stage/scan.cpp \
+    src/axiscontroller/scanrecipe.cpp \
     src/axiscontroller/stage/statemachine.cpp \
     src/axiscontroller/stage/twospot.cpp \
     src/commandfilereader.cpp \
@@ -25,6 +26,8 @@ SOURCES += \
     src/configuration.cpp \
     src/axiscontroller/coordinate.cpp \
     src/functions.cpp \
+    src/led.cpp \
+    src/ledfactory.cpp \
     src/lighttowerstatemachine.cpp \
     src/logger.cpp \
     src/main.cpp \
@@ -35,11 +38,12 @@ SOURCES += \
     src/plasmacontroller/plasmacontroller.cpp \
     src/plasmacontroller/plasmahead.cpp \
     src/plasmacontroller/pwr.cpp \
+    src/plasmacontroller/plasmarecipe.cpp \
     src/plasmacontroller/tuner.cpp \
     src/recipe.cpp \
     src/serialportmanager.cpp \
     src/serialcommandhandler.cpp \
-    src/settingsdialog.cpp 
+    src/settingsdialog.cpp
 
 
 HEADERS += \
@@ -53,12 +57,15 @@ HEADERS += \
     include/axiscontroller/stage/maneuvers.h \
     include/axiscontroller/stage/positions.h \
     include/axiscontroller/stage/scan.h \
+    include/axiscontroller/scanrecipe.h \
     include/axiscontroller/stage/statemachine.h \
     include/axiscontroller/stage/twospot.h \
     include/commandfilereader.h \
     include/commandmap.h \
     include/configuration.h \
     include/functions.h \
+    include/led.h \
+    include/ledfactory.h \
     include/lighttowerstatemachine.h \
     include/logger.h \
     include/mainwindow.h \
@@ -67,11 +74,13 @@ HEADERS += \
     include/plasmacontroller/plasmacontroller.h \
     include/plasmacontroller/plasmahead.h \
     include/plasmacontroller/pwr.h \
+    include/plasmacontroller/plasmarecipe.h \
     include/plasmacontroller/tuner.h \
     include/recipe.h \
     include/serialportmanager.h \
-    include/settingsdialog.h  \
+    include/settingsdialog.h \
     include/serialcommandhandler.h
+
 
 FORMS += \
     ui/mainwindow.ui \
@@ -79,9 +88,6 @@ FORMS += \
 
 RESOURCES += \
     ONTOS3.qrc
-
-DISTFILES += \
-    settingsdialog.o
 
 INCLUDEPATH += $$PWD/include
 

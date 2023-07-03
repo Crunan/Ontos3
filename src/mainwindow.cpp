@@ -23,10 +23,9 @@ MainWindow::MainWindow(MainLoop& loop, Logger& logger, QWidget *parent) :
     CTL.setCommandMap(CTLCommands);
 
     // MFC Startup
-    for (int i = 1, i >= CTL.numberOfMFCs(), i++) {
-
-    }
-    CTL.mfcs
+//    for (int i = 1; i >= CTL.numberOfMFCs(); i++) {
+//        connect(CTL.mfcs)
+//    }
     // Make signal/slot connections here
     connectMFCRecipeButtons();
     connectMFCFlowBars();

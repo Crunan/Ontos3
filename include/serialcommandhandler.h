@@ -4,40 +4,36 @@
 #include <QString>
 #include <QObject>
 #include <QSerialPort>
-#include <functional>
 #include <QVariant>
 
 class SerialCommandHandler : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString outgoingData_ READ getOutgoingData  WRITE setOutgoingData NOTIFY outgoingDataChanged)
-    Q_PROPERTY(QString incomingData_ READ getIncomingData NOTIFY incomingDataChanged)
+    Q_PROPERTY(QString outgoingData READ getOutgoingData WRITE setOutgoingData NOTIFY outgoingDataReady)
+    Q_PROPERTY(QString incomingData READ getIncomingData WRITE setIncomingData NOTIFY incomingDataChanged)
 private:
     QString outgoingData_;
     QString incomingData_;
+    QSerialPort& serial;
 
 public:
-    SerialCommandHandler(QSerialPort& serial, QObject *parent = nullptr);
+    SerialCommandHandler(QSerialPort& serial, QObject* parent = nullptr);
     ~SerialCommandHandler();
 
-
     QString getOutgoingData() const;
-    void setOutgoingData(const QVariant& data);
-
     QString getIncomingData();
-    void setIncomingData();
 
-    void send(QString& data);
+    void setOutgoingData(const QVariant& data);
+    void setIncomingData(const QString& data);
+
+    void sendSerialCommand(const QVariant& data);
 
 signals:
-    void outgoingDataChanged();
+    void outgoingDataReady(const QString& data);
+    void outgoingDataWritten(const QByteArray& data);
+
     void incomingDataChanged();
 
-public slots:
-    void writeOutgoingData();
-
-public:
-    QSerialPort& serial;
 };
 
 #endif // SERIALCOMMANDHANDLER_H

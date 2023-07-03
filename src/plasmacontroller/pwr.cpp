@@ -27,11 +27,26 @@ double PWR::getForwardWatts() const
     return forwardWatts_;
 }
 
+
+void PWR::setForwardWatts(double value)
+{
+    if (forwardWatts_ != value) {
+        forwardWatts_ = value;
+        emit forwardWattsChanged();
+    }
+}
+
 double PWR::getReflectedWatts() const
 {
     return reflectedWatts_;
 }
-
+void PWR::setReflectedWatts(double value)
+{
+    if (reflectedWatts_ != value) {
+        reflectedWatts_ = value;
+        emit reflectedWattsChanged();
+    }
+}
 double PWR::getDefaultRecipe() const
 {
     return defaultRecipe_;

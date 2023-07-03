@@ -35,14 +35,14 @@ public:
     // MFC public commands
     // MFC functions
     MFC* findMFCByNumber(int &mfcNumber);
-    int numberOfMFCS();
+    int numberOfMFCs();
 
 public slots:
     // Define slots for each command logic
 
     // MFCs
     // Getters
-    int handleGetNumberOfMFCsCommand(QString& responseStr);
+    int parseResponseForNumberOfMFCs(QString& responseStr);
     double handleGetMFCRecipeFlowCommand(QString& responseStr);
     // Setters
     void handleSetMFCRecipeFlowCommand(const int mfcNumber, const double recipeFlow);
@@ -68,6 +68,9 @@ public:
     AxisController* axisCTL;  // Optional, can be nullptr
     SerialPortManager serial;  // Reference to SerialComm object
 
+    QString sendSerialCommand(const QString& command);
+    void getCTLStatusCommand();
+    void parseResponseForCTLStatus(QString& response);
 };
 
 #endif // PLASMACONTROLLER_H

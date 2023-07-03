@@ -49,7 +49,7 @@ QString PlasmaController::formatSerialCommand(QString cmd, const QString& setpoi
 {
     // Remove the trailing '%' character
     cmd.chop(1);
-
+void setActualFlow(double value);
     // Add the setpoint to the command
     cmd += setpoint;
 
@@ -69,30 +69,39 @@ MFC* PlasmaController::findMFCByNumber(int& mfcNumber)
     return nullptr;
 }
 
+QString PlasmaController::sendSerialCommand(const QString& command)
+{
+    serial.commandHandler.sendSerialCommand(command);
+    QString response = serial.commandHandler.getIncomingData();
+    return response;
+}
+
 int PlasmaController::numberOfMFCs()
 {
-    serial.commandHandler.setOutgoingData("$30%");
-    int numMFCs = handleGetNumberOfMFCsCommand(serial.commandHandler.getIncomingData());
+    QString command = "$30%";
+    QString response = sendSerialCommand(command);
+    int numMFCs = parseResponseForNumberOfMFCs(response);
+
     return numMFCs;
 }
 
-int PlasmaController::handleGetNumberOfMFCsCommand(QString& responseStr)
+int PlasmaController::parseResponseForNumberOfMFCs(QString& response)
 {
-    //_ $30%; resp[!300m#], m = number of MFCs
+    // _ $30%; resp[!300m#], m = number of MFCs
     int numMFCIndex = 5;
 
     // Extract the number of MFCs substring
-    QString numMFCsStr = responseStr.mid(1, numMFCIndex - 1);
+    QString numMFCsStr = response.mid(1, numMFCIndex - 1);
 
-    // Convert the MFC number and flow to integers
+    // Convert the MFC number to an integer
     int numMFCs = numMFCsStr.toInt();
 
     // Output the extracted data (for demonstration purposes)
     qDebug() << "Number of MFC's:" << numMFCs;
 
     return numMFCs;
-
 }
+
 double PlasmaController::handleGetMFCRecipeFlowCommand(QString& responseStr)
 {
     int mfcIndex = 5;
@@ -171,7 +180,18 @@ void PlasmaController::handleSetPWRMaxWattsCommand(const double maxWatts)
     //serial.commandHandler.send(command);
 }
 
+void PlasmaController::getCTLStatusCommand()
+{
+    QString command = "$91%";
+    QString response = sendSerialCommand(command);
+    parseResponseForCTLStatus(response);
 
+}
+
+void PlasmaController::parseResponseForCTLStatus(QString& response)
+{
+
+}
 //PlasmaController::getPlasmaHead() {
 //    //serial->setOutgoingData(command.getCommandString(""));
 //}
