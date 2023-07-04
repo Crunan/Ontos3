@@ -1,4 +1,4 @@
-QT += core gui widgets serialport
+QT += core gui widgets serialport quick quickcontrols2
 
 greaterThan(QT_MAJOR_VERSION, 4)
 
