@@ -17,7 +17,7 @@ public:
     };
     Q_ENUM(LEDType)
 
-    LED(const QString& name, int index = -1, LEDType type = Normal, bool state = false);
+    explicit LED(const QString& name, int index = -1, LEDType type = Normal, bool state = false);
     LED(const LED& other); // Copy constructor
 
     Q_PROPERTY(QString name READ getName WRITE setName)
