@@ -1,14 +1,14 @@
 # Table of contents
 
-* [Template page](README.md)
+* [Template page](../)
 * [02 Jul -Sun](02-jul-sun.md)
 
 ## This week
 
-* [15 Aug - Mon](this-week/15-aug-mon.md)
+* [15 Aug - Mon](broken-reference)
 
 ## Archive
 
-* [2022](archive/2022/README.md)
-  * [July](archive/2022/july/README.md)
+* [2022](archive/2022/)
+  * [July](archive/2022/july/)
     * [1 Jul - Fri](archive/2022/july/1-jul-fri.md)
