@@ -27,7 +27,8 @@ SOURCES += \
     src/axiscontroller/coordinate.cpp \
     src/functions.cpp \
     src/led.cpp \
-    src/ledfactory.cpp \
+    src/ledfactory.cpp \    
+    src/ledstatus.cpp \
     src/lighttowerstatemachine.cpp \
     src/logger.cpp \
     src/main.cpp \
@@ -65,7 +66,8 @@ HEADERS += \
     include/configuration.h \
     include/functions.h \
     include/led.h \
-    include/ledfactory.h \
+    include/ledfactory.h \    
+    include/ledstatus.h \
     include/lighttowerstatemachine.h \
     include/logger.h \
     include/mainwindow.h \
@@ -80,7 +82,6 @@ HEADERS += \
     include/serialportmanager.h \
     include/settingsdialog.h \
     include/serialcommandhandler.h
-
 
 FORMS += \
     ui/mainwindow.ui \
