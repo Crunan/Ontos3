@@ -1,76 +1,82 @@
 #include "include/led.h"
 
-int LED::nextIndex_ = 0;
+int LED::nextIndex = 0;
 
 LED::LED(const QString& name, int index, LEDType type, bool state)
-    : name_(name), index_(index), type_(type), state_(state)
+    : name(name), index(index), type(type), state(state)
 {
-    if (index_ == -1) {
-        index_ = nextIndex_;
-        nextIndex_++;
+    if (index == -1) {
+        index = nextIndex;
+        nextIndex++;
     }
 
     if (name == "ABORT")
-        type_ = Abort;
+        type = Abort;
     else if (name == "ESTOP")
-        type_ = EStop;
+        type = EStop;
     else if (name == "PL_ON")
-        type_ = PlasmaOn;
+        type = PlasmaOn;
     else
-        type_ = Normal;
+        type = Normal;
+}
+
+LED::LED(const LED& other)
+    : name(other.name), index(other.index), type(other.type), state(other.state)
+{
+    // No need to copy the static member nextIndex_
 }
 
 QString LED::getName() const
 {
-    return name_;
+    return name;
 }
 
-void LED::setName(const QString& name)
+void LED::setName(const QString& value)
 {
-    name_ = name;
+    name = value;
 }
 
 int LED::getIndex() const
 {
-    return index_;
+    return index;
 }
 
-void LED::setIndex(int index)
+void LED::setIndex(int value)
 {
-    index_ = index;
+    index = value;
 }
 
 LED::LEDType LED::getType() const
 {
-    return type_;
+    return type;
 }
 
-void LED::setType(LEDType type)
+void LED::setType(LEDType value)
 {
-    type_ = type;
+    type = value;
 }
 
 bool LED::getState() const
 {
-    return state_;
+    return state;
 }
 
-void LED::setState(bool state)
+void LED::setState(bool value)
 {
-    state_ = state;
+    state = value;
 }
 
 void LED::turnOn()
 {
-    state_ = true;
+    state = true;
 }
 
 void LED::turnOff()
 {
-    state_ = false;
+    state = false;
 }
 
 bool LED::isOn() const
 {
-    return state_;
+    return state;
 }

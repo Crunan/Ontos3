@@ -15,9 +15,9 @@ public:
 
     const QList<LED>& getLedList() const;
 
-private:
-    QList<LED> ledList_;
-    int lastCreatedLedIndex_;
+public:
+    QList<LED> ledList;
+    int lastCreatedLedIndex;
 };
 
 #endif // LEDFACTORY_H

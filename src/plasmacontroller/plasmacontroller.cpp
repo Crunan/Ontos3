@@ -9,7 +9,9 @@ PlasmaController::PlasmaController(QWidget* parent)
     commandMap(),
     config(),
     axisCTL(nullptr),
-    serial()
+    serial(),
+    ledStatus(),
+    executeRecipe(0)
 {
     // Add startup data gathering methods.
     for (MFC* mfc: mfcs) {
@@ -188,9 +190,70 @@ void PlasmaController::getCTLStatusCommand()
 
 }
 
-void PlasmaController::parseResponseForCTLStatus(QString& response)
-{
 
+void PlasmaController::setLEDStatus(int &bits)
+{
+    ledStatus.setStatusBits(bits);
+}
+
+void PlasmaController::parseResponseForCTLStatus(const QString& response)
+{    
+    // Extract LED status
+    QString ledStatusHex = response.mid(3, 4); // Assuming LLRR are at positions 3 to 6
+    bool ok;
+    int ledStatus = ledStatusHex.toInt(&ok, 16);
+    if (ok) {
+        // TODO: Call setter for LED status with the parsed integer value
+        setLEDStatus(ledStatus);
+    } else {
+        // Handle error if the conversion fails
+    }
+
+    // Split the response string into subsystem data
+    QStringList subsystemData = response.mid(6, response.length() - 7).split(";");
+
+    // Check if we have enough data to update the subsystems
+    if (subsystemData.size() != 10) {
+        // Handle error or return if there is not enough data
+        return;
+    }
+
+    // Extract and update the tuner position
+    double tunerPosition = subsystemData[1].toDouble();
+    tuner.setActualPosition(tunerPosition);
+
+    // Extract and update RF power forward and reflected
+    double rfForward = subsystemData[2].toDouble();
+    double rfReflected = subsystemData[3].toDouble();
+    pwr.setForwardWatts(rfForward);
+    pwr.setReflectedWatts(rfReflected);
+
+    // Extract and update ExecuteRecipe member
+    int execRecipeInt = subsystemData[4].toInt();
+    bool execRecipe = (execRecipeInt != 0);
+    setExecuteRecipe(execRecipe);
+
+    // Extract and update MFC actual flow values
+    for (int i = 1; i <= 4; i++) {
+        MFC* mfc = findMFCByNumber(i);
+        double mfcFlow = subsystemData[4 + i].toDouble();
+        mfc->setActualFlow(mfcFlow);
+
+    }
+
+    // Extract and update plasmahead temperature
+    double temperature = subsystemData[9].toDouble();
+    plasmaHead.setTemperature(temperature);
+}
+
+bool PlasmaController::getExecuteRecipe() const
+{
+    return executeRecipe;
+}
+
+void PlasmaController::setExecuteRecipe(bool value)
+{
+    executeRecipe = value;
 }
 //PlasmaController::getPlasmaHead() {
 //    //serial->setOutgoingData(command.getCommandString(""));

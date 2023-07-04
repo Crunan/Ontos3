@@ -4,8 +4,7 @@
 #include <QObject>
 
 class PlasmaRecipe : public QObject {
-    Q_OBJECT
-    Q_PROPERTY(bool executeRecipe READ getExecuteRecipe WRITE setExecuteRecipe NOTIFY executeRecipeChanged)
+    Q_OBJECT    
     Q_PROPERTY(double gas1Setpoint READ getGas1Setpoint WRITE setGas1Setpoint NOTIFY gas1SetpointChanged)
     Q_PROPERTY(double gas2Setpoint READ getGas2Setpoint WRITE setGas2Setpoint NOTIFY gas2SetpointChanged)
     Q_PROPERTY(double gas3Setpoint READ getGas3Setpoint WRITE setGas3Setpoint NOTIFY gas3SetpointChanged)
@@ -14,8 +13,7 @@ class PlasmaRecipe : public QObject {
     Q_PROPERTY(double tunerSetpoint READ getTunerSetpoint WRITE setTunerSetpoint NOTIFY tunerSetpointChanged)
     Q_PROPERTY(bool autoTuneOn READ isAutoTuneOn WRITE setAutoTuneOn NOTIFY autoTuneOnChanged)
 
-private:
-    bool executeRecipe_;
+private:    
     double gas1Setpoint_;
     double gas2Setpoint_;
     double gas3Setpoint_;
@@ -27,9 +25,6 @@ private:
 public:
     PlasmaRecipe(QObject* parent = nullptr);
     ~PlasmaRecipe();
-
-    bool getExecuteRecipe() const;
-    void setExecuteRecipe(bool value);
 
     double getGas1Setpoint() const;
     void setGas1Setpoint(double setpoint);
@@ -53,7 +48,6 @@ public:
     void setAutoTuneOn(bool enabled);
 
 signals:
-    void executeRecipeChanged();
     void gas1SetpointChanged();
     void gas2SetpointChanged();
     void gas3SetpointChanged();

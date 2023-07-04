@@ -8,15 +8,7 @@ PlasmaRecipe::~PlasmaRecipe() {
     // Cleanup any resources here
 }
 
-bool PlasmaRecipe::getExecuteRecipe() const
-{
-    return executeRecipe_;
-}
 
-void PlasmaRecipe::setExecuteRecipe(bool value)
-{
-    executeRecipe_ = value;
-}
 double PlasmaRecipe::getGas1Setpoint() const {
     return gas1Setpoint_;
 }

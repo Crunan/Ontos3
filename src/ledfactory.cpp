@@ -1,7 +1,7 @@
 #include "include/ledfactory.h"
 
 LEDFactory::LEDFactory()
-    : lastCreatedLedIndex_(-1)
+    : lastCreatedLedIndex(-1)
 {
 }
 
