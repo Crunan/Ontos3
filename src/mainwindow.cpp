@@ -8,24 +8,16 @@ MainWindow::MainWindow(MainLoop& loop, Logger& logger, QWidget *parent) :
     ui(new Ui::MainWindow),
     status(new QLabel),
     settings(new SettingsDialog),
-    recipe(),
+    //recipe(),
     CTL(),
+    plasmaRecipe(&CTL),
     serial(nullptr),
     commandFileReader()
 {
     ui->setupUi(this);
     this->setWindowTitle("ONTOS3 INTERFACE");
 
-    // Load Commands for Controller
-    commandFileReader.setCommandFilePath("commands/");
-    commandFileReader.setCommandFileName("commands.ini");
-    QMap CTLCommands = commandFileReader.readCommandsFromFile();
-    CTL.setCommandMap(CTLCommands);
 
-    // MFC Startup
-//    for (int i = 1; i >= CTL.numberOfMFCs(); i++) {
-//        connect(CTL.mfcs)
-//    }
     // Make signal/slot connections here
     connectMFCRecipeButtons();
     connectMFCFlowBars();
@@ -152,4 +144,46 @@ void MainWindow::handleSerialPortError() {
 //    return recipe;
 //}
 
+
+
+void MainWindow::RFRecipeButton_clicked()
+{
+    bool ok;
+    QString recipeStr = QInputDialog::getText(nullptr, "RF Setpoint", "Please enter a setpoint for RF Power:", QLineEdit::Normal, "", &ok);
+
+    if (ok && !recipeStr.isEmpty()) {
+        // User entered a string and clicked OK
+        int recipe = recipeStr.toInt();
+        CTL.pwr.setRecipeWatts(recipe);
+    }
+    else {
+        // User either clicked Cancel or did not enter any string
+        // Handle accordingly
+        return;
+    }
+}
+
+
+void MainWindow::TunerRecipeButton_clicked()
+{
+    bool ok;
+    QString recipeStr = QInputDialog::getText(nullptr, "Tuner Setpoint", "Please enter a setpoint for MB Tuner:", QLineEdit::Normal, "", &ok);
+
+    if (ok && !recipeStr.isEmpty()) {
+        // User entered a string and clicked OK
+        double recipe = recipeStr.toDouble();
+        CTL.tuner.setRecipePosition(recipe);
+    }
+    else {
+        // User either clicked Cancel or did not enter any string
+        // Handle accordingly
+        return;
+    }
+}
+
+
+void MainWindow::AutoTuneCheckbox_stateChanged(int value)
+{
+    CTL.tuner.setAutoTune(value);
+}
 

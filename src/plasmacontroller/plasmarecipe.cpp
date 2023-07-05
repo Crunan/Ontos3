@@ -1,73 +1,113 @@
 #include "include/plasmacontroller/plasmarecipe.h"
 
-PlasmaRecipe::PlasmaRecipe(QObject* parent) : QObject(parent) {
-    // Initialize member variables here
+
+
+PlasmaRecipe::PlasmaRecipe(PlasmaController* CTL, QObject* parent)
+    : QObject(parent), CTL_(CTL)
+{
 }
 
 PlasmaRecipe::~PlasmaRecipe() {
     // Cleanup any resources here
 }
 
+void PlasmaRecipe::setRecipeFromFile()
+{
+    static QRegularExpression regex("([^=]+)=(.*)");
 
-double PlasmaRecipe::getGas1Setpoint() const {
-    return gas1Setpoint_;
+    QString absoluteFilePath = QCoreApplication::applicationDirPath() + "/" + fileReader_.getFilePath() + fileReader_.getFileName();
+
+    QFile file(absoluteFilePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        qDebug() << "Failed to open the file:" << file.errorString();
+        return;
+    }
+
+    QTextStream in(&file);
+    while (!in.atEnd())
+    {
+        QString line = in.readLine().trimmed();
+
+        QRegularExpressionMatch match = regex.match(line);
+        if (match.hasMatch())
+        {
+            QString name = match.captured(1);
+            QString setpoint = match.captured(2);
+
+            if (!setpoint.isEmpty())
+            {
+                recipeMap_[name] = setpoint;
+            }
+            else
+            {
+                qDebug() << "Empty setpoint for line:" << line;
+            }
+        }
+        else
+        {
+            qDebug() << "Invalid line format:" << line;
+        }
+    }
+
+    file.close();
 }
 
-void PlasmaRecipe::setGas1Setpoint(double setpoint) {
-    gas1Setpoint_ = setpoint;
-    emit gas1SetpointChanged();
+void PlasmaRecipe::setMFCsActualFlow()
+{
+    for (int i = 0; i < CTL_->mfcs.size(); i++)
+    {
+        MFC* mfc = CTL_->mfcs.at(i);
+        QString mfcKey = "MFC" + QString::number(i + 1);
+
+        if (recipeMap_.contains(mfcKey))
+        {
+            double flow = recipeMap_[mfcKey].toDouble();
+            mfc->setActualFlow(flow);
+        }
+        else
+        {
+            // Handle the case when the MFC key is not found in the recipe map
+            qDebug() << "MFC" << i+1 << "setpoint not found in recipe map.";
+        }
+    }
 }
 
-double PlasmaRecipe::getGas2Setpoint() const {
-    return gas2Setpoint_;
+void PlasmaRecipe::setRFSetpoint() {
+    if (recipeMap_.contains("RF"))
+    {
+        int watts = recipeMap_["RF"].toInt();
+        CTL_->pwr.setRecipeWatts(watts);
+    }
+    else
+    {
+        // Handle the case when "RF" key is not found in the recipe map
+        qDebug() << "RF setpoint not found in recipe map.";
+    }
 }
 
-void PlasmaRecipe::setGas2Setpoint(double setpoint) {
-    gas2Setpoint_ = setpoint;
-    emit gas2SetpointChanged();
+void PlasmaRecipe::setTunerSetpoint() {
+    if (recipeMap_.contains("TUNER"))
+    {
+        double position = recipeMap_["TUNER"].toDouble();
+        CTL_->tuner.setRecipePosition(position);
+    }
+    else
+    {
+        // Handle the case when "TUNER" key is not found in the recipe map
+        qDebug() << "TUNER setpoint not found in recipe map.";
+    }
 }
 
-double PlasmaRecipe::getGas3Setpoint() const {
-    return gas3Setpoint_;
-}
-
-void PlasmaRecipe::setGas3Setpoint(double setpoint) {
-    gas3Setpoint_ = setpoint;
-    emit gas3SetpointChanged();
-}
-
-double PlasmaRecipe::getGas4Setpoint() const {
-    return gas4Setpoint_;
-}
-
-void PlasmaRecipe::setGas4Setpoint(double setpoint) {
-    gas4Setpoint_ = setpoint;
-    emit gas4SetpointChanged();
-}
-
-int PlasmaRecipe::getRfSetpoint() const {
-    return RfSetpoint_;
-}
-
-void PlasmaRecipe::setRfSetpoint(int setpoint) {
-    RfSetpoint_ = setpoint;
-    emit RfSetpointChanged();
-}
-
-double PlasmaRecipe::getTunerSetpoint() const {
-    return tunerSetpoint_;
-}
-
-void PlasmaRecipe::setTunerSetpoint(double setpoint) {
-    tunerSetpoint_ = setpoint;
-    emit tunerSetpointChanged();
-}
-
-bool PlasmaRecipe::isAutoTuneOn() const {
-    return autoTuneOn_;
-}
-
-void PlasmaRecipe::setAutoTuneOn(bool enabled) {
-    autoTuneOn_ = enabled;
-    emit autoTuneOnChanged();
+void PlasmaRecipe::setAutoTuneOn() {
+    if (recipeMap_.contains("AUTO"))
+    {
+        double setpoint = recipeMap_["AUTO"].toInt();
+        CTL_->tuner.setAutoTune(setpoint);
+    }
+    else
+    {
+        // Handle the case when "AUTO Tune" key is not found in the recipe map
+        qDebug() << "AUTO setpoint not found in recipe map.";
+    }
 }

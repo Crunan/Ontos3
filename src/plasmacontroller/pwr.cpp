@@ -1,20 +1,20 @@
 #include "include/plasmacontroller/pwr.h"
 
 PWR::PWR()
-    : recipeWatts_(0.0),
-    forwardWatts_(0.0),
-    reflectedWatts_(0.0),
-    defaultRecipe_(0.0),
+    : recipeWatts_(0),
+    forwardWatts_(0),
+    reflectedWatts_(0),
+    defaultRecipe_(0),
     maxWatts_(0)
 {
 }
 
-double PWR::getRecipeWatts() const
+int PWR::getRecipeWatts() const
 {
     return recipeWatts_;
 }
 
-void PWR::setRecipeWatts(double value)
+void PWR::setRecipeWatts(int value)
 {
     if (recipeWatts_ != value) {
         recipeWatts_ = value;
@@ -22,13 +22,13 @@ void PWR::setRecipeWatts(double value)
     }
 }
 
-double PWR::getForwardWatts() const
+int PWR::getForwardWatts() const
 {
     return forwardWatts_;
 }
 
 
-void PWR::setForwardWatts(double value)
+void PWR::setForwardWatts(int value)
 {
     if (forwardWatts_ != value) {
         forwardWatts_ = value;
@@ -36,23 +36,23 @@ void PWR::setForwardWatts(double value)
     }
 }
 
-double PWR::getReflectedWatts() const
+int PWR::getReflectedWatts() const
 {
     return reflectedWatts_;
 }
-void PWR::setReflectedWatts(double value)
+void PWR::setReflectedWatts(int value)
 {
     if (reflectedWatts_ != value) {
         reflectedWatts_ = value;
         emit reflectedWattsChanged();
     }
 }
-double PWR::getDefaultRecipe() const
+int PWR::getDefaultRecipe() const
 {
     return defaultRecipe_;
 }
 
-void PWR::setDefaultRecipe(double value)
+void PWR::setDefaultRecipe(int value)
 {
     if (defaultRecipe_ != value) {
         defaultRecipe_ = value;

@@ -12,6 +12,7 @@ SOURCES += \
     src/axiscontroller/axis.cpp \
     src/axiscontroller/axiscommands.cpp \
     src/axiscontroller/axiscontroller.cpp \
+    src/axiscontroller/coordinate.cpp \
     src/axiscontroller/stage/diameter.cpp \
     src/axiscontroller/stage/initialize.cpp \
     src/axiscontroller/stage/load.cpp \
@@ -24,7 +25,7 @@ SOURCES += \
     src/commandfilereader.cpp \
     src/commandmap.cpp \
     src/configuration.cpp \
-    src/axiscontroller/coordinate.cpp \
+    src/filereader.cpp \
     src/functions.cpp \
     src/led.cpp \
     src/ledfactory.cpp \    
@@ -64,6 +65,7 @@ HEADERS += \
     include/commandfilereader.h \
     include/commandmap.h \
     include/configuration.h \
+    include/filereader.h \
     include/functions.h \
     include/led.h \
     include/ledfactory.h \    
