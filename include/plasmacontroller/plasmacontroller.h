@@ -7,7 +7,6 @@
 #include "include/configuration.h"
 #include "include/ledstatus.h"
 #include "include/plasmacontroller/plasmahead.h"
-#include "include/plasmacontroller/plasmarecipe.h"
 #include "include/plasmacontroller/pwr.h"
 #include "include/plasmacontroller/tuner.h"
 #include "include/plasmacontroller/mfc.h"

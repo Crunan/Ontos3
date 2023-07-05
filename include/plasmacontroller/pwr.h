@@ -5,32 +5,32 @@
 
 class PWR : public QObject {
     Q_OBJECT
-    Q_PROPERTY(double recipeWatts READ getRecipeWatts WRITE setRecipeWatts NOTIFY recipeWattsChanged)
-    Q_PROPERTY(double forwardWatts READ getForwardWatts WRITE setForwardWatts NOTIFY forwardWattsChanged)
-    Q_PROPERTY(double reflectedWatts READ getReflectedWatts WRITE setReflectedWatts NOTIFY reflectedWattsChanged)
-    Q_PROPERTY(double defaultRecipe READ getDefaultRecipe WRITE setDefaultRecipe NOTIFY defaultRecipeChanged)
+    Q_PROPERTY(int recipeWatts READ getRecipeWatts WRITE setRecipeWatts NOTIFY recipeWattsChanged)
+    Q_PROPERTY(int forwardWatts READ getForwardWatts WRITE setForwardWatts NOTIFY forwardWattsChanged)
+    Q_PROPERTY(int reflectedWatts READ getReflectedWatts WRITE setReflectedWatts NOTIFY reflectedWattsChanged)
+    Q_PROPERTY(int defaultRecipe READ getDefaultRecipe WRITE setDefaultRecipe NOTIFY defaultRecipeChanged)
 
 private:
-    double recipeWatts_;
-    double forwardWatts_;
-    double reflectedWatts_;
-    double defaultRecipe_;
+    int recipeWatts_;
+    int forwardWatts_;
+    int reflectedWatts_;
+    int defaultRecipe_;
     int maxWatts_;
 
 public:
     PWR();
 
-    double getRecipeWatts() const;
-    void setRecipeWatts(double value);
+    int getRecipeWatts() const;
+    void setRecipeWatts(int value);
 
-    double getForwardWatts() const;
-    void setForwardWatts(double value);
+    int getForwardWatts() const;
+    void setForwardWatts(int value);
 
-    double getReflectedWatts() const;
-    void setReflectedWatts(double value);
+    int getReflectedWatts() const;
+    void setReflectedWatts(int value);
 
-    double getDefaultRecipe() const;
-    void setDefaultRecipe(double value);
+    int getDefaultRecipe() const;
+    void setDefaultRecipe(int value);
 
 signals:
     void recipeWattsChanged();

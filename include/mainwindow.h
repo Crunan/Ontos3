@@ -9,6 +9,7 @@
 #include "include/recipe.h"
 #include "include/logger.h"
 #include "include/serialportmanager.h"
+#include "include/plasmacontroller/plasmarecipe.h"
 #include "include/plasmacontroller/plasmacontroller.h"
 
 #include <QMainWindow>
@@ -34,9 +35,6 @@ public:
     explicit MainWindow(MainLoop& loop, Logger& logger, QWidget *parent = nullptr);
     ~MainWindow();
 
-    Recipe* getRecipe() const;
-    void createRecipe();
-
 private:
 
     // Action Button methods
@@ -55,6 +53,12 @@ private slots:
     void updateFlowBar(const int& mfcNumber, const double& flow);
     void connectSerialPort();
 
+    void RFRecipeButton_clicked();
+
+    void TunerRecipeButton_clicked();
+
+    void AutoTuneCheckbox_stateChanged(int value);
+
 public slots:
     void about();
     void shutDownProgram();
@@ -68,8 +72,9 @@ public:
     Ui::MainWindow* ui = nullptr;
     QLabel* status = nullptr;
     SettingsDialog* settings = nullptr;
-    Recipe recipe;
+    //Recipe recipe;
     PlasmaController CTL;
+    PlasmaRecipe plasmaRecipe;
     SerialPortManager* serial = nullptr;
     CommandFileReader commandFileReader;
 };
