@@ -7,7 +7,7 @@
 #include <QCoreApplication>
 
 CommandFileReader::CommandFileReader()
-    : commandFilePath_(""), commandFileName_("")
+    : commandFile_()
 {
 }
 
@@ -22,7 +22,7 @@ QMap<QString, QPair<QString, QString>> CommandFileReader::readCommandsFromFile()
 
     QMap<QString, QPair<QString, QString>> commandMap;
 
-    QString absoluteFilePath = QCoreApplication::applicationDirPath() + "/" + commandFilePath_ + commandFileName_;
+    QString absoluteFilePath = QCoreApplication::applicationDirPath() + "/" + commandFile_.getFilePath() + commandFile_.getFileName();
 
     QFile file(absoluteFilePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -61,27 +61,4 @@ QMap<QString, QPair<QString, QString>> CommandFileReader::readCommandsFromFile()
     file.close();
 
     return commandMap;
-}
-
-
-
-
-QString CommandFileReader::getCommandFilePath() const
-{
-    return commandFilePath_;
-}
-
-void CommandFileReader::setCommandFilePath(QString path)
-{
-    commandFilePath_ = path;
-}
-
-QString CommandFileReader::getCommandFileName() const
-{
-    return commandFileName_;
-}
-
-void CommandFileReader::setCommandFileName(QString fileName)
-{
-    commandFileName_ = fileName;
 }
