@@ -23,6 +23,11 @@ MainWindow::MainWindow(MainLoop& loop, Logger& logger, QWidget *parent) :
     this->setWindowTitle("ONTOS3 INTERFACE");
 
     // Make signal/slot connections here
+    connect(ui->RFRecipeButton, &QPushButton::clicked, this, &MainWindow::RFRecipeButton_clicked);
+    connect(ui->TunerRecipeButton, &QPushButton::clicked, this, &MainWindow::TunerRecipeButton_clicked);
+    connect(ui->AutoTuneCheckBox, &QCheckBox::stateChanged, this, &MainWindow::AutoTuneCheckbox_stateChanged);
+    connect(ui->loadRecipeButton, &QPushButton::clicked, this, &MainWindow::loadRecipeButton_clicked);
+
     connectMFCRecipeButtons();
     connectMFCFlowBars();
     initActionsConnections();
@@ -200,7 +205,7 @@ void MainWindow::loadRecipeButton_clicked()
 
     // Get the current directory
     QString currentDirectory = QCoreApplication::applicationDirPath();
-    QString initialDirectory = currentDirectory + "recipes/";
+    QString initialDirectory = currentDirectory + "/recipes/";
 
     // Set the initial directory
     dialog.setDirectory(initialDirectory);

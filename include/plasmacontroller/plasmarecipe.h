@@ -21,10 +21,11 @@ public:
     void setAutoTuneOn();
 private:
     PlasmaController* CTL_;
-    QMap<QString, QString> recipeMap_;
+    QMap<QString, QVariant> recipeMap_;
 
 public:
     FileReader fileReader;
+    void processRecipeKeys();
 };
 
 #endif // PLASMARECIPE_H

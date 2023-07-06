@@ -1,5 +1,8 @@
 #include "include/plasmacontroller/plasmarecipe.h"
 
+#include <QTextStream>
+#include <QDebug>
+#include <QRegularExpression>
 
 
 PlasmaRecipe::PlasmaRecipe(PlasmaController* CTL, QObject* parent)
@@ -15,7 +18,7 @@ void PlasmaRecipe::setRecipeFromFile()
 {
     static QRegularExpression regex("([^=]+)=(.*)");
 
-    QString absoluteFilePath = QCoreApplication::applicationDirPath() + "/" + fileReader.getFilePath();
+    QString absoluteFilePath = fileReader.getFilePath();
 
     QFile file(absoluteFilePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -49,8 +52,16 @@ void PlasmaRecipe::setRecipeFromFile()
             qDebug() << "Invalid line format:" << line;
         }
     }
-
+    processRecipeKeys();
     file.close();
+}
+
+void PlasmaRecipe::processRecipeKeys()
+{
+    setMFCsActualFlow();
+    setRFSetpoint();
+    setTunerSetpoint();
+    setAutoTuneOn();
 }
 
 void PlasmaRecipe::setMFCsActualFlow()
@@ -63,7 +74,7 @@ void PlasmaRecipe::setMFCsActualFlow()
         if (recipeMap_.contains(mfcKey))
         {
             double flow = recipeMap_[mfcKey].toDouble();
-            mfc->setActualFlow(flow);
+            mfc->setRecipeFlow(flow);
         }
         else
         {
@@ -100,14 +111,16 @@ void PlasmaRecipe::setTunerSetpoint() {
 }
 
 void PlasmaRecipe::setAutoTuneOn() {
-    if (recipeMap_.contains("AUTO"))
-    {
-        double setpoint = recipeMap_["AUTO"].toInt();
-        CTL_->tuner.setAutoTune(setpoint);
-    }
-    else
-    {
-        // Handle the case when "AUTO Tune" key is not found in the recipe map
-        qDebug() << "AUTO setpoint not found in recipe map.";
+    if (recipeMap_.contains("AUTO")) {
+        QVariant value = recipeMap_["AUTO"];
+
+        if (value.canConvert<bool>()) {
+            bool booleanValue = value.toBool();
+            CTL_->tuner.setAutoTune(booleanValue);
+        } else {
+            qDebug() << "auto tune value is not a boolean.";
+        }
+    } else {
+        qDebug() << "auto tune setpoint not found in recipe map.";
     }
 }
