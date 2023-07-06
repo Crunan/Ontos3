@@ -4,7 +4,7 @@ cover: >-
 coverY: 0
 ---
 
-# 04 JUL - Tues
+# 05 JUL - Wed
 
 {% hint style="info" %}
 Duplicate this page for every day you want to track.
@@ -12,7 +12,7 @@ Duplicate this page for every day you want to track.
 
 ## Today's stuff
 
-<table data-header-hidden><thead><tr><th width="80" data-type="checkbox"></th><th width="120" data-type="number">Time</th><th>Planned</th><th></th></tr></thead><tbody><tr><td>false</td><td>600</td><td>CTLPoll</td><td></td></tr><tr><td>false</td><td>700</td><td>User Manual</td><td></td></tr><tr><td>false</td><td>800</td><td>GUI 6.5.1 integrate chat recommendations</td><td>CTLPoll</td></tr><tr><td>false</td><td>900</td><td>Status Update</td><td>CTLPoll/Status Update</td></tr><tr><td>false</td><td>1000</td><td>LED and config</td><td>breakfast</td></tr><tr><td>false</td><td>1100</td><td>User Manual</td><td>user manual </td></tr><tr><td>false</td><td>1200</td><td>LED and config</td><td>user manual</td></tr><tr><td>false</td><td>1300</td><td>CTL Functions</td><td></td></tr><tr><td>false</td><td>1400</td><td></td><td></td></tr><tr><td>false</td><td>1500</td><td></td><td></td></tr></tbody></table>
+<table data-header-hidden><thead><tr><th width="80" data-type="checkbox"></th><th width="120" data-type="number">Time</th><th>Planned</th><th>Actual</th></tr></thead><tbody><tr><td>false</td><td>600</td><td>User Manual</td><td>User manual</td></tr><tr><td>false</td><td>700</td><td>Ontos3 CTL</td><td></td></tr><tr><td>false</td><td>800</td><td></td><td></td></tr><tr><td>false</td><td>900</td><td></td><td></td></tr><tr><td>false</td><td>1000</td><td></td><td></td></tr><tr><td>false</td><td>1100</td><td></td><td></td></tr><tr><td>false</td><td>1200</td><td></td><td></td></tr><tr><td>false</td><td>1300</td><td></td><td></td></tr><tr><td>false</td><td>1400</td><td></td><td></td></tr><tr><td>false</td><td>1500</td><td></td><td></td></tr></tbody></table>
 
 ## Notes & ideas
 
