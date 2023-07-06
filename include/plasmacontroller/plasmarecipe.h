@@ -22,7 +22,9 @@ public:
 private:
     PlasmaController* CTL_;
     QMap<QString, QString> recipeMap_;
-    FileReader fileReader_;
+
+public:
+    FileReader fileReader;
 };
 
 #endif // PLASMARECIPE_H

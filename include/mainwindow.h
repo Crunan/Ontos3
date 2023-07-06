@@ -59,6 +59,8 @@ private slots:
 
     void AutoTuneCheckbox_stateChanged(int value);
 
+    void loadRecipeButton_clicked();
+
 public slots:
     void about();
     void shutDownProgram();

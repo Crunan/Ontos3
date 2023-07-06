@@ -15,7 +15,7 @@ void PlasmaRecipe::setRecipeFromFile()
 {
     static QRegularExpression regex("([^=]+)=(.*)");
 
-    QString absoluteFilePath = QCoreApplication::applicationDirPath() + "/" + fileReader_.getFilePath() + fileReader_.getFileName();
+    QString absoluteFilePath = QCoreApplication::applicationDirPath() + "/" + fileReader.getFilePath();
 
     QFile file(absoluteFilePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))

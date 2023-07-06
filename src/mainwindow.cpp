@@ -1,6 +1,11 @@
 ﻿#include "include/mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QApplication>
+#include <QFileDialog>
+#include <QTextStream>
+#include <QDebug>
+
 MainWindow::MainWindow(MainLoop& loop, Logger& logger, QWidget *parent) :
     QMainWindow(parent),
     mainLoop(loop),
@@ -16,7 +21,6 @@ MainWindow::MainWindow(MainLoop& loop, Logger& logger, QWidget *parent) :
 {
     ui->setupUi(this);
     this->setWindowTitle("ONTOS3 INTERFACE");
-
 
     // Make signal/slot connections here
     connectMFCRecipeButtons();
@@ -64,32 +68,7 @@ void MainWindow::connectMFCRecipeButton(QPushButton* button, const int& mfcNumbe
     connect(button, &QPushButton::clicked, this, &MainWindow::openRecipeWindowMFC);
 }
 
-void MainWindow::openRecipeWindowMFC()
-{
-    bool ok;
-    QString recipeStr = QInputDialog::getText(nullptr, "MFC Setpoint", "Please enter a setpoint for the MFC:", QLineEdit::Normal, "", &ok);
 
-    if (ok && !recipeStr.isEmpty()) {
-        // User entered a string and clicked OK
-        if (!CTL.mfcs.isEmpty()) {
-            QPushButton* button = qobject_cast<QPushButton*>(sender());
-            if (button) {
-
-                // Retrieve the MFC number from the button's property
-                int mfcNumber = button->property("MFCNumber").toInt();  // Retrieve the MFC index from the button's property
-                MFC* mfc = CTL.findMFCByNumber(mfcNumber);
-                if (mfc) {
-                    double recipe = recipeStr.toDouble();
-                    mfc->setRecipeFlow(recipe);
-                }
-            }
-        }
-    } else {
-        // User either clicked Cancel or did not enter any string
-        // Handle accordingly
-        return;
-    }
-}
 
 void MainWindow::updateFlowBar(const int& mfcNumber, const double& flow)
 {
@@ -145,7 +124,32 @@ void MainWindow::handleSerialPortError() {
 //}
 
 
+void MainWindow::openRecipeWindowMFC()
+{
+    bool ok;
+    QString recipeStr = QInputDialog::getText(nullptr, "MFC Setpoint", "Please enter a setpoint for the MFC:", QLineEdit::Normal, "", &ok);
 
+    if (ok && !recipeStr.isEmpty()) {
+        // User entered a string and clicked OK
+        if (!CTL.mfcs.isEmpty()) {
+            QPushButton* button = qobject_cast<QPushButton*>(sender());
+            if (button) {
+
+                // Retrieve the MFC number from the button's property
+                int mfcNumber = button->property("MFCNumber").toInt();  // Retrieve the MFC index from the button's property
+                MFC* mfc = CTL.findMFCByNumber(mfcNumber);
+                if (mfc) {
+                    double recipe = recipeStr.toDouble();
+                    mfc->setRecipeFlow(recipe);
+                }
+            }
+        }
+    } else {
+        // User either clicked Cancel or did not enter any string
+        // Handle accordingly
+        return;
+    }
+}
 void MainWindow::RFRecipeButton_clicked()
 {
     bool ok;
@@ -185,5 +189,37 @@ void MainWindow::TunerRecipeButton_clicked()
 void MainWindow::AutoTuneCheckbox_stateChanged(int value)
 {
     CTL.tuner.setAutoTune(value);
+}
+
+
+void MainWindow::loadRecipeButton_clicked()
+{
+    // Create a file dialog
+    QFileDialog dialog;
+    dialog.setFileMode(QFileDialog::ExistingFile);
+
+    // Get the current directory
+    QString currentDirectory = QCoreApplication::applicationDirPath();
+    QString initialDirectory = currentDirectory + "recipes/";
+
+    // Set the initial directory
+    dialog.setDirectory(initialDirectory);
+    // Set the window title and filter for specific file types
+    dialog.setWindowTitle("Open Recipe File");
+    dialog.setNameFilter("Recipe Files (*.rcp)");
+
+    // Execute the file dialog
+    if (dialog.exec()) {
+        // Get the selected file path
+        QString filePath = dialog.selectedFiles().first();
+
+        // set plasma Recipe path and file
+        plasmaRecipe.fileReader.setFilePath(filePath);
+        plasmaRecipe.setRecipeFromFile();
+
+    } else {
+        // User canceled the file dialog
+        qDebug() << "File selection canceled.";
+    }
 }
 
