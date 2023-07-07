@@ -1,6 +1,7 @@
 #include "include/plasmacontroller/plasmarecipe.h"
 
 #include <QTextStream>
+#include <QDir>
 #include <QDebug>
 #include <QRegularExpression>
 
@@ -124,3 +125,44 @@ void PlasmaRecipe::setAutoTuneOn() {
         qDebug() << "auto tune setpoint not found in recipe map.";
     }
 }
+
+QMap<QString, QVariant> PlasmaRecipe::getRecipeMap()
+{
+    return recipeMap_;
+}
+
+QList<QString> PlasmaRecipe::getCascadeRecipeList()
+{
+    return cascadeRecipeList_;
+}
+void PlasmaRecipe::addRecipeToCascade(const QString& recipeName) {
+    cascadeRecipeList_.append(recipeName);
+}
+
+void PlasmaRecipe::removeRecipeFromCascade(const QString& recipeName) {
+    cascadeRecipeList_.removeOne(recipeName);
+}
+
+void PlasmaRecipe::executeCurrentRecipe() {
+    if (currentRecipeIndex_ >= 0 && currentRecipeIndex_ < cascadeRecipeList_.size()) {
+        const QString& recipeName = cascadeRecipeList_.at(currentRecipeIndex_);
+        // Load and execute the recipe with the given recipeName
+        fileReader.setFilePath(recipeName);
+        setRecipeFromFile();
+        // Once the recipe execution is complete, move to the next recipe
+        ++currentRecipeIndex_;
+        executeCurrentRecipe();
+    } else {
+        // All recipes in the cascade have been executed
+        // Perform any final actions or cleanup
+        currentRecipeIndex_ = 0;
+    }
+}
+
+bool PlasmaRecipe::isRecipeComplete()
+{
+    //if (Stage.scan.isFinished())
+        //return true;
+}
+
+

@@ -43,28 +43,33 @@ private:
     // Serial Port methods
 
     // GUI signal Slot connections
-    void connectMFCRecipeButtons();
     void connectMFCFlowBars();
     void connectMFCRecipeButton(QPushButton* button, const int &mfcNumber);
+    // Connection for Recipes buttons
+    void connectRecipeButtons();
 
+    // Connection for Cascade Recipes buttons
+    void connectCascadeRecipe();
 
 
 private slots:
-    void updateFlowBar(const int& mfcNumber, const double& flow);
+    void updateRecipeProgressBar(const int& mfcNumber, const double& flow);
     void connectSerialPort();
 
     void RFRecipeButton_clicked();
-
     void TunerRecipeButton_clicked();
-
     void AutoTuneCheckbox_stateChanged(int value);
+    void openRecipe();
+    void saveRecipe();
+    void openCascadeRecipe();
 
-    void loadRecipeButton_clicked();
-
+    void addRecipeToCascadeRecipe();
+    void removeRecipeFromCascadeList();
+    void saveAsCascadeRecipeListToFile();
 public slots:
     void about();
     void shutDownProgram();
-    void openRecipeWindowMFC();    
+    void openRecipeWindowMFC();
     void handleSerialPortError();
 public:
     // Reference to the MainLoop object

@@ -14,18 +14,30 @@ public:
     ~PlasmaRecipe();
 
     void setRecipeFromFile();
+    void processRecipeKeys();
 
     void setMFCsActualFlow();
     void setRFSetpoint();
     void setTunerSetpoint();
     void setAutoTuneOn();
+
+    QMap<QString, QVariant> getRecipeMap();
+    QList<QString> getCascadeRecipeList();
+
+    void addRecipeToCascade(const QString& recipeName);
+    void removeRecipeFromCascade(const QString& recipeName);
+
+    void executeCurrentRecipe();
+
+    bool isRecipeComplete();
 private:
     PlasmaController* CTL_;
     QMap<QString, QVariant> recipeMap_;
+    QList<QString> cascadeRecipeList_;
+    int currentRecipeIndex_;
 
 public:
     FileReader fileReader;
-    void processRecipeKeys();
 };
 
 #endif // PLASMARECIPE_H
