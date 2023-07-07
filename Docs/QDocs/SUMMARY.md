@@ -1,12 +1,3 @@
-# Ontos3 QDocs
-
-* [Template page](../)
-* [02 Jul -Sun](02-jul-sun.md)
-
-## This week
-
-* [15 Aug - Mon](broken-reference)
-
 ## Archive
 
 * [2022](archive/2022/)

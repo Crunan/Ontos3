@@ -1,14 +1,6 @@
-# Ontos3 Documentation
+# Ontos3 Docs
 
-* [Template page](../)
-* [02 Jul -Sun](02-jul-sun.md)
+- [Daily Schedule](Daily%20Schedule/SUMMARY.md)
+- [QDocs](QDocs/SUMMARY.md)
+- [User Manual](User%20Manual/SUMMARY.md)
 
-## This week
-
-* [15 Aug - Mon](broken-reference)
-
-## Archive
-
-* [2022](archive/2022/)
-  * [July](archive/2022/july/)
-    * [1 Jul - Fri](archive/2022/july/1-jul-fri.md)
