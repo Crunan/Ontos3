@@ -1,4 +1,6 @@
-# Preface
+# Table of contents
+
+## Preface
 
 * [Definitions](README.md)
 * [Disclaimer](preface/disclaimer.md)
