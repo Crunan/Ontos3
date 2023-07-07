@@ -1,0 +1,49 @@
+---
+cover: >-
+  https://images.unsplash.com/photo-1687178153425-2889a7b57255?crop=entropy&cs=srgb&fm=jpg&ixid=M3wxOTcwMjR8MHwxfHJhbmRvbXx8fHx8fHx8fDE2ODgyOTU2NDl8&ixlib=rb-4.0.3&q=85
+coverY: 0
+---
+
+# 06 JUL - Thur
+
+{% hint style="info" %}
+Duplicate this page for every day you want to track.
+{% endhint %}
+
+## Today's stuff
+
+<table data-header-hidden><thead><tr><th width="80" data-type="checkbox"></th><th width="120" data-type="number">Time</th><th>Planned</th><th>Actual</th></tr></thead><tbody><tr><td>false</td><td>600</td><td>User Manual</td><td>user manual -9 pages completed</td></tr><tr><td>false</td><td>700</td><td>Ontos3 Recipes</td><td></td></tr><tr><td>false</td><td>800</td><td>Ontos3 Cascade Recipes</td><td></td></tr><tr><td>false</td><td>900</td><td>Ontos3 Publish Abort Codes</td><td></td></tr><tr><td>false</td><td>1000</td><td>Ontos3 GUI</td><td></td></tr><tr><td>false</td><td>1100</td><td></td><td></td></tr><tr><td>false</td><td>1200</td><td></td><td></td></tr><tr><td>false</td><td>1300</td><td></td><td></td></tr><tr><td>false</td><td>1400</td><td></td><td></td></tr><tr><td>false</td><td>1500</td><td></td><td></td></tr></tbody></table>
+
+## Notes & ideas
+
+<details>
+
+<summary>Notes: A meeting I’m attending</summary>
+
+Start taking notes…
+
+</details>
+
+## How was the day?
+
+<details>
+
+<summary>🧠 Mood tracking</summary>
+
+slept okay, woke up quite sore and tired. probably need a nap today.
+
+</details>
+
+<details>
+
+<summary>💡 Observations</summary>
+
+Start taking notes…
+
+</details>
+
+{% hint style="info" %}
+**GitBook tip:** Use the **rating** column in a table to build a super simple habit-tracking section.
+{% endhint %}
+
+<table data-header-hidden><thead><tr><th width="120" data-type="rating" data-max="5"></th><th>Task</th></tr></thead><tbody><tr><td>2</td><td>Sleep</td></tr><tr><td>4</td><td>Work/life balance</td></tr><tr><td>2</td><td>Creativity</td></tr><tr><td>1</td><td>Fitness</td></tr><tr><td>null</td><td>Scripture Memory</td></tr></tbody></table>
