@@ -1,4 +1,4 @@
-# Table of contents
+# Ontos3 QDocs
 
 * [Template page](../)
 * [02 Jul -Sun](02-jul-sun.md)

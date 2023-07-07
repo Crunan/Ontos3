@@ -1,4 +1,4 @@
-# Table of contents
+# Ontos3 User Manual
 
 * [Template page](README.md)
   * [Table of contents](QDocs/SUMMARY.md)
