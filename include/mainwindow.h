@@ -4,6 +4,7 @@
 #pragma once
 
 #include "include/console.h"
+#include "include/grblcontroller.h"
 #include "include/mainloop.h"
 #include "include/commandfilereader.h"
 #include "include/settingsdialog.h"
@@ -92,6 +93,7 @@ public:
     PlasmaRecipe plasmaRecipe;
     QSerialPort* serial = nullptr;
     CommandFileReader commandFileReader;
-    Console* console = nullptr;
+    QList<Console*> consoleList;
+    GRBLController AxisCTL;
 };
 #endif // MAINWINDOW_H

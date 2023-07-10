@@ -18,13 +18,17 @@ MainWindow::MainWindow(MainLoop& loop, Logger& logger, QWidget *parent) :
     plasmaRecipe(&CTL),
     serial(new QSerialPort(this)),
     commandFileReader(),
-    console(nullptr)
+    consoleList(),
+    AxisCTL()
 {
     ui->setupUi(this);
     this->setWindowTitle("ONTOS3 INTERFACE");
 
     //Terminal Tab setup for console commands
     consoleSetup();
+
+    // GRBL setup
+
 
     // Connect button enable/disabled
     ui->actionConnect->setEnabled(true);
@@ -54,6 +58,31 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::openSerialPort()
+{
+    const SettingsDialog::Settings p = settings->settings();
+    serial->setPortName(p.name);
+    serial->setBaudRate(p.baudRate);
+    serial->setDataBits(p.dataBits);
+    serial->setParity(p.parity);
+    serial->setStopBits(p.stopBits);
+    serial->setFlowControl(p.flowControl);
+    if (serial->open(QIODevice::ReadWrite)) {
+        console->setEnabled(true);
+        console->setLocalEchoEnabled(p.localEchoEnabled);
+        ui->actionConnect->setEnabled(false);
+        ui->actionDisconnect->setEnabled(true);
+        ui->actionConfigure->setEnabled(false);
+        showStatusMessage(tr("Connected to %1 : %2, %3, %4, %5, %6")
+                              .arg(p.name).arg(p.stringBaudRate).arg(p.stringDataBits)
+                              .arg(p.stringParity).arg(p.stringStopBits).arg(p.stringFlowControl));
+    } else {
+        QMessageBox::critical(this, tr("Error"), serial->errorString());
+
+        showStatusMessage(tr("Open error"));
+    }
+}
+
+void MainWindow::openGRBLSerialPort()
 {
     const SettingsDialog::Settings p = settings->settings();
     serial->setPortName(p.name);
@@ -137,13 +166,13 @@ void MainWindow::shutDownProgram() {
     MainWindow::close();
 }
 
-void MainWindow::consoleSetup()
+void MainWindow::consoleSetup(QSerialPort& port)
 {
     // Step 1: Create an instance of the console class
-    console = new Console(ui->tabWidget);
+    Console* console = new Console(ui->tabWidget);
 
     // Step 2: Add the console instance to a new tab
-    int tabIndex = ui->tabWidget->addTab(console, "Terminal");
+    int tabIndex = ui->tabWidget->addTab(console, port.portName() + " Terminal");
 
     // Step 3: Set the Qt theme icon for the tab
     QIcon icon = QIcon::fromTheme("utilities-system");
@@ -151,6 +180,9 @@ void MainWindow::consoleSetup()
 
     // Step 4: disable until connected
     console->setEnabled(false);
+
+    // Step 5: Add the console to the QList
+    consoleList.append(console);
 }
 void MainWindow::connectRecipeButtons()
 {
@@ -191,7 +223,58 @@ void MainWindow::connectMFCFlowBars()
 
 void MainWindow::connectMFCRecipeButton(QPushButton* button, const int& mfcNumber)
 {
-    button->setProperty("MFCNumber", mfcNumber);  // Store the MFC index in the button's property
+    button->setProperty#include "include/grblcontroller.h"
+
+#include <QObject>
+#include <QSerialPort>
+
+        class GRBLController : public QObject {
+        Q_OBJECT
+
+    public:
+        explicit GRBLController(QObject* parent = nullptr) : QObject(parent) {
+            serialPort.setBaudRate(115200);  // Set the appropriate baud rate
+            connect(&serialPort, &QSerialPort::readyRead, this, &GRBLController::readData);
+        }
+
+        bool open(const QString& portName) {
+            serialPort.setPortName(portName);
+            if (!serialPort.open(QIODevice::ReadWrite)) {
+                // Failed to open the serial port
+                return false;
+            }
+
+            return true;
+        }
+
+        void close() {
+            serialPort.close();
+        }
+
+        bool sendCommand(const QString& command) {
+            if (serialPort.isOpen()) {
+                QByteArray requestData = command.toUtf8();
+                serialPort.write(requestData);
+                return true;
+            }
+
+            return false;
+        }
+
+    signals:
+        void responseReceived(const QString& response);
+
+    private slots:
+        void readData() {
+            QByteArray responseData = serialPort.readAll();
+            QString response = QString::fromUtf8(responseData);
+            emit responseReceived(response);
+        }
+
+    private:
+        QSerialPort serialPort;
+    };
+("MFCNumber", mfcNumber);  // Store the MFC index in the button's property
     connect(button, &QPushButton::clicked, this, &MainWindow::openRecipeWindowMFC);
 }
 

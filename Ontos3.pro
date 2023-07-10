@@ -28,6 +28,7 @@ SOURCES += \
     src/console.cpp \
     src/filereader.cpp \
     src/functions.cpp \
+    src/grblcontroller.cpp \
     src/led.cpp \
     src/ledfactory.cpp \    
     src/ledstatus.cpp \
@@ -67,6 +68,7 @@ HEADERS += \
     include/console.h \
     include/filereader.h \
     include/functions.h \
+    include/grblcontroller.h \
     include/led.h \
     include/ledfactory.h \    
     include/ledstatus.h \
