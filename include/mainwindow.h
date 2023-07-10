@@ -3,12 +3,12 @@
 
 #pragma once
 
+#include "include/console.h"
 #include "include/mainloop.h"
 #include "include/commandfilereader.h"
 #include "include/settingsdialog.h"
 #include "include/recipe.h"
 #include "include/logger.h"
-#include "include/serialportmanager.h"
 #include "include/plasmacontroller/plasmarecipe.h"
 #include "include/plasmacontroller/plasmacontroller.h"
 
@@ -35,8 +35,33 @@ public:
     explicit MainWindow(MainLoop& loop, Logger& logger, QWidget *parent = nullptr);
     ~MainWindow();
 
-private:
+private slots:
+    // Serial Port
+    void openSerialPort();
+    void closeSerialPort();
+    void about();
+    void writeData(const QByteArray &data);
+    void readData();
 
+    void handleError(QSerialPort::SerialPortError error);
+
+    void shutDownProgram();
+
+    void updateRecipeProgressBar(const int& mfcNumber, const double& flow);
+
+    void RFRecipeButton_clicked();
+    void TunerRecipeButton_clicked();
+    void AutoTuneCheckbox_stateChanged(int value);
+    void openRecipe();
+    void saveRecipe();
+    void openCascadeRecipe();
+
+    void addRecipeToCascadeRecipe();
+    void removeRecipeFromCascadeList();
+    void saveAsCascadeRecipeListToFile();
+
+    void connectConsole();
+private:
     // Action Button methods
     void initActionsConnections();
     void showStatusMessage(const QString &message);
@@ -49,28 +74,11 @@ private:
     void connectRecipeButtons();
 
     // Connection for Cascade Recipes buttons
-    void connectCascadeRecipe();
+    void connectCascadeRecipeButtons();
 
-
-private slots:
-    void updateRecipeProgressBar(const int& mfcNumber, const double& flow);
-    void connectSerialPort();
-
-    void RFRecipeButton_clicked();
-    void TunerRecipeButton_clicked();
-    void AutoTuneCheckbox_stateChanged(int value);
-    void openRecipe();
-    void saveRecipe();
-    void openCascadeRecipe();
-
-    void addRecipeToCascadeRecipe();
-    void removeRecipeFromCascadeList();
-    void saveAsCascadeRecipeListToFile();
+    void consoleSetup();
 public slots:
-    void about();
-    void shutDownProgram();
     void openRecipeWindowMFC();
-    void handleSerialPortError();
 public:
     // Reference to the MainLoop object
     MainLoop& mainLoop;
@@ -82,7 +90,8 @@ public:
     //Recipe recipe;
     PlasmaController CTL;
     PlasmaRecipe plasmaRecipe;
-    SerialPortManager* serial = nullptr;
+    QSerialPort* serial = nullptr;
     CommandFileReader commandFileReader;
+    Console* console = nullptr;
 };
 #endif // MAINWINDOW_H

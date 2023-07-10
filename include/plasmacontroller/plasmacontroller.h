@@ -10,12 +10,11 @@
 #include "include/plasmacontroller/pwr.h"
 #include "include/plasmacontroller/tuner.h"
 #include "include/plasmacontroller/mfc.h"
-#include "include/serialportmanager.h"
 
 #include <QObject>
 #include <vector>
 #include <memory>
-
+#include <QSerialPort>
 
 class PlasmaController : public QObject
 {
@@ -35,8 +34,8 @@ public:
 
     // Serial Functions
     QString formatSerialCommand(QString cmd, const QString& setpoint);
-    SerialPortManager* getSerialPortManager();    
-    QString sendSerialCommand(const QString& command);
+    QString sendSerialCommand(const QString &command);
+
     void getCTLStatusCommand();
     void parseResponseForCTLStatus(const QString &response);
 
@@ -54,7 +53,7 @@ signals:
 public slots:
     // Define slots for each command logic
 
-    // MFCs    
+    // MFCs
     int parseResponseForNumberOfMFCs(QString& responseStr);
     double handleGetMFCRecipeFlowCommand(QString& responseStr);
 
@@ -79,7 +78,7 @@ public:
     CommandMap commandMap;
     Configuration config;
     AxisController* axisCTL;  // Optional, can be nullptr
-    SerialPortManager serial;  // Reference to SerialComm object
+    QSerialPort serial;  // Reference to SerialComm object
     LEDStatus ledStatus;
     bool executeRecipe;
 

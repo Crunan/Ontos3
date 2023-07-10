@@ -16,24 +16,142 @@ MainWindow::MainWindow(MainLoop& loop, Logger& logger, QWidget *parent) :
     //recipe(),
     CTL(),
     plasmaRecipe(&CTL),
-    serial(nullptr),
-    commandFileReader()
+    serial(new QSerialPort(this)),
+    commandFileReader(),
+    console(nullptr)
 {
     ui->setupUi(this);
     this->setWindowTitle("ONTOS3 INTERFACE");
 
+    //Terminal Tab setup for console commands
+    consoleSetup();
+
+    // Connect button enable/disabled
+    ui->actionConnect->setEnabled(true);
+    ui->actionDisconnect->setEnabled(false);
+    ui->actionQuit->setEnabled(true);
+    ui->actionConfigure->setEnabled(true);
+
     // Make signal/slot connections here
     connectRecipeButtons();
-    connectCascadeRecipe();
+    connectCascadeRecipeButtons();
     connectMFCFlowBars();
 
+    // status bar
+    ui->statusBar->addWidget(status);
+
     initActionsConnections();
+
+    connect(serial, &QSerialPort::errorOccurred, this, &MainWindow::handleError);
+
+    connect(serial, &QSerialPort::readyRead, this, &MainWindow::readData);
+
+    connect(console, &Console::getData, this, &MainWindow::writeData);
 }
 MainWindow::~MainWindow() {
-    delete ui;
     delete settings;
+    delete ui;
 }
 
+void MainWindow::openSerialPort()
+{
+    const SettingsDialog::Settings p = settings->settings();
+    serial->setPortName(p.name);
+    serial->setBaudRate(p.baudRate);
+    serial->setDataBits(p.dataBits);
+    serial->setParity(p.parity);
+    serial->setStopBits(p.stopBits);
+    serial->setFlowControl(p.flowControl);
+    if (serial->open(QIODevice::ReadWrite)) {
+        console->setEnabled(true);
+        console->setLocalEchoEnabled(p.localEchoEnabled);
+        ui->actionConnect->setEnabled(false);
+        ui->actionDisconnect->setEnabled(true);
+        ui->actionConfigure->setEnabled(false);
+        showStatusMessage(tr("Connected to %1 : %2, %3, %4, %5, %6")
+                              .arg(p.name).arg(p.stringBaudRate).arg(p.stringDataBits)
+                              .arg(p.stringParity).arg(p.stringStopBits).arg(p.stringFlowControl));
+    } else {
+        QMessageBox::critical(this, tr("Error"), serial->errorString());
+
+        showStatusMessage(tr("Open error"));
+    }
+}
+
+void MainWindow::closeSerialPort()
+{
+    if (serial->isOpen())
+        serial->close();
+    console->setEnabled(false);
+    ui->actionConnect->setEnabled(true);
+    ui->actionDisconnect->setEnabled(false);
+    ui->actionConfigure->setEnabled(true);
+    showStatusMessage(tr("Disconnected"));
+}
+
+void MainWindow::writeData(const QByteArray &data)
+{
+    serial->write(data);
+}
+
+void MainWindow::readData()
+{
+    const QByteArray data = serial->readAll();
+    console->putData(data);
+
+}
+
+void MainWindow::handleError(QSerialPort::SerialPortError error)
+{
+    if (error == QSerialPort::ResourceError) {
+        QMessageBox::critical(this, tr("Critical Error"), serial->errorString());
+        log.logCritical(serial->errorString());
+        closeSerialPort();
+    }
+}
+
+void MainWindow::showStatusMessage(const QString &message)
+{
+    status->setText(message);
+}
+
+
+void MainWindow::initActionsConnections() {
+    connect(ui->actionConnect, &QAction::triggered, this, &MainWindow::openSerialPort);
+    connect(ui->actionDisconnect, &QAction::triggered, this, &MainWindow::closeSerialPort);
+    connect(ui->actionConfigure, &QAction::triggered, settings, &SettingsDialog::show);
+    connect(ui->actionQuit, &QAction::triggered, this, &MainWindow::shutDownProgram);
+}
+
+void MainWindow::about() {
+    QMessageBox::about(this, tr("About Ontos 3 Interface"),
+                   tr("The <b>Ontos3 Interface</b> is the latest"
+                      "modern GUI for Plasma applications."));
+}
+
+void MainWindow::shutDownProgram() {
+    if (serial) {
+        closeSerialPort();
+    }
+    Logger::clean();
+    MainWindow::close();
+}
+
+void MainWindow::consoleSetup()
+{
+    // Step 1: Create an instance of the console class
+    console = new Console(ui->tabWidget);
+
+    // Step 2: Add the console instance to a new tab
+    int tabIndex = ui->tabWidget->addTab(console, "Terminal");
+
+    // Step 3: Set the Qt theme icon for the tab
+    QIcon icon = QIcon::fromTheme("utilities-system");
+    ui->tabWidget->setTabIcon(tabIndex, icon);
+
+    // Step 4: disable until connected
+    console->setEnabled(false);
+}
 void MainWindow::connectRecipeButtons()
 {
     connect(ui->RFRecipeButton, &QPushButton::clicked, this, &MainWindow::RFRecipeButton_clicked);
@@ -47,24 +165,20 @@ void MainWindow::connectRecipeButtons()
     connectMFCRecipeButton(ui->pushButton_4, 4);
 }
 
-void MainWindow::connectCascadeRecipe()
+void MainWindow::connectCascadeRecipeButtons()
 {
     connect(ui->addCascadeRecipeButton, &QPushButton::clicked, this, &MainWindow::addRecipeToCascadeRecipe);
     connect(ui->removeCascadeRecipeButton, &QPushButton::clicked, this, &MainWindow::removeRecipeFromCascadeList);
     connect(ui->saveAsCascadeRecipeButton, &QPushButton::clicked, this, &MainWindow::saveAsCascadeRecipeListToFile);
 }
-void MainWindow::connectSerialPort()
+
+void MainWindow::connectConsole()
 {
-    // Get the current settings from the SettingsDialog
     SettingsDialog::Settings portSettings = settings->settings();
 
-    // Call the openSerialPort function of CTL.serial and pass the settings
-    CTL.serial.openSerialPort(portSettings);
-
-    // Set serial CTL object for the mainwindow to use.
-    this->serial = CTL.getSerialPortManager();
+    console->setEnabled(true);
+    console->setLocalEchoEnabled(portSettings.localEchoEnabled);
 }
-
 
 void MainWindow::connectMFCFlowBars()
 {
@@ -74,7 +188,6 @@ void MainWindow::connectMFCFlowBars()
         connect(CTL.mfcs[i], &MFC::recipeFlowChanged, this, &MainWindow::updateRecipeProgressBar);
     }
 }
-
 
 void MainWindow::connectMFCRecipeButton(QPushButton* button, const int& mfcNumber)
 {
@@ -97,46 +210,6 @@ void MainWindow::updateRecipeProgressBar(const int& mfcNumber, const double& flo
         ui->recipeProgressBar_4->setValue(flow);
     }
 }
-
-void MainWindow::initActionsConnections() {
-    connect(ui->actionDisconnect, &QAction::triggered, &CTL.serial, &SerialPortManager::closeSerialPort);
-    connect(ui->actionConnect, &QAction::triggered, this, &MainWindow::connectSerialPort);
-    connect(ui->actionConfigure, &QAction::triggered, settings, &SettingsDialog::show);
-    connect(ui->actionQuit, &QAction::triggered, this, &MainWindow::shutDownProgram);
-}
-
-void MainWindow::about() {
-    QMessageBox::about(this, tr("About Ontos 3 Interface"),
-                   tr("The <b>Ontos3 Interface</b> is the latest"
-                      "modern GUI for Plasma applications."));
-}
-
-void MainWindow::shutDownProgram() {
-    if (serial) {
-        serial->closeSerialPort();
-    }
-    Logger::clean();
-    MainWindow::close();
-}
-
-void MainWindow::handleSerialPortError() {
-    // Display the error to the user and log
-    QMessageBox::critical(this, tr("Serial Communication Error"), serial->getError());
-    log.logCritical(serial->getError());
-}
-
-//void MainWindow::createRecipe() {
-//    // Delete the previous recipe if one exists
-//    delete recipe;
-
-//    // Create a new recipe object
-//    recipe = new Recipe();
-//    // Initialize the recipe object or perform other operations
-//}
-//Recipe* MainWindow::getRecipe() const{
-//    return recipe;
-//}
-
 
 void MainWindow::openRecipeWindowMFC()
 {

@@ -42,10 +42,6 @@ QString PlasmaController::findCommandValue(QString command) const
     return commandMap.findCommandValue(command);
 }
 
-SerialPortManager* PlasmaController::getSerialPortManager()
-{
-    return &serial;
-}
 
 QString PlasmaController::formatSerialCommand(QString cmd, const QString& setpoint)
 {
@@ -73,8 +69,8 @@ MFC* PlasmaController::findMFCByNumber(int& mfcNumber)
 
 QString PlasmaController::sendSerialCommand(const QString& command)
 {
-    serial.commandHandler.sendSerialCommand(command);
-    QString response = serial.commandHandler.getIncomingData();
+    serial.write(command.toUtf8());
+    QString response = serial.readAll();
     return response;
 }
 

@@ -25,6 +25,7 @@ SOURCES += \
     src/commandfilereader.cpp \
     src/commandmap.cpp \
     src/configuration.cpp \
+    src/console.cpp \
     src/filereader.cpp \
     src/functions.cpp \
     src/led.cpp \
@@ -43,8 +44,6 @@ SOURCES += \
     src/plasmacontroller/plasmarecipe.cpp \
     src/plasmacontroller/tuner.cpp \
     src/recipe.cpp \
-    src/serialportmanager.cpp \
-    src/serialcommandhandler.cpp \
     src/settingsdialog.cpp
 
 
@@ -65,6 +64,7 @@ HEADERS += \
     include/commandfilereader.h \
     include/commandmap.h \
     include/configuration.h \
+    include/console.h \
     include/filereader.h \
     include/functions.h \
     include/led.h \
@@ -81,9 +81,7 @@ HEADERS += \
     include/plasmacontroller/plasmarecipe.h \
     include/plasmacontroller/tuner.h \
     include/recipe.h \
-    include/serialportmanager.h \
-    include/settingsdialog.h \
-    include/serialcommandhandler.h
+    include/settingsdialog.h
 
 FORMS += \
     ui/mainwindow.ui \
