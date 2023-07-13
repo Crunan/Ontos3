@@ -12,6 +12,7 @@
 #include "include/logger.h"
 #include "include/plasmacontroller/plasmarecipe.h"
 #include "include/plasmacontroller/plasmacontroller.h"
+#include "include/stagewidget.h"
 
 #include <QMainWindow>
 #include <QMessageBox>
@@ -37,15 +38,23 @@ public:
     ~MainWindow();
 
 private slots:
-    // Serial Port
-    void openSerialPort();
-    void closeSerialPort();
+    // Main CTL Serial Port
+    void openMainPort();
+    void closeMainPort();
+    void writeMainPort(const QByteArray &data);
+    QString readMainPort();
+
+    void handleMainSerialError(QSerialPort::SerialPortError error);
+
+    // Stage CTL Serial Port
+    void openStagePort();
+    void closeStagePort();
+    void writeStagePort(const QByteArray &data);
+    QString readStagePort();
+
+    void handleStageSerialError(QSerialPort::SerialPortError error);
+
     void about();
-    void writeData(const QByteArray &data);
-    void readData();
-
-    void handleError(QSerialPort::SerialPortError error);
-
     void shutDownProgram();
 
     void updateRecipeProgressBar(const int& mfcNumber, const double& flow);
@@ -61,10 +70,9 @@ private slots:
     void removeRecipeFromCascadeList();
     void saveAsCascadeRecipeListToFile();
 
-    void connectConsole();
 private:
     // Action Button methods
-    void initActionsConnections();
+    void serialButtonPreConnectState();
     void showStatusMessage(const QString &message);
     // Serial Port methods
 
@@ -77,23 +85,22 @@ private:
     // Connection for Cascade Recipes buttons
     void connectCascadeRecipeButtons();
 
-    void consoleSetup();
+    void consoleMainCTLSetup();
+    void consoleStageCTLSetup();
 public slots:
     void openRecipeWindowMFC();
 public:
-    // Reference to the MainLoop object
     MainLoop& mainLoop;
-    // Reference to the logger
     Logger& log;
     Ui::MainWindow* ui = nullptr;
     QLabel* status = nullptr;
     SettingsDialog* settings = nullptr;
-    //Recipe recipe;
-    PlasmaController CTL;
-    PlasmaRecipe plasmaRecipe;
-    QSerialPort* serial = nullptr;
+    PlasmaController mainCTL;
+    GRBLController stageCTL;
     CommandFileReader commandFileReader;
-    QList<Console*> consoleList;
-    GRBLController AxisCTL;
+    PlasmaRecipe plasmaRecipe;
+    Console* mainCTLConsole = nullptr;
+    Console* stageCTLConsole = nullptr;
+    StageWidget* stageWidget;
 };
 #endif // MAINWINDOW_H

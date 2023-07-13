@@ -1,42 +1,59 @@
-#include "grblcontroller.h"
+#include "include/grblcontroller.h"
 
 GRBLController::GRBLController(QObject* parent)
     : QObject(parent)
-{
-    serialPort.setBaudRate(115200); // Set the appropriate baud rate
-    connect(&serialPort, &QSerialPort::readyRead, this, &GRBLController::readData);
+{    
 }
 
-bool GRBLController::open(const QString& portName)
+bool GRBLController::open(const SettingsDialog& settings)
 {
-    serialPort.setPortName(portName);
-    if (!serialPort.open(QIODevice::ReadWrite)) {
+    const SettingsDialog::Settings p = settings.settings();
+    serialPort_.setPortName(p.name);
+    serialPort_.setBaudRate(p.baudRate);
+    serialPort_.setDataBits(p.dataBits);
+    serialPort_.setParity(p.parity);
+    serialPort_.setStopBits(p.stopBits);
+    serialPort_.setFlowControl(p.flowControl);
+    if (!serialPort_.open(QIODevice::ReadWrite)) {
         // Failed to open the serial port
         return false;
-    }
+    }    
+    // Signals connections
+    connect(&serialPort_, &QSerialPort::readyRead, this, &GRBLController::readData);
+    emit stagePortOpened();
 
     return true;
 }
 
 void GRBLController::close()
 {
-    serialPort.close();
+    serialPort_.close();
 }
 
 bool GRBLController::sendCommand(const QString& command)
 {
-    if (serialPort.isOpen()) {
+    if (serialPort_.isOpen()) {
         QByteArray requestData = command.toUtf8();
-        serialPort.write(requestData);
+        serialPort_.write(requestData);
         return true;
     }
 
     return false;
 }
 
-void GRBLController::readData()
+QString GRBLController::readData()
 {
-    QByteArray responseData = serialPort.readAll();
+    QByteArray responseData = serialPort_.readAll();
     QString response = QString::fromUtf8(responseData);
-    emit responseReceived(response);
+    return response;
+}
+
+QString GRBLController::getPortErrorString()
+{
+    return serialPort_.errorString();
+}
+
+bool GRBLController::isOpen()
+{
+    return serialPort_.isOpen();
 }

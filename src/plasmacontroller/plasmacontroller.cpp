@@ -9,7 +9,7 @@ PlasmaController::PlasmaController(QWidget* parent)
     commandMap(),
     config(),
     axisCTL(nullptr),
-    serial(),
+    serialPort_(),
     ledStatus(),
     executeRecipe(0)
 {
@@ -32,6 +32,49 @@ PlasmaController::~PlasmaController()
     }
 }
 
+bool PlasmaController::open(const SettingsDialog& settings)
+{
+    const SettingsDialog::Settings p = settings.settings();
+    serialPort_.setPortName(p.name);
+    serialPort_.setBaudRate(p.baudRate);
+    serialPort_.setDataBits(p.dataBits);
+    serialPort_.setParity(p.parity);
+    serialPort_.setStopBits(p.stopBits);
+    serialPort_.setFlowControl(p.flowControl);
+    if (!serialPort_.open(QIODevice::ReadWrite)) {
+        // Failed to open the serial port
+        return false;
+    }
+    // Signals connections
+    connect(&serialPort_, &QSerialPort::readyRead, this, &PlasmaController::readData);
+    emit mainPortOpened();
+
+    return true;
+}
+
+void PlasmaController::close()
+{
+    serialPort_.close();
+}
+
+
+bool PlasmaController::sendCommand(const QString& command)
+{
+    if (serialPort_.isOpen()) {
+        QByteArray requestData = command.toUtf8();
+        serialPort_.write(requestData);
+        return true;
+    }
+
+    return false;
+}
+
+QString PlasmaController::readData()
+{
+    QByteArray responseData = serialPort_.readAll();
+    QString response = QString::fromUtf8(responseData);
+    return response;
+}
 
 void PlasmaController::setCommandMap(const QMap<QString, QPair<QString, QString>>& map)
 {
@@ -47,7 +90,7 @@ QString PlasmaController::formatSerialCommand(QString cmd, const QString& setpoi
 {
     // Remove the trailing '%' character
     cmd.chop(1);
-void setActualFlow(double value);
+
     // Add the setpoint to the command
     cmd += setpoint;
 
@@ -67,20 +110,13 @@ MFC* PlasmaController::findMFCByNumber(int& mfcNumber)
     return nullptr;
 }
 
-QString PlasmaController::sendSerialCommand(const QString& command)
-{
-    serial.write(command.toUtf8());
-    QString response = serial.readAll();
-    return response;
-}
-
 int PlasmaController::numberOfMFCs()
 {
-    QString command = "$30%";
-    QString response = sendSerialCommand(command);
-    int numMFCs = parseResponseForNumberOfMFCs(response);
+//    QString command = "$30%";
+//    send(command);
+//    int numMFCs = parseResponseForNumberOfMFCs(response);
 
-    return numMFCs;
+//    return numMFCs;
 }
 
 int PlasmaController::parseResponseForNumberOfMFCs(QString& response)
@@ -98,6 +134,16 @@ int PlasmaController::parseResponseForNumberOfMFCs(QString& response)
     qDebug() << "Number of MFC's:" << numMFCs;
 
     return numMFCs;
+}
+
+QString PlasmaController::getPortErrorString()
+{
+    return serialPort_.errorString();
+}
+
+bool PlasmaController::isOpen()
+{
+    return serialPort_.isOpen();
 }
 
 double PlasmaController::handleGetMFCRecipeFlowCommand(QString& responseStr)
@@ -180,9 +226,9 @@ void PlasmaController::handleSetPWRMaxWattsCommand(const double maxWatts)
 
 void PlasmaController::getCTLStatusCommand()
 {
-    QString command = "$91%";
-    QString response = sendSerialCommand(command);
-    parseResponseForCTLStatus(response);
+//    QString command = "$91%";
+//    QString response = send(command);
+//    parseResponseForCTLStatus(response);
 
 }
 
@@ -251,107 +297,6 @@ void PlasmaController::setExecuteRecipe(bool value)
 {
     executeRecipe = value;
 }
-//PlasmaController::getPlasmaHead() {
-//    //serial->setOutgoingData(command.getCommandString(""));
-//}
-//void PlasmaController::RunPolling() {
-//    getCTLStatus();
-//    //didCTLStatusChange(); //is this for logging?
-//    splitRCV();
-//    //! [0]
-//    setStatusBitsFromPoll();
-//    UpdateStatus();
-//    //! [1]
-//    setTunerPosition();
-//    displayTunerPosition();
-//    //! [2]
-//    setRFPower();
-//    displayRFValue();
-//    //! [3]
-//    setReflectedPower();
-//    displayReflectedPower();
-//    //! [4]
-//    //! setExecRecipe()
-//    //! [5]
-//    setMFC1();
-//    MFC1ActualFlow();
-//    //! [6]
-//    setMFC2();
-//    MFC2ActualFlow();
-//    //! [7]
-//    setMFC3();
-//    MFC3ActualFlow();
-//    //! [8]
-//    setMFC4();
-//    MFC4ActualFlow();
-//    //! [9]
-//    setTempValue();
-//    getHeadTemp();
-//    //! [10]
-//    //UpdateHandshakeStatus();
-//    //! [11]
-//    getAxisStatus();
-//}
-
-//void MainWindow::setMFC4() {
-//    if (StringIsValidDoubleChars(CTLparametersAndValues[8])) {
-//        MFC[4].setActualFlow(CTLparametersAndValues[8]);
-//    };
-//}
-//void MainWindow::setMFC3() {
-//    if (StringIsValidDoubleChars(CTLparametersAndValues[7])) {
-//        MFC[3].setActualFlow(CTLparametersAndValues[7]);
-//    };
-//}
-//void MainWindow::setMFC2() {
-//    if (StringIsValidDoubleChars(CTLparametersAndValues[6])) {
-//        MFC[2].setActualFlow(CTLparametersAndValues[6]);
-//    };
-//}
-//void MainWindow::setMFC1() {
-//    if (StringIsValidDoubleChars(CTLparametersAndValues[5])) {
-//        MFC[1].setActualFlow(CTLparametersAndValues[5]);
-//    };
-//}
-//void MainWindow::setReflectedPower() {
-//    if (StringIsValidDoubleChars(CTLparametersAndValues[3])) {
-//        RF.setActualRefWatts(CTLparametersAndValues[3]);
-//    };
-//}
-//void MainWindow::setRFPower() {
-//    if (StringIsValidDoubleChars(CTLparametersAndValues[2])) {
-//        RF.setActualWatts(CTLparametersAndValues[2]);
-//    };
-//}
-//void MainWindow::setTunerPosition() {
-//    if (StringIsValidDoubleChars(CTLparametersAndValues[1])) {
-//        TUNER.setActualPosition(CTLparametersAndValues[1]);
-//    };
-//}
-//void MainWindow::setTempValue() {
-//    plasmahead.setHeadTemp(CTLparametersAndValues[9]);
-//}
-//void MainWindow::setStatusBitsFromPoll() {
-//    bool ok;
-//    QString StrVar = CTLparametersAndValues[0].mid(3);
-//    StatusBits = StrVar.toInt(&ok, 16);
-//}
-
-//void MainWindow::didStatusBitsChange() {
-//    if (StatusBits != StatusBitsWas)
-//        logInfo("Status Bits Change from " + QString::number(StatusBitsWas) + " to " + QString::number(StatusBits));
-//}
-
-//void MainWindow::splitRCV() {
-//    PCBStatus = RCV;
-//    CTLparametersAndValues = RCV.split(QLatin1Char(';'));
-//}
-
-//void MainWindow::RunStartup() {
-//    GetExeCfg();
-//    CTLStartup();
-//    AxisStartup();
-//}
 
 
 

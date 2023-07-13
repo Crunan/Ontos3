@@ -1,6 +1,8 @@
 #ifndef GRBLCONTROLLER_H
 #define GRBLCONTROLLER_H
 
+#include "include/settingsdialog.h"
+
 #include <QObject>
 #include <QSerialPort>
 
@@ -9,18 +11,19 @@ class GRBLController : public QObject {
 
 public:
     explicit GRBLController(QObject* parent = nullptr);
-    bool open(const QString& portName);
+    bool open(const SettingsDialog& settings);
     void close();
     bool sendCommand(const QString& command);
+    QString readData();
 
+    QString getPortErrorString();
+    bool isOpen();
 signals:
     void responseReceived(const QString& response);
-
-private slots:
-    void readData();
+    void stagePortOpened();
 
 private:
-    QSerialPort serialPort;
+    QSerialPort serialPort_;
 };
 
 #endif // GRBLCONTROLLER_H

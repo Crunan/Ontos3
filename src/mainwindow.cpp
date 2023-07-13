@@ -13,28 +13,26 @@ MainWindow::MainWindow(MainLoop& loop, Logger& logger, QWidget *parent) :
     ui(new Ui::MainWindow),
     status(new QLabel),
     settings(new SettingsDialog),
-    //recipe(),
-    CTL(),
-    plasmaRecipe(&CTL),
-    serial(new QSerialPort(this)),
+    mainCTL(),
+    stageCTL(),
     commandFileReader(),
-    consoleList(),
-    AxisCTL()
+    plasmaRecipe(&mainCTL),
+    mainCTLConsole(),
+    stageCTLConsole(),
+    stageWidget(new StageWidget(this))
 {
     ui->setupUi(this);
     this->setWindowTitle("ONTOS3 INTERFACE");
 
-    //Terminal Tab setup for console commands
-    consoleSetup();
+    // Signal for Power down button
+    connect(ui->actionQuit, &QAction::triggered, this, &MainWindow::shutDownProgram);
 
-    // GRBL setup
+    // Serial buttons initial states
+    serialButtonPreConnectState();
 
-
-    // Connect button enable/disabled
-    ui->actionConnect->setEnabled(true);
-    ui->actionDisconnect->setEnabled(false);
-    ui->actionQuit->setEnabled(true);
-    ui->actionConfigure->setEnabled(true);
+    // TODO: create stage area for custom pathing
+    ui->verticalLayout_4->addWidget(stageWidget);
+    stageWidget->setStageBounds(0.0, 100.0, 0.0, 50.0);
 
     // Make signal/slot connections here
     connectRecipeButtons();
@@ -44,112 +42,146 @@ MainWindow::MainWindow(MainLoop& loop, Logger& logger, QWidget *parent) :
     // status bar
     ui->statusBar->addWidget(status);
 
-    initActionsConnections();
-
-    connect(serial, &QSerialPort::errorOccurred, this, &MainWindow::handleError);
-
-    connect(serial, &QSerialPort::readyRead, this, &MainWindow::readData);
-
-    connect(console, &Console::getData, this, &MainWindow::writeData);
 }
 MainWindow::~MainWindow() {
     delete settings;
     delete ui;
 }
 
-void MainWindow::openSerialPort()
+void MainWindow::openMainPort()
 {
     const SettingsDialog::Settings p = settings->settings();
-    serial->setPortName(p.name);
-    serial->setBaudRate(p.baudRate);
-    serial->setDataBits(p.dataBits);
-    serial->setParity(p.parity);
-    serial->setStopBits(p.stopBits);
-    serial->setFlowControl(p.flowControl);
-    if (serial->open(QIODevice::ReadWrite)) {
-        console->setEnabled(true);
-        console->setLocalEchoEnabled(p.localEchoEnabled);
-        ui->actionConnect->setEnabled(false);
-        ui->actionDisconnect->setEnabled(true);
-        ui->actionConfigure->setEnabled(false);
+    if (mainCTL.open(*settings)) {
+
+        //Terminal Tab setup for console commands
+        consoleMainCTLSetup();        
+        mainCTLConsole->setEnabled(true);
+        mainCTLConsole->setLocalEchoEnabled(p.localEchoEnabled);
+
+        // Update UI buttons
+        ui->mainConnectButton->setEnabled(false);
+        ui->mainDisconnectButton->setEnabled(true);
+        ui->mainSettingsButton->setEnabled(false);
+
+        // Give status on connect
         showStatusMessage(tr("Connected to %1 : %2, %3, %4, %5, %6")
                               .arg(p.name).arg(p.stringBaudRate).arg(p.stringDataBits)
                               .arg(p.stringParity).arg(p.stringStopBits).arg(p.stringFlowControl));
     } else {
-        QMessageBox::critical(this, tr("Error"), serial->errorString());
+        QMessageBox::critical(this, tr("Error"), mainCTL.getPortErrorString());
 
         showStatusMessage(tr("Open error"));
     }
 }
 
-void MainWindow::openGRBLSerialPort()
+void MainWindow::openStagePort()
 {
     const SettingsDialog::Settings p = settings->settings();
-    serial->setPortName(p.name);
-    serial->setBaudRate(p.baudRate);
-    serial->setDataBits(p.dataBits);
-    serial->setParity(p.parity);
-    serial->setStopBits(p.stopBits);
-    serial->setFlowControl(p.flowControl);
-    if (serial->open(QIODevice::ReadWrite)) {
-        console->setEnabled(true);
-        console->setLocalEchoEnabled(p.localEchoEnabled);
-        ui->actionConnect->setEnabled(false);
-        ui->actionDisconnect->setEnabled(true);
-        ui->actionConfigure->setEnabled(false);
+    if (stageCTL.open(*settings)) {
+
+        //Terminal Tab setup for console commands
+        consoleStageCTLSetup();
+        stageCTLConsole->setEnabled(true);
+        stageCTLConsole->setLocalEchoEnabled(p.localEchoEnabled);
+
+        // Update UI buttons
+        ui->stageConnectButton->setEnabled(true);
+        ui->stageDisconnectButton->setEnabled(false);
+        ui->stageSettingsButton->setEnabled(true);
+
+        // Give status on connect
         showStatusMessage(tr("Connected to %1 : %2, %3, %4, %5, %6")
                               .arg(p.name).arg(p.stringBaudRate).arg(p.stringDataBits)
                               .arg(p.stringParity).arg(p.stringStopBits).arg(p.stringFlowControl));
     } else {
-        QMessageBox::critical(this, tr("Error"), serial->errorString());
+        QMessageBox::critical(this, tr("Error"), stageCTL.getPortErrorString());
 
         showStatusMessage(tr("Open error"));
     }
 }
 
-void MainWindow::closeSerialPort()
+void MainWindow::closeMainPort()
 {
-    if (serial->isOpen())
-        serial->close();
-    console->setEnabled(false);
-    ui->actionConnect->setEnabled(true);
-    ui->actionDisconnect->setEnabled(false);
-    ui->actionConfigure->setEnabled(true);
+    if (mainCTL.isOpen()) {
+        mainCTL.close();
+    }
+
+    // Disable Console
+    mainCTLConsole->setEnabled(false);
+
+    // Default button states
+    ui->mainConnectButton->setEnabled(true);
+    ui->mainDisconnectButton->setEnabled(false);
+    ui->mainSettingsButton->setEnabled(true);
+
+    // Update Status bar
     showStatusMessage(tr("Disconnected"));
 }
 
-void MainWindow::writeData(const QByteArray &data)
+void MainWindow::closeStagePort()
 {
-    serial->write(data);
+    if (stageCTL.isOpen()) {
+        stageCTL.close();
+    }
+
+    // Disable Console
+    stageCTLConsole->setEnabled(false);
+
+    // Default button states
+    ui->stageConnectButton->setEnabled(true);
+    ui->stageDisconnectButton->setEnabled(false);
+    ui->stageSettingsButton->setEnabled(true);
+
+    // Update Status bar
+    showStatusMessage(tr("Disconnected"));
 }
 
-void MainWindow::readData()
+void MainWindow::writeMainPort(const QByteArray &data)
 {
-    const QByteArray data = serial->readAll();
-    console->putData(data);
-
+    if (!mainCTL.sendCommand(data))
+        qDebug() << "Command not sent to main CTL";
 }
 
-void MainWindow::handleError(QSerialPort::SerialPortError error)
+void MainWindow::writeStagePort(const QByteArray &data)
+{
+    if (!stageCTL.sendCommand(data))
+        qDebug() << "Command not sent to stage CTL";
+}
+
+QString MainWindow::readMainPort()
+{
+    return mainCTL.readData();
+}
+
+QString MainWindow::readStagePort()
+{
+    return stageCTL.readData();
+
+    // Update console without side effect
+    //stageCTLConsole->putData(data);
+
+}
+void MainWindow::handleMainSerialError(QSerialPort::SerialPortError error)
 {
     if (error == QSerialPort::ResourceError) {
-        QMessageBox::critical(this, tr("Critical Error"), serial->errorString());
-        log.logCritical(serial->errorString());
-        closeSerialPort();
+        QMessageBox::critical(this, tr("Critical Error"), mainCTL.getPortErrorString());
+        log.logCritical(mainCTL.getPortErrorString());
+        closeMainPort();
+    }
+}
+
+void MainWindow::handleStageSerialError(QSerialPort::SerialPortError error)
+{
+    if (error == QSerialPort::ResourceError) {
+        QMessageBox::critical(this, tr("Critical Error"), stageCTL.getPortErrorString());
+        log.logCritical(stageCTL.getPortErrorString());
+        closeStagePort();
     }
 }
 
 void MainWindow::showStatusMessage(const QString &message)
 {
     status->setText(message);
-}
-
-
-void MainWindow::initActionsConnections() {
-    connect(ui->actionConnect, &QAction::triggered, this, &MainWindow::openSerialPort);
-    connect(ui->actionDisconnect, &QAction::triggered, this, &MainWindow::closeSerialPort);
-    connect(ui->actionConfigure, &QAction::triggered, settings, &SettingsDialog::show);
-    connect(ui->actionQuit, &QAction::triggered, this, &MainWindow::shutDownProgram);
 }
 
 void MainWindow::about() {
@@ -159,31 +191,48 @@ void MainWindow::about() {
 }
 
 void MainWindow::shutDownProgram() {
-    if (serial) {
-        closeSerialPort();
+    if (mainCTL.isOpen()) {
+        mainCTL.close();
+    }
+    if (stageCTL.isOpen()) {
+        stageCTL.close();
     }
     Logger::clean();
     MainWindow::close();
 }
 
-void MainWindow::consoleSetup(QSerialPort& port)
+void MainWindow::consoleMainCTLSetup()
 {
     // Step 1: Create an instance of the console class
-    Console* console = new Console(ui->tabWidget);
+    mainCTLConsole = new Console(ui->mainTabWidget);
 
     // Step 2: Add the console instance to a new tab
-    int tabIndex = ui->tabWidget->addTab(console, port.portName() + " Terminal");
+    int tabIndex = ui->mainTabWidget->addTab(mainCTLConsole, "Main CTL Terminal");
 
     // Step 3: Set the Qt theme icon for the tab
     QIcon icon = QIcon::fromTheme("utilities-system");
-    ui->tabWidget->setTabIcon(tabIndex, icon);
+    ui->mainTabWidget->setTabIcon(tabIndex, icon);
 
-    // Step 4: disable until connected
-    console->setEnabled(false);
-
-    // Step 5: Add the console to the QList
-    consoleList.append(console);
+    // Step 4: connect signals/slot
+    connect(mainCTLConsole, &Console::getData, this, &MainWindow::writeMainPort);
 }
+
+void MainWindow::consoleStageCTLSetup()
+{
+    // Step 1: Create an instance of the console class
+    stageCTLConsole = new Console(ui->mainTabWidget);
+
+    // Step 2: Add the console instance to a new tab
+    int tabIndex = ui->mainTabWidget->addTab(stageCTLConsole, "Stage CTL Terminal");
+
+    // Step 3: Set the Qt theme icon for the tab
+    QIcon icon = QIcon::fromTheme("utilities-system");
+    ui->mainTabWidget->setTabIcon(tabIndex, icon);
+
+    // Step 4: connect signals/slot
+    connect(stageCTLConsole, &Console::getData, this, &MainWindow::writeStagePort);
+}
+
 void MainWindow::connectRecipeButtons()
 {
     connect(ui->RFRecipeButton, &QPushButton::clicked, this, &MainWindow::RFRecipeButton_clicked);
@@ -204,77 +253,18 @@ void MainWindow::connectCascadeRecipeButtons()
     connect(ui->saveAsCascadeRecipeButton, &QPushButton::clicked, this, &MainWindow::saveAsCascadeRecipeListToFile);
 }
 
-void MainWindow::connectConsole()
-{
-    SettingsDialog::Settings portSettings = settings->settings();
-
-    console->setEnabled(true);
-    console->setLocalEchoEnabled(portSettings.localEchoEnabled);
-}
-
 void MainWindow::connectMFCFlowBars()
 {
     // This will connect the flowchanged signal along with its passed params
     // to the GUI updateFlowbars function.
-    for (int i = 0; i < CTL.mfcs.size(); ++i) {
-        connect(CTL.mfcs[i], &MFC::recipeFlowChanged, this, &MainWindow::updateRecipeProgressBar);
+    for (int i = 0; i < mainCTL.mfcs.size(); ++i) {
+        connect(mainCTL.mfcs[i], &MFC::recipeFlowChanged, this, &MainWindow::updateRecipeProgressBar);
     }
 }
 
 void MainWindow::connectMFCRecipeButton(QPushButton* button, const int& mfcNumber)
 {
-    button->setProperty#include "include/grblcontroller.h"
-
-#include <QObject>
-#include <QSerialPort>
-
-        class GRBLController : public QObject {
-        Q_OBJECT
-
-    public:
-        explicit GRBLController(QObject* parent = nullptr) : QObject(parent) {
-            serialPort.setBaudRate(115200);  // Set the appropriate baud rate
-            connect(&serialPort, &QSerialPort::readyRead, this, &GRBLController::readData);
-        }
-
-        bool open(const QString& portName) {
-            serialPort.setPortName(portName);
-            if (!serialPort.open(QIODevice::ReadWrite)) {
-                // Failed to open the serial port
-                return false;
-            }
-
-            return true;
-        }
-
-        void close() {
-            serialPort.close();
-        }
-
-        bool sendCommand(const QString& command) {
-            if (serialPort.isOpen()) {
-                QByteArray requestData = command.toUtf8();
-                serialPort.write(requestData);
-                return true;
-            }
-
-            return false;
-        }
-
-    signals:
-        void responseReceived(const QString& response);
-
-    private slots:
-        void readData() {
-            QByteArray responseData = serialPort.readAll();
-            QString response = QString::fromUtf8(responseData);
-            emit responseReceived(response);
-        }
-
-    private:
-        QSerialPort serialPort;
-    };
-("MFCNumber", mfcNumber);  // Store the MFC index in the button's property
+    button->setProperty("MFCNumber", mfcNumber);  // Store the MFC index in the button's property
     connect(button, &QPushButton::clicked, this, &MainWindow::openRecipeWindowMFC);
 }
 
@@ -294,6 +284,18 @@ void MainWindow::updateRecipeProgressBar(const int& mfcNumber, const double& flo
     }
 }
 
+void MainWindow::serialButtonPreConnectState()
+{
+    // Enable serial buttons
+    ui->mainConnectButton->setEnabled(true);
+    ui->mainDisconnectButton->setEnabled(false);
+    ui->mainSettingsButton->setEnabled(true);
+
+    ui->stageConnectButton->setEnabled(true);
+    ui->stageDisconnectButton->setEnabled(false);
+    ui->stageSettingsButton->setEnabled(true);
+}
+
 void MainWindow::openRecipeWindowMFC()
 {
     bool ok;
@@ -301,13 +303,13 @@ void MainWindow::openRecipeWindowMFC()
 
     if (ok && !recipeStr.isEmpty()) {
         // User entered a string and clicked OK
-        if (!CTL.mfcs.isEmpty()) {
+        if (!mainCTL.mfcs.isEmpty()) {
             QPushButton* button = qobject_cast<QPushButton*>(sender());
             if (button) {
 
                 // Retrieve the MFC number from the button's property
                 int mfcNumber = button->property("MFCNumber").toInt();  // Retrieve the MFC index from the button's property
-                MFC* mfc = CTL.findMFCByNumber(mfcNumber);
+                MFC* mfc = mainCTL.findMFCByNumber(mfcNumber);
                 if (mfc) {
                     double recipe = recipeStr.toDouble();
                     mfc->setRecipeFlow(recipe);
@@ -328,7 +330,7 @@ void MainWindow::RFRecipeButton_clicked()
     if (ok && !recipeStr.isEmpty()) {
         // User entered a string and clicked OK
         int recipe = recipeStr.toInt();
-        CTL.pwr.setRecipeWatts(recipe);
+        mainCTL.pwr.setRecipeWatts(recipe);
     }
     else {
         // User either clicked Cancel or did not enter any string
@@ -346,7 +348,7 @@ void MainWindow::TunerRecipeButton_clicked()
     if (ok && !recipeStr.isEmpty()) {
         // User entered a string and clicked OK
         double recipe = recipeStr.toDouble();
-        CTL.tuner.setRecipePosition(recipe);
+        mainCTL.tuner.setRecipePosition(recipe);
     }
     else {
         // User either clicked Cancel or did not enter any string
@@ -358,7 +360,7 @@ void MainWindow::TunerRecipeButton_clicked()
 
 void MainWindow::AutoTuneCheckbox_stateChanged(int value)
 {
-    CTL.tuner.setAutoTune(value);
+    mainCTL.tuner.setAutoTune(value);
 }
 
 

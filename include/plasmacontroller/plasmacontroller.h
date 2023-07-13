@@ -1,7 +1,6 @@
 #ifndef PLASMACONTROLLER_H
 #define PLASMACONTROLLER_H
 
-
 #include "include/axiscontroller/axiscontroller.h"
 #include "include/commandmap.h"
 #include "include/configuration.h"
@@ -10,6 +9,7 @@
 #include "include/plasmacontroller/pwr.h"
 #include "include/plasmacontroller/tuner.h"
 #include "include/plasmacontroller/mfc.h"
+#include "include/settingsdialog.h"
 
 #include <QObject>
 #include <vector>
@@ -24,18 +24,22 @@ class PlasmaController : public QObject
 public:
     explicit PlasmaController(QWidget* parent = nullptr);
     ~PlasmaController();
+    // Serial Functions
+    bool open(const SettingsDialog& settings);
+    void close();
+    QString formatSerialCommand(QString cmd, const QString& setpoint);
+    bool sendCommand(const QString& command);
+    QString readData();
 
-    bool getExecuteRecipe() const;
-    void setExecuteRecipe(bool value);
+    QString getPortErrorString();
+    bool isOpen();
 
-    // CTL Commands
+    // Commands Map functions
     void setCommandMap(const QMap<QString, QPair<QString, QString>>& map);
     QString findCommandValue(QString command) const;
 
-    // Serial Functions
-    QString formatSerialCommand(QString cmd, const QString& setpoint);
-    QString sendSerialCommand(const QString &command);
 
+    // Poll Commands
     void getCTLStatusCommand();
     void parseResponseForCTLStatus(const QString &response);
 
@@ -47,12 +51,16 @@ public:
     MFC* findMFCByNumber(int &mfcNumber);
     int numberOfMFCs();
 
+    // Recipe functions
+    bool getExecuteRecipe() const;
+    void setExecuteRecipe(bool value);
+
 signals:
+    void responseReceived(const QString& response);
     void executeRecipeChanged();
+    void mainPortOpened();
 
 public slots:
-    // Define slots for each command logic
-
     // MFCs
     int parseResponseForNumberOfMFCs(QString& responseStr);
     double handleGetMFCRecipeFlowCommand(QString& responseStr);
@@ -70,17 +78,20 @@ public slots:
     void handleSetPWRDefaultRecipeCommand(const double defaultWatts);
     void handleSetPWRRecipeWattsCommand(const double recipeWatts);
     void handleSetPWRMaxWattsCommand(const double maxWatts);
+
+private:
+    QSerialPort serialPort_;  // Reference to SerialComm object
+    AxisController* axisCTL;  // Optional, can be nullptr
+    LEDStatus ledStatus;
+    bool executeRecipe;
+    Configuration config;
+    CommandMap commandMap;
+
 public:
     PlasmaHead plasmaHead;
     PWR pwr;
     Tuner tuner;
-    QList<MFC*> mfcs; //Store the MFCs in a list
-    CommandMap commandMap;
-    Configuration config;
-    AxisController* axisCTL;  // Optional, can be nullptr
-    QSerialPort serial;  // Reference to SerialComm object
-    LEDStatus ledStatus;
-    bool executeRecipe;
+    QList<MFC*> mfcs; // Store the MFCs in a list
 
 };
 

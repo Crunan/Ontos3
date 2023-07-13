@@ -30,7 +30,7 @@ SOURCES += \
     src/functions.cpp \
     src/grblcontroller.cpp \
     src/led.cpp \
-    src/ledfactory.cpp \    
+    src/ledfactory.cpp \
     src/ledstatus.cpp \
     src/lighttowerstatemachine.cpp \
     src/logger.cpp \
@@ -45,7 +45,8 @@ SOURCES += \
     src/plasmacontroller/plasmarecipe.cpp \
     src/plasmacontroller/tuner.cpp \
     src/recipe.cpp \
-    src/settingsdialog.cpp
+    src/settingsdialog.cpp \
+    src/stagewidget.cpp
 
 
 HEADERS += \
@@ -70,7 +71,7 @@ HEADERS += \
     include/functions.h \
     include/grblcontroller.h \
     include/led.h \
-    include/ledfactory.h \    
+    include/ledfactory.h \
     include/ledstatus.h \
     include/lighttowerstatemachine.h \
     include/logger.h \
@@ -83,7 +84,8 @@ HEADERS += \
     include/plasmacontroller/plasmarecipe.h \
     include/plasmacontroller/tuner.h \
     include/recipe.h \
-    include/settingsdialog.h
+    include/settingsdialog.h \
+    include/stagewidget.h
 
 FORMS += \
     ui/mainwindow.ui \
