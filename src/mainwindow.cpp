@@ -29,6 +29,15 @@ MainWindow::MainWindow(MainLoop& loop, Logger& logger, QWidget *parent) :
 
     // Serial buttons initial states
     serialButtonPreConnectState();
+    // Main Serial connect/disconnect buttons
+    connect(ui->mainConnectButton, &QPushButton::clicked, this, &MainWindow::openMainPort);
+    connect(ui->mainDisconnectButton, &QPushButton::clicked, this, &MainWindow::closeMainPort);
+    // Stage Serial connect/disconnect buttons
+    connect(ui->stageConnectButton, &QPushButton::clicked, this, &MainWindow::openStagePort);
+    connect(ui->stageDisconnectButton, &QPushButton::clicked, this, &MainWindow::closeStagePort);
+    // Settings button
+    connect(ui->mainSettingsButton, &QPushButton::clicked, settings, &SettingsDialog::show);
+    connect(ui->stageSettingsButton, &QPushButton::clicked, settings, &SettingsDialog::show);
 
     // TODO: create stage area for custom pathing
     ui->verticalLayout_4->addWidget(stageWidget);
@@ -85,9 +94,9 @@ void MainWindow::openStagePort()
         stageCTLConsole->setLocalEchoEnabled(p.localEchoEnabled);
 
         // Update UI buttons
-        ui->stageConnectButton->setEnabled(true);
-        ui->stageDisconnectButton->setEnabled(false);
-        ui->stageSettingsButton->setEnabled(true);
+        ui->stageConnectButton->setEnabled(false);
+        ui->stageDisconnectButton->setEnabled(true);
+        ui->stageSettingsButton->setEnabled(false);
 
         // Give status on connect
         showStatusMessage(tr("Connected to %1 : %2, %3, %4, %5, %6")

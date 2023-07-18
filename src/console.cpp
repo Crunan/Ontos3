@@ -73,7 +73,7 @@ void Console::putData(const QByteArray &data)
 
 void Console::setLocalEchoEnabled(bool set)
 {
-    m_localEchoEnabled = set;
+    localEchoEnabled_ = set;
 }
 
 void Console::keyPressEvent(QKeyEvent *e)
@@ -86,7 +86,7 @@ void Console::keyPressEvent(QKeyEvent *e)
     case Qt::Key_Down:
         break;
     default:
-        if (m_localEchoEnabled)
+        if (localEchoEnabled_)
             QPlainTextEdit::keyPressEvent(e);
         emit getData(e->text().toLocal8Bit());
     }
