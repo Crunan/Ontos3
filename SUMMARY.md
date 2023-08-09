@@ -16,37 +16,39 @@
 * [🛑 Emergency Power-Off](safety/emergency-power-off.md)
 * [⚠ Specific Areas of Risk](safety/specific-areas-of-risk.md)
 * [🖐 Physical Risk](safety/physical-risk.md)
-* [⚡ Electrical Hazards](safety/electrical-hazards.md)
-* [⚡ Electrical Hazards (cont.)](safety/electrical-hazards-cont..md)
-* [⚡ Electrical Hazards (cont.)](safety/electrical-hazards-cont.-1.md)
+* [⚡ Electrical Hazards](safety/electrical-hazards/README.md)
+  * [⚡ Electrical Hazards (cont.)](safety/electrical-hazards/electrical-hazards-cont..md)
+  * [⚡ Single-point-earth-ground](safety/electrical-hazards/single-point-earth-ground.md)
 * [⚗ Gaseous and Chemical Hazards](safety/gaseous-and-chemical-hazards.md)
-* [📦 Ozone Safety Kit](safety/ozone-safety-kit.md)
+* [📦 Ozone Safety Kit (Optional)](safety/ozone-safety-kit-optional.md)
 
 ## System Description
 
 * [What is the Ontos3?](system-description/what-is-the-ontos3.md)
-* [Subsystems](system-description/subsystems.md)
-* [Enclosure Components](system-description/enclosure-components.md)
+* [Subsystems](system-description/subsystems/README.md)
+  * [⚫ Base System - Components](system-description/subsystems/base-system-components.md)
+  * [🔵 3-Axis Stage - Overview](system-description/subsystems/3-axis-stage-overview.md)
+  * [🔵 3 Axis Stage - Limit Switches](system-description/subsystems/3-axis-stage-limit-switches.md)
+  * [🟤 Frame Assembly -Components](system-description/subsystems/frame-assembly-components.md)
+  * [🟤 Frame Assembly - Polycarbonate Panels](system-description/subsystems/frame-assembly-polycarbonate-panels.md)
+  * [🟢 Control Chassis - Components](system-description/subsystems/control-chassis-components.md)
+  * [🟢 Control Chassis - Control Drawer](system-description/subsystems/control-chassis-control-drawer.md)
+  * [🟢 Control Chassis - Din Rail](system-description/subsystems/control-chassis-din-rail.md)
+  * [🟢 Control Chassis - Gas Delivery](system-description/subsystems/control-chassis-gas-delivery.md)
+  * [🟢 Control Chassis - N2 Manifold](system-description/subsystems/control-chassis-n2-manifold.md)
+  * [🟡 Vacuum Cap Matchbox Assembly - Components](system-description/subsystems/vacuum-cap-matchbox-assembly-components.md)
+  * [🟡 Vacuum Cap Matchbox Assembly - Matchbox Group](system-description/subsystems/vacuum-cap-matchbox-assembly-matchbox-group.md)
+  * [⚫ A/C Distribution Box](system-description/subsystems/a-c-distribution-box.md)
+  * [🟠 Upper Control Panel - Components](system-description/subsystems/upper-control-panel-components.md)
+  * [🟠 Upper Control Panel - Aux PCB](system-description/subsystems/upper-control-panel-aux-pcb.md)
+  * [🟠 Upper Control Panel - Plasma Cooling](system-description/subsystems/upper-control-panel-plasma-cooling.md)
+  * [🟠 Upper Control Panel - N2 Puge Valve](system-description/subsystems/upper-control-panel-n2-puge-valve.md)
+  * [🔵 Touchscreen Computer & Controller](system-description/subsystems/touchscreen-computer-and-controller.md)
+  * [🚦 Signal Tower](system-description/subsystems/signal-tower.md)
+  * [🟣 Plasma Head Assembly](system-description/subsystems/plasma-head-assembly.md)
+  * [🔴 Crash Avoidance System](system-description/subsystems/crash-avoidance-system.md)
+  * [⚪ Ellipsometry System - Components](system-description/subsystems/ellipsometry-system-components.md)
 * [Electrostatic Discharge Port](system-description/electrostatic-discharge-port.md)
-* [Sliding Tempered Glass Doors](system-description/sliding-tempered-glass-doors.md)
-* [Polycarbonate Panels](system-description/polycarbonate-panels.md)
-* [Standing Frame](system-description/standing-frame.md)
-* [♻ Nitrogen Purge Valve](system-description/nitrogen-purge-valve.md)
-* [Workstand Leveling Feet](system-description/workstand-leveling-feet.md)
-* [Adjusting the Stand Leveling Casters](system-description/adjusting-the-stand-leveling-casters.md)
-
-## Control Chassis
-
-* [Subsystems](control-chassis/subsystems.md)
-* [Power management](control-chassis/power-management.md)
-* [Emergency Power Off](control-chassis/emergency-power-off.md)
-* [Control PCB](control-chassis/control-pcb.md)
-* [RF Power Generator](control-chassis/rf-power-generator.md)
-* [Mass flow controllers](control-chassis/mass-flow-controllers.md)
-
-## Stage
-
-* [3-Axis Stage](stage/3-axis-stage.md)
 
 ## Tuner
 
@@ -56,14 +58,13 @@
 
 * [Plasma Stream](plasma/plasma-stream.md)
 
-## Cooling
+## Upper Control Panel
 
-* [🌀 Cooling System](cooling/cooling-system.md)
+* [🌀 Upper Control Panel](upper-control-panel/upper-control-panel.md)
 
 ## Protection Systems
 
 * [🚦 Light Tower](protection-systems/light-tower.md)
-* [Crash Avoidance System](protection-systems/crash-avoidance-system.md)
 
 ## Computer&#x20;
 
@@ -83,6 +84,7 @@
 * [Utilities](installation/utilities.md)
 * [Rear Service Panel](installation/rear-service-panel.md)
 * [Gasses](installation/gasses.md)
+* [Adjusting the Stand Leveling Casters](installation/adjusting-the-stand-leveling-casters.md)
 * [Wiring Diagram](installation/wiring-diagram.md)
 
 ## Machine Operation

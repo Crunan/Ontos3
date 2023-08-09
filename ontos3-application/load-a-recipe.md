@@ -4,7 +4,7 @@
 2. The Select a Recipe File window will open. Select the recipe and click \[Open].
 
 {% hint style="success" %}
-Once the recipe is opened, ensure that the Recipe values are set correctly to their required setponts.
+Once the recipe is opened, ensure that the Recipe values are set correctly to their required setpoints.
 {% endhint %}
 
 

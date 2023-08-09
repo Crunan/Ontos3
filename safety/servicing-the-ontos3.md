@@ -1,5 +1,5 @@
 # 🔧 Servicing the Ontos3
 
-A limited number of functional checks can be performed by users. These are described in detail in (Fill in chapter). All other service and maintenance for the Ontos3 should be performed by qualified, OES-trained technicians, and only after they have ensured that all hazards outlined in this chapter have been mitigated.&#x20;
+A limited number of functional checks can be performed by users. These are described in detail in the [Servicing ](../servicing/maintenance.md)section of the manual. All other service and maintenance for the tool should be performed by qualified, OES-trained technicians, and only after they have ensured that all hazards outlined in this section have been mitigated.&#x20;
 
-Specifically, make sure that electrical power and gas pressure have been turned off, and that all surfaces have cooled before attempting to open the covers or conduct any diagnostics or service on that area of the machine.
+In particular, it's essential to confirm the deactivation of electrical power and gas pressure, as well as ensuring adequate cooling of all surfaces. These precautions must be diligently adhered to before embarking on tasks such as uncovering machine components or engaging in diagnostics and servicing within that machine area.

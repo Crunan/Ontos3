@@ -2,16 +2,16 @@
 
 ### Specific Areas of Risk for the Ontos3 <a href="#_toc54339753" id="_toc54339753"></a>
 
-There are multiple areas of the Ontos3 which might cause or lead to injury. Contact with process gases, high voltages, pinch points and hot surfaces or gases can lead to serious injury or death.
+Within the system, it's imperative to acknowledge zones where hazards can arise and the risk of injury is present. Engaging process gases, exposure to high voltages, encountering pinch points, and coming into contact with heated surfaces or gases all carry the potential for serious injury or even fatality.
 
 {% hint style="info" %}
-&#x20;The machine is shipped and installed with numerous protection devices, including machine interlocks. &#x20;
+From the outset of shipment and throughout the installation process, the tool is equipped with an array of protective mechanisms, including integral machine interlocks designed to bolster safety protocols.
 {% endhint %}
 
 {% hint style="warning" %}
-Do not attempt to override or remove any interlocks.
+Prior to initiating machine operation, it is mandatory that all interlocks are intact and operational, and that enclosure panels are securely affixed. This measure is intended to uphold the safety of all personnel and the overall operation of the Ontos3 system.
 {% endhint %}
 
-{% hint style="warning" %}
-Do not attempt to operate the machine unless all interlocks and enclosure panels are in place and functional.
+{% hint style="danger" %}
+Under no circumstances should any attempts be made to override or remove these interlocks. Their presence is pivotal in safeguarding against potential dangers.
 {% endhint %}

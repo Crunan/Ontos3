@@ -4,4 +4,5 @@ The Ontos3 Atmospheric Plasma Surface Preparation System creates a plasma using 
 
 Typical downstream processes might include soldering, joining, bonding, etching, deposition, plating, or other semiconductor fabrication or assembly steps.&#x20;
 
-The following is a brief description of the equipment’s subsystems and major components. The Ontos3has two tool sizes, 200mm and 300mm&#x20;
+<figure><img src="../.gitbook/assets/image.png" alt=""><figcaption><p>Ontos3 System</p></figcaption></figure>
+

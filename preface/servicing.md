@@ -2,6 +2,9 @@
 
 **Service Calls**
 
-In order to avoid abuse, every request for the service call of an OES authorized after sales technician must be confirmed via email. No other form of request will be acknowledged. In addition, for service calls outside the warranty period, the email should include an order number in order to facilitate rapid settlement. The point-of-contact for service work is [service@set-na.com](mailto:service@set-na.com).
+To ensure the best support experience for all our valued customers, we kindly request that you follow these simple steps when requesting a service call:
 
-The payment of service calls carried out outside the warranty period is to be made upon receipt of our invoice. No service calls will be carried out if these conditions are not observed.
+1. Reach out to our OES authorized after-sales technician by sending an email to [service@set-na.com](mailto:service@set-na.com) to initiate the service call process.
+2. For service calls outside the warranty period, please include an order number in your email. This will help expedite the settlement process.
+
+We genuinely appreciate your cooperation in adhering to these guidelines, as they allow us to serve you better. By working together, we can ensure that your service needs are promptly addressed.
