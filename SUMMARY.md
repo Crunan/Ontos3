@@ -12,7 +12,7 @@
 ## Safety
 
 * [ℹ Introduction](safety/introduction.md)
-* [🔧 Servicing the Ontos3](safety/servicing-the-ontos3.md)
+* [🔧 Servicing the system](safety/servicing-the-system.md)
 * [🛑 Emergency Power-Off](safety/emergency-power-off.md)
 * [⚠ Specific Areas of Risk](safety/specific-areas-of-risk.md)
 * [🖐 Physical Risk](safety/physical-risk.md)
@@ -24,25 +24,14 @@
 
 ## System Description
 
-* [What is the Ontos3?](system-description/what-is-the-ontos3.md)
+* [What is the ONTOS Clean?](system-description/what-is-the-ontos-clean.md)
 * [Subsystems](system-description/subsystems/README.md)
   * [⚫ Base System - Components](system-description/subsystems/base-system-components.md)
   * [🔵 3-Axis Stage - Overview](system-description/subsystems/3-axis-stage-overview.md)
-  * [🔵 3 Axis Stage - Limit Switches](system-description/subsystems/3-axis-stage-limit-switches.md)
-  * [🟤 Frame Assembly -Components](system-description/subsystems/frame-assembly-components.md)
-  * [🟤 Frame Assembly - Polycarbonate Panels](system-description/subsystems/frame-assembly-polycarbonate-panels.md)
-  * [🟢 Control Chassis - Components](system-description/subsystems/control-chassis-components.md)
-  * [🟢 Control Chassis - Control Drawer](system-description/subsystems/control-chassis-control-drawer.md)
-  * [🟢 Control Chassis - Din Rail](system-description/subsystems/control-chassis-din-rail.md)
-  * [🟢 Control Chassis - Gas Delivery](system-description/subsystems/control-chassis-gas-delivery.md)
-  * [🟢 Control Chassis - N2 Manifold](system-description/subsystems/control-chassis-n2-manifold.md)
-  * [🟡 Vacuum Cap Matchbox Assembly - Components](system-description/subsystems/vacuum-cap-matchbox-assembly-components.md)
-  * [🟡 Vacuum Cap Matchbox Assembly - Matchbox Group](system-description/subsystems/vacuum-cap-matchbox-assembly-matchbox-group.md)
+  * [🟤 Frame Assembly - Tempered Glass Panels and Door](system-description/subsystems/frame-assembly-tempered-glass-panels-and-door.md)
+  * [🟡 Vacuum Cap Matchbox Assembly - Overview](system-description/subsystems/vacuum-cap-matchbox-assembly-overview.md)
   * [⚫ A/C Distribution Box](system-description/subsystems/a-c-distribution-box.md)
   * [🟠 Upper Control Panel - Components](system-description/subsystems/upper-control-panel-components.md)
-  * [🟠 Upper Control Panel - Aux PCB](system-description/subsystems/upper-control-panel-aux-pcb.md)
-  * [🟠 Upper Control Panel - Plasma Cooling](system-description/subsystems/upper-control-panel-plasma-cooling.md)
-  * [🟠 Upper Control Panel - N2 Puge Valve](system-description/subsystems/upper-control-panel-n2-puge-valve.md)
   * [🔵 Touchscreen Computer & Controller](system-description/subsystems/touchscreen-computer-and-controller.md)
   * [🚦 Signal Tower](system-description/subsystems/signal-tower.md)
   * [🟣 Plasma Head Assembly](system-description/subsystems/plasma-head-assembly.md)
@@ -84,7 +73,8 @@
 * [Utilities](installation/utilities.md)
 * [Rear Service Panel](installation/rear-service-panel.md)
 * [Gasses](installation/gasses.md)
-* [Adjusting the Stand Leveling Casters](installation/adjusting-the-stand-leveling-casters.md)
+* [Seismic Mount Installation](installation/seismic-mount-installation.md)
+* [Securing the Stand Leveling Casters](installation/securing-the-stand-leveling-casters.md)
 * [Wiring Diagram](installation/wiring-diagram.md)
 
 ## Machine Operation

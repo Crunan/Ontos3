@@ -1,6 +1,6 @@
 # ⚗ Gaseous and Chemical Hazards
 
-Safety mechanisms incorporated into the Ontos3 system are designed to provide a safe operating environment ONLY when gases are properly installed and operated as stated within this manual. Use of other gases is not covered by safety design features.
+Safety mechanisms incorporated into the ONTOS _Clean_ are designed to provide a safe operating environment ONLY when gases are properly installed and operated as stated within this manual. Use of other gases is not covered by safety design features.
 
 {% hint style="danger" %}
 Use of any other gases than described in this manual is not authorized by OES and may result in safety hazards and/or equipment damage and void the warranty.

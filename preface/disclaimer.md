@@ -1,8 +1,8 @@
 # Disclaimer
 
-**Disclaimer: Read Before Using the Atmospheric plasma tool.**
+**Read Before Using the Atmospheric plasma tool.**
 
-Thank you for choosing Ontos Equipment Systems. Before using the plasma tool for cleaning substrates using atmospheric plasma, it is essential to carefully read and understand the following disclaimer. By proceeding with the use of this equipment, you acknowledge that you have read, comprehended, and agreed to the terms outlined herein.
+Thank you for choosing Ontos Equipment Systems. Before using the ONTOS _Clean_ plasma tool for cleaning substrates using atmospheric plasma, it is essential to carefully read and understand the following disclaimer. By proceeding with the use of this equipment, you acknowledge that you have read, comprehended, and agreed to the terms outlined herein.
 
 1. **Safety Precautions:** The equipment must be operated by trained personnel in adherence to all safety guidelines and protocols outlined in the user manual. Failure to follow safety procedures may result in injury, equipment damage, or other hazards.
 2. **Intended Use:** This equipment is intended solely for cleaning substrates using atmospheric plasma as described in the user manual. Any usage beyond its intended purpose is strictly prohibited and may result in damage to the equipment or hazardous conditions.

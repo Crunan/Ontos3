@@ -8,10 +8,15 @@ Ensure all gas supplies to the system are turned on.
 On the Control Rack, ensure the EPO button is release by twisting it clockwise and letting it pop back out.
 {% endhint %}
 
-Figure 28: Front Panel Buttons
+{% hint style="success" %}
+Rotate the main power switch clockwise from the off (O) position.
 
-1. Rotate the main power switch clockwise from the off (O) position.
-2. Press and release the green start button, it will light up as seen below.
+
+{% endhint %}
+
+{% hint style="success" %}
+Press and release the green start button, it will light up as seen below.
+{% endhint %}
 
 
 

@@ -1,10 +1,10 @@
-# 🟡 Vacuum Cap Matchbox Assembly - Components
+# 🟡 Vacuum Cap Matchbox Assembly - Overview
 
 The Matchbox Assembly is made up of the following components:
 
 1. Matchbox Enclosure
 2. Matchbox Cover
-3. [Vacuum Cap Matchbox Component Group](vacuum-cap-matchbox-assembly-matchbox-group.md)
+3. [Vacuum Cap Matchbox Component Group](broken-reference)
 
 <div align="center" data-full-width="false">
 
