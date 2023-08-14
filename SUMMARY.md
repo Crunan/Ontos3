@@ -29,35 +29,15 @@
   * [⚫ Base System - Components](system-description/subsystems/base-system-components.md)
   * [🔵 3-Axis Stage - Overview](system-description/subsystems/3-axis-stage-overview.md)
   * [🟤 Frame Assembly - Tempered Glass Panels and Door](system-description/subsystems/frame-assembly-tempered-glass-panels-and-door.md)
-  * [🟡 Vacuum Cap Matchbox Assembly - Overview](system-description/subsystems/vacuum-cap-matchbox-assembly-overview.md)
+  * [🟡 Vacuum Cap Matchbox Assembly - Overview](system-description/subsystems/vacuum-cap-matchbox-assembly-components.md)
   * [⚫ A/C Distribution Box](system-description/subsystems/a-c-distribution-box.md)
   * [🟠 Upper Control Panel - Components](system-description/subsystems/upper-control-panel-components.md)
-  * [🔵 Touchscreen Computer & Controller](system-description/subsystems/touchscreen-computer-and-controller.md)
+  * [🖥 Touchscreen Computer & Controller](system-description/subsystems/touchscreen-computer-and-controller.md)
   * [🚦 Signal Tower](system-description/subsystems/signal-tower.md)
   * [🟣 Plasma Head Assembly](system-description/subsystems/plasma-head-assembly.md)
   * [🔴 Crash Avoidance System](system-description/subsystems/crash-avoidance-system.md)
-  * [⚪ Ellipsometry System - Components](system-description/subsystems/ellipsometry-system-components.md)
+  * [⚪ Elipsometry System - Components](system-description/subsystems/elipsometry-system-components.md)
 * [Electrostatic Discharge Port](system-description/electrostatic-discharge-port.md)
-
-## Tuner
-
-* [RF Matching Circuit](tuner/rf-matching-circuit.md)
-
-## Plasma
-
-* [Plasma Stream](plasma/plasma-stream.md)
-
-## Upper Control Panel
-
-* [🌀 Upper Control Panel](upper-control-panel/upper-control-panel.md)
-
-## Protection Systems
-
-* [🚦 Light Tower](protection-systems/light-tower.md)
-
-## Computer&#x20;
-
-* [🕹 Touchscreen Computer & Joystick](computer/touchscreen-computer-and-joystick.md)
 
 ## Ontos3 Software
 
