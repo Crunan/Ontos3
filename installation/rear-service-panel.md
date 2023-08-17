@@ -1,9 +1,15 @@
 # Rear Service Panel
 
-The four input gas ports and one output gas port (chuck vacuum) are located on the back panel of the OntosTT. The fittings used for the four input gas ports are ¼” Swagelok® compression fittings. The four gases used in the system are typically operated at a pressure of 20 PSI (1.4 bar). OES suggests that UHP gases and point-of-use filters be used. All gas flow rates should be capable of 20 SLPM at 20 PSI.
+**Gas Ports and Connections**
 
-A stainless-steel regulator with a maximum range of 0 to 100 PSI (0 to 6.9 bar) must be installed on the delivery source for each gas. In addition, a stainless-steel shut-off valve may be installed immediately downstream of the regulator to allow gas to be switched on/off without adjusting the regulator. This can enable changing out of bottles without the need to purge for a long period before resuming plasma.
+Proper gas connections are vital for the optimal functioning of the ONTOS _Clean_ system. Follow these guidelines for secure and efficient gas handling:
 
-If the delivery source is located in a chase, then a valve should be installed inside the clean room area near the system connections.
+* **Gas Ports Location:** The back panel of the ONTOS _Clean_ houses four input gas ports and one output gas port (chuck vacuum).
+* **Fitting Type:** The four input gas ports are equipped with ¼” Swagelok® compression fittings.
+* **Gas Pressure:** Operate the four gases in the system at a pressure of 20 PSI (1.4 bar).
+* **Recommended Gas Quality:** OES recommends the use of Ultra-High Purity (UHP) gases and point-of-use filters to ensure gas quality.
+* **Flow Rate and Pressure Compatibility:** All gas flow rates should be capable of 50 SLPM at 20 PSI.
+* **Regulator Installation:** Install a stainless-steel regulator with a maximum range of 0 to 100 PSI (0 to 6.9 bar) on the delivery source for each gas.
+* **Shut-off Valve:** Additionally, consider installing a stainless-steel shut-off valve downstream of the regulator. This valve allows gas to be switched on/off without adjusting the regulator, enabling efficient bottle changes without extensive purging before plasma resumption.
+* **Chase Installation:** If the delivery source is located in a chase, ensure the installation of a valve within the clean room area near the system connections.
 
-Figure 26: Service Panel with Gas and Power Ports

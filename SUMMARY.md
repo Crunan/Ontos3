@@ -11,44 +11,33 @@
 
 ## Safety
 
-* [ℹ Introduction](safety/introduction.md)
-* [🔧 Servicing the system](safety/servicing-the-system.md)
-* [🛑 Emergency Power-Off](safety/emergency-power-off.md)
-* [⚠ Specific Areas of Risk](safety/specific-areas-of-risk.md)
-* [🖐 Physical Risk](safety/physical-risk.md)
-* [⚡ Electrical Hazards](safety/electrical-hazards/README.md)
-  * [⚡ Electrical Hazards (cont.)](safety/electrical-hazards/electrical-hazards-cont..md)
-  * [⚡ Single-point-earth-ground](safety/electrical-hazards/single-point-earth-ground.md)
-* [⚗ Gaseous and Chemical Hazards](safety/gaseous-and-chemical-hazards.md)
-* [📦 Ozone Safety Kit (Optional)](safety/ozone-safety-kit-optional.md)
+* [Introduction](safety/introduction.md)
+* [Servicing the system](safety/servicing-the-system.md)
+* [Emergency Power Off (EPO) Functionality](safety/emergency-power-off-epo-functionality.md)
+* [Specific Areas of Risk](safety/specific-areas-of-risk/README.md)
+  * [Physical Risks at the Plasma Head:](safety/specific-areas-of-risk/physical-risks-at-the-plasma-head.md)
+  * [Electrical Hazards and Precautions](safety/specific-areas-of-risk/electrical-hazards-and-precautions.md)
+  * [Gaseous and Chemical Hazards](safety/specific-areas-of-risk/gaseous-and-chemical-hazards.md)
+  * [Optional Ozone Safety Kit](safety/specific-areas-of-risk/optional-ozone-safety-kit.md)
 
 ## System Description
 
 * [What is the ONTOS Clean?](system-description/what-is-the-ontos-clean.md)
 * [Subsystems](system-description/subsystems/README.md)
-  * [⚫ Base System - Components](system-description/subsystems/base-system-components.md)
-  * [🔵 3-Axis Stage - Overview](system-description/subsystems/3-axis-stage-overview.md)
-  * [🟤 Frame Assembly - Tempered Glass Panels and Door](system-description/subsystems/frame-assembly-tempered-glass-panels-and-door.md)
-  * [🟡 Vacuum Cap Matchbox Assembly - Overview](system-description/subsystems/vacuum-cap-matchbox-assembly-components.md)
-  * [⚫ A/C Distribution Box](system-description/subsystems/a-c-distribution-box.md)
-  * [🟠 Upper Control Panel - Components](system-description/subsystems/upper-control-panel-components.md)
-  * [🖥 Touchscreen Computer & Controller](system-description/subsystems/touchscreen-computer-and-controller.md)
-  * [🚦 Signal Tower](system-description/subsystems/signal-tower.md)
-  * [🟣 Plasma Head Assembly](system-description/subsystems/plasma-head-assembly.md)
-  * [🔴 Crash Avoidance System](system-description/subsystems/crash-avoidance-system.md)
-  * [⚪ Elipsometry System - Components](system-description/subsystems/elipsometry-system-components.md)
-* [Electrostatic Discharge Port](system-description/electrostatic-discharge-port.md)
-
-## Ontos3 Software
-
-* [Ontos3 Software](ontos3-software/ontos3-software.md)
-* [Menu Bar](ontos3-software/menu-bar.md)
-* [Service Menu](ontos3-software/service-menu.md)
-* [Recipe Menu](ontos3-software/recipe-menu.md)
-* [Enter Code](ontos3-software/enter-code.md)
+  * [🔵 1. Axis Stage](system-description/subsystems/1.-axis-stage.md)
+  * [🟤 2. Frame Assembly](system-description/subsystems/2.-frame-assembly.md)
+  * [🟡 3. Vacuum Cap Matchbox Assembly](system-description/subsystems/3.-vacuum-cap-matchbox-assembly.md)
+  * [⚫ 4. A/C Distribution Box](system-description/subsystems/4.-a-c-distribution-box.md)
+  * [🟠 5. Upper Control Panel](system-description/subsystems/5.-upper-control-panel.md)
+  * [🖥 6. Touchscreen Computer & Controller](system-description/subsystems/6.-touchscreen-computer-and-controller.md)
+  * [🚦 7. Signal Tower](system-description/subsystems/7.-signal-tower.md)
+  * [🟣 8. Plasma Head Assembly](system-description/subsystems/8.-plasma-head-assembly.md)
+  * [🔴 9. Crash Avoidance System](system-description/subsystems/9.-crash-avoidance-system.md)
+  * [⚪ 10. Elipsometry System](system-description/subsystems/10.-elipsometry-system.md)
 
 ## Installation
 
+* [Unpacking the Machine](installation/unpacking-the-machine.md)
 * [Environmental Conditions](installation/environmental-conditions.md)
 * [Utilities](installation/utilities.md)
 * [Rear Service Panel](installation/rear-service-panel.md)
@@ -59,47 +48,47 @@
 
 ## Machine Operation
 
-* [Power up](machine-operation/power-up.md)
+* [Powering Up](machine-operation/powering-up.md)
 * [Shutting Down](machine-operation/shutting-down.md)
+* [Starting the Software](machine-operation/starting-the-software.md)
 
-## Ontos3 Application
+## Software Application
 
-* [Ontos3 Application](ontos3-application/ontos3-application.md)
-* [Access Controls](ontos3-application/access-controls.md)
-* [GUI Overview](ontos3-application/gui-overview.md)
-* [Connecting to Comms Port](ontos3-application/connecting-to-comms-port.md)
-* [Plasma Recipe Setpoints](ontos3-application/plasma-recipe-setpoints.md)
-* [Load a Recipe](ontos3-application/load-a-recipe.md)
-* [Load Cascade Recipe](ontos3-application/load-cascade-recipe.md)
-* [Tool Settings](ontos3-application/tool-settings/README.md)
-  * [Auto Start Scan](ontos3-application/tool-settings/auto-start-scan.md)
-  * [Batch ID Logging](ontos3-application/tool-settings/batch-id-logging.md)
-  * [Crash Avoidance System](ontos3-application/tool-settings/crash-avoidance-system.md)
-* [Running Plasma](ontos3-application/running-plasma.md)
-* [Stop Plasma](ontos3-application/stop-plasma.md)
-* [Initializing the Stage](ontos3-application/initializing-the-stage.md)
-* [Stage Recipe Setpoints](ontos3-application/stage-recipe-setpoints.md)
-* [N2 Purge Curtain](ontos3-application/n2-purge-curtain.md)
-* [Save Stage Recipe](ontos3-application/save-stage-recipe.md)
-* [Build Cascade Recipe](ontos3-application/build-cascade-recipe.md)
-* [Save Cascade Recipe](ontos3-application/save-cascade-recipe.md)
-* [Stage Process Overview](ontos3-application/stage-process-overview.md)
-* [Lift Pins](ontos3-application/lift-pins.md)
-* [Vacuum](ontos3-application/vacuum.md)
-* [Load Position](ontos3-application/load-position.md)
-* [Start Scan](ontos3-application/start-scan.md)
-* [Auto Start Scan](ontos3-application/auto-start-scan.md)
-* [Crash Avoidance System](ontos3-application/crash-avoidance-system.md)
-* [Acknowledge Error](ontos3-application/acknowledge-error.md)
-* [Batch ID Logging](ontos3-application/batch-id-logging.md)
-* [Closing the Ontos3 Software](ontos3-application/closing-the-ontos3-software.md)
-* [Set TwoSpot](ontos3-application/set-twospot.md)
-* [Set TwoSpot (cont.)](ontos3-application/set-twospot-cont..md)
+* [ONTOS Clean Application](software-application/ontos-clean-application.md)
+* [Operator Mode](software-application/operator-mode/README.md)
+  * [Load a Recipe](software-application/operator-mode/load-a-recipe.md)
+  * [Load Cascade Recipe](software-application/operator-mode/load-cascade-recipe.md)
+  * [Running Plasma](software-application/operator-mode/running-plasma.md)
+  * [Acknowledging an Error](software-application/operator-mode/acknowledging-an-error.md)
+  * [Initializing the Stage](software-application/operator-mode/initializing-the-stage.md)
+  * [Load Position](software-application/operator-mode/load-position.md)
+  * [Starting a Scan](software-application/operator-mode/starting-a-scan.md)
+  * [Lift Pins](software-application/operator-mode/lift-pins.md)
+  * [Log Files](software-application/operator-mode/log-files.md)
+  * [Vacuum](software-application/operator-mode/vacuum.md)
+  * [Closing the ONTOS Clean Program](software-application/operator-mode/closing-the-ontos-clean-program.md)
+* [Engineer Mode](software-application/engineer-mode/README.md)
+  * [Connection to a Communication Port](software-application/engineer-mode/connection-to-a-communication-port.md)
+  * [Auto Tune](software-application/engineer-mode/auto-tune.md)
+  * [Manual Tuning](software-application/engineer-mode/manual-tuning.md)
+  * [Settings](software-application/engineer-mode/settings/README.md)
+    * [Auto Start Scan](software-application/engineer-mode/settings/auto-start-scan.md)
+    * [Batch ID Logging](software-application/engineer-mode/settings/batch-id-logging.md)
+    * [Crash Avoidance System](software-application/engineer-mode/settings/crash-avoidance-system.md)
+  * [Running Plasma](software-application/engineer-mode/running-plasma.md)
+  * [Running Scanning Cycle](software-application/engineer-mode/running-scanning-cycle.md)
+  * [Illustration of a Scanning Cycle](software-application/engineer-mode/illustration-of-a-scanning-cycle.md)
+  * [Set TwoSpot](software-application/engineer-mode/set-twospot.md)
+  * [Set Diameter](software-application/engineer-mode/set-diameter.md)
+  * [Manual Recipe Setpoints](software-application/engineer-mode/manual-recipe-setpoints.md)
+  * [Save a New Recipe](software-application/engineer-mode/save-a-new-recipe.md)
+  * [Overwrite an Existing Recipe Configuration](software-application/engineer-mode/overwrite-an-existing-recipe-configuration.md)
+  * [Cascade Recipes](software-application/engineer-mode/cascade-recipes.md)
+  * [N2 Purge](software-application/engineer-mode/n2-purge.md)
 
 ## Logging
 
-* [Log File](logging/log-file.md)
-* [Log Commands](logging/log-commands.md)
+* [Log File - Tracking System Events](logging/log-file-tracking-system-events.md)
 
 ## Servicing
 
@@ -110,10 +99,8 @@
 
 ## Troubleshooting
 
-* [Troubleshooting Table](troubleshooting/troubleshooting-table.md)
-* [Plasma Issue #1](troubleshooting/plasma-issue-1.md)
-* [Plasma Issue #2](troubleshooting/plasma-issue-2.md)
-* [Plasma Issue #3](troubleshooting/plasma-issue-3.md)
+* [Troubleshooting the ONTOS Clean System](troubleshooting/troubleshooting-the-ontos-clean-system.md)
+* [Plasma Issues](troubleshooting/plasma-issues.md)
 * [Gas Flow Issues](troubleshooting/gas-flow-issues.md)
 * [Fuse Replacement](troubleshooting/fuse-replacement.md)
 * [Cooling System Issues](troubleshooting/cooling-system-issues.md)
@@ -121,4 +108,4 @@
 ## Diagrams
 
 * [Safety Interlock System](diagrams/safety-interlock-system.md)
-* [System with the Optional Oxygen Kit](diagrams/system-with-the-optional-oxygen-kit.md)
+* [Safety Interlock System for Systems with Optional Oxygen Kits](diagrams/safety-interlock-system-for-systems-with-optional-oxygen-kits.md)

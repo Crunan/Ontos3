@@ -1,19 +1,16 @@
 # Safety Interlock System
 
+Ensuring the safety of the ONTOS _Clean_ system's operation is paramount. The safety interlock system plays a crucial role in this. Refer to the block diagram, Figure 94, for an overview of the safety interlock setup.
 
+**Base System Interlock (No Optional Oxygen Kit):**
 
-Refer to block diagram, Figure 94.
+For base systems without the optional Oxygen kit, a single interlock condition must be met for the process to run smoothly. This interlock involves the red Emergency Power Off (EPO) button. Follow these guidelines:
 
-Figure 94: Safety Interlock Diagram
+{% hint style="success" %}
+1. **Release the EPO Button:**
+   * Before initiating any process, ensure that the red EPO button has been released. If the EPO button is engaged, it may interrupt the operation. Please be cautious, as the EPO button can occasionally be accidentally triggered, leading to unintended disruptions.
+{% endhint %}
 
-#### Base System (without the optional Oxygen Kit) <a href="#_toc54339797" id="_toc54339797"></a>
+For a visual representation of the standard interlock configuration see the interlock diagram. It provides a clear overview of the interlock setup to ensure safe and reliable system operation.
 
-For base systems without the optional Oxygen kit there is “one” interlock which must be satisfied for the process to run. The red EPO button must be released per step 2.1.5.
-
-Note: The EPO button occasionally gets accidentally bumped and disconnects and it may not be apparent that it has been activated.
-
-Refer to the diagram in Figure 95 to see the Standard Interlock Configuration.
-
-Figure 95: Standard Interlock Configuration
-
-#### &#x20;<a href="#_toc54339798" id="_toc54339798"></a>
+Your attention to safety interlocks contributes to the secure functioning of the ONTOS _Clean_ system. Always adhere to these interlock guidelines for a smooth and risk-free operation.

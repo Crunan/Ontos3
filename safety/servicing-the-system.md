@@ -1,5 +1,20 @@
-# 🔧 Servicing the Ontos3
+# Servicing the system
 
-A limited number of functional checks can be performed by users. These are described in detail in the [Servicing ](../servicing/maintenance.md)section of the manual. All other service and maintenance for the tool should be performed by qualified, OES-trained technicians, and only after they have ensured that all hazards outlined in this section have been mitigated.&#x20;
+Proper servicing and maintenance of the ONTOS Clean system are a part of keeping the system at optimal performance. While a few functional checks are permissible for users, the majority of service and maintenance tasks should only be undertaken by certified and OES-trained technicians. It is imperative that these personnel possess the training and experience to effectively mitigate all potential hazards.
 
-In particular, it's essential to confirm the deactivation of electrical power and gas pressure, as well as ensuring adequate cooling of all surfaces. These precautions must be diligently adhered to before embarking on tasks such as uncovering machine components or engaging in diagnostics and servicing within that machine area.
+**User-Performed Functional Checks:** Certain functional checks outlined in the Servicing section of this manual can be conducted by users. These checks are detailed to provide an understanding of the limited tasks that users can safely perform. They contribute to basic operational monitoring and adherence to routine maintenance practices.
+
+**Qualified Service Technicians:** All service and maintenance activities beyond the scope of user-performed checks should be entrusted only to qualified OES-trained technicians. These professionals possess the expertise to identify, address, and rectify complex technical issues while adhering to appropriate safety protocols.
+
+**Prior Precautions:** Before initiating any service or maintenance procedures, it is important to follow the precautions outlined below:
+
+{% hint style="success" %}
+* Deactivate electrical power to prevent accidental electrical hazards.
+* Release gas pressure to eliminate potential gas-related risks.
+* Verify proper cooling of all machine components, eliminating the threat of overheating.
+* Safeguard against any unforeseen system activity or startup during the servicing process.
+{% endhint %}
+
+**Diligent Adherence to Precautions:** Before delving into any maintenance task that requires uncovering machine components, diagnostics, or servicing within machine areas, diligent observance to the outlined precautions is mandatory. These measures mitigate the risk of accidents, equipment damage, and potential hazards to personnel.
+
+Proactive servicing practices guarantee not only the optimal functioning of the ONTOS Clean system but also the well-being of operators and maintenance personnel.

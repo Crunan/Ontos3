@@ -1,29 +1,35 @@
 # Gas Flow Issues
 
-**as valves not turned on.**
+{% hint style="success" %}
+1. **Valves Not Turned On:**
+   * Ensure that all gas supply valves are turned on.
+   * Check gas supply lines to verify proper flow.
+2. **Gas Cylinder Empty:**
+   * Confirm that gas cylinders are not empty.
+   * Replace with full cylinders as needed.
+3. **No Flow Setting in MFC#1:**
+   * Set MFC#1 to a flow value of at least 5 SLPM.
+   * This flow is necessary to activate the manifold outlet valve.
+{% endhint %}
 
-**Gas cylinder empty.**
+If the above steps do not resolve the gas flow issue, please contact our service team at [service@set-na.com](mailto:service@set-na.com) for further assistance.
 
-**No flow setting in MFC#1. (There must be at least 5 SLPM of flow for MFC#1 to activate the manifold outlet valve.**
+**Issue #2: Safety Interlock Issues:**
 
-**If this does not resolve the issue, call or email service at** [**service@set-na.com**](mailto:service@set-na.com)**.**
+{% hint style="info" %}
+Gas flow will automatically shut down if safety interlocks are open.
+{% endhint %}
 
-**Issue #2: Safety interlock issues**
+* Ensure that all safety interlocks are securely closed.
 
-Note: Gas flow will automatically be shut down if safety interlocks are open.
+If the gas flow issue persists due to safety interlock problems, please contact our service team at [service@set-na.com](mailto:service@set-na.com) for further assistance.
 
-**Ensure all safety interlocks are closed.**
+**Issue #3: If Gas Flow Still Does Not Control Properly:**
 
-**If this does not resolve the issue, call or email service at** [**service@set-na.com**](mailto:service@set-na.com)**.**
+{% hint style="warning" %}
+* An MFC (Mass Flow Controller) may be faulty.
+* There could be a problem with the MFC controller.
+* A fuse may be blown in the Main Control Module.
+{% endhint %}
 
-**Issue #3: If gas flow still does not control properly**
-
-**An MFC may could faulty.**
-
-**There is a problem with the MFC controller**
-
-**A fuse may be blown in the Main Control Module**
-
-**For any of the above issues, call or email service at** [**service@set-na.com**](mailto:service@set-na.com)**.**
-
-### &#x20;<a href="#_toc84500410" id="_toc84500410"></a>
+If you encounter any of the issues mentioned above and are unable to resolve them, please contact our service team at [service@set-na.com](mailto:service@set-na.com) for prompt assistance.

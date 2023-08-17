@@ -1,16 +1,19 @@
 # Securing the Stand Leveling Casters
 
-To perform an adjustment of the casters, turn the red thumbwheel to lower or raise the leveling pad as seen below.
+**Leveling the Casters**
 
-The pads underneath the casters should all&#x20;
+Proper leveling of the ONTOS Clean system is essential to ensure stability and optimal performance. Follow these steps to achieve accurate caster leveling:
 
 {% hint style="info" %}
-After an adjustment, use a bubble level on top of the Ontos3 to check for level.
+After an adjustment, use a bubble level on top of the system to check for level.
 {% endhint %}
 
-| ![](../.gitbook/assets/14.png) | <img src="../.gitbook/assets/15.jpeg" alt="Graphical user interface
+<figure><img src="../.gitbook/assets/caster.png" alt="" width="150"><figcaption><p>Caster with Red Wheel Adjustment</p></figcaption></figure>
 
-Description automatically generated with medium confidence" data-size="original"> |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Leveling Feet Casters          | Work Stand Bubble Level                                                                                                                                |
+{% hint style="success" %}
+1. **Caster Adjustment:** To adjust the casters, use the red thumbwheel to either lower or raise the leveling pad, as shown in the diagram above.&#x20;
+2. **Leveling Considerations:** As you begin to level one foot of the system, it may bring the corresponding caster down onto the pad, potentially achieving an overall level. However, for complete stability, it's crucial to have each caster firmly resting on its respective pad.
+3. **Verify Each Caster:** After adjusting and leveling each foot of the system, ensure to check that the associated caster is securely placed on its pad. Repeat this process for all four casters to achieve uniform and accurate leveling.
+4. **Stability Check:** Gently test the stability of the ONTOS _Clean_ system after leveling. Ensure there's no wobbling or unevenness, confirming that the system is securely balanced on all four casters.
+{% endhint %}
 

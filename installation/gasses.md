@@ -1,6 +1,6 @@
 # Gasses
 
-T_he gas input ports (labelled 1-4) should be connected as follows:_
+T_he gas input ports (labelled 1-6) should be connected as follows:_
 
 {% hint style="success" %}
 During installation, pay close attention to input gasses and gas type.
@@ -33,6 +33,14 @@ Oxygen 20 PSI with a flow rate at least 0.5 SLPM, (0.0035-0.0175 CFM).&#x20;
 {% hint style="info" %}
 For systems equipped with the optional O2 gas kit with Ozone safety system, this MFC is plumbed to Oxygen
 {% endhint %}
+{% endtab %}
+
+{% tab title="Gas #5" %}
+
+{% endtab %}
+
+{% tab title="Gas #6" %}
+
 {% endtab %}
 {% endtabs %}
 
