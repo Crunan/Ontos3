@@ -1,6 +1,6 @@
 # Load a Recipe
 
-Follow these steps to load a recipe into the ONTOS Clean application:
+Follow these steps to load a recipe into the ONTOS _CLEAN_ software:
 
 {% hint style="success" %}
 1. Click on **Recipe** ▼ **Open**.

@@ -5,7 +5,7 @@
 Follow these steps to adjust the scanning diameter using the "Set Diameter" function in Engineer Mode:
 
 {% hint style="success" %}
-1. **Ensure Stage Initialization**: Confirm that the stage has been successfully initialized before proceeding.
+1. [**Ensure Stage Initialization**](../operator-mode/initializing-the-stage.md): Confirm that the stage has been successfully initialized before proceeding.
 2. **Activate Set Diameter Function**:
    * Click the \[SET DIAMETER] button in the application interface.
 3. **Choose Size Option**:

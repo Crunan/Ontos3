@@ -1,6 +1,6 @@
 # Electrical Hazards and Precautions
 
-The ONTOS _Clean_ machine incorporates various electrical components and systems, some of which can pose potential electrical hazards. Caution should be exercised to ensure your safety and the integrity of the equipment.
+The ONTOS _CLEAN_ incorporates various electrical components and systems, some of which can pose potential electrical hazards. Caution should be exercised to ensure your safety and the integrity of the equipment.
 
 **Warning Symbols:** Watch for warning symbols like those shown here, which may be affixed to your machine to highlight areas with specific electrical hazards.
 
@@ -24,7 +24,7 @@ The ONTOS _Clean_ machine incorporates various electrical components and systems
 
 ![Single-Point-Earth-Ground Terminal](../../.gitbook/assets/6.png)
 
-By heeding these precautions and understanding the potential electrical hazards, you play an essential role in ensuring your safety and the reliable operation of the ONTOS _Clean_ system.&#x20;
+By heeding these precautions and understanding the potential electrical hazards, you play an essential role in ensuring your safety and the reliable operation of the ONTOS _CLEAN_.&#x20;
 
 {% hint style="warning" %}
 Any procedure which requires the use of tools (i.e., screwdriver, wrench, Allen key, etc.) is to be performed by factory-trained personnel only).

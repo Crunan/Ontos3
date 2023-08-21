@@ -3,7 +3,9 @@
 ## Preface
 
 * [Definitions](README.md)
+* [Symbols](preface/symbols.md)
 * [Disclaimer](preface/disclaimer.md)
+* [Performance Limitation](preface/performance-limitation.md)
 * [Copyright](preface/copyright.md)
 * [Warranty](preface/warranty.md)
 * [Ownership](preface/ownership.md)
@@ -22,7 +24,7 @@
 
 ## System Description
 
-* [What is the ONTOS Clean?](system-description/what-is-the-ontos-clean.md)
+* [What is the ONTOS CLEAN?](system-description/what-is-the-ontos-clean.md)
 * [Subsystems](system-description/subsystems/README.md)
   * [🔵 1. Axis Stage](system-description/subsystems/1.-axis-stage.md)
   * [🟤 2. Frame Assembly](system-description/subsystems/2.-frame-assembly.md)
@@ -42,7 +44,7 @@
 * [Utilities](installation/utilities.md)
 * [Rear Service Panel](installation/rear-service-panel.md)
 * [Gasses](installation/gasses.md)
-* [Seismic Mount Installation](installation/seismic-mount-installation.md)
+* [Seismic Anchoring Installation](installation/seismic-anchoring-installation.md)
 * [Securing the Stand Leveling Casters](installation/securing-the-stand-leveling-casters.md)
 * [Wiring Diagram](installation/wiring-diagram.md)
 
@@ -50,11 +52,13 @@
 
 * [Powering Up](machine-operation/powering-up.md)
 * [Shutting Down](machine-operation/shutting-down.md)
-* [Starting the Software](machine-operation/starting-the-software.md)
+* [Opening The Door](machine-operation/opening-the-door.md)
 
 ## Software Application
 
-* [ONTOS Clean Application](software-application/ontos-clean-application.md)
+* [ONTOS CLEAN Software](software-application/ontos-clean-software.md)
+* [Starting the Software](software-application/starting-the-software.md)
+* [Closing the ONTOS CLEAN Software](software-application/closing-the-ontos-clean-software.md)
 * [Operator Mode](software-application/operator-mode/README.md)
   * [Load a Recipe](software-application/operator-mode/load-a-recipe.md)
   * [Load Cascade Recipe](software-application/operator-mode/load-cascade-recipe.md)
@@ -64,10 +68,9 @@
   * [Load Position](software-application/operator-mode/load-position.md)
   * [Starting a Scan](software-application/operator-mode/starting-a-scan.md)
   * [Lift Pins](software-application/operator-mode/lift-pins.md)
-  * [Log Files](software-application/operator-mode/log-files.md)
   * [Vacuum](software-application/operator-mode/vacuum.md)
-  * [Closing the ONTOS Clean Program](software-application/operator-mode/closing-the-ontos-clean-program.md)
 * [Engineer Mode](software-application/engineer-mode/README.md)
+  * [Accessing Engineer Mode](software-application/engineer-mode/accessing-engineer-mode.md)
   * [Connection to a Communication Port](software-application/engineer-mode/connection-to-a-communication-port.md)
   * [Auto Tune](software-application/engineer-mode/auto-tune.md)
   * [Manual Tuning](software-application/engineer-mode/manual-tuning.md)
@@ -88,7 +91,8 @@
 
 ## Logging
 
-* [Log File - Tracking System Events](logging/log-file-tracking-system-events.md)
+* [Log Files](logging/log-files.md)
+* [Log File - Tracked System Events](logging/log-file-tracked-system-events.md)
 
 ## Servicing
 
@@ -99,7 +103,7 @@
 
 ## Troubleshooting
 
-* [Troubleshooting the ONTOS Clean System](troubleshooting/troubleshooting-the-ontos-clean-system.md)
+* [Troubleshooting the ONTOS CLEAN System](troubleshooting/troubleshooting-the-ontos-clean-system.md)
 * [Plasma Issues](troubleshooting/plasma-issues.md)
 * [Gas Flow Issues](troubleshooting/gas-flow-issues.md)
 * [Fuse Replacement](troubleshooting/fuse-replacement.md)

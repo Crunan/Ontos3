@@ -1,6 +1,6 @@
 # N2 Purge
 
-The N2 Purge feature in the ONTOS _Clean_ system provides an effective means of cooling down the substrate before it is exposed to the atmosphere during processing. Follow these steps to utilize the N2 Purge functionality:
+The N2 Purge feature in the ONTOS _CLEAN_ provides an effective means of cooling down the substrate before it is exposed to the atmosphere during processing. Follow these steps to utilize the N2 Purge functionality:
 
 {% hint style="success" %}
 1. **Activate N2 Purge**:
@@ -11,6 +11,6 @@ The N2 Purge feature in the ONTOS _Clean_ system provides an effective means of 
    * The status of the N2 Purge (enabled or disabled) will be saved as part of the recipe when performing the "Save" or "Save As" operations. This ensures that your preferred N2 Purge configuration is preserved for future runs.
 {% endhint %}
 
-By enabling the N2 Purge feature and ensuring its automatic control during scanning, you enhance the efficiency and reliability of your processing operations with the ONTOS _Clean_ system. The N2 Purge plays a crucial role in maintaining substrate integrity during and after the treatment process.
+By enabling the N2 Purge feature and ensuring its automatic control during scanning, you enhance the efficiency and reliability of your processing operations with the ONTOS _CLEAN_. The N2 Purge plays a crucial role in maintaining substrate integrity during and after the treatment process.
 
 \

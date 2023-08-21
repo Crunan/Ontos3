@@ -1,10 +1,10 @@
 # Operator Mode
 
-The Operator mode within the ONTOS Clean application offers controls designed to facilitate loading and running recipes efficiently providing a streamlined experience, making it straightforward for Operators to achieve their tasks effectively. Below are the key features available to the Operator:
+The Operator mode within the ONTOS _CLEAN_ software offers controls designed to facilitate loading and running recipes efficiently providing a streamlined experience, making it straightforward for Operators to achieve their tasks effectively. Below are the key features available to the Operator:
 
 1. **Limited Operator Controls:** In Operator mode, the available controls are focused on loading and executing recipes for processing substrates and wafers.
 2. **User-Friendly Interface:** The application window presents an graphical representation of the system with intuitive interface that ensures ease of use for Operators.
-3. **Button Navigation:** When navigating the application, the use of the ▼ symbol indicates a sequence of actions, starting with a button click followed by a dropdown selection.
+3. **Button Navigation:** When navigating the software, the use of the ▼ symbol indicates a sequence of actions, starting with a button click followed by a dropdown selection.
 
 <figure><img src="https://lh5.googleusercontent.com/NfkgVJ5N671MgY8XIPZ1IqT0WB0DkAzdlor5xErMuSdzlcfzV7BPxfm6-9mitA7vmky9TiCxCt5SMzGTAcA3Cz59wgTAX31b3ynexzYqlIxTn1boJ6Sw3E5f5CM_mtGmbb6RTpkjI7lJYsWm5CzdI7huhdGO8l3w" alt=""><figcaption><p>Operator Interface </p></figcaption></figure>
 

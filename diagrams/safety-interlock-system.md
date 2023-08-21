@@ -1,6 +1,8 @@
 # Safety Interlock System
 
-Ensuring the safety of the ONTOS _Clean_ system's operation is paramount. The safety interlock system plays a crucial role in this. Refer to the block diagram, Figure 94, for an overview of the safety interlock setup.
+Ensuring the safety of the ONTOS _CLEAN's_ operation is paramount. The safety interlock system plays a crucial role in this. Refer to the block diagram for an overview of the safety interlock setup:
+
+<figure><img src="../.gitbook/assets/safetyinterlock.jpg" alt=""><figcaption></figcaption></figure>
 
 **Base System Interlock (No Optional Oxygen Kit):**
 
@@ -13,4 +15,4 @@ For base systems without the optional Oxygen kit, a single interlock condition m
 
 For a visual representation of the standard interlock configuration see the interlock diagram. It provides a clear overview of the interlock setup to ensure safe and reliable system operation.
 
-Your attention to safety interlocks contributes to the secure functioning of the ONTOS _Clean_ system. Always adhere to these interlock guidelines for a smooth and risk-free operation.
+Your attention to safety interlocks contributes to the secure functioning of the ONTOS _CLEAN_. Always adhere to these interlock guidelines for a smooth and risk-free operation.

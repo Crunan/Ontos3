@@ -11,4 +11,4 @@ Please be aware that fuse replacement should be conducted by OES-trained mainten
    * Fuses often blow due to underlying problems. Our trained personnel can diagnose the root cause of the fuse failure and address it appropriately.
 {% endhint %}
 
-Remember, your safety and the proper functioning of the OntosTT system are our priorities. Let our experts guide you through the fuse replacement process to ensure the system's integrity.
+Remember, your safety and the proper functioning of the ONTOS _CLEAN_ system are our priorities. Let our experts guide you through the fuse replacement process to ensure the system's integrity.

@@ -6,7 +6,7 @@ Batch ID Logging allows for organized tracking of batch or lot numbers. To enabl
 1. **Enable Batch ID Logging:**
    * Access the settings window and enable Batch ID Logging.
 2. **Batch ID Button:**
-   * Once enabled, a new button labeled "Batch ID" becomes available on the ONTOS Clean dashboard.
+   * Once enabled, a new button labeled "Batch ID" becomes available on the ONTOS _CLEAN_ dashboard.
 3. **Entering Batch/lot Number:**
    * Click the "Batch ID" button to input the batch or lot number.
 4. **Confirm and Store:**

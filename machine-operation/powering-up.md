@@ -2,7 +2,7 @@
 
 **Starting Up the Tool**
 
-Follow these steps for powering up the ONTOS _Clean_:
+Follow these steps for powering up the ONTOS _CLEAN_:
 
 {% hint style="success" %}
 1. **Gas Supplies:** Ensure all gas supplies required for the system's operation are turned on and properly connected.
@@ -11,4 +11,4 @@ Follow these steps for powering up the ONTOS _Clean_:
 4. **Start Button Activation:** Press and release the green start button. The button will illuminate, indicating the system's activation is in progress.
 {% endhint %}
 
-Once the green start button is illuminated, the ONTOS _Clean_ will initiate its startup sequence.&#x20;
+Once the green start button is illuminated, the ONTOS _CLEAN_ will initiate its startup sequence.&#x20;

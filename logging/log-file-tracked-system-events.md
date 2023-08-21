@@ -1,8 +1,8 @@
-# Log File - Tracking System Events
+# Log File - Tracked System Events
 
 
 
-The Log File feature in the OntosTT application serves as a comprehensive record of various tasks performed by operators and updates from the tool itself. This tracking system provides valuable insights into the operation of the ONTOS Clean system. The key details about this Log File functionality are presented below:
+The Log File feature in the ONTOS _CLEAN_ software serves as a comprehensive record of various tasks performed by operators and updates from the tool itself. This tracking system provides valuable insights into the operation of the ONTOS _CLEAN_. The key details about this Log File functionality are presented below:
 
 * **Log File Location**:
   * The log file is stored as a text file in the directory: C:\OTT\_PLUS\Logs.
@@ -54,6 +54,8 @@ The Log File feature in the OntosTT application serves as a comprehensive record
     | Status Bits changed: Low Threshold for MFC2          | <mark style="color:red;">"MFC\_2 Low Flow"</mark>                                                        |
     | Status Bits changed: Low Threshold MFC3              | <mark style="color:red;">"MFC\_3 Low Flow"</mark>                                                        |
     | Status Bits changed: Low Threshold MFC4              | <mark style="color:red;">"MFC\_4 Low Flow"</mark>                                                        |
+    | Status Bits changed: Low Threshold MFC5              | <mark style="color:red;">"MFC\_5 Low Flow"</mark>                                                        |
+    | Status Bits changed: Low Threshold MFC6              | <mark style="color:red;">"MFC\_6 Low Flow"</mark>                                                        |
     | Status Bits changed: No Flow for Helium              | <mark style="color:red;">"BAD HELIUM"</mark>                                                             |
     | Status Bits changed: ESTOP ACTIVATED                 | <mark style="color:red;">"ESTOP ACTIVE"</mark>                                                           |
     | Status Bits changed: MFC are no longer communicating | <mark style="color:red;">"MFC Comms Down"</mark>                                                         |
@@ -63,6 +65,6 @@ The Log File feature in the OntosTT application serves as a comprehensive record
   * The log file can be easily copied or moved to external storage such as a USB drive or a network location. Utilize Windows Cut/Copy functions for this purpose.
   * The destination for storing the log file can be chosen as needed.
 
-By maintaining a detailed log of various operations, events, and system status changes, the Log File functionality empowers operators and engineers with a comprehensive record for analysis, troubleshooting, and process optimization within the ONTOS Clean system.
+By maintaining a detailed log of various operations, events, and system status changes, the Log File functionality empowers operators and engineers with a comprehensive record for analysis, troubleshooting, and process optimization within the ONTOS _CLEAN_.
 
 \

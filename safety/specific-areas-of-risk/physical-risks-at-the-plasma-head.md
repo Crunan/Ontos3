@@ -1,6 +1,6 @@
 # Physical Risks at the Plasma Head:
 
-Within the ONTOS Clean system, physical risks are associated with the Plasma Head, a component emitting a plume resulting from internal reactions. This plume might contain hot gases, leading to potential hazards. It's crucial to recognize and mitigate these risks when operating the equipment.
+Within the ONTOS _CLEAN_, physical risks are associated with the Plasma Head, a component emitting a plume resulting from internal reactions. This plume might contain hot gases, leading to potential hazards. It's crucial to recognize and mitigate these risks when operating the equipment.
 
 **Elevated Temperatures:** The Plasma Head's operational cycle can elevate its temperature up to 150°C, even after the processing has concluded. This heat emission can pose a risk to operators and personnel in proximity. Warning labels are affixed to surfaces in the vicinity of the Plasma Head to alert users to potential dangers.
 
@@ -18,7 +18,7 @@ Within the ONTOS Clean system, physical risks are associated with the Plasma Hea
 
 **Preventive Measures:** To minimize physical risks associated with the Plasma Head:
 
-{% hint style="success" %}
+{% hint style="info" %}
 * Adhere to all warning labels placed on surfaces near the Plasma Head.
 * Avoid direct contact with the Plasma Head and its surrounding structure during and after processing.
 * Wear suitable personal protective equipment (PPE) as recommended by safety guidelines.

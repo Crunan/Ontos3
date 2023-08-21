@@ -16,9 +16,9 @@ Cascade Recipes offer the capability to seamlessly execute a series of recipes i
 6. **Manage Cascade Recipe List**:
    * The added recipe will now appear in the Cascade Recipe List. If necessary, you can remove a recipe from the list by selecting it and clicking "REMOVE".
 7. **Save Cascade Recipe**:
-   * When satisfied with the configuration of your Cascade Recipe, click "SAVE" to preserve the sequence (Figure 90).
+   * When satisfied with the configuration of your Cascade Recipe, click "SAVE" to preserve the sequence.
 8. **Complete Cascade Recipe Management**:
    * To finish working with the Cascade Recipe, click "OK" to exit the menu.
 {% endhint %}
 
-By creating Cascade Recipes, you enable the automation of multiple sequential recipe runs. This feature streamlines processing and ensures efficient execution, making the ONTOS Clean system even more versatile for various production requirements.
+By creating Cascade Recipes, you enable the automation of multiple sequential recipe runs. This feature streamlines processing and ensures efficient execution, making the ONTOS _Clean_ system even more versatile for various production requirements.

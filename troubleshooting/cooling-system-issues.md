@@ -11,4 +11,4 @@ Maintaining proper plasma head temperature is essential for system performance. 
    * While awaiting service, you can continue intermittent operation, but closely monitor that the plasma head temperature remains below 150°C. This precaution helps prevent further issues.
 {% endhint %}
 
-Remember, the cooling system is critical for the reliable operation of the ONTOS _Clean_ system. Timely action ensures the system's longevity and performance. Reach out to our service team for assistance and to schedule necessary repairs.
+Remember, the cooling system is critical for the reliable operation of the ONTOS _CLEAN_. Timely action ensures the system's longevity and performance. Reach out to our service team for assistance and to schedule necessary repairs.
