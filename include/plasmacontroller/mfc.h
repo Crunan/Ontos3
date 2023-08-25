@@ -7,11 +7,6 @@
 class MFC : public QObject {
 
     Q_OBJECT
-    Q_PROPERTY(int mfcNumber READ getMFCNumber CONSTANT)
-    Q_PROPERTY(double recipeFlow READ getRecipeFlow WRITE setRecipeFlow NOTIFY recipeFlowChanged)
-    Q_PROPERTY(double actualFlow READ getActualFlow WRITE setActualFlow NOTIFY actualFlowChanged)
-    Q_PROPERTY(double range READ getRange WRITE setRange NOTIFY rangeChanged)
-    Q_PROPERTY(double defaultRecipe READ getDefaultRecipe WRITE setDefaultRecipe NOTIFY defaultRecipeChanged)
 
 private:
     int mfcNumber_;

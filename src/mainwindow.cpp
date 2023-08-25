@@ -5,22 +5,30 @@
 #include <QFileDialog>
 #include <QTextStream>
 #include <QDebug>
+#include "include/axescontroller/axiscontroller.h"
 
-MainWindow::MainWindow(MainLoop& loop, Logger& logger, QWidget *parent) :
+int SM_PollCounter = 0;
+const int SM_POLL_PERIOD = 5;
+std::chrono::milliseconds CTLResetTimeOut = 0ms;
+
+
+MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     QMainWindow(parent),
-    mainLoop(loop),
-    log(logger),
+    m_pMainLoop(loop),
     ui(new Ui::MainWindow),
-    status(new QLabel),
-    settings(new SettingsDialog),
-    mainCTL(),
-    stageCTL(),
-    commandFileReader(),
-    plasmaRecipe(&mainCTL),
-    mainCTLConsole(),
-    stageCTLConsole(),
-    stageWidget(new StageWidget(this))
-{
+    m_pStatus(new QLabel),
+    m_pSettings(new SettingsDialog),
+    m_mainCTL(),
+    m_stageCTL(),
+    m_commandFileReader(),
+    m_recipe(),
+    m_plasmaRecipe(&m_mainCTL),
+    m_pMainCTLConsole(),
+    m_pStageCTLConsole(),
+    m_pStageWidget(new StageWidget(this)),
+    m_config(),
+    m_waferDiameter()
+{    
     ui->setupUi(this);
     this->setWindowTitle("ONTOS3 INTERFACE");
 
@@ -34,14 +42,21 @@ MainWindow::MainWindow(MainLoop& loop, Logger& logger, QWidget *parent) :
     connect(ui->mainDisconnectButton, &QPushButton::clicked, this, &MainWindow::closeMainPort);
     // Stage Serial connect/disconnect buttons
     connect(ui->stageConnectButton, &QPushButton::clicked, this, &MainWindow::openStagePort);
-    connect(ui->stageDisconnectButton, &QPushButton::clicked, this, &MainWindow::closeStagePort);
+    //connect(ui->stageDisconnectButton, &QPushButton::clicked, this, &MainWindow::closeStagePort);
+    // Stage buttons
+    //connect(ui->init_button, &QPushButton::clicked, this, &MainWindow::initButtonClicked);
     // Settings button
-    connect(ui->mainSettingsButton, &QPushButton::clicked, settings, &SettingsDialog::show);
-    connect(ui->stageSettingsButton, &QPushButton::clicked, settings, &SettingsDialog::show);
+    connect(ui->mainSettingsButton, &QPushButton::clicked, m_pSettings, &SettingsDialog::show);
+    connect(ui->stageSettingsButton, &QPushButton::clicked, m_pSettings, &SettingsDialog::show);
+
+    connect(&m_stageCTL, &AxesController::stageStatusUpdate, this, &MainWindow::stageStatusUpdate);
+    connect(&m_stageCTL, &AxesController::stageResponseReceived, this, &MainWindow::stageResponseUpdate);
+
+    connect(m_pMainLoop, &MainLoop::runMainStateMachine, this, &MainWindow::runMainStateMachine);
 
     // TODO: create stage area for custom pathing
-    ui->verticalLayout_4->addWidget(stageWidget);
-    stageWidget->setStageBounds(0.0, 100.0, 0.0, 50.0);
+    ui->verticalLayout_4->addWidget(m_pStageWidget);
+    m_pStageWidget->setStageBounds(0.0, 100.0, 0.0, 50.0);
 
     // Make signal/slot connections here
     connectRecipeButtons();
@@ -49,25 +64,76 @@ MainWindow::MainWindow(MainLoop& loop, Logger& logger, QWidget *parent) :
     connectMFCFlowBars();
 
     // status bar
-    ui->statusBar->addWidget(status);
+    ui->statusBar->addWidget(m_pStatus);
 
+    setupMainStateMachine();
+
+    //this->openMainPort();
+
+    // setup wafer diamter combo box
+    ui->wafer_diameter->addItems(m_waferDiameter.getWaferDiameterTextList());
+    ui->wafer_diameter_dup->addItems(m_waferDiameter.getWaferDiameterTextList());
 }
+
 MainWindow::~MainWindow() {
-    delete settings;
+    delete m_pSettings;
     delete ui;
+
+    // cleanup state machine
+    delete m_pMainStartupState;
+    delete m_pMainIdleState;
+    delete m_pMainPollingState;
+    delete m_pMainShutdownState;
+
+    delete m_pMainLoop;
+}
+
+void MainWindow::setupMainStateMachine()
+{
+    m_pMainStartupState = new QState();
+    m_pMainIdleState = new QState();
+    m_pMainPollingState = new QState();
+    m_pMainShutdownState = new QState();
+
+    // construct operating transitions
+    m_pMainStartupState->addTransition(this, SIGNAL(MSM_TransitionPolling()), m_pMainPollingState);
+    m_pMainIdleState->addTransition(this, SIGNAL(MSM_TransitionStartup()), m_pMainStartupState);
+
+    // shutdown transitions
+    m_pMainStartupState->addTransition(this, SIGNAL(MSM_TransitionShutdown()), m_pMainShutdownState);
+    m_pMainPollingState->addTransition(this, SIGNAL(MSM_TransitionShutdown()), m_pMainShutdownState);
+    m_pMainIdleState->addTransition(this, SIGNAL(MSM_TransitionShutdown()), m_pMainShutdownState);
+
+    // idle transitions
+    m_pMainStartupState->addTransition(this, SIGNAL(MSM_TransitionIdle()), m_pMainIdleState);
+    m_pMainPollingState->addTransition(this, SIGNAL(MSM_TransitionIdle()), m_pMainIdleState);
+    m_pMainShutdownState->addTransition(this, SIGNAL(MSM_TransitionIdle()), m_pMainIdleState);
+
+    // add states to the machine
+    m_mainStateMachine.addState(m_pMainIdleState);
+    m_mainStateMachine.addState(m_pMainStartupState);
+    m_mainStateMachine.addState(m_pMainPollingState);
+    m_mainStateMachine.addState(m_pMainShutdownState);
+
+    // set initial state to idle
+    m_mainStateMachine.setInitialState(m_pMainIdleState);
+
+    // start the state machine
+    m_mainStateMachine.start();
 }
 
 void MainWindow::openMainPort()
 {
-    const SettingsDialog::Settings p = settings->settings();
-    if (mainCTL.open(*settings)) {
+    const SettingsDialog::Settings p = m_pSettings->settings();
+
+    if (m_mainCTL.open(*m_pSettings)) {
 
         //Terminal Tab setup for console commands
         consoleMainCTLSetup();        
-        mainCTLConsole->setEnabled(true);
-        mainCTLConsole->setLocalEchoEnabled(p.localEchoEnabled);
+        m_pMainCTLConsole->setEnabled(true);
+        m_pMainCTLConsole->setLocalEchoEnabled(p.localEchoEnabled);
 
-        // Update UI buttons
+        // Update UI buttonsvoid stageStatusUpdate(QString status);
         ui->mainConnectButton->setEnabled(false);
         ui->mainDisconnectButton->setEnabled(true);
         ui->mainSettingsButton->setEnabled(false);
@@ -77,7 +143,7 @@ void MainWindow::openMainPort()
                               .arg(p.name).arg(p.stringBaudRate).arg(p.stringDataBits)
                               .arg(p.stringParity).arg(p.stringStopBits).arg(p.stringFlowControl));
     } else {
-        QMessageBox::critical(this, tr("Error"), mainCTL.getPortErrorString());
+        QMessageBox::critical(this, tr("Error"), m_mainCTL.getPortErrorString());
 
         showStatusMessage(tr("Open error"));
     }
@@ -85,25 +151,35 @@ void MainWindow::openMainPort()
 
 void MainWindow::openStagePort()
 {
-    const SettingsDialog::Settings p = settings->settings();
-    if (stageCTL.open(*settings)) {
+    const SettingsDialog::Settings p = m_pSettings->settings();
+    if (m_stageCTL.open(*m_pSettings)) {
 
         //Terminal Tab setup for console commands
         consoleStageCTLSetup();
-        stageCTLConsole->setEnabled(true);
-        stageCTLConsole->setLocalEchoEnabled(p.localEchoEnabled);
+        m_pStageCTLConsole->setEnabled(true);
+        m_pStageCTLConsole->setLocalEchoEnabled(p.localEchoEnabled);
 
         // Update UI buttons
         ui->stageConnectButton->setEnabled(false);
         ui->stageDisconnectButton->setEnabled(true);
         ui->stageSettingsButton->setEnabled(false);
 
+        m_stageCTL.resetAxes();
+        //resetCTL(); // TODO:  Needs implementing
+        CTLResetTimeOut = 2500ms / m_pMainLoop->getTimerInterval();
+        //(DEBUG_MODE) ? MainStateMachine.setState(IDLE) : MainStateMachine.setState(STARTUP); // TODO: Needs implementing
+
+        // start the main state machine
+        emit MSM_TransitionStartup();
+
+        Logger::init();
+
         // Give status on connect
         showStatusMessage(tr("Connected to %1 : %2, %3, %4, %5, %6")
                               .arg(p.name).arg(p.stringBaudRate).arg(p.stringDataBits)
                               .arg(p.stringParity).arg(p.stringStopBits).arg(p.stringFlowControl));
     } else {
-        QMessageBox::critical(this, tr("Error"), stageCTL.getPortErrorString());
+        QMessageBox::critical(this, tr("Error"), m_stageCTL.getPortErrorString());
 
         showStatusMessage(tr("Open error"));
     }
@@ -111,12 +187,12 @@ void MainWindow::openStagePort()
 
 void MainWindow::closeMainPort()
 {
-    if (mainCTL.isOpen()) {
-        mainCTL.close();
+    if (m_mainCTL.isOpen()) {
+        m_mainCTL.close();
     }
 
     // Disable Console
-    mainCTLConsole->setEnabled(false);
+    m_pMainCTLConsole->setEnabled(false);
 
     // Default button states
     ui->mainConnectButton->setEnabled(true);
@@ -129,12 +205,12 @@ void MainWindow::closeMainPort()
 
 void MainWindow::closeStagePort()
 {
-    if (stageCTL.isOpen()) {
-        stageCTL.close();
+    if (m_stageCTL.isOpen()) {
+        m_stageCTL.close();
     }
 
     // Disable Console
-    stageCTLConsole->setEnabled(false);
+    m_pStageCTLConsole->setEnabled(false);
 
     // Default button states
     ui->stageConnectButton->setEnabled(true);
@@ -147,24 +223,24 @@ void MainWindow::closeStagePort()
 
 void MainWindow::writeMainPort(const QByteArray &data)
 {
-    if (!mainCTL.sendCommand(data))
+    if (!m_mainCTL.sendCommand(data))
         qDebug() << "Command not sent to main CTL";
 }
 
 void MainWindow::writeStagePort(const QByteArray &data)
 {
-    if (!stageCTL.sendCommand(data))
+    if (!m_stageCTL.sendCommand(data))
         qDebug() << "Command not sent to stage CTL";
 }
 
 QString MainWindow::readMainPort()
 {
-    return mainCTL.readData();
+    return m_mainCTL.readData();
 }
 
 QString MainWindow::readStagePort()
 {
-    return stageCTL.readData();
+    return m_stageCTL.readResponse();
 
     // Update console without side effect
     //stageCTLConsole->putData(data);
@@ -173,8 +249,8 @@ QString MainWindow::readStagePort()
 void MainWindow::handleMainSerialError(QSerialPort::SerialPortError error)
 {
     if (error == QSerialPort::ResourceError) {
-        QMessageBox::critical(this, tr("Critical Error"), mainCTL.getPortErrorString());
-        log.logCritical(mainCTL.getPortErrorString());
+        QMessageBox::critical(this, tr("Critical Error"), m_mainCTL.getPortErrorString());
+        Logger::logCritical(m_mainCTL.getPortErrorString());
         closeMainPort();
     }
 }
@@ -182,15 +258,15 @@ void MainWindow::handleMainSerialError(QSerialPort::SerialPortError error)
 void MainWindow::handleStageSerialError(QSerialPort::SerialPortError error)
 {
     if (error == QSerialPort::ResourceError) {
-        QMessageBox::critical(this, tr("Critical Error"), stageCTL.getPortErrorString());
-        log.logCritical(stageCTL.getPortErrorString());
+        QMessageBox::critical(this, tr("Critical Error"), m_stageCTL.getPortErrorString());
+        Logger::logCritical(m_stageCTL.getPortErrorString());
         closeStagePort();
     }
 }
 
 void MainWindow::showStatusMessage(const QString &message)
 {
-    status->setText(message);
+    m_pStatus->setText(message);
 }
 
 void MainWindow::about() {
@@ -200,11 +276,11 @@ void MainWindow::about() {
 }
 
 void MainWindow::shutDownProgram() {
-    if (mainCTL.isOpen()) {
-        mainCTL.close();
+    if (m_mainCTL.isOpen()) {
+        m_mainCTL.close();
     }
-    if (stageCTL.isOpen()) {
-        stageCTL.close();
+    if (m_stageCTL.isOpen()) {
+        m_stageCTL.close();
     }
     Logger::clean();
     MainWindow::close();
@@ -213,46 +289,46 @@ void MainWindow::shutDownProgram() {
 void MainWindow::consoleMainCTLSetup()
 {
     // Step 1: Create an instance of the console class
-    mainCTLConsole = new Console(ui->mainTabWidget);
+    m_pMainCTLConsole = new Console(ui->mainTabWidget);
 
     // Step 2: Add the console instance to a new tab
-    int tabIndex = ui->mainTabWidget->addTab(mainCTLConsole, "Main CTL Terminal");
+    int tabIndex = ui->mainTabWidget->addTab(m_pMainCTLConsole, "Main CTL Terminal");
 
     // Step 3: Set the Qt theme icon for the tab
     QIcon icon = QIcon::fromTheme("utilities-system");
     ui->mainTabWidget->setTabIcon(tabIndex, icon);
 
     // Step 4: connect signals/slot
-    connect(mainCTLConsole, &Console::getData, this, &MainWindow::writeMainPort);
+    connect(m_pMainCTLConsole, &Console::getData, this, &MainWindow::writeMainPort);
 }
 
 void MainWindow::consoleStageCTLSetup()
 {
     // Step 1: Create an instance of the console class
-    stageCTLConsole = new Console(ui->mainTabWidget);
+    m_pStageCTLConsole = new Console(ui->mainTabWidget);
 
     // Step 2: Add the console instance to a new tab
-    int tabIndex = ui->mainTabWidget->addTab(stageCTLConsole, "Stage CTL Terminal");
+    int tabIndex = ui->mainTabWidget->addTab(m_pStageCTLConsole, "Stage CTL Terminal");
 
     // Step 3: Set the Qt theme icon for the tab
     QIcon icon = QIcon::fromTheme("utilities-system");
     ui->mainTabWidget->setTabIcon(tabIndex, icon);
 
     // Step 4: connect signals/slot
-    connect(stageCTLConsole, &Console::getData, this, &MainWindow::writeStagePort);
+    connect(m_pStageCTLConsole, &Console::getData, this, &MainWindow::writeStagePort);
 }
 
 void MainWindow::connectRecipeButtons()
 {
-    connect(ui->RFRecipeButton, &QPushButton::clicked, this, &MainWindow::RFRecipeButton_clicked);
-    connect(ui->TunerRecipeButton, &QPushButton::clicked, this, &MainWindow::TunerRecipeButton_clicked);
-    connect(ui->AutoTuneCheckBox, &QCheckBox::stateChanged, this, &MainWindow::AutoTuneCheckbox_stateChanged);
+    connect(ui->loadRecipeButton, &QPushButton::clicked, this, &MainWindow::RFRecipeButton_clicked);
+    connect(ui->loadMBButton, &QPushButton::clicked, this, &MainWindow::loadMBRecipeButton_clicked);
+    //connect(ui->AutoTuneCheckBox, &QCheckBox::stateChanged, this, &MainWindow::AutoTuneCheckbox_stateChanged); // MCD: should this be a checkbox?
     connect(ui->loadRecipeButton, &QPushButton::clicked, this, &MainWindow::openRecipe);
     //MFC buttons
-    connectMFCRecipeButton(ui->pushButton, 1);
-    connectMFCRecipeButton(ui->pushButton_2, 2);
-    connectMFCRecipeButton(ui->pushButton_3, 3);
-    connectMFCRecipeButton(ui->pushButton_4, 4);
+    connectMFCRecipeButton(ui->loadMFC1Button, 1);
+    connectMFCRecipeButton(ui->loadMFC2Button, 2);
+    connectMFCRecipeButton(ui->loadMFC3Button, 3);
+    connectMFCRecipeButton(ui->loadMFC4Button, 4);
 }
 
 void MainWindow::connectCascadeRecipeButtons()
@@ -266,8 +342,8 @@ void MainWindow::connectMFCFlowBars()
 {
     // This will connect the flowchanged signal along with its passed params
     // to the GUI updateFlowbars function.
-    for (int i = 0; i < mainCTL.mfcs.size(); ++i) {
-        connect(mainCTL.mfcs[i], &MFC::recipeFlowChanged, this, &MainWindow::updateRecipeProgressBar);
+    for (int i = 0; i < m_mainCTL.mfcs.size(); ++i) {
+        connect(m_mainCTL.mfcs[i], &MFC::recipeFlowChanged, this, &MainWindow::updateRecipeProgressBar);
     }
 }
 
@@ -282,7 +358,8 @@ void MainWindow::connectMFCRecipeButton(QPushButton* button, const int& mfcNumbe
 void MainWindow::updateRecipeProgressBar(const int& mfcNumber, const double& flow)
 {
     // This uses the parameters passed in the signal
-    if (mfcNumber == 1) {
+    /* MCD: Ask Cory.  Temporary just to compile
+     * if (mfcNumber == 1) {
         ui->recipeProgressBar->setValue(flow);
     } else if (mfcNumber == 2) {
         ui->recipeProgressBar_2->setValue(flow);
@@ -290,6 +367,17 @@ void MainWindow::updateRecipeProgressBar(const int& mfcNumber, const double& flo
         ui->recipeProgressBar_3->setValue(flow);
     } else if (mfcNumber == 4) {
         ui->recipeProgressBar_4->setValue(flow);
+    }*/
+
+    // MCD: Temporary just to compile
+    if (mfcNumber == 1) {
+        ui->gas1ProgressBar->setValue(flow);
+    } else if (mfcNumber == 2) {
+        ui->gas2ProgressBar->setValue(flow);
+    } else if (mfcNumber == 3) {
+        ui->gas3ProgressBar->setValue(flow);
+    } else if (mfcNumber == 4) {
+        ui->gas4ProgressBar->setValue(flow);
     }
 }
 
@@ -312,13 +400,13 @@ void MainWindow::openRecipeWindowMFC()
 
     if (ok && !recipeStr.isEmpty()) {
         // User entered a string and clicked OK
-        if (!mainCTL.mfcs.isEmpty()) {
+        if (!m_mainCTL.mfcs.isEmpty()) {
             QPushButton* button = qobject_cast<QPushButton*>(sender());
             if (button) {
 
                 // Retrieve the MFC number from the button's property
                 int mfcNumber = button->property("MFCNumber").toInt();  // Retrieve the MFC index from the button's property
-                MFC* mfc = mainCTL.findMFCByNumber(mfcNumber);
+                MFC* mfc = m_mainCTL.findMFCByNumber(mfcNumber);
                 if (mfc) {
                     double recipe = recipeStr.toDouble();
                     mfc->setRecipeFlow(recipe);
@@ -339,7 +427,7 @@ void MainWindow::RFRecipeButton_clicked()
     if (ok && !recipeStr.isEmpty()) {
         // User entered a string and clicked OK
         int recipe = recipeStr.toInt();
-        mainCTL.pwr.setRecipeWatts(recipe);
+        m_mainCTL.pwr.setRecipeWatts(recipe);
     }
     else {
         // User either clicked Cancel or did not enter any string
@@ -349,7 +437,7 @@ void MainWindow::RFRecipeButton_clicked()
 }
 
 
-void MainWindow::TunerRecipeButton_clicked()
+void MainWindow::loadMBRecipeButton_clicked()
 {
     bool ok;
     QString recipeStr = QInputDialog::getText(nullptr, "Tuner Setpoint", "Please enter a setpoint for MB Tuner:", QLineEdit::Normal, "", &ok);
@@ -357,7 +445,7 @@ void MainWindow::TunerRecipeButton_clicked()
     if (ok && !recipeStr.isEmpty()) {
         // User entered a string and clicked OK
         double recipe = recipeStr.toDouble();
-        mainCTL.tuner.setRecipePosition(recipe);
+        m_mainCTL.tuner.setRecipePosition(recipe);
     }
     else {
         // User either clicked Cancel or did not enter any string
@@ -369,7 +457,7 @@ void MainWindow::TunerRecipeButton_clicked()
 
 void MainWindow::AutoTuneCheckbox_stateChanged(int value)
 {
-    mainCTL.tuner.setAutoTune(value);
+    m_mainCTL.tuner.setAutoTune(value);
 }
 
 
@@ -395,8 +483,8 @@ void MainWindow::openRecipe()
         QString filePath = dialog.selectedFiles().first();
 
         // set plasma Recipe path and file
-        plasmaRecipe.fileReader.setFilePath(filePath);
-        plasmaRecipe.setRecipeFromFile();
+        m_plasmaRecipe.fileReader.setFilePath(filePath);
+        m_plasmaRecipe.setRecipeFromFile();
 
     } else {
         // User canceled the file dialog
@@ -425,7 +513,7 @@ void MainWindow::saveRecipe() {
         if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
             QTextStream out(&file);
 
-            QMap<QString, QVariant> recipe = plasmaRecipe.getRecipeMap();
+            QMap<QString, QVariant> recipe = m_plasmaRecipe.getRecipeMap();
             // Write each recipe name to the file
             for (auto it = recipe.begin(); it != recipe.end(); it++) {
                 const QString& key = it.key();
@@ -473,7 +561,7 @@ void MainWindow::addRecipeToCascadeRecipe()
         QString fileName = fileInfo.fileName();
 
         // Set plasma Recipe path to Cascade Recipe
-        plasmaRecipe.addRecipeToCascade(fileName);
+        m_plasmaRecipe.addRecipeToCascade(fileName);
 
         // Update the UI with the recipes
         ui->listCascadeRecipes->addItem(fileName);
@@ -495,7 +583,7 @@ void MainWindow::removeRecipeFromCascadeList()
         ui->listCascadeRecipes->takeItem(ui->listCascadeRecipes->row(selectedItem));
 
         // Remove the item from the cascade recipe list
-        plasmaRecipe.removeRecipeFromCascade(recipeFileName);
+        m_plasmaRecipe.removeRecipeFromCascade(recipeFileName);
     }
 
 }
@@ -522,7 +610,7 @@ void MainWindow::saveAsCascadeRecipeListToFile() {
             QTextStream out(&file);
 
             // Write each recipe name to the file
-            for (const QString& recipeName : plasmaRecipe.getCascadeRecipeList()) {
+            for (const QString& recipeName : m_plasmaRecipe.getCascadeRecipeList()) {
                 out << recipeName << "\n";
             }
 
@@ -532,5 +620,361 @@ void MainWindow::saveAsCascadeRecipeListToFile() {
             qDebug() << "Failed to open file for writing: " << file.errorString();
         }
     }
+}
+
+void MainWindow::stageStatusUpdate(QString statusNow, QString statusNext)
+{
+    // dashboard
+    ui->axisstatus->setText(statusNow);
+    ui->axisstatus_2->setText(statusNext);
+
+    // 3 axis tab
+    ui->axisstatus_dup->setText(statusNow);
+    ui->axisstatus_2_dup->setText(statusNext);
+}
+
+void MainWindow::stageResponseUpdate(QString status)
+{
+    ui->textRCVbox->appendPlainText(status);
+}
+
+
+void MainWindow::runMainStateMachine()
+{
+    if (m_mainStateMachine.configuration().contains(m_pMainStartupState)) { // in Startup state
+        if (CTLResetTimeOut > 0ms) {
+            CTLResetTimeOut -= 1ms;
+        }
+        else {
+            Logger::logInfo("Main State Machine Start Up");
+            RunStartup();
+            // transition to polling state
+            emit MSM_TransitionPolling();
+            UpdateStatus();
+        }
+    }
+    else if (m_mainStateMachine.configuration().contains(m_pMainPollingState)) { // in Polling state
+        //RunCheckInput(); TODO: Need to implement
+
+        SM_PollCounter += 1;
+        if (SM_PollCounter >= SM_POLL_PERIOD) {
+            SM_PollCounter = 0;
+            RunPolling();
+            UpdateStatus();
+            // setLightTower(); TODO: Need to implement
+            m_stageCTL.RunInitAxesSM();
+            //RunTwoSpotAxesSM(); TODO: Need to implement
+            m_stageCTL.RunHomeAxesSM();
+            //RunScanAxesSM(); TODO: Need to implement
+
+        }
+    }
+    else if (m_mainStateMachine.configuration().contains(m_pMainIdleState)) { // in Idle state
+    }
+    else if (m_mainStateMachine.configuration().contains(m_pMainShutdownState)) { // in Shutdown state
+    }
+}
+
+void MainWindow::RunStartup()
+{
+    //GetExeCfg(); TODO: need to implement
+    m_mainCTL.CTLStartup(); // TODO: need to implement
+    m_stageCTL.AxisStartup();
+}
+
+void MainWindow::GetExeCfg()
+{
+    QStringList Values;
+    QFile file("./config/default.cfg");
+
+    if(!file.open(QIODevice::ReadOnly)) {
+        QMessageBox::information(0, "error", file.errorString());
+    }
+    QTextStream in(&file);
+
+    while(!in.atEnd()) {
+        QString line = in.readLine();
+        Values += line.split(">");
+    }
+
+    file.close();
+
+    loadConfigGUI(Values);
+}
+
+
+void MainWindow::RunPolling()
+{
+    /*
+    getCTLStatus(); // TODO: need to implement
+    //didCTLStatusChange(); //is this for logging?
+    splitRCV(); // TODO: need to implement
+    //! [0]
+    setStatusBitsFromPoll();// TODO: need to implement*/
+    //UpdateStatus();// TODO: need to implement
+    //! [1]
+    /*setTunerPosition();// TODO: need to implement
+    displayTunerPosition();// TODO: need to implement
+    //! [2]
+    setRFPower();// TODO: need to implement
+    displayRFValue();// TODO: need to implement
+    //! [3]
+    setReflectedPower();// TODO: need to implement
+    displayReflectedPower();// TODO: need to implement
+    //! [4]
+    //! setExecRecipe()
+    //! [5]
+    setMFC1();// TODO: need to implement
+    MFC1ActualFlow();// TODO: need to implement
+    //! [6]
+    setMFC2();// TODO: need to implement
+    MFC2ActualFlow();// TODO: need to implement
+    //! [7]
+    setMFC3();// TODO: need to implement
+    MFC3ActualFlow();// TODO: need to implement
+    //! [8]
+    setMFC4();// TODO: need to implement
+    MFC4ActualFlow();// TODO: need to implement
+    //! [9]
+    setTempValue();// TODO: need to implement
+    getHeadTemp();// TODO: need to implement
+    //! [10]
+    //UpdateHandshakeStatus();*/
+    //! [11]
+    m_stageCTL.getAxisStatus();
+    AxisStatusToUI();
+}
+
+void MainWindow::AxisStatusToUI()
+{
+    // update current positions on dashboard
+    ui->X_relative_PH->setText(QString::number(m_stageCTL.getXPosition()));
+    ui->Y_relative_PH->setText(QString::number(m_stageCTL.getYPosition()));
+    ui->Z_relative_PH->setText(QString::number(m_stageCTL.getZPosition()));
+    // update current positions on 3 axis tab
+    ui->X_relative_PH_dup->setText(QString::number(m_stageCTL.getXPosition()));
+    ui->Y_relative_PH_dup->setText(QString::number(m_stageCTL.getYPosition()));
+    ui->Z_relative_PH_dup->setText(QString::number(m_stageCTL.getZPosition()));
+}
+
+void MainWindow::loadConfigGUI(QStringList value)
+{
+    /* // TODO: need to implement
+    config.setMFC1(value[1]);
+    ui->gas1_label->setText(config.getMFC1());
+    config.setMFC2(value[3]);
+    ui->gas2_label->setText(config.getMFC2());
+    config.setMFC3(value[5]);
+    ui->gas3_label->setText(config.getMFC3());
+    config.setMFC4(value[7]);
+    ui->gas4_label->setText(config.getMFC4());
+*/
+}
+
+void MainWindow::UpdateStatus()
+{
+    /*// TODO: need to implement
+     * didStatusBitsChange();
+    StatusBitsWas = StatusBits;
+
+    (StatusBits & 0x0100) > 0 ? ui->actionGAS_1->setChecked(true) : ui->actionGAS_1->setChecked(false);
+    (StatusBits & 0x0200) > 0 ? ui->actionGAS_2->setChecked(true) : ui->actionGAS_2->setChecked(false);
+    (StatusBits & 0x0400) > 0 ? ui->actionGAS_3->setChecked(true) : ui->actionGAS_3->setChecked(false);
+    (StatusBits & 0x0800) > 0 ? ui->actionGAS_4->setChecked(true) : ui->actionGAS_4->setChecked(false);
+
+    (StatusBits & 0x1000) > 0 ? ui->actionV5->setChecked(true) : ui->actionV5->setChecked(false);
+    (StatusBits & 0x2000) > 0 ? ui->actionV6->setChecked(true) : ui->actionV6->setChecked(false);
+    (StatusBits & 0x4000) > 0 ? ui->actionV7->setChecked(true) : ui->actionV7->setChecked(false);
+    (StatusBits & 0x8000) > 0 ? ui->actionRF_ENABLED->setChecked(true) : ui->actionRF_ENABLED->setChecked(false);
+
+    (StatusBits & 0x0001) > 0 ? ui->actionPLASMA_ON->setChecked(true) : ui->actionPLASMA_ON->setChecked(false);
+    (StatusBits & 0x0002) > 0 ? ui->actionTUNING->setChecked(true) : ui->actionTUNING->setChecked(false);
+    (StatusBits & 0x0004) > 0 ? ui->actionAUTO_MODE->setChecked(true) : ui->actionAUTO_MODE->setChecked(false);
+    (StatusBits & 0x0008) > 0 ? ui->actionEXECUTE_RECIPE->setChecked(true) : ui->actionEXECUTE_RECIPE->setChecked(false);
+
+    (StatusBits & 0x0010) > 0 ? ui->actionESTOP_ON->setChecked(true) : ui->actionESTOP_ON->setChecked(false);
+    (StatusBits & 0x0020) > 0 ? ui->actionDO_CMD->setChecked(true) : ui->actionDO_CMD->setChecked(false);
+    (StatusBits & 0x0040) > 0 ? ui->actionHE_SIG->setChecked(true) : ui->actionHE_SIG->setChecked(false);
+    (StatusBits & 0x0080) > 0 ? ui->actionPROCESS_ABORT->setChecked(true) : ui->actionPROCESS_ABORT->setChecked(false);
+
+    if (ui->actionEXECUTE_RECIPE->isChecked()) {
+        RunRecipeOn = true;
+    }
+    else {
+        RunRecipeOn= false;
+    }*/
+
+}
+
+void MainWindow::toggleJoystickOn()
+{
+    m_stageCTL.toggleJoystickOn();
+}
+
+void MainWindow::toggleJoystickOff()
+{
+    m_stageCTL.toggleJoystickOff();
+}
+
+void MainWindow::toggleN2PurgeOn()
+{
+    m_stageCTL.toggleN2PurgeOn(m_recipe);
+}
+void MainWindow::toggleN2PurgeOff()
+{
+    m_stageCTL.toggleN2PurgeOff(m_recipe);
+}
+
+
+// init button on dash
+void MainWindow::on_init_button_clicked()
+{
+    m_stageCTL.StartInit();
+}
+
+// init button on 3 axis tab
+void MainWindow::on_init_button_dup_clicked()
+{
+    m_stageCTL.StartInit();
+}
+
+// home button on dash
+void MainWindow::on_Home_button_clicked()
+{
+    m_stageCTL.StartHome();
+}
+
+// home button on 3 axis tab
+void MainWindow::on_Home_button_dup_clicked()
+{
+    m_stageCTL.StartHome();
+}
+
+// pins button on 3 axis tab
+void MainWindow::on_Stagepins_button_dup_toggled(bool checked)
+{
+    if (checked) {
+        m_stageCTL.togglePinsOn();
+    }
+    else {
+        m_stageCTL.togglePinsOff();
+    }
+}
+
+// n2 purge button on 3 axis tab
+void MainWindow::on_n2_purge_button_dup_toggled(bool checked)
+{
+    if (checked) {
+        toggleN2PurgeOn();
+    }
+    else {
+        toggleN2PurgeOff();
+    }
+}
+
+// diameter button on 3 axis tab
+void MainWindow::on_diameter_button_dup_clicked()
+{
+
+}
+
+// close serial on 3 axis tab
+void MainWindow::on_stageDisconnectButton_clicked()
+{
+    closeStagePort();
+}
+
+
+
+
+void MainWindow::on_Joystick_button_dup_toggled(bool checked)
+{
+    if (checked) {
+        toggleJoystickOn();
+    }
+    else {
+        toggleJoystickOff();
+    }
+}
+
+
+void MainWindow::on_load_thick_clicked()
+{
+    bool ok;
+    double doubVal = QInputDialog::getDouble(this, "Thickness: ","mm: ", 0, 0, 50.00, 2, &ok,Qt::WindowFlags(), 1);
+    if (ok) {
+        m_recipe.setThickness(doubVal);
+        // update dashboard
+        ui->thickness_recipe->setText(m_recipe.getThickness());
+        // update 3 axis tab
+        ui->input_thickness_dup->setText(m_recipe.getThickness());
+    }
+}
+
+
+void MainWindow::on_load_gap_clicked()
+{
+    bool ok;
+    double doubVal = QInputDialog::getDouble(this, "Gap: ","mm: ", 0, 0, 50.00, 2, &ok,Qt::WindowFlags(), 1);
+    if (ok) {
+        m_recipe.setGap(doubVal);
+        // update dashboard
+        ui->gap_recipe->setText(m_recipe.getGap());
+        // update 3 axis tab
+        ui->gap_recipe->setText(m_recipe.getGap());
+    }
+}
+
+
+void MainWindow::on_load_overlap_clicked()
+{
+    bool ok;
+    double doubVal = QInputDialog::getDouble(this, "Overlap: ","mm: ", 0, 0, 5.00, 2, &ok,Qt::WindowFlags(), 1);
+    if (ok) {
+        m_recipe.setOverlap(doubVal);
+        // update dashboard
+        ui->overlap_recipe->setText(m_recipe.getOverlap());
+        // update 3 axis tab
+        ui->input_overlap_dup->setText(m_recipe.getOverlap());
+    }
+}
+
+
+void MainWindow::on_loadSpeedButton_clicked()
+{
+    bool ok;
+    double doubVal = QInputDialog::getDouble(this, "Speed: ","mm: " + m_stageCTL.getXMaxSpeedQStr(), 0, 0, m_stageCTL.XMaxSpeed(), 0, &ok,Qt::WindowFlags(), 1);
+    if (ok) {
+        m_recipe.setSpeed(doubVal);
+        // update dashboard
+        ui->speed_recipe->setText(m_recipe.getSpeed());
+        // update 3 axis tab
+        ui->input_speed_dup->setText(m_recipe.getSpeed());
+    }
+}
+
+
+void MainWindow::on_load_cycles_clicked()
+{
+    bool ok;
+    double doubVal = QInputDialog::getInt(this, "Number of Cycles","cycles: ", 0, 0, 200, 0, &ok);
+    if (ok) {
+        m_recipe.setCycles(doubVal);
+        // update dashboard
+        ui->cycles_recipe->setText(m_recipe.getCycles());
+        // update 3 axis tab
+        ui->input_cycles_dup->setText(m_recipe.getCycles());
+    }
+}
+
+void MainWindow::on_load_autoscan_clicked()
+{
+
+}
+
+// wafer combo box on the 3 axis page
+void MainWindow::on_wafer_diameter_dup_currentIndexChanged(int index)
+{
+    m_waferDiameter.setCurrentWaferDiameter(m_waferDiameter.getWaferDiameterByIndex(index));
 }
 

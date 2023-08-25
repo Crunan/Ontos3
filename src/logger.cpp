@@ -28,7 +28,7 @@ void Logger::init()
     logFile->open(QIODevice::Append | QIODevice::Text);
 
     //Redirect logs to messageOutput
-    qInstallMessageHandler(Logger::messageOutput);
+    //qInstallMessageHandler(Logger::messageOutput);
 
     //Clear file contents
     logFile->resize(0);
@@ -64,16 +64,16 @@ void Logger::messageOutput(QtMsgType type, const QMessageLogContext& context, co
 }
 
 void Logger::logDebug(QString debugMsg) {
-    qDebug() << debugMsg;
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODateWithMs) << " " << debugMsg;
 }
 void Logger::logInfo(QString infoMsg) {
-    qInfo() << infoMsg;
+    qInfo() << QDateTime::currentDateTime().toString(Qt::ISODateWithMs) << " "  << infoMsg;
 }
 void Logger::logWarning(QString warningMsg) {
-    qWarning() << warningMsg;
+    qWarning() << QDateTime::currentDateTime().toString(Qt::ISODateWithMs) << " "  << warningMsg;
 }
 void Logger::logCritical(QString criticalMsg) {
-    qCritical() << criticalMsg;
+    qCritical() << QDateTime::currentDateTime().toString(Qt::ISODateWithMs) << " "  << criticalMsg;
 }
 void Logger::logFatal() {
     qFatal("Fatal Log!");

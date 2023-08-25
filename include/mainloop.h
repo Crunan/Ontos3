@@ -15,16 +15,18 @@ public:
     void start();
     void stop();
     void setTimerInterval(int interval);
+    int getTimerInterval() { return m_pTimer->interval(); }
 
 signals:
     // Define custom signals here
+    void runMainStateMachine();
 
 private slots:
     void handleTimer();
 
 private:
-    QEventLoop* loop;
-    QTimer* timer;
+    QEventLoop* m_pLoop;
+    QTimer* m_pTimer;
 
 };
 

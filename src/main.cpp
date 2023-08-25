@@ -5,21 +5,21 @@
 
 #include "ui_mainwindow.h"
 
+
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
 
     // Create our main loop
     // Contains our Event loop and Timer
-    MainLoop mainLoop;
-    mainLoop.start();
+    MainLoop *mainLoop = new MainLoop(); // cleaned up in MainWindow destructor
+    mainLoop->start();
 
-    // Create our logger
-    Logger log;
-    log.init();
+    // Initialize our logger
+    Logger::init();
 
     // Create our main window
     // Contains our GUI
-    MainWindow window(mainLoop, log);
+    MainWindow window(mainLoop);
     window.show();
 
     //end program

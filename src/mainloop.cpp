@@ -4,37 +4,37 @@
 MainLoop::MainLoop(QObject *parent) : QObject(parent)
 {
     // Create the event loop
-    loop = new QEventLoop(this);
+    m_pLoop = new QEventLoop(this);
 
     // Create the timer
-    timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, &MainLoop::handleTimer);
+    m_pTimer = new QTimer(this);
+    connect(m_pTimer, &QTimer::timeout, this, &MainLoop::handleTimer);
 
-    // Configure the timer interval (default: 1 second
-    setTimerInterval(100);
+    // Configure the timer interval
+    setTimerInterval(200);
 }
 
 MainLoop::~MainLoop() {
     // Clean up resources
-    delete loop;
-    delete timer;
+    delete m_pLoop;
+    delete m_pTimer;
 }
 
 void MainLoop::start() {
     // Start the timer
-    timer->start();
+    m_pTimer->start();
 
     // Start the event loop
-    loop->exec();
+    m_pLoop->exec();
 }
 
 void MainLoop::stop() {
-    timer->stop();
-    loop->quit();
+    m_pTimer->stop();
+    m_pLoop->quit();
 }
 
 void MainLoop::setTimerInterval(int interval) {
-    timer->setInterval(interval);
+    m_pTimer->setInterval(interval);
 }
 
 
@@ -43,5 +43,7 @@ void MainLoop::handleTimer() {
     // Perform actions here on time timeout
     // Emit custom signals if needed!
     // mostly poll here signal.
-    loop->exit();
+    emit runMainStateMachine();
+
+    m_pLoop->exit();
 }

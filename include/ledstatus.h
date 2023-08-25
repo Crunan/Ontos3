@@ -30,11 +30,11 @@ signals:
     void statusBitsChanged();
 
 private:
-    int _statusBits;
-    int _statusBitsWas;
-    LED _abortLed;
-    LED _estopLed;
-    LED _plasmaOnLed;
+    int m_statusBits;
+    int m_statusBitsWas;
+    LED m_abortLed;
+    LED m_estopLed;
+    LED m_plasmaOnLed;
 };
 
 #endif  // LEDSTATUS_H

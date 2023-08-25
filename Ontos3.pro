@@ -1,4 +1,6 @@
-QT += core gui widgets serialport
+QT += core gui widgets serialport statemachine
+
+
 
 greaterThan(QT_MAJOR_VERSION, 4)
 
@@ -9,19 +11,21 @@ CONFIG += c++17
 # DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    src/axiscontroller/axis.cpp \
-    src/axiscontroller/axiscommands.cpp \
-    src/axiscontroller/axiscontroller.cpp \
-    src/axiscontroller/coordinate.cpp \
-    src/axiscontroller/stage/diameter.cpp \
-    src/axiscontroller/stage/initialize.cpp \
-    src/axiscontroller/stage/load.cpp \
-    src/axiscontroller/stage/maneuvers.cpp \
-    src/axiscontroller/stage/positions.cpp \
-    src/axiscontroller/stage/scan.cpp \
-    src/axiscontroller/scanrecipe.cpp \
-    src/axiscontroller/stage/statemachine.cpp \
-    src/axiscontroller/stage/twospot.cpp \
+    src/diameter.cpp \
+    src/serialinterface.cpp \
+    src/axescontroller/axescontroller.cpp \
+    src/axescontroller/axis.cpp \
+    src/axescontroller/axiscommands.cpp \
+    src/axescontroller/axiscontroller.cpp \
+    src/axescontroller/coordinate.cpp \
+    src/axescontroller/stage/initialize.cpp \
+    src/axescontroller/stage/load.cpp \
+    src/axescontroller/stage/maneuvers.cpp \
+    src/axescontroller/stage/positions.cpp \
+    src/axescontroller/stage/scan.cpp \
+    src/axescontroller/scanrecipe.cpp \
+    src/axescontroller/stage/statemachine.cpp \
+    src/axescontroller/stage/twospot.cpp \
     src/commandfilereader.cpp \
     src/commandmap.cpp \
     src/configuration.cpp \
@@ -46,27 +50,30 @@ SOURCES += \
     src/plasmacontroller/tuner.cpp \
     src/recipe.cpp \
     src/settingsdialog.cpp \
+    src/stage.cpp \
     src/stagewidget.cpp
 
 
 HEADERS += \
-    include/axiscontroller/axis.h \
-    include/axiscontroller/axiscommands.h \
-    include/axiscontroller/axiscontroller.h \
-    include/axiscontroller/coordinate.h \
-    include/axiscontroller/stage/diameter.h \
-    include/axiscontroller/stage/initialize.h \
-    include/axiscontroller/stage/load.h \
-    include/axiscontroller/stage/maneuvers.h \
-    include/axiscontroller/stage/positions.h \
-    include/axiscontroller/stage/scan.h \
-    include/axiscontroller/scanrecipe.h \
-    include/axiscontroller/stage/statemachine.h \
-    include/axiscontroller/stage/twospot.h \
+    include/diameter.h \
+    include/axescontroller/axescontroller.h \
+    include/axescontroller/axis.h \
+    include/axescontroller/axiscommands.h \
+    include/axescontroller/axiscontroller.h \
+    include/axescontroller/coordinate.h \
+    include/axescontroller/stage/initialize.h \
+    include/axescontroller/stage/load.h \
+    include/axescontroller/stage/maneuvers.h \
+    include/axescontroller/stage/positions.h \
+    include/axescontroller/stage/scan.h \
+    include/axescontroller/scanrecipe.h \
+    include/axescontroller/stage/statemachine.h \
+    include/axescontroller/stage/twospot.h \
     include/commandfilereader.h \
     include/commandmap.h \
     include/configuration.h \
     include/console.h \
+    include/diameter.h \
     include/filereader.h \
     include/functions.h \
     include/grblcontroller.h \
@@ -85,7 +92,10 @@ HEADERS += \
     include/plasmacontroller/tuner.h \
     include/recipe.h \
     include/settingsdialog.h \
-    include/stagewidget.h
+    include/stagewidget.h \
+    include/serialinterface.h \
+    include/axescontroller/zaxis.h \
+    include/stage.h
 
 FORMS += \
     ui/mainwindow.ui \

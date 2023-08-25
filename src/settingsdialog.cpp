@@ -167,6 +167,7 @@ void SettingsDialog::fillPortsInfo()
     QString manufacturer;
     QString serialNumber;
     const auto infos = QSerialPortInfo::availablePorts();
+
     for (const QSerialPortInfo &info : infos) {
         QStringList list;
         description = info.description();

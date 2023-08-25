@@ -8,18 +8,18 @@ GRBLController::GRBLController(QObject* parent)
 bool GRBLController::open(const SettingsDialog& settings)
 {
     const SettingsDialog::Settings p = settings.settings();
-    serialPort_.setPortName(p.name);
-    serialPort_.setBaudRate(p.baudRate);
-    serialPort_.setDataBits(p.dataBits);
-    serialPort_.setParity(p.parity);
-    serialPort_.setStopBits(p.stopBits);
-    serialPort_.setFlowControl(p.flowControl);
-    if (!serialPort_.open(QIODevice::ReadWrite)) {
+    serialInterface.setPortName(p.name);
+    serialInterface.setBaudRate(p.baudRate);
+    serialInterface.setDataBits(p.dataBits);
+    serialInterface.setParity(p.parity);
+    serialInterface.setStopBits(p.stopBits);
+    serialInterface.setFlowControl(p.flowControl);
+    if (!serialInterface.open(QIODevice::ReadWrite)) {
         // Failed to open the serial port
         return false;
     }    
     // Signals connections
-    connect(&serialPort_, &QSerialPort::readyRead, this, &GRBLController::readData);
+    //connect(&serialInterface, &QSerialPort::readyRead, this, &GRBLController::readData);
     emit stagePortOpened();
 
     return true;
@@ -27,33 +27,25 @@ bool GRBLController::open(const SettingsDialog& settings)
 
 void GRBLController::close()
 {
-    serialPort_.close();
+    serialInterface.close();
 }
 
 bool GRBLController::sendCommand(const QString& command)
 {
-    if (serialPort_.isOpen()) {
-        QByteArray requestData = command.toUtf8();
-        serialPort_.write(requestData);
-        return true;
-    }
-
-    return false;
+    return serialInterface.sendCommand(command);
 }
 
-QString GRBLController::readData()
+QString GRBLController::readResponse()
 {
-    QByteArray responseData = serialPort_.readAll();
-    QString response = QString::fromUtf8(responseData);
-    return response;
+    return serialInterface.readResponse();
 }
 
 QString GRBLController::getPortErrorString()
 {
-    return serialPort_.errorString();
+    return serialInterface.errorString();
 }
 
 bool GRBLController::isOpen()
 {
-    return serialPort_.isOpen();
+    return serialInterface.isOpen();
 }

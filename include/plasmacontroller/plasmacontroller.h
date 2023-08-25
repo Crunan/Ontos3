@@ -1,7 +1,7 @@
 #ifndef PLASMACONTROLLER_H
 #define PLASMACONTROLLER_H
 
-#include "include/axiscontroller/axiscontroller.h"
+#include "include/axescontroller/axescontroller.h"
 #include "include/commandmap.h"
 #include "include/configuration.h"
 #include "include/ledstatus.h"
@@ -19,7 +19,6 @@
 class PlasmaController : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(bool executeRecipe READ getExecuteRecipe WRITE setExecuteRecipe NOTIFY executeRecipeChanged)
 
 public:
     explicit PlasmaController(QWidget* parent = nullptr);
@@ -55,6 +54,8 @@ public:
     bool getExecuteRecipe() const;
     void setExecuteRecipe(bool value);
 
+    void CTLStartup();
+
 signals:
     void responseReceived(const QString& response);
     void executeRecipeChanged();
@@ -81,7 +82,7 @@ public slots:
 
 private:
     QSerialPort serialPort_;  // Reference to SerialComm object
-    AxisController* axisCTL;  // Optional, can be nullptr
+    AxesController* axesCTL;  // Optional, can be nullptr
     LEDStatus ledStatus;
     bool executeRecipe;
     Configuration config;

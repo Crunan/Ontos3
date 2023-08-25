@@ -8,7 +8,7 @@ PlasmaController::PlasmaController(QWidget* parent)
     mfcs({ new MFC(1), new MFC(2), new MFC(3), new MFC(4) }),
     commandMap(),
     config(),
-    axisCTL(nullptr),
+    axesCTL(nullptr),
     serialPort_(),
     ledStatus(),
     executeRecipe(0)
@@ -300,7 +300,8 @@ void PlasmaController::setExecuteRecipe(bool value)
 
 
 
-//void MainWindow::CTLStartup() {
+void PlasmaController::CTLStartup()
+{
 //    howManyMFCs();
 //    getBatchIDLogging();
 //    getRecipeMBPosition();
@@ -318,7 +319,7 @@ void PlasmaController::setExecuteRecipe(bool value)
 //    turnOffExecRecipe();
 //    getTemp();
 //    setCTLStateMachinesIdle();
-//}
+}
 
 
 //void MainWindow::UpdateStatus() {
