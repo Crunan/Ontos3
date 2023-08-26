@@ -8,21 +8,21 @@ const int SERIAL_WRITE_TIMEOUT = 1000; // timeout waiting for control pcb respon
 SerialInterface::SerialInterface()
 {
     // serial watchdog timer
-    pSerialWatchdogTimer = new QTimer(this);
-    connect(pSerialWatchdogTimer, SIGNAL(timeout()), this, SLOT(serialWatchdogTimerElapsed()));
+    m_pSerialWatchdogTimer = new QTimer(this);
+    connect(m_pSerialWatchdogTimer, SIGNAL(timeout()), this, SLOT(serialWatchdogTimerElapsed()));
 
-    serialWatchdogTriggered = false;
+    m_serialWatchdogTriggered = false;
 }
 
 SerialInterface::~SerialInterface()
 {
-    delete pSerialWatchdogTimer;
+    delete m_pSerialWatchdogTimer;
 }
 
 void SerialInterface::serialWatchdogTimerElapsed()
 {
-    serialWatchdogTriggered = true;
-    pSerialWatchdogTimer->stop();
+    m_serialWatchdogTriggered = true;
+    m_pSerialWatchdogTimer->stop();
 }
 
 bool SerialInterface::sendCommand(QString command)
@@ -32,16 +32,16 @@ bool SerialInterface::sendCommand(QString command)
     // don't overrun CTL input buffers.  Garbage protection
     if (commandLength> AUX_INPUT_BUFFER_MAX_SIZE) commandLength = AUX_INPUT_BUFFER_MAX_SIZE;
 
-    if (serialPort_.isOpen()) {
+    if (m_serialPort.isOpen()) {
         QByteArray sendData = command.toUtf8();
 
-        serialPort_.write(command.toLatin1(), commandLength);
+        m_serialPort.write(command.toLatin1(), commandLength);
 
         // wait for bytes to be written
-        serialPort_.waitForBytesWritten(SERIAL_WRITE_TIMEOUT);
+        m_serialPort.waitForBytesWritten(SERIAL_WRITE_TIMEOUT);
 
         // start watchdog timer
-        pSerialWatchdogTimer->start(SERIAL_RESPONSE_TIMEOUT);
+        m_pSerialWatchdogTimer->start(SERIAL_RESPONSE_TIMEOUT);
 
         Logger::logInfo("AxesController::sendCommand: " + command);
 
@@ -59,7 +59,7 @@ QString SerialInterface::readResponse()
     QString serialResponse = "";
 
     // wait up to 100ms for data to be ready
-    serialPort_.waitForReadyRead(250);
+    m_serialPort.waitForReadyRead(250);
 
     while (responseVal != QChar('#').toLatin1()) {
 
@@ -68,20 +68,20 @@ QString SerialInterface::readResponse()
         // if the response was zero give it more time for the data to arrive
         while (responseVal == 0) {
             // check the watchdog timer
-            if (serialWatchdogTriggered) {
-                serialWatchdogTriggered = false;
-                pSerialWatchdogTimer->stop();
+            if (m_serialWatchdogTriggered) {
+                m_serialWatchdogTriggered = false;
+                m_pSerialWatchdogTimer->stop();
                 Logger::logCritical("AxesController::readResponse() watchdog triggered....bailing");
                 return 0; // get out if timed out
             }
-            serialPort_.waitForReadyRead(100);
+            m_serialPort.waitForReadyRead(100);
             responseVal = ReadChar();
         }
 
         serialResponse += char(responseVal);
 
         // response received so stop the watchdog timer
-        pSerialWatchdogTimer->stop();
+       m_pSerialWatchdogTimer->stop();
     }
 
     Logger::logDebug("SerialResponse = " + serialResponse);
@@ -94,8 +94,8 @@ int SerialInterface::ReadChar()
     int returnValue = 0;
     char readChar;
 
-    if (serialPort_.isOpen()) {
-        returnValue = serialPort_.read(&readChar, 1);
+    if (m_serialPort.isOpen()) {
+        returnValue = m_serialPort.read(&readChar, 1);
 
         if (returnValue == -1) {
             Logger::logCritical("Error: Reading from serialPort_" );
