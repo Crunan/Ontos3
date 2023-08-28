@@ -49,8 +49,10 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(ui->mainSettingsButton, &QPushButton::clicked, m_pSettings, &SettingsDialog::show);
     connect(ui->stageSettingsButton, &QPushButton::clicked, m_pSettings, &SettingsDialog::show);
 
+    // ui updates from various sources
     connect(&m_stageCTL, &AxesController::stageStatusUpdate, this, &MainWindow::stageStatusUpdate);
     connect(&m_stageCTL, &AxesController::stageResponseReceived, this, &MainWindow::stageResponseUpdate);
+    connect(&m_stageCTL, &AxesController::setHomeButtonText, this, &MainWindow::setHomeButtonText);
 
     connect(m_pMainLoop, &MainLoop::runMainStateMachine, this, &MainWindow::runMainStateMachine);
 
@@ -264,6 +266,12 @@ void MainWindow::handleStageSerialError(QSerialPort::SerialPortError error)
     }
 }
 
+void MainWindow::setHomeButtonText(QString text)
+{
+    ui->Home_button->setText(text);
+    ui->Home_button_dup->setText(text);
+}
+
 void MainWindow::showStatusMessage(const QString &message)
 {
     m_pStatus->setText(message);
@@ -276,9 +284,9 @@ void MainWindow::about() {
 }
 
 void MainWindow::shutDownProgram() {
-    if (m_mainCTL.isOpen()) {
+    /*if (m_mainCTL.isOpen()) {
         m_mainCTL.close();
-    }
+    }*/ // TODO: Needs implementing
     if (m_stageCTL.isOpen()) {
         m_stageCTL.close();
     }

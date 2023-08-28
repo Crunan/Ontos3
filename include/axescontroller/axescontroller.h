@@ -92,6 +92,7 @@ signals:
     void stagePortOpened();
     void stageStatusUpdate(QString status1, QString status2);
     void stageResponseReceived(QString resonse);
+    void setHomeButtonText(QString text);
 
     // init state machine transitions
     void ISM_TransitionWaitForDone();
@@ -107,6 +108,14 @@ signals:
     void HSM_TransitionHomeZToWaitHomeZ();
     void HSM_TransitionIdle();
     void HSM_TransitionStartup();
+    void HSM_TransitionShutdown();
+
+    // two spot state machine transitions
+    void TSSM_TransitionGetFirst();
+    void TSSM_TransitionJoyBtnOff();
+    void TSSM_TransitionGetSecond();
+    void TSSM_TransitionShutdown();
+    void TSSM_TransitionIdle();
 
     /*/ update ui
     void currentStatusChanged();
@@ -123,6 +132,7 @@ private:
     // setup state machines
     void SetupInitAxesStateMachine();
     void SetupHomeAxesStateMachine();
+    void RunTwoSpotAxesSM();
 
     // utility functions
     bool nextStateReady();
@@ -138,6 +148,11 @@ private:
     void setSpeed(QString axis, QString speed);
     void setAbsMove(QString axis, QString position);
 
+    //translate displayed PH X,Y,Z to the Base PH X,Y,Z (for motor moves)
+    double TranslateCoordXPH2Base(double x) { return (m_Xaxis.getp2Base() - x); }
+    double TranslateCoordYPH2Base(double y) { return (m_Yaxis.getp2Base() - y); }
+    double TranslateCoordZPH2Base(double z) { return (z - m_Zaxis.getp2Base()); }
+
     LEDStatus m_ledStatus;
 
     // init axes state machine
@@ -149,6 +164,7 @@ private:
 
     // home axes state machine
     QStateMachine m_homeStateMachine;
+    QState *m_pHomeAxisSuperState;
     QState *m_pHomeAxesStartupState;
     QState *m_pHomeAxesWaitParkZState;
     QState *m_pHomeAxesHomeXYState;
@@ -158,6 +174,16 @@ private:
     QState *m_pHomeAxesShutdownState;
     QState *m_pHomeAxesIdleState;
 
+    // two spot state machine
+    QStateMachine m_twoSpotStateMachine;
+    QState *m_pTwoSpotSuperState;
+    QState *m_pTwoSpotStartupState;
+    QState *m_pTwoSpotGetFirstState;
+    QState *m_pTwoSpotWaitJoyBtnOffState;
+    QState *m_pTwoSpotGetSecondState;
+    QState *m_pTwoSpotShutdownState;
+    QState *m_pTwoSpotIdleState;
+
     SerialInterface m_serialInterface;
 
     Axis m_Xaxis, m_Yaxis, m_Zaxis;
@@ -166,6 +192,7 @@ private:
     QStringList m_axisStatus;
 
     bool m_sameStateXYZ;
+    bool m_joystickOn;
 };
 
 #endif // AXESCONTROLLER_H

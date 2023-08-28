@@ -44,6 +44,21 @@ public:
     QString getMaxSpeedQStr() const { return QString::number(m_maxSpeed, 'f', 2); }
     QString getHomePosQStr() const { return QString::number(m_homePos, 'f', 2); }
 
+
+    void setp2Base(QString p2Base) { m_P_2_Base = p2Base.toDouble(); }
+    double getp2Base() const { return m_P_2_Base; }
+
+    void setScanMax(double max) { m_scanMax = max; }
+    void setScanMin(double min) { m_scanMin = min; }
+
+    double getScanMax() const { return m_scanMax; }
+    double getScanMin() const { return m_scanMin; }
+
+    double setTwoSpotFirstPoint(double first) { m_twoSpotFirstPoint = first; }
+    double setTwoSpotSecondPoint(double second) { m_twoSpotSecondPoint = second; }
+
+    void checkAndSetDimensions();
+
     //void setCurrentState(AxisState state);
 
 signals:
@@ -61,6 +76,13 @@ private:
     double m_maxPos;
     double m_maxSpeed;
     double m_homePos;
+    double m_P_2_Base;
+
+    double m_twoSpotFirstPoint;
+    double m_twoSpotSecondPoint;
+
+    double m_scanMax;
+    double m_scanMin;
 
 };
 

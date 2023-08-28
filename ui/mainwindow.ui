@@ -65,7 +65,7 @@ QProgressBar::Chunk
      <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex">
-     <number>3</number>
+     <number>0</number>
     </property>
     <property name="iconSize">
      <size>
@@ -2417,7 +2417,7 @@ font: 28pt &quot;Ubuntu Bold&quot;;
        <rect>
         <x>1470</x>
         <y>30</y>
-        <width>225</width>
+        <width>234</width>
         <height>611</height>
        </rect>
       </property>

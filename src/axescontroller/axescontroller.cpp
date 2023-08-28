@@ -22,7 +22,8 @@ AxesController::AxesController(QObject *parent) :
     m_Zaxis(this),
     m_stage(),
     m_axisStatus(),
-    m_sameStateXYZ(false)
+    m_sameStateXYZ(false),
+    m_joystickOn(false)
 {
     SetupInitAxesStateMachine();
     SetupHomeAxesStateMachine();
@@ -45,6 +46,7 @@ AxesController::~AxesController()
     delete m_pHomeAxesWaitHomeZState;
     delete m_pHomeAxesShutdownState;
     delete m_pHomeAxesIdleState;
+    delete m_pHomeAxisSuperState;
 }
 
 //////////////// State Machine Setup
@@ -78,40 +80,43 @@ void AxesController::SetupInitAxesStateMachine()
 
 void AxesController::SetupHomeAxesStateMachine()
 {
-    m_pHomeAxesStartupState = new QState();
-    m_pHomeAxesWaitParkZState = new QState();
-    m_pHomeAxesHomeXYState = new QState();
-    m_pHomeAxesWaitHomeXYState = new QState();
-    m_pHomeAxesHomeZState = new QState();
-    m_pHomeAxesWaitHomeZState = new QState();
+    m_pHomeAxisSuperState = new QState();
+    m_pHomeAxesStartupState = new QState(m_pHomeAxisSuperState);
+    m_pHomeAxesWaitParkZState = new QState(m_pHomeAxisSuperState);
+    m_pHomeAxesHomeXYState = new QState(m_pHomeAxisSuperState);
+    m_pHomeAxesWaitHomeXYState = new QState(m_pHomeAxisSuperState);
+    m_pHomeAxesHomeZState = new QState(m_pHomeAxisSuperState);
+    m_pHomeAxesWaitHomeZState = new QState(m_pHomeAxisSuperState);
     m_pHomeAxesShutdownState = new QState();
     m_pHomeAxesIdleState = new QState();
 
-    // construct transitionsHSM_TransitionStartup
-    m_pHomeAxesIdleState->addTransition(this, SIGNAL(HSM_TransitionStartup()), m_pHomeAxesStartupState);
-    m_pHomeAxesStartupState->addTransition(this, SIGNAL(HSM_TransitionStartupToWaitParkZ()), m_pHomeAxesWaitParkZState);
-    m_pHomeAxesWaitParkZState->addTransition(this, SIGNAL(HSM_TransitionWaitParkZToHomeXY()), m_pHomeAxesHomeXYState);
-    m_pHomeAxesHomeXYState ->addTransition(this, SIGNAL(HSM_TransitionHomeXYToWaitHomeXY()), m_pHomeAxesWaitHomeXYState);
-    m_pHomeAxesWaitHomeXYState->addTransition(this, SIGNAL(HSM_TransitionHomeXYToHomeZ()), m_pHomeAxesHomeZState);
-    m_pHomeAxesHomeZState->addTransition(this, SIGNAL(HSM_TransitionHomeZToWaitHomeZ()), m_pHomeAxesWaitHomeZState);
-    m_pHomeAxesShutdownState->addTransition(this, SIGNAL(HSM_TransitionIdle()), m_pHomeAxesIdleState);
-    m_pHomeAxesStartupState->addTransition(this, SIGNAL(HSM_TransitionIdle()), m_pHomeAxesIdleState);
-    m_pHomeAxesWaitParkZState->addTransition(this, SIGNAL(HSM_TransitionIdle()), m_pHomeAxesIdleState);
-    m_pHomeAxesHomeXYState ->addTransition(this, SIGNAL(HSM_TransitionIdle()), m_pHomeAxesIdleState);
-    m_pHomeAxesWaitHomeXYState->addTransition(this, SIGNAL(HSM_TransitionIdle()), m_pHomeAxesIdleState);
-    m_pHomeAxesHomeZState->addTransition(this, SIGNAL(HSM_TransitionIdle()), m_pHomeAxesIdleState);
-    m_pHomeAxesWaitHomeZState->addTransition(this, SIGNAL(HSM_TransitionIdle()), m_pHomeAxesIdleState);
-    m_pHomeAxesShutdownState->addTransition(this, SIGNAL(HSM_TransitionIdle()), m_pHomeAxesIdleState);
+    // set super state machine initial state and add it to the state machine
+    m_pHomeAxisSuperState->setInitialState(m_pHomeAxesStartupState);
+    m_homeStateMachine.addState(m_pHomeAxisSuperState);
 
-    // add states to the machine
+    // add the rest of the states
+    m_homeStateMachine.addState(m_pHomeAxesShutdownState);
+    m_homeStateMachine.addState(m_pHomeAxesIdleState);
     m_homeStateMachine.addState(m_pHomeAxesStartupState);
     m_homeStateMachine.addState(m_pHomeAxesWaitParkZState);
     m_homeStateMachine.addState(m_pHomeAxesHomeXYState);
     m_homeStateMachine.addState(m_pHomeAxesWaitHomeXYState);
     m_homeStateMachine.addState(m_pHomeAxesHomeZState);
     m_homeStateMachine.addState(m_pHomeAxesWaitHomeZState);
-    m_homeStateMachine.addState(m_pHomeAxesShutdownState);
-    m_homeStateMachine.addState(m_pHomeAxesIdleState);
+
+    // add transitions to and from the super state
+    m_pHomeAxisSuperState->addTransition(this, SIGNAL(HSM_TransitionIdle()), m_pHomeAxesIdleState);
+    m_pHomeAxisSuperState->addTransition(this, SIGNAL(HSM_TransitionShutdown()), m_pHomeAxesShutdownState);
+    m_pHomeAxesIdleState->addTransition(this, SIGNAL(HSM_TransitionStartup()), m_pHomeAxisSuperState);
+
+    // add the rest of the transitions
+    m_pHomeAxesStartupState->addTransition(this, SIGNAL(HSM_TransitionStartupToWaitParkZ()), m_pHomeAxesWaitParkZState);
+    m_pHomeAxesWaitParkZState->addTransition(this, SIGNAL(HSM_TransitionWaitParkZToHomeXY()), m_pHomeAxesHomeXYState);
+    m_pHomeAxesHomeXYState ->addTransition(this, SIGNAL(HSM_TransitionHomeXYToWaitHomeXY()), m_pHomeAxesWaitHomeXYState);
+    m_pHomeAxesWaitHomeXYState->addTransition(this, SIGNAL(HSM_TransitionHomeXYToHomeZ()), m_pHomeAxesHomeZState);
+    m_pHomeAxesHomeZState->addTransition(this, SIGNAL(HSM_TransitionHomeZToWaitHomeZ()), m_pHomeAxesWaitHomeZState);
+    m_pHomeAxesShutdownState->addTransition(this, SIGNAL(HSM_TransitionIdle()), m_pHomeAxesShutdownState);
+    m_pHomeAxesIdleState->addTransition(this, SIGNAL(HSM_TransitionShutdown()), m_pHomeAxesShutdownState);
 
     // set initial state
     m_homeStateMachine.setInitialState(m_pHomeAxesIdleState);
@@ -180,7 +185,13 @@ void AxesController::StartHome()
     emit HSM_TransitionStartup();
 
 }
+//            RunScanBtn.Visible = False
+//            SetTwoSpotBtn.Visible = False
+//            SetDiameterBtn.Visible = False
+//            HomeAxesBtn.Text = "STOP"
 
+//            PinsSquare.BackColor = Color.Gainsboro
+//            b_HasPins = False 'This is so the first time the button is hit, the button will bury the pins
 //////////////// State Machines
 void AxesController::RunInitAxesSM()
 {
@@ -197,7 +208,6 @@ void AxesController::RunInitAxesSM()
 
         //GUI status
         //ui->Stagepins_button->setChecked(true); // TODO: need to implement
-        //updateStageStatus("Initializing Axes", ""); // TODO: need to implement
 
         // update UI
         emit stageStatusUpdate("Initializing Axes", "");
@@ -228,22 +238,40 @@ void AxesController::RunInitAxesSM()
 
 void AxesController::RunHomeAxesSM()
 {
+    //Start by parking Z in a safe position to move
     if (m_homeStateMachine.configuration().contains(m_pHomeAxesStartupState)) { // in Startup state
 
-        // put init axis state machine in the Idle state
-        emit ISM_TransitionIdle();
+        if (nextStateReady()) {
 
-        //setHomeBtnText("STOP"); // TODO: implement this at the button handler level
+//            RunScanBtn.Visible = False TODO: needs implementing
+//            SetTwoSpotBtn.Visible = False
+//            SetDiameterBtn.Visible = False
+//            HomeAxesBtn.Text = "STOP"
 
-        // update UI
-        emit stageStatusUpdate("Homing Startup - Parking Z", "Homing X & Y");
+//            PinsSquare.BackColor = Color.Gainsboro
+//            b_HasPins = False 'This is so the first time the button is hit, the button will bury the pins
 
-        move(ZAXIS_QSTR, m_Zaxis.getMaxSpeedQStr(), m_stage.getPinsBuriedPosQStr());
-        Logger::logInfo("Homing SM Start Up");
+            // put init axis state machine in the Idle state
+            emit ISM_TransitionIdle();
 
-        // transition to wait_park_z
-        emit HSM_TransitionStartupToWaitParkZ();
+            // update UI//            RunScanBtn.Visible = False
+            //            SetTwoSpotBtn.Visible = False
+            //            SetDiameterBtn.Visible = False
+            //            HomeAxesBtn.Text = "STOP"
+
+            //            PinsSquare.BackColor = Color.Gainsboro
+            //            b_HasPins = False 'This is so the first time the button is hit, the button will bury the pins
+            emit setHomeButtonText("STOP");
+            emit stageStatusUpdate("Homing Startup - Parking Z", "Homing X & Y");
+
+            move(ZAXIS_QSTR, m_Zaxis.getMaxSpeedQStr(), m_stage.getPinsBuriedPosQStr());
+            Logger::logInfo("Homing Start.  Speed = " + m_Zaxis.getMaxSpeedQStr());
+
+            // transition to wait_park_z
+            emit HSM_TransitionStartupToWaitParkZ();
+        }
     }
+    // wait until z is parked
     else if (m_homeStateMachine.configuration().contains(m_pHomeAxesWaitParkZState)) { // in wait park z state
 
         if (nextStateReady()) {
@@ -254,18 +282,7 @@ void AxesController::RunHomeAxesSM()
             Logger::logInfo("Homing Z Parked");
         }
     }
-    else if (m_homeStateMachine.configuration().contains(m_pHomeAxesHomeXYState)) { // in home xy state
-
-        // update the UI
-        emit stageStatusUpdate("Homing X & Y", "Homing Z");
-
-        move(XAXIS_QSTR, m_Xaxis.getMaxPosQStr(), m_Xaxis.getHomePosQStr());
-        move(YAXIS_QSTR, m_Yaxis.getMaxSpeedQStr(), m_Yaxis.getHomePosQStr());
-        Logger::logInfo("Homing X & Y");
-
-        // transition to wait home XY
-        emit HSM_TransitionHomeXYToWaitHomeXY();
-    }
+    // set speeds
     else if (m_homeStateMachine.configuration().contains(m_pHomeAxesHomeXYState)) { // in home xy state
 
         // update the UI
@@ -274,7 +291,13 @@ void AxesController::RunHomeAxesSM()
         move(XAXIS_QSTR, m_Xaxis.getMaxSpeedQStr(), m_Xaxis.getHomePosQStr());
         move(YAXIS_QSTR, m_Yaxis.getMaxSpeedQStr(), m_Yaxis.getHomePosQStr());
 
-        Logger::logInfo("Homing X & Y");
+        QString sMsg("Homing X & Y."
+                     " X speed = " + m_Xaxis.getMaxSpeedQStr() +
+                     " X pos = " + m_Xaxis.getHomePosQStr() +
+                     " Y speed = " + m_Yaxis.getMaxSpeedQStr() +
+                     " Y pos = " + m_Yaxis.getHomePosQStr());
+
+        Logger::logInfo(sMsg);
 
         // transition to wait home XY
         emit HSM_TransitionHomeXYToWaitHomeXY();
@@ -286,7 +309,13 @@ void AxesController::RunHomeAxesSM()
             // transition to home Z
             emit HSM_TransitionHomeXYToHomeZ();
 
-            Logger::logInfo("Homing Z Parked");
+            Logger::logInfo("X & Y Homed");
+
+            //        RunScanBtn.Visible = True // TODO: needs implementing
+            //        If b_ENG_mode Then
+            //            SetTwoSpotBtn.Visible = True
+            //            SetDiameterBtn.Visible = True
+            //        End If
         }
     }
     else if (m_homeStateMachine.configuration().contains(m_pHomeAxesHomeZState)) { // in home z state
@@ -294,21 +323,14 @@ void AxesController::RunHomeAxesSM()
         // update the UI
         emit stageStatusUpdate("Homing Z", "");
 
-        Logger::logInfo("Homing Z Parked");
+        Logger::logInfo("Homing Z");
 
-        move(ZAXIS_QSTR, m_Zaxis.getMaxSpeedQStr(), m_Zaxis.getHomePosQStr());
+        move(ZAXIS_QSTR, m_Zaxis.getMaxSpeedQStr(), m_stage.getPinsBuriedPosQStr());
 
         // transition to wait home Z
         emit HSM_TransitionHomeZToWaitHomeZ();
     }
     else if (m_homeStateMachine.configuration().contains(m_pHomeAxesWaitHomeZState)) { // in wait home z state
-
-        // update the UI
-        emit stageStatusUpdate("Homing Z", "");
-
-        Logger::logInfo("Homing Z Parked");
-
-        move(ZAXIS_QSTR, m_Zaxis.getMaxSpeedQStr(), m_Zaxis.getHomePosQStr());
 
         // transition to wait home Z
         emit HSM_TransitionHomeZToWaitHomeZ();
@@ -317,7 +339,7 @@ void AxesController::RunHomeAxesSM()
 
             // update the UI
             emit stageStatusUpdate("", "");
-            //setHomeBtnText("LOAD"); // TODO: implement this
+            emit setHomeButtonText("LOAD");
 
             Logger::logInfo("Z Homed");
 
@@ -334,17 +356,96 @@ void AxesController::RunHomeAxesSM()
 
         stopMotors();
 
-        //setHomeBtnText("LOAD"); // TODO: implement this
-        Logger::logInfo("Operator Abort Homing");
+        emit setHomeButtonText("LOAD");
 
-        move(ZAXIS_QSTR, m_Zaxis.getMaxSpeedQStr(), m_Zaxis.getHomePosQStr());
+        move(ZAXIS_QSTR, m_Zaxis.getMaxSpeedQStr(), m_stage.getPinsBuriedPosQStr());
 
-        //updateStageStatus("", ""); // TODO: not sure about this
+        emit stageStatusUpdate("", "");
 
         // transition to idle
         emit HSM_TransitionIdle();
+
+//        RunScanBtn.Visible = True // TODO: needs implementing
+//        If b_ENG_mode Then
+//            SetTwoSpotBtn.Visible = True
+//            SetDiameterBtn.Visible = True
+//        End If
     }
 }
+
+void AxesController::RunTwoSpotAxesSM()
+{
+    if (m_twoSpotStateMachine.configuration().contains(m_pTwoSpotStartupState)) {
+
+        toggleJoystickOn();
+
+        // setTwoSpotBtnText("STOP"); // TODO: needs implementing
+        emit stageStatusUpdate("Use Controller for Stage", "Spot First Point");
+
+        Logger::logInfo("TwoSpotSM Start Up");
+
+        emit TSSM_TransitionGetFirst();
+    }
+    else if (m_twoSpotStateMachine.configuration().contains(m_pTwoSpotGetFirstState)) {
+
+        if (m_joystickOn) {
+
+            emit stageStatusUpdate("Use Controller for Stage", "Release JoyStick Button");
+
+            // translate into ph coordinates and save
+            m_Xaxis.setTwoSpotFirstPoint(TranslateCoordXPH2Base(m_Xaxis.getPosition()));
+            m_Yaxis.setTwoSpotFirstPoint(TranslateCoordYPH2Base(m_Yaxis.getPosition()));
+
+            Logger::logInfo("TwoSpotSM Got First");
+
+            emit TSSM_TransitionJoyBtnOff();
+        }
+    }
+    else if (m_twoSpotStateMachine.configuration().contains(m_pTwoSpotWaitJoyBtnOffState)) {
+
+        if (!m_joystickOn) {
+
+            Logger::logInfo("TwoSpotSM Getting Second");
+
+            emit stageStatusUpdate("Spot Second Point", "");
+
+            emit TSSM_TransitionGetSecond();
+        }
+    }
+    else if (m_twoSpotStateMachine.configuration().contains(m_pTwoSpotGetSecondState)) {
+
+        if (m_joystickOn) {
+
+            // translate to ph coordinates and save
+            m_Xaxis.setTwoSpotSecondPoint(TranslateCoordXPH2Base(m_Xaxis.getPosition()));
+            m_Yaxis.setTwoSpotSecondPoint(TranslateCoordYPH2Base(m_Yaxis.getPosition()));
+
+            //determine box orientation and corners for scanning
+            m_Xaxis.checkAndSetDimensions();
+            m_Yaxis.checkAndSetDimensions();
+
+            // updateTwoSpotXYText(); TODO: Needs implementing
+
+            Logger::logInfo("TwoSpotSM Got Second - done");
+
+            emit TSSM_TransitionShutdown();
+        }
+    }
+    else if (m_twoSpotStateMachine.configuration().contains(m_pTwoSpotShutdownState)) {
+
+        toggleJoystickOff();
+
+        emit TSSM_TransitionIdle();
+
+        emit stageStatusUpdate("", "");
+
+        //setTwoSpotBtnText("TWO SPOT"); TODO: needs implementing
+    }
+    else if (m_twoSpotStateMachine.configuration().contains(m_pTwoSpotIdleState)) {
+        // no op
+    }
+}
+
 
 void AxesController::move(QString axis, QString speed, QString position)
 {
@@ -859,6 +960,7 @@ void AxesController::toggleJoystickOn()
     sendCommand("$BE%");
     readResponse();
     Logger::logInfo("Joystick : enabled");
+    m_joystickOn = true;
 }
 
 void AxesController::toggleJoystickOff()
@@ -866,6 +968,7 @@ void AxesController::toggleJoystickOff()
     sendCommand("$BF%");
     readResponse();
     Logger::logInfo("Joystick : disabled");
+    m_joystickOn = false;
 }
 
 void AxesController::toggleN2PurgeOn(Recipe &recipe)

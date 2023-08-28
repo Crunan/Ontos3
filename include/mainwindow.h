@@ -70,6 +70,7 @@ private slots:
 
 
     void handleStageSerialError(QSerialPort::SerialPortError error);
+    void setHomeButtonText(QString text);
 
     void about();
     void shutDownProgram();
