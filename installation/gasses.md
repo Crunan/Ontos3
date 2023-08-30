@@ -1,7 +1,7 @@
 # Gasses
 
 {% hint style="warning" %}
-* **During installation, pay close attention to input gases and gas type.** &#x20;
+* **During installation, pay close attention to input gasses and gas type.** &#x20;
 * **Incorrectly set pressure lines may result in a safety hazard and/or equipment damage.**
 {% endhint %}
 
@@ -13,7 +13,7 @@
 * **The amount of Hydrogen within the Helium typically is between 3% & 5%, dependent upon local LEL standards. Please consult your local gas supplier for information regarding your area.**
 {% endhint %}
 
-T_he gas input ports (labelled 1-6) should be connected as follows, click on each corresponding header to see information pertaining to each gas port:_
+T_he gas input ports (labelled 1-6) should be connected as follows:_
 
 {% tabs %}
 {% tab title="Gas #1" %}
