@@ -1,2 +1,0 @@
-# Sliding Tempered Glass Doors
-
