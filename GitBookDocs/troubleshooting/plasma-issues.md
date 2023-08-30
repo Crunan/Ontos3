@@ -29,9 +29,9 @@ If the plasma is **RUNNING**, but the current recipe does not light the plasma (
 To troubleshoot this issue:
 
 {% hint style="success" %}
-1. [Manually enter](../software-application/engineer-mode/manual-recipe-setpoints.md) **10 SLPM** for Helium.
-2. [Manually enter](../software-application/engineer-mode/manual-recipe-setpoints.md) **0.1 SLPM** for Nitrogen. _(Maximum depends on Helium flow but generally under 0.25 SLPM.)_
-3. **Optional: If the system is equipped with the Ozone option**, [manually enter ](../software-application/engineer-mode/manual-recipe-setpoints.md)**0.1 SLPM** for Oxygen. _(Maximum depends on Helium flow but generally under 0.25 SLPM.)_
+1. [Manually enter](broken-reference) **10 SLPM** for Helium.
+2. [Manually enter](broken-reference) **0.1 SLPM** for Nitrogen. _(Maximum depends on Helium flow but generally under 0.25 SLPM.)_
+3. **Optional: If the system is equipped with the Ozone option**, [manually enter ](broken-reference)**0.1 SLPM** for Oxygen. _(Maximum depends on Helium flow but generally under 0.25 SLPM.)_
 {% endhint %}
 
 {% hint style="danger" %}
@@ -40,7 +40,7 @@ Do not run oxygen and hydrogen together in a single process, as this can cause a
 
 After adjusting the gas settings:
 
-1. [Run plasma](../software-application/engineer-mode/running-plasma.md).
+1. [Run plasma](broken-reference).
 
 **Issue #3: Plasma Stops During a Cycle**
 
@@ -65,4 +65,4 @@ If the plasma is **RUNNING**, but goes out during a cycle, an error message will
 
 After performing the above steps:
 
-1. [Repeat the plasma run](../software-application/engineer-mode/running-plasma.md).
+1. [Repeat the plasma run](broken-reference).

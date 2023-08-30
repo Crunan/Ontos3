@@ -6,7 +6,7 @@ The Engineer mode within the ONTOS _CLEAN_ software is designed to provide engin
 
 [**Advanced System Controls**](accessing-engineer-mode.md)**:** Engineer Mode provides a wide range of controls that enable engineers to configure and fine-tune various aspects of the system, including gas flow rates, RF power, and advanced tuning parameters.
 
-[**MFC Setpoint Adjustment:**](manual-recipe-setpoints.md) Engineers can adjust the setpoints of Mass Flow Controllers (MFCs) by clicking the associated Enter button for a specific MFC. This precision control allows for precise gas flow rate configuration.
+[**MFC Setpoint Adjustment:**](broken-reference) Engineers can adjust the setpoints of Mass Flow Controllers (MFCs) by clicking the associated Enter button for a specific MFC. This precision control allows for precise gas flow rate configuration.
 
 [**Automatic Tuning:**](auto-tune.md) Engineers can toggle the \[AUTO TUNE] button to activate or deactivate the automatic tuning feature. This functionality optimizes system performance by automatically adjusting tuning parameters.
 

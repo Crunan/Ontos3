@@ -6,8 +6,8 @@ To access and utilize the Crash Avoidance System in [Engineer Mode](../accessing
 
 {% hint style="success" %}
 1. **Enable Crash Avoidance System**: Navigate to the Engineer Mode section of the application. In this mode, you'll have access to the advanced settings and controls, including the Crash Avoidance System. Activate the Crash Avoidance System option to enable the system's sensors.
-2. [**Enter Stage Recipe Info**](../manual-recipe-setpoints.md)**:** The substrate information can be entered by the Operator under Gap, Thickness.
-3. [**Run Plasma**](../running-plasma.md): Run plasma per Starting Plasma section.&#x20;
+2. [**Enter Stage Recipe Info**](broken-reference)**:** The substrate information can be entered by the Operator under Gap, Thickness.
+3. [**Run Plasma**](broken-reference): Run plasma per Starting Plasma section.&#x20;
 4. **Collision Test**: With the Crash Avoidance System active, the system will perform a collision test to ensure that the substrate can pass safely under the plasma head. This involves elevating the stage chuck to its maximum Z-axis height and then moving it towards the plasma head.
 5. **Operator Input Validation**: The Collision Test assesses the correctness of Operator inputs for Gap and Thickness settings. If these inputs have been correctly configured, the substrate on the chuck will successfully pass under the plasma head without any issue.
 6. **Detection of Miscalculation**: If there is a miscalculation in the Gap and Thickness settings, the Crash Avoidance System's laser sensors will detect the potential collision before it occurs. In response, the system will promptly halt all stage movement to prevent any contact between the substrate and the plasma head.

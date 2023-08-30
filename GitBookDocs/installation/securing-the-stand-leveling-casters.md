@@ -8,9 +8,9 @@ Proper leveling of the ONTOS _CLEAN_ is essential to ensure stability and optima
 After an adjustment, use a bubble level on top of the system to check for level.
 {% endhint %}
 
-<figure><img src="../.gitbook/assets/caster.png" alt="" width="150"><figcaption><p>Caster with Red Wheel Adjustment</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/caster.png" alt="" width="150"><figcaption><p>Caster with Red Wheel Adjustment</p></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/Screenshot 2023-08-21 113513.jpg" alt="" width="326"><figcaption><p>Caster with leveling pad</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/Screenshot 2023-08-21 113513.jpg" alt="" width="326"><figcaption><p>Caster with leveling pad</p></figcaption></figure>
 
 {% hint style="success" %}
 1. **Caster Adjustment:** use the red thumbwheel to either lower or raise the leveling pad, as shown in the diagram above.&#x20;

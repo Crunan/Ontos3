@@ -2,7 +2,7 @@
 
 ## Preface
 
-* [Definitions](GitBookDocs/preface/definitions.md)
+* [Definitions](README.md)
 * [Symbols](GitBookDocs/preface/symbols.md)
 * [Disclaimer](GitBookDocs/preface/disclaimer.md)
 * [Performance Limitation](GitBookDocs/preface/performance-limitation.md)

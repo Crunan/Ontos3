@@ -8,7 +8,7 @@ The ONTOS _CLEAN_ incorporates a critical safety feature known as the Emergency 
 #### To stop the machine in an emergency, press the red Emergency Power Off button.
 {% endhint %}
 
-<figure><img src="../.gitbook/assets/1.jpeg" alt="" width="375"><figcaption><p>Emergency Power-Off button</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/1.jpeg" alt="" width="375"><figcaption><p>Emergency Power-Off button</p></figcaption></figure>
 
 **Releasing the EPO Button:** Once activated, the EPO button needs to be reset before the system can resume normal operations. To release the EPO button, gently twist it clockwise. This motion will cause the button to pop back out, signaling that the emergency shutdown state has been disengaged.
 

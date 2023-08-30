@@ -8,7 +8,7 @@ To initiate plasma operation, follow these steps:
 2. **Initialize Stage (If Required):**
    * If the stage has not been initialized during machine startup, perform initialization as described in [Initializing the Stage](initializing-the-stage.md).
 3. **Set Recipe Values:**
-   * Verify that all [recipe setpoint values](../engineer-mode/manual-recipe-setpoints.md) for gases, RF Power, and Matchbox (MB) Tuning are their expected recipe values.
+   * Verify that all [recipe setpoint values](broken-reference) for gases, RF Power, and Matchbox (MB) Tuning are their expected recipe values.
 4. **Start Plasma:**
    * Click the **\[START PLASMA]** button.
 5. **Tuning and Ignition:**
