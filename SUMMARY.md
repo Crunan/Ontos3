@@ -42,7 +42,7 @@
 * [Unpacking the Machine](installation/unpacking-the-machine.md)
 * [Environmental Conditions](installation/environmental-conditions.md)
 * [Utilities](installation/utilities.md)
-* [Rear Service Panel](installation/rear-service-panel.md)
+* [Rear Facilities Panel](installation/rear-facilities-panel.md)
 * [Gasses](installation/gasses.md)
 * [Seismic Anchoring Installation](installation/seismic-anchoring-installation.md)
 * [Securing the Stand Leveling Casters](installation/securing-the-stand-leveling-casters.md)

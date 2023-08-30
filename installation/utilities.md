@@ -1,12 +1,10 @@
----
-description: Tabs containing the specifications for each utility on the Ontos3
----
-
 # Utilities
 
 **Utilities**
 
-It is recommended to maintain an exclusion zone for service and installation. Order of gasses may change for each tool based on customer requirements, please see the purchase order for your specific tool.
+It is recommended to maintain an exclusion zone for service and installation.
+
+Order of gasses may change for each tool based on customer requirements, please see the purchase order for your specific tool.
 
 {% tabs %}
 {% tab title="Machine Power" %}
@@ -48,7 +46,7 @@ Gas #2 - Argon/Hydrogen ≥ 20 SLPM (\~0.8 CFM)
 
 Gas #3 - Helium: Flow rate ≥ 20 SLPM (\~0.8 CFM)
 
-Gas #4 - Helium/Hydrogen: Flow rate ≥ 5 SLPM (\~0.2 CFM).
+Gas #4 - Helium/Hydrogen: Flow rate ≥ 20 SLPM (\~0.2 CFM).
 
 Gas #5 - Oxygen (optional): Flow rate ≥ 0.5 SLPM (\~0.02 CFM)
 

@@ -9,7 +9,7 @@ The ONTOS _CLEAN_ may only be unpacked and relocated with explicit authorization
 
 **Unpacking and Preparation for ONTOS **_**CLEAN**_&#x20;
 
-The ONTOS _CLEAN_ should be unpacked before being brought into the clean room. The machine is covered with film to prevent particles from getting inside. Remove the final film layer within the clean room just before connecting the necessary facilities.
+The ONTOS _CLEAN_ should be unpacked before entering any on-site clean room. The machine is covered with film to prevent particles from getting inside. Remove the final film layer within the clean room just before connecting the necessary facilities.
 
 **Unpacking Procedures for ONTOS **_**CLEAN**_&#x20;
 

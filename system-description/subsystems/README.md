@@ -1,6 +1,6 @@
 # Subsystems
 
-The ONTOS _CLEAN_ is comprised of 11 distinct subsystems, each playing a crucial role in its functionality:
+The ONTOS _CLEAN_ is comprised of 11 distinct subsystems
 
 1. [**3-Axis Stage Assembly**](1.-axis-stage.md)**:** This assembly is for precise movement control in three dimensions of the stage, ensuring accurate positioning during processing.
 2. [**Frame Assembly**](broken-reference)**:** The frame assembly provides structural integrity and support, forming the foundational framework for the entire system.
@@ -14,7 +14,7 @@ The ONTOS _CLEAN_ is comprised of 11 distinct subsystems, each playing a crucial
 10. [**Crash Avoidance System (Optional)**](9.-crash-avoidance-system.md)**:** Ensuring safety during operation, this system utilizes sensors and algorithms to prevent collisions or mishaps of substrates with the plasma head.
 11. [**Film Sense Ellipsometer**](10.-elipsometry-system.md)**:** This component contributes to the precision of the system by measuring and analyzing process results via ellipsometry, aiding in achieving desired outcomes.
 
-Each of these subsystems is meticulously designed and integrated to collectively deliver the advanced capabilities of the ONTOS _CLEAN_.
+
 
 
 

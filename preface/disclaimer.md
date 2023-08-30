@@ -1,6 +1,6 @@
 # Disclaimer
 
-**Read Before Using the Atmospheric plasma tool.**
+**Read Before Using the** [**Atmospheric plasma tool**](#user-content-fn-1)[^1]**.**
 
 Thank you for choosing the ONTOS _CLEAN_ from Ontos Equipment Systems. Before using the ONTOS _CLEAN_ for cleaning substrates using atmospheric plasma, it is essential to carefully read and understand the following disclaimer. By proceeding with the use of this equipment, you acknowledge that you have read, comprehended, and agreed to the terms outlined herein.
 
@@ -17,3 +17,5 @@ Thank you for choosing the ONTOS _CLEAN_ from Ontos Equipment Systems. Before us
 By proceeding with the use of the semiconductor equipment, you acknowledge and agree to the terms set forth in this disclaimer. If you do not agree with these terms, please refrain from using the equipment.
 
 For any questions, concerns, or additional information, please refer to the user manual or contact our customer support.
+
+[^1]: Maybe just say ONTOS Clean here
