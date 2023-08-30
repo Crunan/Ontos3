@@ -6,8 +6,6 @@ During the wipe-down procedure, it's important to avoid contact with the guiding
 With the ONTOS _CLEAN_ powered off, the stage motors are de-energized, allowing the stage to be freely moved for cleaning.
 {% endhint %}
 
-
-
 {% hint style="success" %}
 1. **Preparation:** Before cleaning, ensure that the equipment is powered off and disconnected from the power source to prevent electrical hazards.
 2. **Materials:** Use a clean room wipe, such as Texwipe™ TX 1008B or a similar product. These materials are designed to minimize the risk of scratching or leaving particles on the glass surface.
@@ -28,4 +26,4 @@ With the ONTOS _CLEAN_ powered off, the stage motors are de-energized, allowing 
 9. **Frequency:** Regularly inspect the glass panels for dirt, smudges, or residue. Clean them as needed or according to your equipment's maintenance schedule.
 {% endhint %}
 
-By following these cleaning steps, you can help maintain the cleanliness and functionality of the ONTOS _CLEAN_ Please note that these steps are intended for routine cleaning. For more advanced maintenance or technical issues, it's recommended to rely on trained personnel who have completed the necessary training to ensure proper care and handling of the system.
+By following these cleaning steps, you can help maintain the cleanliness and functionality of the ONTOS _CLEAN_. Please note that these steps are intended for routine cleaning. For more advanced maintenance or technical issues, it's recommended to rely on trained personnel who have completed the necessary training to ensure proper care and handling of the system.

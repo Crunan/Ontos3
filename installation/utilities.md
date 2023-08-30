@@ -6,6 +6,8 @@ It is recommended to maintain an exclusion zone for service and installation.
 
 Order of gasses may change for each tool based on customer requirements, please see the purchase order for your specific tool.
 
+The table below contains information that can be selected by click on the corresponding header of each of the following: **Machine Power**, **Process Gasses**, **Exhaust**, **Moisture and Humidity**, **Vacuum**.
+
 {% tabs %}
 {% tab title="Machine Power" %}
 Power: 110/240 VAC, 50/60 Hz, 1400 W (16A@120V / 8A@240V)

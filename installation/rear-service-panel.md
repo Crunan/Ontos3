@@ -1,4 +1,4 @@
-# Rear Service Panel
+# Rear Facilities Panel
 
 **Gas Ports and Connections**
 
