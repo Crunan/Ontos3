@@ -22,11 +22,11 @@ Three cables are available for the tool, consult your purchase order to verify t
 
 * CORD 12AWG 5-20P - 320-C19 8.2' (USA Applications)
 
-<figure><img src="../.gitbook/assets/plug1.jpg" alt="" width="255"><figcaption><p>PN#CA-00007</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/plug1.jpg" alt="" width="255"><figcaption><p>PN#CA-00007</p></figcaption></figure>
 
 * CORD CEE 7/7 TO IEC 320-C19 8' (Euro Style, 250VAC Applications)
 
-<figure><img src="../.gitbook/assets/plug2.jpg" alt="" width="254"><figcaption><p>PN#CA-000071</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/plug2.jpg" alt="" width="254"><figcaption><p>PN#CA-000071</p></figcaption></figure>
 
 * CRD 12AWG NEMAL6-20P - 320C19 6' (USA 220VAC applications)
 {% endtab %}
