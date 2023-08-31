@@ -4,5 +4,5 @@ The ONTOS _CLEAN_ is a surface preparation tool which uses a stable plasma at at
 
 Typical downstream processes might include soldering, joining, bonding, etching, deposition, plating, or other semiconductor fabrication or assembly steps.&#x20;
 
-<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption><p>Ontos3 System</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/ontosside.jpeg" alt=""><figcaption><p>ONTOS <em>CLEAN</em> System</p></figcaption></figure>
 

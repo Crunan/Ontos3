@@ -1,6 +1,6 @@
 # Specific Areas of Risk
 
-### Specific Areas of Risk for the ONTOS CLEAN <a href="#_toc54339753" id="_toc54339753"></a>
+### Specific Areas of Risk for the ONTOS _CLEAN_ <a href="#_toc54339753" id="_toc54339753"></a>
 
 Within the system, it's necessary to acknowledge zones where hazards can arise and the risk of injury is present. Engaging process gases, exposure to high voltages, encountering pinch points, and coming into contact with heated surfaces or gases all carry the potential for serious injury or even fatality.
 

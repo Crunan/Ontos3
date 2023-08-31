@@ -26,4 +26,4 @@ Within the ONTOS _CLEAN_, physical risks are associated with the Plasma Head, a 
 
 By following safety protocols and utilizing appropriate protective equipment, you can minimize the physical risks associated with the Plasma Head and its emitted plume.
 
-![Plasma Head with Thermal Hazard Symbol](../../../.gitbook/assets/3.jpeg)
+![Plasma Head with Thermal Hazard Symbol](../../../.gitbook/assets/hazard.jpeg)
