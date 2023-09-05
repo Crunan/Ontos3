@@ -94,7 +94,6 @@ HEADERS += \
     src/settingsdialog.h \
     src/stagewidget.h \
     src/serialinterface.h \
-    src/zaxis.h \
     src/stage.h
 
 FORMS += \
