@@ -1,11 +1,11 @@
-﻿#include "include/mainwindow.h"
+﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
 
 #include <QApplication>
 #include <QFileDialog>
 #include <QTextStream>
 #include <QDebug>
-#include "include/axescontroller/axiscontroller.h"
+#include "axiscontroller.h"
 
 int SM_PollCounter = 0;
 const int SM_POLL_PERIOD = 5;
@@ -37,6 +37,7 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
 
     // Serial buttons initial states
     serialButtonPreConnectState();
+
     // Main Serial connect/disconnect buttons
     connect(ui->mainConnectButton, &QPushButton::clicked, this, &MainWindow::openMainPort);
     connect(ui->mainDisconnectButton, &QPushButton::clicked, this, &MainWindow::closeMainPort);
@@ -52,7 +53,12 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     // ui updates from various sources
     connect(&m_stageCTL, &AxesController::stageStatusUpdate, this, &MainWindow::stageStatusUpdate);
     connect(&m_stageCTL, &AxesController::stageResponseReceived, this, &MainWindow::stageResponseUpdate);
-    connect(&m_stageCTL, &AxesController::setHomeButtonText, this, &MainWindow::setHomeButtonText);
+    connect(&m_stageCTL, &AxesController::setUIHomeSMStartup, this, &MainWindow::homeStateMachineStartup);
+    connect(&m_stageCTL, &AxesController::setUIHomeSMDone, this, &MainWindow::homeStateMachineDone);
+    connect(&m_stageCTL, &AxesController::setUIInitSMStartup, this, &MainWindow::initStateMachineStartup);
+    connect(&m_stageCTL, &AxesController::setUIInitSMDone, this, &MainWindow::initStateMachineDone);
+    connect(&m_stageCTL, &AxesController::setUITwoSpotSMStartup, this, &MainWindow::twoSpotStateMachineStartup);
+    connect(&m_stageCTL, &AxesController::setUITwoSpotSMDone, this, &MainWindow::twoSpotStateMachineDone);
 
     connect(m_pMainLoop, &MainLoop::runMainStateMachine, this, &MainWindow::runMainStateMachine);
 
@@ -266,10 +272,88 @@ void MainWindow::handleStageSerialError(QSerialPort::SerialPortError error)
     }
 }
 
-void MainWindow::setHomeButtonText(QString text)
+// set ui elements accordingly
+void MainWindow::homeStateMachineStartup()
 {
-    ui->Home_button->setText(text);
-    ui->Home_button_dup->setText(text);
+//    RunScanBtn.Visible = False
+//    SetTwoSpotBtn.Visible = False
+//    SetDiameterBtn.Visible = False
+//    HomeAxesBtn.Text = "STOP"
+    //            PinsSquare.BackColor = Color.Gainsboro
+    //            b_HasPins = False 'This is so the first time the button is hit, the button will bury the pins
+
+    ui->twospot_button->setEnabled(false);
+    ui->twospot_button_dup->setEnabled(false);
+    ui->diameter_button->setEnabled(false);
+    ui->diameter_button_dup->setEnabled(false);
+    ui->Home_button->setText("STOP");
+    ui->Home_button_dup->setText("STOP");
+}
+
+// set ui elements accordingly
+void MainWindow::homeStateMachineDone()
+{
+    ui->twospot_button->setEnabled(true);
+    ui->twospot_button_dup->setEnabled(true);
+    ui->diameter_button->setEnabled(true);
+    ui->diameter_button_dup->setEnabled(true);
+    ui->Home_button->setText("LOAD");
+    ui->Home_button_dup->setText("LOAD");
+}
+
+// set ui elements accordingly
+void MainWindow::initStateMachineStartup()
+{
+    //GUI status
+    //ui->Stagepins_button->setChecked(true); // TODO: need to implement
+    //RunScanBtn.Visible = False
+    ui->twospot_button->setEnabled(false);
+    ui->twospot_button_dup->setEnabled(false);
+    ui->diameter_button->setEnabled(false);
+    ui->diameter_button_dup->setEnabled(false);
+    ui->Home_button->setEnabled(false);
+    ui->Home_button_dup->setEnabled(false);
+    ui->init_button->setEnabled(false);
+    ui->init_button_dup->setEnabled(false);
+}
+
+// set ui elements accordingly
+void MainWindow::initStateMachineDone()
+{
+//    RunScanBtn.Visible = True
+//    Vacbtn.Visible = True
+//    RecipeButtonPins.Visible = True
+//    AutoVacSquare.Visible = True
+//    PinsSquare.Visible = True
+//    PinsSquare.BackColor = Color.Lime
+//    b_HasPins = True 'This is so the first time the button is hit, the button will bury the pins
+//    If b_ENG_mode Then
+//        SetTwoSpotBtn.Visible = True
+//        SetDiameterBtn.Visible = True
+//    End If
+    ui->twospot_button->setEnabled(true);
+    ui->twospot_button_dup->setEnabled(true);
+    ui->diameter_button->setEnabled(true);
+    ui->diameter_button_dup->setEnabled(true);
+    ui->Home_button->setEnabled(true);
+    ui->Home_button_dup->setEnabled(true);
+    ui->init_button->setEnabled(true);
+    ui->init_button_dup->setEnabled(true);
+}
+
+void MainWindow::twoSpotStateMachineStartup()
+{
+    ui->twospot_button->setText("STOP");
+}
+
+void MainWindow::twoSpotStateMachineDone()
+{
+    ui->twospot_button->setText("TWO SPOT");
+
+    ui->xmin_controls_dup->setText(QString::number(m_stageCTL.getXTwoSpotFirstPoint()));
+    ui->xmax_controls_dup->setText(QString::number(m_stageCTL.getXTwoSpotSecondPoint()));
+    ui->ymin_controls_dup->setText(QString::number(m_stageCTL.getYTwoSpotFirstPoint()));
+    ui->ymax_controls_dup->setText(QString::number(m_stageCTL.getYTwoSpotSecondPoint()));
 }
 
 void MainWindow::showStatusMessage(const QString &message)
@@ -671,7 +755,7 @@ void MainWindow::runMainStateMachine()
             UpdateStatus();
             // setLightTower(); TODO: Need to implement
             m_stageCTL.RunInitAxesSM();
-            //RunTwoSpotAxesSM(); TODO: Need to implement
+            m_stageCTL.RunTwoSpotSM();
             m_stageCTL.RunHomeAxesSM();
             //RunScanAxesSM(); TODO: Need to implement
 
@@ -749,8 +833,8 @@ void MainWindow::RunPolling()
     //! [10]
     //UpdateHandshakeStatus();*/
     //! [11]
-    m_stageCTL.getAxisStatus();
-    AxisStatusToUI();
+    m_stageCTL.getAxisStatus(); // TODO: uncomment
+    AxisStatusToUI(); // TODO: uncomment
 }
 
 void MainWindow::AxisStatusToUI()
@@ -814,26 +898,6 @@ void MainWindow::UpdateStatus()
 
 }
 
-void MainWindow::toggleJoystickOn()
-{
-    m_stageCTL.toggleJoystickOn();
-}
-
-void MainWindow::toggleJoystickOff()
-{
-    m_stageCTL.toggleJoystickOff();
-}
-
-void MainWindow::toggleN2PurgeOn()
-{
-    m_stageCTL.toggleN2PurgeOn(m_recipe);
-}
-void MainWindow::toggleN2PurgeOff()
-{
-    m_stageCTL.toggleN2PurgeOff(m_recipe);
-}
-
-
 // init button on dash
 void MainWindow::on_init_button_clicked()
 {
@@ -847,15 +911,37 @@ void MainWindow::on_init_button_dup_clicked()
 }
 
 // home button on dash
-void MainWindow::on_Home_button_clicked()
+void MainWindow::on_Home_button_toggled(bool checked)
 {
-    m_stageCTL.StartHome();
+    on_Home_button_dup_toggled(checked);
 }
 
 // home button on 3 axis tab
-void MainWindow::on_Home_button_dup_clicked()
+void MainWindow::on_Home_button_dup_toggled(bool checked)
 {
-    m_stageCTL.StartHome();
+    if (checked) {
+        m_stageCTL.StartHome();
+    }
+    else {
+        m_stageCTL.StopHome();
+    }
+}
+
+// two spot on dashboard
+void MainWindow::on_twospot_button_toggled(bool checked)
+{
+    on_twospot_button_dup_toggled(checked);
+}
+
+// two spot on 3 axis tab
+void MainWindow::on_twospot_button_dup_toggled(bool checked)
+{
+    if (checked) {
+        m_stageCTL.StartTwoSpot();
+    }
+    else {
+        m_stageCTL.StopTwoSpot();
+    }
 }
 
 // pins button on 3 axis tab
@@ -863,9 +949,15 @@ void MainWindow::on_Stagepins_button_dup_toggled(bool checked)
 {
     if (checked) {
         m_stageCTL.togglePinsOn();
+
+        // TODO
+        ui->Stagepins_button_dup->setText("PINS OFF");
     }
     else {
         m_stageCTL.togglePinsOff();
+
+        // TODO
+        ui->Stagepins_button_dup->setText("PINS");
     }
 }
 
@@ -873,11 +965,35 @@ void MainWindow::on_Stagepins_button_dup_toggled(bool checked)
 void MainWindow::on_n2_purge_button_dup_toggled(bool checked)
 {
     if (checked) {
-        toggleN2PurgeOn();
+        m_stageCTL.toggleN2PurgeOn();
+
+        // TODO
+        ui->n2_purge_button_dup->setText("N2 OFF");
     }
     else {
-        toggleN2PurgeOff();
+        m_stageCTL.toggleN2PurgeOff();
+
+        // TODO
+        ui->n2_purge_button_dup->setText("N2 PURGE");
     }
+}
+
+// n2 purge button on dashboard
+void MainWindow::on_n2_purge_button_toggled(bool checked)
+{
+    if (checked) {
+        m_stageCTL.toggleN2PurgeOn();
+
+        // TODO
+        ui->n2_purge_button->setText("N2 OFF");
+    }
+    else {
+        m_stageCTL.toggleN2PurgeOff();
+
+        // TODO
+        ui->n2_purge_button->setText("N2 PURGE");
+    }
+
 }
 
 // diameter button on 3 axis tab
@@ -893,15 +1009,53 @@ void MainWindow::on_stageDisconnectButton_clicked()
 }
 
 
-
-
 void MainWindow::on_Joystick_button_dup_toggled(bool checked)
 {
     if (checked) {
-        toggleJoystickOn();
+        m_stageCTL.toggleJoystickOn();
+
+        // TODO
+        ui->Joystick_button_dup->setText("JOY OFF");
     }
     else {
-        toggleJoystickOff();
+        m_stageCTL.toggleJoystickOff();
+
+        // TODO
+        ui->Joystick_button_dup->setText("JOY");
+    }
+}
+
+// wafer combo box on the 3 axis page
+void MainWindow::on_wafer_diameter_dup_currentIndexChanged(int index)
+{
+    m_waferDiameter.setCurrentWaferDiameter(m_waferDiameter.getWaferDiameterByIndex(index));
+}
+
+// vacuum button on 3 axis tab
+void MainWindow::on_vac_button_dup_toggled(bool checked)
+{
+    if (checked) {
+        m_stageCTL.toggleVacOn();
+
+        // TODO
+        ui->vac_button_dup->setText("VAC OFF");
+    }
+    else {
+        m_stageCTL.toggleVacOff();
+
+        // TODO
+        ui->vac_button_dup->setText("VAC");
+    }
+}
+
+// vacuum button on dashboard
+void MainWindow::on_vac_button_toggled(bool checked)
+{
+    if (checked) {
+        m_stageCTL.toggleVacOn();
+    }
+    else {
+        m_stageCTL.toggleVacOff();
     }
 }
 
@@ -975,14 +1129,15 @@ void MainWindow::on_load_cycles_clicked()
     }
 }
 
-void MainWindow::on_load_autoscan_clicked()
-{
 
-}
 
-// wafer combo box on the 3 axis page
-void MainWindow::on_wafer_diameter_dup_currentIndexChanged(int index)
-{
-    m_waferDiameter.setCurrentWaferDiameter(m_waferDiameter.getWaferDiameterByIndex(index));
-}
+
+
+
+
+
+
+
+
+
 

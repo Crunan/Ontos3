@@ -1,4 +1,4 @@
-#include "include/grblcontroller.h"
+#include "grblcontroller.h"
 
 GRBLController::GRBLController(QObject* parent)
     : QObject(parent)

@@ -5,6 +5,8 @@ const int AUX_INPUT_BUFFER_MAX_SIZE = 90;
 const int SERIAL_RESPONSE_TIMEOUT = 5000; // timeout waiting for response (milliseconds)
 const int SERIAL_WRITE_TIMEOUT = 1000; // timeout waiting for control pcb response (milliseconds)
 
+QString lastCommand("");
+
 SerialInterface::SerialInterface()
 {
     // serial watchdog timer
@@ -43,7 +45,10 @@ bool SerialInterface::sendCommand(QString command)
         // start watchdog timer
         m_pSerialWatchdogTimer->start(SERIAL_RESPONSE_TIMEOUT);
 
-        Logger::logInfo("AxesController::sendCommand: " + command);
+        // record command for logging purposes
+        lastCommand = command;
+
+        Logger::logDebug("AxesController::sendCommand: " + command);
 
         return true;
     }
@@ -71,7 +76,8 @@ QString SerialInterface::readResponse()
             if (m_serialWatchdogTriggered) {
                 m_serialWatchdogTriggered = false;
                 m_pSerialWatchdogTimer->stop();
-                Logger::logCritical("AxesController::readResponse() watchdog triggered....bailing");
+                Logger::logDebug("AxesController::readResponse() watchdog triggered....bailing");
+                Logger::logInfo("Comms error: " + lastCommand);
                 return 0; // get out if timed out
             }
             m_serialPort.waitForReadyRead(100);
@@ -98,7 +104,7 @@ int SerialInterface::ReadChar()
         returnValue = m_serialPort.read(&readChar, 1);
 
         if (returnValue == -1) {
-            Logger::logCritical("Error: Reading from serialPort_" );
+            Logger::logDebug("Error: Reading from m_serialPort" );
             return returnValue;
         }
         else if (returnValue == 0) { // no more data

@@ -1,4 +1,4 @@
-#include "include/lighttowerstatemachine.h"
+#include "lighttowerstatemachine.h"
 
 LightTowerStateMachine::LightTowerStateMachine()
     : currentState(INACTIVE)

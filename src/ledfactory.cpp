@@ -1,4 +1,4 @@
-#include "include/ledfactory.h"
+#include "ledfactory.h"
 
 LEDFactory::LEDFactory()
     : lastCreatedLedIndex(-1)

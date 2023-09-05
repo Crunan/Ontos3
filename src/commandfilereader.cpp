@@ -1,4 +1,4 @@
-#include "include/commandfilereader.h"
+#include "commandfilereader.h"
 
 #include <QFile>
 #include <QTextStream>

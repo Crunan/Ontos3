@@ -1,6 +1,6 @@
 #include <QtWidgets/QApplication>
-#include "include/mainwindow.h"
-#include "include/mainloop.h"
+#include "mainwindow.h"
+#include "mainloop.h"
 #include "logger.h"
 
 #include "ui_mainwindow.h"

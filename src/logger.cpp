@@ -1,4 +1,4 @@
-#include "include/logger.h"
+#include "logger.h"
 
 #include <QDateTime>
 #include <QDir>
@@ -27,8 +27,11 @@ void Logger::init()
     logFile->setFileName("ontos3.log");
     logFile->open(QIODevice::Append | QIODevice::Text);
 
+#ifndef QT_DEBUG
     //Redirect logs to messageOutput
-    //qInstallMessageHandler(Logger::messageOutput);
+    qInstallMessageHandler(Logger::messageOutput);
+#endif
+
 
     //Clear file contents
     logFile->resize(0);

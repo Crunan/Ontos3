@@ -1,4 +1,4 @@
-#include "include/ledstatus.h"
+#include "ledstatus.h"
 
 LEDStatus::LEDStatus(QObject *parent)
     : QObject(parent),
@@ -17,9 +17,11 @@ int LEDStatus::getStatusBits() const {
 }
 
 void LEDStatus::setStatusBits(int statusBits) {
+    syncLEDStatusFromBits();
     if (m_statusBits != statusBits) {
         m_statusBitsWas = m_statusBits;
         m_statusBits = statusBits;
+
         emit statusBitsChanged();
     }
 }
@@ -43,14 +45,19 @@ bool LEDStatus::isEstopActive() const {
 
 void LEDStatus::syncLEDStatusFromBits()
 {
-    for (LED& led : LEDS.ledList) {
-        int bitPosition = 1 << led.index;
-        if ((m_statusBits & bitPosition) > 0) {
-            led.turnOn();
-            // maybe need to add type setting here.
-        } else {
-            led.turnOff();
-        }
-    }
+    if (m_abortLed.isOn())
+        m_abortLed.turnOff();
+    else
+        m_abortLed.turnOn();
+
+//    for (LED& led : LEDS.ledList) {
+//        int bitPosition = 1 << led.index;
+//        if ((m_statusBits & bitPosition) > 0) {
+//            led.turnOn();
+//            // maybe need to add type setting here.
+//        } else {
+//            led.turnOff();
+//        }
+//    }
 }
 

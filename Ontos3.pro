@@ -13,19 +13,19 @@ CONFIG += c++17
 SOURCES += \
     src/diameter.cpp \
     src/serialinterface.cpp \
-    src/axescontroller/axescontroller.cpp \
-    src/axescontroller/axis.cpp \
-    src/axescontroller/axiscommands.cpp \
-    src/axescontroller/axiscontroller.cpp \
-    src/axescontroller/coordinate.cpp \
-    src/axescontroller/stage/initialize.cpp \
-    src/axescontroller/stage/load.cpp \
-    src/axescontroller/stage/maneuvers.cpp \
-    src/axescontroller/stage/positions.cpp \
-    src/axescontroller/stage/scan.cpp \
-    src/axescontroller/scanrecipe.cpp \
-    src/axescontroller/stage/statemachine.cpp \
-    src/axescontroller/stage/twospot.cpp \
+    src/axescontroller.cpp \
+    src/axis.cpp \
+    src/axiscommands.cpp \
+    src/axiscontroller.cpp \
+    src/coordinate.cpp \
+    src/initialize.cpp \
+    src/load.cpp \
+    src/maneuvers.cpp \
+    src/positions.cpp \
+    src/scan.cpp \
+    src/scanrecipe.cpp \
+    src/statemachine.cpp \
+    src/twospot.cpp \
     src/commandfilereader.cpp \
     src/commandmap.cpp \
     src/configuration.cpp \
@@ -42,12 +42,12 @@ SOURCES += \
     src/mainloop.cpp \
     src/mainstatemachine.cpp \
     src/mainwindow.cpp \
-    src/plasmacontroller/mfc.cpp \
-    src/plasmacontroller/plasmacontroller.cpp \
-    src/plasmacontroller/plasmahead.cpp \
-    src/plasmacontroller/pwr.cpp \
-    src/plasmacontroller/plasmarecipe.cpp \
-    src/plasmacontroller/tuner.cpp \
+    src/mfc.cpp \
+    src/plasmacontroller.cpp \
+    src/plasmahead.cpp \
+    src/pwr.cpp \
+    src/plasmarecipe.cpp \
+    src/tuner.cpp \
     src/recipe.cpp \
     src/settingsdialog.cpp \
     src/stage.cpp \
@@ -55,54 +55,54 @@ SOURCES += \
 
 
 HEADERS += \
-    include/diameter.h \
-    include/axescontroller/axescontroller.h \
-    include/axescontroller/axis.h \
-    include/axescontroller/axiscommands.h \
-    include/axescontroller/axiscontroller.h \
-    include/axescontroller/coordinate.h \
-    include/axescontroller/stage/initialize.h \
-    include/axescontroller/stage/load.h \
-    include/axescontroller/stage/maneuvers.h \
-    include/axescontroller/stage/positions.h \
-    include/axescontroller/stage/scan.h \
-    include/axescontroller/scanrecipe.h \
-    include/axescontroller/stage/statemachine.h \
-    include/axescontroller/stage/twospot.h \
-    include/commandfilereader.h \
-    include/commandmap.h \
-    include/configuration.h \
-    include/console.h \
-    include/diameter.h \
-    include/filereader.h \
-    include/functions.h \
-    include/grblcontroller.h \
-    include/led.h \
-    include/ledfactory.h \
-    include/ledstatus.h \
-    include/lighttowerstatemachine.h \
-    include/logger.h \
-    include/mainwindow.h \
-    include/mainloop.h \
-    include/plasmacontroller/mfc.h \
-    include/plasmacontroller/plasmacontroller.h \
-    include/plasmacontroller/plasmahead.h \
-    include/plasmacontroller/pwr.h \
-    include/plasmacontroller/plasmarecipe.h \
-    include/plasmacontroller/tuner.h \
-    include/recipe.h \
-    include/settingsdialog.h \
-    include/stagewidget.h \
-    include/serialinterface.h \
-    include/axescontroller/zaxis.h \
-    include/stage.h
+    src/diameter.h \
+    src/axescontroller.h \
+    src/axis.h \
+    src/axiscommands.h \
+    src/axiscontroller.h \
+    src/coordinate.h \
+    src/initialize.h \
+    src/load.h \
+    src/maneuvers.h \
+    src/positions.h \
+    src/scan.h \
+    src/scanrecipe.h \
+    src/statemachine.h \
+    src/twospot.h \
+    src/commandfilereader.h \
+    src/commandmap.h \
+    src/configuration.h \
+    src/console.h \
+    src/diameter.h \
+    src/filereader.h \
+    src/functions.h \
+    src/grblcontroller.h \
+    src/led.h \
+    src/ledfactory.h \
+    src/ledstatus.h \
+    src/lighttowerstatemachine.h \
+    src/logger.h \
+    src/mainwindow.h \
+    src/mainloop.h \
+    src/mfc.h \
+    src/plasmacontroller.h \
+    src/plasmahead.h \
+    src/pwr.h \
+    src/plasmarecipe.h \
+    src/tuner.h \
+    src/recipe.h \
+    src/settingsdialog.h \
+    src/stagewidget.h \
+    src/serialinterface.h \
+    src/zaxis.h \
+    src/stage.h
 
 FORMS += \
-    ui/mainwindow.ui \
-    ui/settingsdialog.ui
+    src/mainwindow.ui \
+    src/settingsdialog.ui
 
 RESOURCES += \
-    ONTOS3.qrc
+    src/ONTOS3.qrc
 
-INCLUDEPATH += $$PWD/include
+#INCLUDEPATH += $$PWD/include
 

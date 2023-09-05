@@ -1,4 +1,4 @@
-#include "include/diameter.h"
+#include "diameter.h"
 
 const int NUM_WAFER_SIZES = 5;
 

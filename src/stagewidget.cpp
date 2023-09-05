@@ -1,4 +1,4 @@
-#include "include/stagewidget.h"
+#include "stagewidget.h"
 
 #include <QPainter>
 
