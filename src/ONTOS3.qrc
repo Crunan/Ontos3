@@ -1,0 +1,17 @@
+<RCC>
+    <qresource prefix="/">
+        <file>../images/application-exit.png</file>
+        <file>../images/clear.png</file>
+        <file>../images/connect.png</file>
+        <file>../images/disconnect.png</file>
+        <file>../images/settings.png</file>
+        <file>../images/arrow-left.png</file>
+        <file>../images/arrow-right.png</file>
+        <file>../images/Button-Blank-Blue-icon.png</file>
+        <file>../images/Button-Blank-Green-icon.png</file>
+        <file>../images/Button-Blank-Red-icon.png</file>
+        <file>../images/Button-Blank-Gray-icon.png</file>
+        <file>../images/open.png</file>
+        <file>../images/save.png</file>
+    </qresource>
+</RCC>

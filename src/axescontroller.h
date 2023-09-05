@@ -1,0 +1,231 @@
+#ifndef AXESCONTROLLER_H
+#define AXESCONTROLLER_H
+
+#include <QObject>
+#include <QStateMachine>
+#include "settingsdialog.h"
+#include "serialinterface.h"
+#include "axis.h"
+#include "stage.h"
+#include "ledstatus.h"
+
+class QEventLoop;
+class Recipe;
+
+class AxesController : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit AxesController(QObject *parent = nullptr);
+    ~AxesController();
+
+    bool open(const SettingsDialog& settings);
+    void close();
+    bool sendCommand(const QString& command);
+    QString readResponse();
+
+    QString getPortErrorString();
+    bool isOpen();
+
+    void StartInit() { emit ISM_TransitionStartup(); }
+    void RunInitAxesSM();
+    void StartHome() { emit HSM_TransitionStartup(); }
+    void StopHome() { emit HSM_TransitionShutdown(); }
+    void RunHomeAxesSM();
+    void StartTwoSpot() { emit TSSM_TransitionStartup(); }
+    void StopTwoSpot() { emit TSSM_TransitionShutdown(); }
+    void RunTwoSpotSM();
+
+    void setXMaxPos(const double maxPos);
+    void setXMaxSpeed(const double maxSpeed);
+    void setXHomePos(const double homePos);
+
+    void setYMaxPos(const double maxPos);
+    void setYMaxSpeed(const double maxSpeed);
+    void setYHomePos(const double homePos);
+
+    void setZMaxPos(const double maxPos);
+    void setZMaxSpeed(const double maxSpeed);
+    void setZHomePos(const double homePos);
+
+    void AxisStartup();
+
+    QString getXMaxSpeedQStr() { return m_Xaxis.getMaxSpeedQStr(); }
+    double XMaxSpeed() { return m_Xaxis.getMaxSpeed(); }
+    QString getXHomePosQStr() { return m_Xaxis.getHomePosQStr(); }
+
+    double getXTwoSpotFirstPoint() { return m_Xaxis.getTwoSpotFirstPoint(); }
+    double getXTwoSpotSecondPoint() { return m_Xaxis.getTwoSpotSecondPoint(); }
+    double getYTwoSpotFirstPoint() { return m_Yaxis.getTwoSpotFirstPoint(); }
+    double getYTwoSpotSecondPoint() { return m_Yaxis.getTwoSpotSecondPoint(); }
+
+    // command wrappers.  Maybe consider moving some to plasmacontroller
+    void getXMaxSpeed();
+    void getYMaxSpeed();
+    void getZMaxSpeed();
+    void getXp2Base();
+    void getYp2Base();
+    void getZp2Base();
+    void getXs2PH();
+    void getYs2PH();
+    void getPHSlitLength();
+    void getPHSlitWidth();
+    void getPHSafetyZGap();
+    void getZPinsBuried();
+    void getZPinsExposed();
+    void getLoadX2Base();
+    void getLoadY2Base();
+    void getLoadZ2Base();
+
+    void setAxisStateMachinesIdle();
+
+    void getAxisStatus();
+    void updateAxisStatus();
+
+    double getXPosition() const { return m_Xaxis.getPosition(); }
+    double getYPosition() const { return m_Yaxis.getPosition(); }
+    double getZPosition() const { return m_Zaxis.getPosition(); }
+
+    void resetAxes();
+
+    void togglePinsOn();
+    void togglePinsOff();
+    void toggleJoystickOn();
+    void toggleJoystickOff();
+    void toggleN2PurgeOn();
+    void toggleN2PurgeOff();
+    void toggleVacOn();
+    void toggleVacOff();
+
+signals:
+
+    void stagePortOpened();
+    void stageStatusUpdate(QString status1, QString status2);
+    void stageResponseReceived(QString resonse);
+
+    // init state machine UI updating signals
+    void setUIInitSMStartup();
+    void setUIInitSMDone();
+
+    // home state machine UI updating signals
+    void setUIHomeSMStartup();
+    void setUIHomeSMDone();
+
+    // two spot state machine UI updating signals
+    void setUITwoSpotSMStartup();
+    void setUITwoSpotSMDone();
+
+    // init state machine transitions
+    void ISM_TransitionWaitForDone();
+    void ISM_TransitionInitialized();
+    void ISM_TransitionIdle();
+    void ISM_TransitionStartup();
+
+    // home state machine transitions
+    void HSM_TransitionStartupToWaitParkZ();
+    void HSM_TransitionWaitParkZToHomeXY();
+    void HSM_TransitionHomeXYToWaitHomeXY();
+    void HSM_TransitionHomeXYToHomeZ();
+    void HSM_TransitionHomeZToWaitHomeZ();
+    void HSM_TransitionIdle();
+    void HSM_TransitionStartup();
+    void HSM_TransitionShutdown();
+
+    // two spot state machine transitions
+    void TSSM_TransitionGetFirst();
+    void TSSM_TransitionJoyBtnOff();
+    void TSSM_TransitionGetSecond();
+    void TSSM_TransitionShutdown();
+    void TSSM_TransitionIdle();
+    void TSSM_TransitionStartup();
+
+    /*/ update ui
+    void currentStatusChanged();
+    void axisStatusChanged();
+    void ledStatesChanged();
+    void doorsOpenChanged();
+    void joystickOnChanged();
+    void vacuumOnChanged();
+    void nitrogenPurgeOnChanged();*/
+
+private slots:
+
+private:
+    // setup state machines
+    void SetupInitAxesStateMachine();
+    void SetupHomeAxesStateMachine();
+    void SetupTwoSpotStateMachine();
+
+    // utility functions
+    bool nextStateReady();
+    void setValve2(QString toggle);
+    void setValve2On();
+    void setValve2Off();
+    void stopMotors();
+    void sendInitCMD();
+    void setSameStateXYZsame();
+    void parseStatus(QString serialResponse);
+
+    void setLEDstate(QString firstHexStrNibble, QString secondHexStrNibble);
+
+    void move(QString axis, QString speed, QString position);
+    void setSpeed(QString axis, QString speed);
+    void setAbsMove(QString axis, QString position);
+
+    //translate displayed PH X,Y,Z to the Base PH X,Y,Z (for motor moves)
+    double TranslateCoordXPH2Base(double x) { return (m_Xp2Base - x); }
+    double TranslateCoordYPH2Base(double y) { return (m_Yp2Base - y); }
+    double TranslateCoordZPH2Base(double z) { return (z - m_Zp2Base); }
+
+    LEDStatus m_ledStatus;
+
+    // init axes state machine
+    QStateMachine m_initStateMachine;
+    QState *m_pInitAxesIdleState;
+    QState *m_pInitAxesStartupState;
+    QState *m_pInitAxesWaitForDoneState;
+    QState *m_pInitAxesInitializedState;
+
+    // home axes state machine
+    QStateMachine m_homeStateMachine;
+    QState *m_pHomeAxisSuperState;
+    QState *m_pHomeAxesStartupState;
+    QState *m_pHomeAxesWaitParkZState;
+    QState *m_pHomeAxesHomeXYState;
+    QState *m_pHomeAxesWaitHomeXYState;
+    QState *m_pHomeAxesHomeZState;
+    QState *m_pHomeAxesWaitHomeZState;
+    QState *m_pHomeAxesShutdownState;
+    QState *m_pHomeAxesIdleState;
+
+    // two spot state machine
+    QStateMachine m_twoSpotStateMachine;
+    QState *m_pTwoSpotSuperState;
+    QState *m_pTwoSpotStartupState;
+    QState *m_pTwoSpotGetFirstState;
+    QState *m_pTwoSpotWaitJoyBtnOffState;
+    QState *m_pTwoSpotGetSecondState;
+    QState *m_pTwoSpotShutdownState;
+    QState *m_pTwoSpotIdleState;
+
+    SerialInterface m_serialInterface;
+
+    Axis m_Xaxis, m_Yaxis, m_Zaxis;
+    Stage m_stage;
+
+    QStringList m_axisStatus;
+
+    bool m_sameStateXYZ;
+    bool m_joystickOn;
+    bool m_joyButtonOn;
+
+    // coordinate transforms
+    double m_Xp2Base;
+    double m_Yp2Base;
+    double m_Zp2Base;
+    double m_Xs2PH;
+    double m_Ys2PH;
+};
+
+#endif // AXESCONTROLLER_H
