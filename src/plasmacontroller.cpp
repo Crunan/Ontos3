@@ -2,10 +2,10 @@
 
 PlasmaController::PlasmaController(QWidget* parent)
   : QObject(parent),
-    plasmaHead(),
-    pwr(),
-    tuner(),
-    mfcs({ new MFC(1), new MFC(2), new MFC(3), new MFC(4) }),
+    m_plasmaHead(),
+    m_pwr(),
+    m_tuner(),
+    m_mfcs({ new MFC(1), new MFC(2), new MFC(3), new MFC(4) }),
     commandMap(),
     config(),
     axesCTL(nullptr),
@@ -14,20 +14,20 @@ PlasmaController::PlasmaController(QWidget* parent)
     executeRecipe(0)
 {
     // Add startup data gathering methods.
-    for (MFC* mfc: mfcs) {
+    for (MFC* mfc: m_mfcs) {
         connect(mfc, &MFC::defaultRecipeChanged, this, &PlasmaController::handleSetMFCDefaultRecipeCommand);
         connect(mfc, &MFC::recipeFlowChanged, this, &PlasmaController::handleSetMFCRecipeFlowCommand);
         connect(mfc, &MFC::rangeChanged, this, &PlasmaController::handleSetMFCRangeCommand);
     }
-    connect(&tuner, &Tuner::defaultRecipeChanged, this, &PlasmaController::handleSetTunerDefaultRecipeCommand);
-    connect(&tuner, &Tuner::recipePositionChanged, this, &PlasmaController::handleSetTunerRecipePositionCommand);
-    connect(&tuner, &Tuner::autoTuneChanged, this, &PlasmaController::handleSetTunerAutoTuneCommand);
+    connect(&m_tuner, &Tuner::defaultRecipeChanged, this, &PlasmaController::handleSetTunerDefaultRecipeCommand);
+    connect(&m_tuner, &Tuner::recipePositionChanged, this, &PlasmaController::handleSetTunerRecipePositionCommand);
+    connect(&m_tuner, &Tuner::autoTuneChanged, this, &PlasmaController::handleSetTunerAutoTuneCommand);
 }
 
 PlasmaController::~PlasmaController()
 {
     // Clean up the MFC objects
-    for (MFC* mfc : mfcs) {
+    for (MFC* mfc : m_mfcs) {
         delete mfc;
     }
 }
@@ -100,9 +100,9 @@ QString PlasmaController::formatSerialCommand(QString cmd, const QString& setpoi
     return cmd;
 }
 
-MFC* PlasmaController::findMFCByNumber(int& mfcNumber)
+MFC* PlasmaController::findMFCByNumber(int mfcNumber)
 {
-    for (MFC* mfc : mfcs) {
+    for (MFC* mfc : m_mfcs) {
         if (mfc->getMFCNumber() == mfcNumber) {
             return mfc;
         }
@@ -262,13 +262,13 @@ void PlasmaController::parseResponseForCTLStatus(const QString& response)
 
     // Extract and update the tuner position
     double tunerPosition = subsystemData[1].toDouble();
-    tuner.setActualPosition(tunerPosition);
+    m_tuner.setActualPosition(tunerPosition);
 
     // Extract and update RF power forward and reflected
     double rfForward = subsystemData[2].toDouble();
     double rfReflected = subsystemData[3].toDouble();
-    pwr.setForwardWatts(rfForward);
-    pwr.setReflectedWatts(rfReflected);
+    m_pwr.setForwardWatts(rfForward);
+    m_pwr.setReflectedWatts(rfReflected);
 
     // Extract and update ExecuteRecipe member
     int execRecipeInt = subsystemData[4].toInt();
@@ -285,7 +285,7 @@ void PlasmaController::parseResponseForCTLStatus(const QString& response)
 
     // Extract and update plasmahead temperature
     double temperature = subsystemData[9].toDouble();
-    plasmaHead.setTemperature(temperature);
+    m_plasmaHead.setTemperature(temperature);
 }
 
 bool PlasmaController::getExecuteRecipe() const

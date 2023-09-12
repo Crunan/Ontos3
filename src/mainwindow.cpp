@@ -38,15 +38,10 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     // Serial buttons initial states
     serialButtonPreConnectState();
 
-    // Main Serial connect/disconnect buttons
-    connect(ui->mainConnectButton, &QPushButton::clicked, this, &MainWindow::openMainPort);
-    connect(ui->mainDisconnectButton, &QPushButton::clicked, this, &MainWindow::closeMainPort);
     // Stage Serial connect/disconnect buttons
     connect(ui->stageConnectButton, &QPushButton::clicked, this, &MainWindow::openStagePort);
-    //connect(ui->stageDisconnectButton, &QPushButton::clicked, this, &MainWindow::closeStagePort);
-    // Stage buttons
-    //connect(ui->init_button, &QPushButton::clicked, this, &MainWindow::initButtonClicked);
-    // Settings button
+
+    // Settings buttons
     connect(ui->mainSettingsButton, &QPushButton::clicked, m_pSettings, &SettingsDialog::show);
     connect(ui->stageSettingsButton, &QPushButton::clicked, m_pSettings, &SettingsDialog::show);
 
@@ -67,9 +62,12 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     m_pStageWidget->setStageBounds(0.0, 100.0, 0.0, 50.0);
 
     // Make signal/slot connections here
-    connectRecipeButtons();
-    connectCascadeRecipeButtons();
+    connectRecipeButtons(); // TODO: remove these and replace with designer click handlers
+    connectCascadeRecipeButtons(); // TODO: remove these and replace with designer click handlers
+
+    // recipe slots
     connectMFCFlowBars();
+    connect(&m_mainCTL.m_pwr, &PWR::recipeWattsChanged, this, &MainWindow::recipeWattsChanged);
 
     // status bar
     ui->statusBar->addWidget(m_pStatus);
@@ -96,38 +94,223 @@ MainWindow::~MainWindow() {
     delete m_pMainLoop;
 }
 
-void MainWindow::setupMainStateMachine()
+void MainWindow::showStatusMessage(const QString &message)
 {
-    m_pMainStartupState = new QState();
-    m_pMainIdleState = new QState();
-    m_pMainPollingState = new QState();
-    m_pMainShutdownState = new QState();
+    m_pStatus->setText(message);
+}
 
-    // construct operating transitions
-    m_pMainStartupState->addTransition(this, SIGNAL(MSM_TransitionPolling()), m_pMainPollingState);
-    m_pMainIdleState->addTransition(this, SIGNAL(MSM_TransitionStartup()), m_pMainStartupState);
+void MainWindow::about() {
+    QMessageBox::about(this, tr("About Ontos 3 Interface"),
+                       tr("The <b>Ontos3 Interface</b> is the latest"
+                          "modern GUI for Plasma applications."));
+}
 
-    // shutdown transitions
-    m_pMainStartupState->addTransition(this, SIGNAL(MSM_TransitionShutdown()), m_pMainShutdownState);
-    m_pMainPollingState->addTransition(this, SIGNAL(MSM_TransitionShutdown()), m_pMainShutdownState);
-    m_pMainIdleState->addTransition(this, SIGNAL(MSM_TransitionShutdown()), m_pMainShutdownState);
+void MainWindow::shutDownProgram() {
+    /*if (m_mainCTL.isOpen()) {
+        m_mainCTL.close();
+    }*/ // TODO: Needs implementing
+    if (m_stageCTL.isOpen()) {
+        m_stageCTL.close();
+    }
+    Logger::clean();
+    MainWindow::close();
+}
 
-    // idle transitions
-    m_pMainStartupState->addTransition(this, SIGNAL(MSM_TransitionIdle()), m_pMainIdleState);
-    m_pMainPollingState->addTransition(this, SIGNAL(MSM_TransitionIdle()), m_pMainIdleState);
-    m_pMainShutdownState->addTransition(this, SIGNAL(MSM_TransitionIdle()), m_pMainIdleState);
+//////////////////////////////////////////////////////////////////////////////////
+// Setup
+//////////////////////////////////////////////////////////////////////////////////
+void MainWindow::consoleMainCTLSetup()
+{
+    // Step 1: Create an instance of the console class
+    m_pMainCTLConsole = new Console(ui->mainTabWidget);
 
-    // add states to the machine
-    m_mainStateMachine.addState(m_pMainIdleState);
-    m_mainStateMachine.addState(m_pMainStartupState);
-    m_mainStateMachine.addState(m_pMainPollingState);
-    m_mainStateMachine.addState(m_pMainShutdownState);
+    // Step 2: Add the console instance to a new tab
+    int tabIndex = ui->mainTabWidget->addTab(m_pMainCTLConsole, "Main CTL Terminal");
 
-    // set initial state to idle
-    m_mainStateMachine.setInitialState(m_pMainIdleState);
+    // Step 3: Set the Qt theme icon for the tab
+    QIcon icon = QIcon::fromTheme("utilities-system");
+    ui->mainTabWidget->setTabIcon(tabIndex, icon);
 
-    // start the state machine
-    m_mainStateMachine.start();
+    // Step 4: connect signals/slot
+    connect(m_pMainCTLConsole, &Console::getData, this, &MainWindow::writeMainPort);
+}
+
+void MainWindow::consoleStageCTLSetup()
+{
+    // Step 1: Create an instance of the console class
+    m_pStageCTLConsole = new Console(ui->mainTabWidget);
+
+    // Step 2: Add the console instance to a new tab
+    int tabIndex = ui->mainTabWidget->addTab(m_pStageCTLConsole, "Stage CTL Terminal");
+
+    // Step 3: Set the Qt theme icon for the tab
+    QIcon icon = QIcon::fromTheme("utilities-system");
+    ui->mainTabWidget->setTabIcon(tabIndex, icon);
+
+    // Step 4: connect signals/slot
+    connect(m_pStageCTLConsole, &Console::getData, this, &MainWindow::writeStagePort);
+}
+
+void MainWindow::connectRecipeButtons()
+{
+    connect(ui->loadMBButton, &QPushButton::clicked, this, &MainWindow::loadMBRecipeButton_clicked);
+    //connect(ui->AutoTuneCheckBox, &QCheckBox::stateChanged, this, &MainWindow::AutoTuneCheckbox_stateChanged); // MCD: should this be a checkbox?
+
+    //MFC buttons
+    connectMFCRecipeButton(ui->loadMFC1Button, 1);
+    connectMFCRecipeButton(ui->loadMFC2Button, 2);
+    connectMFCRecipeButton(ui->loadMFC3Button, 3);
+    connectMFCRecipeButton(ui->loadMFC4Button, 4);
+}
+
+void MainWindow::connectCascadeRecipeButtons()
+{
+    connect(ui->addCascadeRecipeButton, &QPushButton::clicked, this, &MainWindow::addRecipeToCascadeRecipe);
+    connect(ui->removeCascadeRecipeButton, &QPushButton::clicked, this, &MainWindow::removeRecipeFromCascadeList);
+    connect(ui->saveAsCascadeRecipeButton, &QPushButton::clicked, this, &MainWindow::saveAsCascadeRecipeListToFile);
+}
+
+void MainWindow::connectMFCFlowBars()
+{
+    // This will connect the flowchanged signal along with its passed params
+    // to the GUI updateFlowbars function.
+    for (int i = 0; i < m_mainCTL.m_mfcs.size(); ++i) {
+        connect(m_mainCTL.m_mfcs[i], &MFC::recipeFlowChanged, this, &MainWindow::updateRecipeFlow);
+    }
+}
+
+void MainWindow::connectMFCRecipeButton(QPushButton* button, const int& mfcNumber)
+{
+    button->setProperty("MFCNumber", mfcNumber);  // Store the MFC index in the button's property
+    connect(button, &QPushButton::clicked, this, &MainWindow::openRecipeWindowMFC);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+// State machine slots
+//////////////////////////////////////////////////////////////////////////////////
+
+// set ui elements accordingly
+void MainWindow::homeStateMachineStartup()
+{
+    //    RunScanBtn.Visible = False
+    //    SetTwoSpotBtn.Visible = False
+    //    SetDiameterBtn.Visible = False
+    //    HomeAxesBtn.Text = "STOP"
+    //            PinsSquare.BackColor = Color.Gainsboro
+    //            b_HasPins = False 'This is so the first time the button is hit, the button will bury the pins
+
+    ui->twospot_button->setEnabled(false);
+    ui->twospot_button_dup->setEnabled(false);
+    ui->diameter_button->setEnabled(false);
+    ui->diameter_button_dup->setEnabled(false);
+    ui->Home_button->setText("STOP");
+    ui->Home_button_dup->setText("STOP");
+}
+
+// set ui elements accordingly
+void MainWindow::homeStateMachineDone()
+{
+    ui->twospot_button->setEnabled(true);
+    ui->twospot_button_dup->setEnabled(true);
+    ui->diameter_button->setEnabled(true);
+    ui->diameter_button_dup->setEnabled(true);
+    ui->Home_button->setText("LOAD");
+    ui->Home_button_dup->setText("LOAD");
+    ui->Home_button->setChecked(false);
+    ui->Home_button_dup->setChecked(false);
+}
+
+// set ui elements accordingly
+void MainWindow::initStateMachineStartup()
+{
+    //GUI status
+    //ui->Stagepins_button->setChecked(true); // TODO: need to implement
+    //RunScanBtn.Visible = False
+    ui->twospot_button->setEnabled(false);
+    ui->twospot_button_dup->setEnabled(false);
+    ui->diameter_button->setEnabled(false);
+    ui->diameter_button_dup->setEnabled(false);
+    ui->Home_button->setEnabled(false);
+    ui->Home_button_dup->setEnabled(false);
+    ui->init_button->setEnabled(false);
+    ui->init_button_dup->setEnabled(false);
+}
+
+// set ui elements accordingly
+void MainWindow::initStateMachineDone()
+{
+    //    RunScanBtn.Visible = True
+    //    Vacbtn.Visible = True
+    //    RecipeButtonPins.Visible = True
+    //    AutoVacSquare.Visible = True
+    //    PinsSquare.Visible = True
+    //    PinsSquare.BackColor = Color.Lime
+    //    b_HasPins = True 'This is so the first time the button is hit, the button will bury the pins
+    //    If b_ENG_mode Then
+    //        SetTwoSpotBtn.Visible = True
+    //        SetDiameterBtn.Visible = True
+    //    End If
+    ui->twospot_button->setEnabled(true);
+    ui->twospot_button_dup->setEnabled(true);
+    ui->diameter_button->setEnabled(true);
+    ui->diameter_button_dup->setEnabled(true);
+    ui->Home_button->setEnabled(true);
+    ui->Home_button_dup->setEnabled(true);
+    ui->init_button->setEnabled(true);
+    ui->init_button_dup->setEnabled(true);
+    ui->init_button->setChecked(false);
+    ui->init_button_dup->setChecked(false);
+}
+
+void MainWindow::twoSpotStateMachineStartup()
+{
+    ui->twospot_button->setText("STOP");
+
+    ui->Home_button->setEnabled(false);
+    ui->Home_button_dup->setEnabled(false);
+    ui->init_button->setEnabled(false);
+    ui->init_button_dup->setEnabled(false);
+    ui->init_button->setChecked(false);
+    ui->init_button_dup->setChecked(false);
+}
+
+void MainWindow::twoSpotStateMachineDone()
+{
+    ui->twospot_button->setText("TWO SPOT");
+
+    ui->xmin_controls_dup->setText(QString::number(m_stageCTL.getXTwoSpotFirstPoint()));
+    ui->xmax_controls_dup->setText(QString::number(m_stageCTL.getXTwoSpotSecondPoint()));
+    ui->ymin_controls_dup->setText(QString::number(m_stageCTL.getYTwoSpotFirstPoint()));
+    ui->ymax_controls_dup->setText(QString::number(m_stageCTL.getYTwoSpotSecondPoint()));
+
+    ui->Home_button->setEnabled(true);
+    ui->Home_button_dup->setEnabled(true);
+    ui->init_button->setEnabled(true);
+    ui->init_button_dup->setEnabled(true);
+    ui->twospot_button->setChecked(false);
+    ui->twospot_button->setChecked(false);
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+// Serial Ports
+//////////////////////////////////////////////////////////////////////////////////
+void MainWindow::closeMainPort()
+{
+    if (m_mainCTL.isOpen()) {
+        m_mainCTL.close();
+    }
+
+    // Disable Console
+    m_pMainCTLConsole->setEnabled(false);
+
+    // Default button states
+    ui->mainConnectButton->setEnabled(true);
+    ui->mainDisconnectButton->setEnabled(false);
+    ui->mainSettingsButton->setEnabled(true);
+
+    // Update Status bar
+    showStatusMessage(tr("Disconnected"));
 }
 
 void MainWindow::openMainPort()
@@ -137,7 +320,7 @@ void MainWindow::openMainPort()
     if (m_mainCTL.open(*m_pSettings)) {
 
         //Terminal Tab setup for console commands
-        consoleMainCTLSetup();        
+        consoleMainCTLSetup();
         m_pMainCTLConsole->setEnabled(true);
         m_pMainCTLConsole->setLocalEchoEnabled(p.localEchoEnabled);
 
@@ -191,24 +374,6 @@ void MainWindow::openStagePort()
 
         showStatusMessage(tr("Open error"));
     }
-}
-
-void MainWindow::closeMainPort()
-{
-    if (m_mainCTL.isOpen()) {
-        m_mainCTL.close();
-    }
-
-    // Disable Console
-    m_pMainCTLConsole->setEnabled(false);
-
-    // Default button states
-    ui->mainConnectButton->setEnabled(true);
-    ui->mainDisconnectButton->setEnabled(false);
-    ui->mainSettingsButton->setEnabled(true);
-
-    // Update Status bar
-    showStatusMessage(tr("Disconnected"));
 }
 
 void MainWindow::closeStagePort()
@@ -272,207 +437,6 @@ void MainWindow::handleStageSerialError(QSerialPort::SerialPortError error)
     }
 }
 
-// set ui elements accordingly
-void MainWindow::homeStateMachineStartup()
-{
-//    RunScanBtn.Visible = False
-//    SetTwoSpotBtn.Visible = False
-//    SetDiameterBtn.Visible = False
-//    HomeAxesBtn.Text = "STOP"
-    //            PinsSquare.BackColor = Color.Gainsboro
-    //            b_HasPins = False 'This is so the first time the button is hit, the button will bury the pins
-
-    ui->twospot_button->setEnabled(false);
-    ui->twospot_button_dup->setEnabled(false);
-    ui->diameter_button->setEnabled(false);
-    ui->diameter_button_dup->setEnabled(false);
-    ui->Home_button->setText("STOP");
-    ui->Home_button_dup->setText("STOP");
-}
-
-// set ui elements accordingly
-void MainWindow::homeStateMachineDone()
-{
-    ui->twospot_button->setEnabled(true);
-    ui->twospot_button_dup->setEnabled(true);
-    ui->diameter_button->setEnabled(true);
-    ui->diameter_button_dup->setEnabled(true);
-    ui->Home_button->setText("LOAD");
-    ui->Home_button_dup->setText("LOAD");
-}
-
-// set ui elements accordingly
-void MainWindow::initStateMachineStartup()
-{
-    //GUI status
-    //ui->Stagepins_button->setChecked(true); // TODO: need to implement
-    //RunScanBtn.Visible = False
-    ui->twospot_button->setEnabled(false);
-    ui->twospot_button_dup->setEnabled(false);
-    ui->diameter_button->setEnabled(false);
-    ui->diameter_button_dup->setEnabled(false);
-    ui->Home_button->setEnabled(false);
-    ui->Home_button_dup->setEnabled(false);
-    ui->init_button->setEnabled(false);
-    ui->init_button_dup->setEnabled(false);
-}
-
-// set ui elements accordingly
-void MainWindow::initStateMachineDone()
-{
-//    RunScanBtn.Visible = True
-//    Vacbtn.Visible = True
-//    RecipeButtonPins.Visible = True
-//    AutoVacSquare.Visible = True
-//    PinsSquare.Visible = True
-//    PinsSquare.BackColor = Color.Lime
-//    b_HasPins = True 'This is so the first time the button is hit, the button will bury the pins
-//    If b_ENG_mode Then
-//        SetTwoSpotBtn.Visible = True
-//        SetDiameterBtn.Visible = True
-//    End If
-    ui->twospot_button->setEnabled(true);
-    ui->twospot_button_dup->setEnabled(true);
-    ui->diameter_button->setEnabled(true);
-    ui->diameter_button_dup->setEnabled(true);
-    ui->Home_button->setEnabled(true);
-    ui->Home_button_dup->setEnabled(true);
-    ui->init_button->setEnabled(true);
-    ui->init_button_dup->setEnabled(true);
-}
-
-void MainWindow::twoSpotStateMachineStartup()
-{
-    ui->twospot_button->setText("STOP");
-}
-
-void MainWindow::twoSpotStateMachineDone()
-{
-    ui->twospot_button->setText("TWO SPOT");
-
-    ui->xmin_controls_dup->setText(QString::number(m_stageCTL.getXTwoSpotFirstPoint()));
-    ui->xmax_controls_dup->setText(QString::number(m_stageCTL.getXTwoSpotSecondPoint()));
-    ui->ymin_controls_dup->setText(QString::number(m_stageCTL.getYTwoSpotFirstPoint()));
-    ui->ymax_controls_dup->setText(QString::number(m_stageCTL.getYTwoSpotSecondPoint()));
-}
-
-void MainWindow::showStatusMessage(const QString &message)
-{
-    m_pStatus->setText(message);
-}
-
-void MainWindow::about() {
-    QMessageBox::about(this, tr("About Ontos 3 Interface"),
-                   tr("The <b>Ontos3 Interface</b> is the latest"
-                      "modern GUI for Plasma applications."));
-}
-
-void MainWindow::shutDownProgram() {
-    /*if (m_mainCTL.isOpen()) {
-        m_mainCTL.close();
-    }*/ // TODO: Needs implementing
-    if (m_stageCTL.isOpen()) {
-        m_stageCTL.close();
-    }
-    Logger::clean();
-    MainWindow::close();
-}
-
-void MainWindow::consoleMainCTLSetup()
-{
-    // Step 1: Create an instance of the console class
-    m_pMainCTLConsole = new Console(ui->mainTabWidget);
-
-    // Step 2: Add the console instance to a new tab
-    int tabIndex = ui->mainTabWidget->addTab(m_pMainCTLConsole, "Main CTL Terminal");
-
-    // Step 3: Set the Qt theme icon for the tab
-    QIcon icon = QIcon::fromTheme("utilities-system");
-    ui->mainTabWidget->setTabIcon(tabIndex, icon);
-
-    // Step 4: connect signals/slot
-    connect(m_pMainCTLConsole, &Console::getData, this, &MainWindow::writeMainPort);
-}
-
-void MainWindow::consoleStageCTLSetup()
-{
-    // Step 1: Create an instance of the console class
-    m_pStageCTLConsole = new Console(ui->mainTabWidget);
-
-    // Step 2: Add the console instance to a new tab
-    int tabIndex = ui->mainTabWidget->addTab(m_pStageCTLConsole, "Stage CTL Terminal");
-
-    // Step 3: Set the Qt theme icon for the tab
-    QIcon icon = QIcon::fromTheme("utilities-system");
-    ui->mainTabWidget->setTabIcon(tabIndex, icon);
-
-    // Step 4: connect signals/slot
-    connect(m_pStageCTLConsole, &Console::getData, this, &MainWindow::writeStagePort);
-}
-
-void MainWindow::connectRecipeButtons()
-{
-    connect(ui->loadRecipeButton, &QPushButton::clicked, this, &MainWindow::RFRecipeButton_clicked);
-    connect(ui->loadMBButton, &QPushButton::clicked, this, &MainWindow::loadMBRecipeButton_clicked);
-    //connect(ui->AutoTuneCheckBox, &QCheckBox::stateChanged, this, &MainWindow::AutoTuneCheckbox_stateChanged); // MCD: should this be a checkbox?
-    connect(ui->loadRecipeButton, &QPushButton::clicked, this, &MainWindow::openRecipe);
-    //MFC buttons
-    connectMFCRecipeButton(ui->loadMFC1Button, 1);
-    connectMFCRecipeButton(ui->loadMFC2Button, 2);
-    connectMFCRecipeButton(ui->loadMFC3Button, 3);
-    connectMFCRecipeButton(ui->loadMFC4Button, 4);
-}
-
-void MainWindow::connectCascadeRecipeButtons()
-{
-    connect(ui->addCascadeRecipeButton, &QPushButton::clicked, this, &MainWindow::addRecipeToCascadeRecipe);
-    connect(ui->removeCascadeRecipeButton, &QPushButton::clicked, this, &MainWindow::removeRecipeFromCascadeList);
-    connect(ui->saveAsCascadeRecipeButton, &QPushButton::clicked, this, &MainWindow::saveAsCascadeRecipeListToFile);
-}
-
-void MainWindow::connectMFCFlowBars()
-{
-    // This will connect the flowchanged signal along with its passed params
-    // to the GUI updateFlowbars function.
-    for (int i = 0; i < m_mainCTL.mfcs.size(); ++i) {
-        connect(m_mainCTL.mfcs[i], &MFC::recipeFlowChanged, this, &MainWindow::updateRecipeProgressBar);
-    }
-}
-
-void MainWindow::connectMFCRecipeButton(QPushButton* button, const int& mfcNumber)
-{
-    button->setProperty("MFCNumber", mfcNumber);  // Store the MFC index in the button's property
-    connect(button, &QPushButton::clicked, this, &MainWindow::openRecipeWindowMFC);
-}
-
-
-
-void MainWindow::updateRecipeProgressBar(const int& mfcNumber, const double& flow)
-{
-    // This uses the parameters passed in the signal
-    /* MCD: Ask Cory.  Temporary just to compile
-     * if (mfcNumber == 1) {
-        ui->recipeProgressBar->setValue(flow);
-    } else if (mfcNumber == 2) {
-        ui->recipeProgressBar_2->setValue(flow);
-    } else if (mfcNumber == 3) {
-        ui->recipeProgressBar_3->setValue(flow);
-    } else if (mfcNumber == 4) {
-        ui->recipeProgressBar_4->setValue(flow);
-    }*/
-
-    // MCD: Temporary just to compile
-    if (mfcNumber == 1) {
-        ui->gas1ProgressBar->setValue(flow);
-    } else if (mfcNumber == 2) {
-        ui->gas2ProgressBar->setValue(flow);
-    } else if (mfcNumber == 3) {
-        ui->gas3ProgressBar->setValue(flow);
-    } else if (mfcNumber == 4) {
-        ui->gas4ProgressBar->setValue(flow);
-    }
-}
-
 void MainWindow::serialButtonPreConnectState()
 {
     // Enable serial buttons
@@ -485,252 +449,69 @@ void MainWindow::serialButtonPreConnectState()
     ui->stageSettingsButton->setEnabled(true);
 }
 
-void MainWindow::openRecipeWindowMFC()
+//////////////////////////////////////////////////////////////////////////////////
+// State machine and execution
+//////////////////////////////////////////////////////////////////////////////////
+void MainWindow::setupMainStateMachine()
 {
-    bool ok;
-    QString recipeStr = QInputDialog::getText(nullptr, "MFC Setpoint", "Please enter a setpoint for the MFC:", QLineEdit::Normal, "", &ok);
+    m_pMainStartupState = new QState();
+    m_pMainIdleState = new QState();
+    m_pMainPollingState = new QState();
+    m_pMainShutdownState = new QState();
 
-    if (ok && !recipeStr.isEmpty()) {
-        // User entered a string and clicked OK
-        if (!m_mainCTL.mfcs.isEmpty()) {
-            QPushButton* button = qobject_cast<QPushButton*>(sender());
-            if (button) {
+    // construct operating transitions
+    m_pMainStartupState->addTransition(this, SIGNAL(MSM_TransitionPolling()), m_pMainPollingState);
+    m_pMainIdleState->addTransition(this, SIGNAL(MSM_TransitionStartup()), m_pMainStartupState);
 
-                // Retrieve the MFC number from the button's property
-                int mfcNumber = button->property("MFCNumber").toInt();  // Retrieve the MFC index from the button's property
-                MFC* mfc = m_mainCTL.findMFCByNumber(mfcNumber);
-                if (mfc) {
-                    double recipe = recipeStr.toDouble();
-                    mfc->setRecipeFlow(recipe);
-                }
-            }
-        }
-    } else {
-        // User either clicked Cancel or did not enter any string
-        // Handle accordingly
-        return;
-    }
+    // shutdown transitions
+    m_pMainStartupState->addTransition(this, SIGNAL(MSM_TransitionShutdown()), m_pMainShutdownState);
+    m_pMainPollingState->addTransition(this, SIGNAL(MSM_TransitionShutdown()), m_pMainShutdownState);
+    m_pMainIdleState->addTransition(this, SIGNAL(MSM_TransitionShutdown()), m_pMainShutdownState);
+
+    // idle transitions
+    m_pMainStartupState->addTransition(this, SIGNAL(MSM_TransitionIdle()), m_pMainIdleState);
+    m_pMainPollingState->addTransition(this, SIGNAL(MSM_TransitionIdle()), m_pMainIdleState);
+    m_pMainShutdownState->addTransition(this, SIGNAL(MSM_TransitionIdle()), m_pMainIdleState);
+
+    // add states to the machine
+    m_mainStateMachine.addState(m_pMainIdleState);
+    m_mainStateMachine.addState(m_pMainStartupState);
+    m_mainStateMachine.addState(m_pMainPollingState);
+    m_mainStateMachine.addState(m_pMainShutdownState);
+
+    // set initial state to idle
+    m_mainStateMachine.setInitialState(m_pMainIdleState);
+
+    // start the state machine
+    m_mainStateMachine.start();
 }
-void MainWindow::RFRecipeButton_clicked()
+
+void MainWindow::RunStartup()
 {
-    bool ok;
-    QString recipeStr = QInputDialog::getText(nullptr, "RF Setpoint", "Please enter a setpoint for RF Power:", QLineEdit::Normal, "", &ok);
-
-    if (ok && !recipeStr.isEmpty()) {
-        // User entered a string and clicked OK
-        int recipe = recipeStr.toInt();
-        m_mainCTL.pwr.setRecipeWatts(recipe);
-    }
-    else {
-        // User either clicked Cancel or did not enter any string
-        // Handle accordingly
-        return;
-    }
+    //GetExeCfg(); TODO: need to implement
+    m_mainCTL.CTLStartup(); // TODO: need to implement
+    m_stageCTL.AxisStartup();
 }
 
-
-void MainWindow::loadMBRecipeButton_clicked()
+void MainWindow::GetExeCfg()
 {
-    bool ok;
-    QString recipeStr = QInputDialog::getText(nullptr, "Tuner Setpoint", "Please enter a setpoint for MB Tuner:", QLineEdit::Normal, "", &ok);
+    QStringList Values;
+    QFile file("./config/default.cfg");
 
-    if (ok && !recipeStr.isEmpty()) {
-        // User entered a string and clicked OK
-        double recipe = recipeStr.toDouble();
-        m_mainCTL.tuner.setRecipePosition(recipe);
+    if(!file.open(QIODevice::ReadOnly)) {
+        QMessageBox::information(0, "error", file.errorString());
     }
-    else {
-        // User either clicked Cancel or did not enter any string
-        // Handle accordingly
-        return;
-    }
-}
+    QTextStream in(&file);
 
-
-void MainWindow::AutoTuneCheckbox_stateChanged(int value)
-{
-    m_mainCTL.tuner.setAutoTune(value);
-}
-
-
-void MainWindow::openRecipe()
-{
-    // Create a file dialog
-    QFileDialog dialog;
-    dialog.setFileMode(QFileDialog::ExistingFile);
-
-    // Get the current directory
-    QString currentDirectory = QCoreApplication::applicationDirPath();
-    QString initialDirectory = currentDirectory + "/recipes/";
-
-    // Set the initial directory
-    dialog.setDirectory(initialDirectory);
-    // Set the window title and filter for specific file types
-    dialog.setWindowTitle("Open Recipe File");
-    dialog.setNameFilter("Recipe Files (*.rcp)");
-
-    // Execute the file dialog
-    if (dialog.exec()) {
-        // Get the selected file path
-        QString filePath = dialog.selectedFiles().first();
-
-        // set plasma Recipe path and file
-        m_plasmaRecipe.fileReader.setFilePath(filePath);
-        m_plasmaRecipe.setRecipeFromFile();
-
-    } else {
-        // User canceled the file dialog
-        qDebug() << "File selection canceled.";
-    }
-}
-
-void MainWindow::saveRecipe() {
-    // Create the directory path
-    QString directoryPath = QCoreApplication::applicationDirPath() + "/Recipes";
-
-    // Create the directory if it doesn't exist
-    QDir directory;
-    if (!directory.exists(directoryPath)) {
-        directory.mkpath(directoryPath);
+    while(!in.atEnd()) {
+        QString line = in.readLine();
+        Values += line.split(">");
     }
 
-    // Open the file dialog for saving
-    QString selectedFileName = QFileDialog::getSaveFileName(this, "Save Recipe", directoryPath, "Recipe Files (*.rcp)");
-    if (!selectedFileName.isEmpty()) {
-        // Create the file path
-        QString filePath = selectedFileName;
+    file.close();
 
-        // Open the file for writing
-        QFile file(filePath);
-        if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            QTextStream out(&file);
-
-            QMap<QString, QVariant> recipe = m_plasmaRecipe.getRecipeMap();
-            // Write each recipe name to the file
-            for (auto it = recipe.begin(); it != recipe.end(); it++) {
-                const QString& key = it.key();
-                const QVariant& value = it.value();
-
-                out << key << "=" << value.toString() << "\n";
-            }
-
-            file.close();
-            qDebug() << "Recipe saved to file: " << filePath;
-        } else {
-            qDebug() << "Failed to open file for writing: " << file.errorString();
-        }
-    }
+    loadConfigGUI(Values);
 }
-
-void MainWindow::openCascadeRecipe()
-{
-  //  plasmaRecipe.currentRecipeIndex_;
-}
-
-void MainWindow::addRecipeToCascadeRecipe()
-{
-    // Create a file dialog
-    QFileDialog dialog;
-    dialog.setFileMode(QFileDialog::ExistingFile);
-
-    // Get the current directory
-    QString currentDirectory = QCoreApplication::applicationDirPath();
-    QString initialDirectory = currentDirectory + "/recipes/";
-
-    // Set the initial directory
-    dialog.setDirectory(initialDirectory);
-    // Set the window title and filter for specific file types
-    dialog.setWindowTitle("Add Recipe File to Cascade Recipe");
-    dialog.setNameFilter("Recipe Files (*.rcp)");
-
-    // Execute the file dialog
-    if (dialog.exec()) {
-        // Get the selected file path
-        QString filePath = dialog.selectedFiles().first();
-
-        // Extract the file name from the file path
-        QFileInfo fileInfo(filePath);
-        QString fileName = fileInfo.fileName();
-
-        // Set plasma Recipe path to Cascade Recipe
-        m_plasmaRecipe.addRecipeToCascade(fileName);
-
-        // Update the UI with the recipes
-        ui->listCascadeRecipes->addItem(fileName);
-    } else {
-        // User canceled the file dialog
-        qDebug() << "File selection canceled.";
-    }
-}
-
-void MainWindow::removeRecipeFromCascadeList()
-{
-    // Get the selected item in the list widget
-    QListWidgetItem* selectedItem = ui->listCascadeRecipes->currentItem();
-    if (selectedItem) {
-        // Get the text of the selected item
-        QString recipeFileName = selectedItem->text();
-
-        // Remove the item from the list widget
-        ui->listCascadeRecipes->takeItem(ui->listCascadeRecipes->row(selectedItem));
-
-        // Remove the item from the cascade recipe list
-        m_plasmaRecipe.removeRecipeFromCascade(recipeFileName);
-    }
-
-}
-
-void MainWindow::saveAsCascadeRecipeListToFile() {
-    // Create the directory path
-    QString directoryPath = QCoreApplication::applicationDirPath() + "/Cascade Recipes";
-
-    // Create the directory if it doesn't exist
-    QDir directory;
-    if (!directory.exists(directoryPath)) {
-        directory.mkpath(directoryPath);
-    }
-
-    // Open the file dialog for saving
-    QString selectedFileName = QFileDialog::getSaveFileName(this, "Save Cascade Recipe List", directoryPath, "Text Files (*.txt)");
-    if (!selectedFileName.isEmpty()) {
-        // Create the file path
-        QString filePath = selectedFileName;
-
-        // Open the file for writing
-        QFile file(filePath);
-        if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            QTextStream out(&file);
-
-            // Write each recipe name to the file
-            for (const QString& recipeName : m_plasmaRecipe.getCascadeRecipeList()) {
-                out << recipeName << "\n";
-            }
-
-            file.close();
-            qDebug() << "Cascade recipe list saved to file: " << filePath;
-        } else {
-            qDebug() << "Failed to open file for writing: " << file.errorString();
-        }
-    }
-}
-
-void MainWindow::stageStatusUpdate(QString statusNow, QString statusNext)
-{
-    // dashboard
-    ui->axisstatus->setText(statusNow);
-    ui->axisstatus_2->setText(statusNext);
-
-    // 3 axis tab
-    ui->axisstatus_dup->setText(statusNow);
-    ui->axisstatus_2_dup->setText(statusNext);
-}
-
-void MainWindow::stageResponseUpdate(QString status)
-{
-    ui->textRCVbox->appendPlainText(status);
-}
-
-
 void MainWindow::runMainStateMachine()
 {
     if (m_mainStateMachine.configuration().contains(m_pMainStartupState)) { // in Startup state
@@ -765,33 +546,6 @@ void MainWindow::runMainStateMachine()
     }
     else if (m_mainStateMachine.configuration().contains(m_pMainShutdownState)) { // in Shutdown state
     }
-}
-
-void MainWindow::RunStartup()
-{
-    //GetExeCfg(); TODO: need to implement
-    m_mainCTL.CTLStartup(); // TODO: need to implement
-    m_stageCTL.AxisStartup();
-}
-
-void MainWindow::GetExeCfg()
-{
-    QStringList Values;
-    QFile file("./config/default.cfg");
-
-    if(!file.open(QIODevice::ReadOnly)) {
-        QMessageBox::information(0, "error", file.errorString());
-    }
-    QTextStream in(&file);
-
-    while(!in.atEnd()) {
-        QString line = in.readLine();
-        Values += line.split(">");
-    }
-
-    file.close();
-
-    loadConfigGUI(Values);
 }
 
 
@@ -837,16 +591,58 @@ void MainWindow::RunPolling()
     AxisStatusToUI(); // TODO: uncomment
 }
 
+//////////////////////////////////////////////////////////////////////////////////
+// 3 axis
+//////////////////////////////////////////////////////////////////////////////////
+
+void MainWindow::stageStatusUpdate(QString statusNow, QString statusNext)
+{
+    // dashboard
+    ui->axisstatus->setText(statusNow);
+    ui->axisstatus_2->setText(statusNext);
+
+    // 3 axis tab
+    ui->axisstatus_dup->setText(statusNow);
+    ui->axisstatus_2_dup->setText(statusNext);
+}
+
+void MainWindow::stageResponseUpdate(QString status)
+{
+    ui->textRCVbox->appendPlainText(status);
+}
+
 void MainWindow::AxisStatusToUI()
 {
-    // update current positions on dashboard
-    ui->X_relative_PH->setText(QString::number(m_stageCTL.getXPosition()));
-    ui->Y_relative_PH->setText(QString::number(m_stageCTL.getYPosition()));
-    ui->Z_relative_PH->setText(QString::number(m_stageCTL.getZPosition()));
-    // update current positions on 3 axis tab
-    ui->X_relative_PH_dup->setText(QString::number(m_stageCTL.getXPosition()));
-    ui->Y_relative_PH_dup->setText(QString::number(m_stageCTL.getYPosition()));
-    ui->Z_relative_PH_dup->setText(QString::number(m_stageCTL.getZPosition()));
+    // XAxis
+    if (m_stageCTL.getXAxisState() >= AXIS_IDLE) {
+        double Xpos = m_stageCTL.getXPosition();
+        ui->X_relative_PH->setText(QString::number(m_stageCTL.TranslateCoordXPH2Base(Xpos)));
+        ui->X_relative_PH_dup->setText(QString::number(m_stageCTL.TranslateCoordXPH2Base(Xpos)));
+    }
+    else {
+        ui->X_relative_PH->setText("???");
+        ui->X_relative_PH_dup->setText("???");
+    }
+    // YAxis
+    if (m_stageCTL.getYAxisState() >= AXIS_IDLE) {
+        double Ypos = m_stageCTL.getYPosition();
+        ui->Y_relative_PH->setText(QString::number(m_stageCTL.TranslateCoordYPH2Base(Ypos)));
+        ui->Y_relative_PH_dup->setText(QString::number(m_stageCTL.TranslateCoordYPH2Base(Ypos)));
+    }
+    else {
+        ui->Y_relative_PH->setText("???");
+        ui->Y_relative_PH_dup->setText("???");
+    }
+    // ZAxis
+    if (m_stageCTL.getZAxisState() >= AXIS_IDLE) {
+        double Zpos = m_stageCTL.getZPosition();
+        ui->Z_relative_PH->setText(QString::number(m_stageCTL.TranslateCoordZPH2Base(Zpos)));
+        ui->Z_relative_PH_dup->setText(QString::number(m_stageCTL.TranslateCoordZPH2Base(Zpos)));
+    }
+    else {
+        ui->Z_relative_PH->setText("???");
+        ui->Z_relative_PH_dup->setText("???");
+    }
 }
 
 void MainWindow::loadConfigGUI(QStringList value)
@@ -897,6 +693,316 @@ void MainWindow::UpdateStatus()
     }*/
 
 }
+//////////////////////////////////////////////////////////////////////////////////
+// Recipe
+//////////////////////////////////////////////////////////////////////////////////
+
+void MainWindow::AutoTuneCheckbox_stateChanged(int value)
+{
+    m_mainCTL.m_tuner.setAutoTune(value);
+}
+
+void MainWindow::openRecipeWindowMFC()
+{
+    bool ok;
+    QString recipeStr = QInputDialog::getText(nullptr, "MFC Setpoint", "Please enter a setpoint for the MFC:", QLineEdit::Normal, "", &ok);
+
+    if (ok && !recipeStr.isEmpty()) {
+        // User entered a string and clicked OK
+        if (!m_mainCTL.m_mfcs.isEmpty()) {
+            QPushButton* button = qobject_cast<QPushButton*>(sender());
+            if (button) {
+
+                // Retrieve the MFC number from the button's property
+                int mfcNumber = button->property("MFCNumber").toInt();  // Retrieve the MFC index from the button's property
+                MFC* mfc = m_mainCTL.findMFCByNumber(mfcNumber);
+                if (mfc) {
+                    double recipe = recipeStr.toDouble();
+                    mfc->setRecipeFlow(recipe);
+                }
+            }
+        }
+    } else {
+        // User either clicked Cancel or did not enter any string
+        // Handle accordingly
+        return;
+    }
+}
+
+void MainWindow::openRecipe()
+{
+    // Create a file dialog
+    QFileDialog dialog;
+    dialog.setFileMode(QFileDialog::ExistingFile);
+
+    // Get the current directory
+    QString currentDirectory = QCoreApplication::applicationDirPath();
+    QString initialDirectory = currentDirectory + "/recipes/";
+
+    // Set the initial directory
+    dialog.setDirectory(initialDirectory);
+    // Set the window title and filter for specific file types
+    dialog.setWindowTitle("Open Recipe File");
+    dialog.setNameFilter("Recipe Files (*.rcp)");
+
+    // Execute the file dialog
+    if (dialog.exec()) {
+       // Get the selected file path
+       QString filePath = dialog.selectedFiles().first();
+
+       // set plasma Recipe path and file
+       m_plasmaRecipe.fileReader.setFilePath(filePath);
+       m_plasmaRecipe.setRecipeFromFile();
+
+    } else {
+       // User canceled the file dialog
+       qDebug() << "File selection canceled.";
+    }
+}
+
+void MainWindow::saveRecipe() {
+    // Create the directory path
+    QString directoryPath = QCoreApplication::applicationDirPath() + "/Recipes";
+
+    // Create the directory if it doesn't exist
+    QDir directory;
+    if (!directory.exists(directoryPath)) {
+       directory.mkpath(directoryPath);
+    }
+
+    // Open the file dialog for saving
+    QString selectedFileName = QFileDialog::getSaveFileName(this, "Save Recipe", directoryPath, "Recipe Files (*.rcp)");
+    if (!selectedFileName.isEmpty()) {
+       // Create the file path
+       QString filePath = selectedFileName;
+
+       // Open the file for writing
+       QFile file(filePath);
+       if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            QTextStream out(&file);
+
+            QMap<QString, QVariant> recipe = m_plasmaRecipe.getRecipeMap();
+            // Write each recipe name to the file
+            for (auto it = recipe.begin(); it != recipe.end(); it++) {
+                const QString& key = it.key();
+                const QVariant& value = it.value();
+
+                out << key << "=" << value.toString() << "\n";
+            }
+
+            file.close();
+            qDebug() << "Recipe saved to file: " << filePath;
+       } else {
+            qDebug() << "Failed to open file for writing: " << file.errorString();
+       }
+    }
+}
+
+void MainWindow::openCascadeRecipe()
+{
+    //  plasmaRecipe.currentRecipeIndex_;
+}
+
+void MainWindow::addRecipeToCascadeRecipe()
+{
+    // Create a file dialog
+    QFileDialog dialog;
+    dialog.setFileMode(QFileDialog::ExistingFile);
+
+    // Get the current directory
+    QString currentDirectory = QCoreApplication::applicationDirPath();
+    QString initialDirectory = currentDirectory + "/recipes/";
+
+    // Set the initial directory
+    dialog.setDirectory(initialDirectory);
+    // Set the window title and filter for specific file types
+    dialog.setWindowTitle("Add Recipe File to Cascade Recipe");
+    dialog.setNameFilter("Recipe Files (*.rcp)");
+
+    // Execute the file dialog
+    if (dialog.exec()) {
+       // Get the selected file path
+       QString filePath = dialog.selectedFiles().first();
+
+       // Extract the file name from the file path
+       QFileInfo fileInfo(filePath);
+       QString fileName = fileInfo.fileName();
+
+       // Set plasma Recipe path to Cascade Recipe
+       m_plasmaRecipe.addRecipeToCascade(fileName);
+
+       // Update the UI with the recipes
+       ui->listCascadeRecipes->addItem(fileName);
+    } else {
+       // User canceled the file dialog
+       qDebug() << "File selection canceled.";
+    }
+}
+
+void MainWindow::removeRecipeFromCascadeList()
+{
+    // Get the selected item in the list widget
+    QListWidgetItem* selectedItem = ui->listCascadeRecipes->currentItem();
+    if (selectedItem) {
+       // Get the text of the selected item
+       QString recipeFileName = selectedItem->text();
+
+       // Remove the item from the list widget
+       ui->listCascadeRecipes->takeItem(ui->listCascadeRecipes->row(selectedItem));
+
+       // Remove the item from the cascade recipe list
+       m_plasmaRecipe.removeRecipeFromCascade(recipeFileName);
+    }
+
+}
+
+void MainWindow::saveAsCascadeRecipeListToFile() {
+    // Create the directory path
+    QString directoryPath = QCoreApplication::applicationDirPath() + "/Cascade Recipes";
+
+    // Create the directory if it doesn't exist
+    QDir directory;
+    if (!directory.exists(directoryPath)) {
+       directory.mkpath(directoryPath);
+    }
+
+    // Open the file dialog for saving
+    QString selectedFileName = QFileDialog::getSaveFileName(this, "Save Cascade Recipe List", directoryPath, "Text Files (*.txt)");
+    if (!selectedFileName.isEmpty()) {
+       // Create the file path
+       QString filePath = selectedFileName;
+
+       // Open the file for writing
+       QFile file(filePath);
+       if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            QTextStream out(&file);
+
+            // Write each recipe name to the file
+            for (const QString& recipeName : m_plasmaRecipe.getCascadeRecipeList()) {
+                out << recipeName << "\n";
+            }
+
+            file.close();
+            qDebug() << "Cascade recipe list saved to file: " << filePath;
+       } else {
+            qDebug() << "Failed to open file for writing: " << file.errorString();
+       }
+    }
+}
+
+// update the recipe progress bar and value
+void MainWindow::updateRecipeFlow(const int& mfcNumber, const double& flow)
+{
+    // This uses the parameters passed in the signal
+    if (mfcNumber == 1) {
+
+       // set vertical progress bar
+       double range = m_mainCTL.findMFCByNumber(1)->getRange();
+       double percentage = 100;
+       if (range != 0) (flow / range) * 100.0; // divide by zero protection
+       ui->recipeProgressBar_1->setValue(int(percentage));
+
+       // set dashboard recipe edit box
+       ui->mfc1_recipe->setText(QString::number(percentage));
+
+       // set the dashboard edit box below the progress bar
+       ui->gas1_recipe_SLPM->setText(QString::number(percentage));
+    }
+    else if (mfcNumber == 2) {
+
+       // set vertical progress bar
+       double range = m_mainCTL.findMFCByNumber(2)->getRange();
+       double percentage = 100;
+       if (range != 0) (flow / range) * 100.0; // divide by zero protection
+       ui->recipeProgressBar_2->setValue(int(percentage));
+
+       // set dashboard recipe edit box
+       ui->mfc2_recipe->setText(QString::number(percentage));
+
+       // set the dashboard edit box below the progress bar
+       ui->gas2_recipe_SLPM->setText(QString::number(percentage));
+    }
+    else if (mfcNumber == 3) {
+
+       // set vertical progress bar
+       double range = m_mainCTL.findMFCByNumber(3)->getRange();
+       double percentage = 100;
+       if (range != 0) (flow / range) * 100.0; // divide by zero protection
+       ui->recipeProgressBar_3->setValue(int(percentage));
+
+       // set dashboard recipe edit box
+       ui->mfc3_recipe->setText(QString::number(percentage));
+
+       // set the dashboard edit box below the progress bar
+       ui->gas3_recipe_SLPM->setText(QString::number(percentage));
+    }
+    else if (mfcNumber == 4) {
+
+       // set vertical progress bar
+       double range = m_mainCTL.findMFCByNumber(4)->getRange();
+       double percentage = 100;
+       if (range != 0) (flow / range) * 100.0; // divide by zero protection
+       ui->recipeProgressBar_4->setValue(int(percentage));
+
+       // set dashboard recipe edit box
+       ui->mfc4_recipe->setText(QString::number(percentage));
+
+       // set the dashboard edit box below the progress bar
+       ui->gas4_recipe_SLPM->setText(QString::number(percentage));
+    }
+}
+
+// update the recipe watts
+void MainWindow::recipeWattsChanged()
+{
+    int watts = m_mainCTL.m_pwr.getRecipeWatts();
+    ui->RF_recipe_watts->setText(QString::number(watts));
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+// Button handlers
+//////////////////////////////////////////////////////////////////////////////////
+
+void MainWindow::on_mainDisconnectButton_clicked()
+{
+    closeMainPort();
+}
+
+
+void MainWindow::on_mainConnectButton_clicked()
+{
+    openMainPort();
+}
+
+void MainWindow::loadMBRecipeButton_clicked()
+{
+    bool ok;
+    QString recipeStr = QInputDialog::getText(nullptr, "Tuner Setpoint", "Please enter a setpoint for MB Tuner:", QLineEdit::Normal, "", &ok);
+
+    if (ok && !recipeStr.isEmpty()) {
+       // User entered a string and clicked OK
+       double recipe = recipeStr.toDouble();
+       m_mainCTL.m_tuner.setRecipePosition(recipe);
+    }
+    else {
+       // User either clicked Cancel or did not enter any string
+       // Handle accordingly
+       return;
+    }
+}
+
+// open serial on 3 axis tab
+void MainWindow::on_stageConnectButton_clicked()
+{
+    openStagePort();
+}
+
+// close serial on 3 axis tab
+void MainWindow::on_stageDisconnectButton_clicked()
+{
+    closeStagePort();
+}
 
 // init button on dash
 void MainWindow::on_init_button_clicked()
@@ -926,6 +1032,7 @@ void MainWindow::on_Home_button_dup_toggled(bool checked)
         m_stageCTL.StopHome();
     }
 }
+
 
 // two spot on dashboard
 void MainWindow::on_twospot_button_toggled(bool checked)
@@ -1002,13 +1109,6 @@ void MainWindow::on_diameter_button_dup_clicked()
 
 }
 
-// close serial on 3 axis tab
-void MainWindow::on_stageDisconnectButton_clicked()
-{
-    closeStagePort();
-}
-
-
 void MainWindow::on_Joystick_button_dup_toggled(bool checked)
 {
     if (checked) {
@@ -1058,7 +1158,6 @@ void MainWindow::on_vac_button_toggled(bool checked)
         m_stageCTL.toggleVacOff();
     }
 }
-
 
 void MainWindow::on_load_thick_clicked()
 {
@@ -1130,14 +1229,37 @@ void MainWindow::on_load_cycles_clicked()
 }
 
 
+void MainWindow::on_loadRecipeButton_clicked()
+{
+    openRecipe();
+}
+
+void MainWindow::on_loadRFButton_clicked()
+{
+    bool ok;
+    QString recipeStr = QInputDialog::getText(nullptr, "RF Setpoint", "Please enter a setpoint for RF Power:", QLineEdit::Normal, "", &ok);
+
+    if (ok && !recipeStr.isEmpty()) {
+        // User entered a string and clicked OK
+        int recipe = recipeStr.toInt();
+        m_mainCTL.m_pwr.setRecipeWatts(recipe);
+    }
+    else {
+        // User either clicked Cancel or did not enter any string
+        // Handle accordingly
+        return;
+    }
+}
+
+void MainWindow::on_load_autoscan_clicked()
+{
+
+}
 
 
 
+void MainWindow::on_load_autoscan_clicked(bool checked)
+{
 
-
-
-
-
-
-
+}
 

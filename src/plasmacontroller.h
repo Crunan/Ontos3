@@ -47,7 +47,7 @@ public:
 
     // MFC public commands
     // MFC functions
-    MFC* findMFCByNumber(int &mfcNumber);
+    MFC* findMFCByNumber(int mfcNumber);
     int numberOfMFCs();
 
     // Recipe functions
@@ -80,6 +80,12 @@ public slots:
     void handleSetPWRRecipeWattsCommand(const double recipeWatts);
     void handleSetPWRMaxWattsCommand(const double maxWatts);
 
+public:
+    PlasmaHead m_plasmaHead;
+    PWR m_pwr;
+    Tuner m_tuner;
+    QList<MFC*> m_mfcs; // Store the MFCs in a list
+
 private:
     QSerialPort serialPort_;  // Reference to SerialComm object
     AxesController* axesCTL;  // Optional, can be nullptr
@@ -87,12 +93,6 @@ private:
     bool executeRecipe;
     Configuration config;
     CommandMap commandMap;
-
-public:
-    PlasmaHead plasmaHead;
-    PWR pwr;
-    Tuner tuner;
-    QList<MFC*> mfcs; // Store the MFCs in a list
 
 };
 

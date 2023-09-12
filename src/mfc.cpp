@@ -2,80 +2,80 @@
 
 MFC::MFC(int mfcNumber)
     : QObject(nullptr),
-    mfcNumber_(mfcNumber),
-    recipeFlow_(0.0),
-    actualFlow_(0.0),
-    range_(0.0),
-    defaultRecipe_(0.0)
+    m_mfcNumber(mfcNumber),
+    m_recipeFlow(0.0),
+    m_actualFlow(0.0),
+    m_range(0.0),
+    m_defaultRecipe(0.0)
 {
 
 }
 
 QString MFC::getMFCNumberAsString() const
 {
-    return QString::number(mfcNumber_);
+    return QString::number(m_mfcNumber);
 }
 
 int MFC::getMFCNumber() const
 {
-    return mfcNumber_;
+    return m_mfcNumber;
 }
 
 QString MFC::getRecipeFlowAsString() const
 {
-    return QString::number(recipeFlow_);
+    return QString::number(m_recipeFlow);
 }
 
 double MFC::getRecipeFlow() const
 {
-    return recipeFlow_;
+    return m_recipeFlow;
 }
 
 void MFC::setRecipeFlow(double value)
 {
-    if (recipeFlow_ != value)
+    if (m_recipeFlow != value)
     {
-        recipeFlow_ = value;
-        emit recipeFlowChanged(mfcNumber_, recipeFlow_);
+        m_recipeFlow = value;
+        emit recipeFlowChanged(m_mfcNumber, m_recipeFlow);
     }
 }
 
 double MFC::getActualFlow() const
 {
-    return actualFlow_;
+    return m_actualFlow;
 }
 
 void MFC::setActualFlow(double value)
 {
-    if (actualFlow_ != value)
+    if (m_actualFlow != value)
     {
-        actualFlow_ = value;
-        emit actualFlowChanged(mfcNumber_, actualFlow_);
+        m_actualFlow = value;
+        emit actualFlowChanged(m_mfcNumber, m_actualFlow);
     }
 }
 
 double MFC::getRange() const
 {
-    return range_;
+    return m_range;
 }
 
 void MFC::setRange(double value)
 {
-    if (range_ != value)
+    if (m_range != value)
     {
-        range_ = value;
-        emit rangeChanged(mfcNumber_, range_);    }
+        m_range = value;
+        emit rangeChanged(m_mfcNumber, m_range);    }
 }
 
 double MFC::getDefaultRecipe() const
 {
-    return defaultRecipe_;
+    return m_defaultRecipe;
 }
 
 void MFC::setDefaultRecipe(double value)
 {
-    if (defaultRecipe_!= value)
+    if (m_defaultRecipe!= value)
     {
-        defaultRecipe_ = value;
-        emit defaultRecipeChanged(mfcNumber_, defaultRecipe_);    }
+        m_defaultRecipe = value;
+        emit defaultRecipeChanged(m_mfcNumber, m_defaultRecipe);    }
 }

@@ -17,7 +17,7 @@ PlasmaRecipe::~PlasmaRecipe() {
 
 void PlasmaRecipe::setRecipeFromFile()
 {
-    static QRegularExpression regex("([^=]+)=(.*)");
+    // this must refer to a different recipe format: static QRegularExpression regex("([^=]+)=(.*)");
 
     QString absoluteFilePath = fileReader.getFilePath();
 
@@ -33,6 +33,27 @@ void PlasmaRecipe::setRecipeFromFile()
     {
         QString line = in.readLine().trimmed();
 
+        QStringList list = line.split(">");
+
+        if (list.length() == 2) { // found a recipe entry
+
+            QString name = list.at(0); // get the key
+            QString setpoint = list.at(1); // get the setpoint
+
+            if (name.at(0) == '<') { // format check
+                name = name.remove(0, 1); // remove the "<"
+                m_recipeMap[name] = setpoint;
+            }
+            else {
+                qDebug() << "Invalid line format:" << line;
+            }
+
+        }
+        else {
+            qDebug() << "Invalid line format:" << line;
+        }
+
+        /*
         QRegularExpressionMatch match = regex.match(line);
         if (match.hasMatch())
         {
@@ -51,7 +72,7 @@ void PlasmaRecipe::setRecipeFromFile()
         else
         {
             qDebug() << "Invalid line format:" << line;
-        }
+        }*/
     }
     processRecipeKeys();
     file.close();
@@ -67,18 +88,16 @@ void PlasmaRecipe::processRecipeKeys()
 
 void PlasmaRecipe::setMFCsActualFlow()
 {
-    for (int i = 0; i < CTL_->mfcs.size(); i++)
+    for (int i = 0; i < CTL_->m_mfcs.size(); i++)
     {
-        MFC* mfc = CTL_->mfcs.at(i);
+        MFC* mfc = CTL_->m_mfcs.at(i);
         QString mfcKey = "MFC" + QString::number(i + 1);
 
-        if (recipeMap_.contains(mfcKey))
-        {
-            double flow = recipeMap_[mfcKey].toDouble();
+        if (m_recipeMap.contains(mfcKey)) {
+            double flow = m_recipeMap[mfcKey].toDouble();
             mfc->setRecipeFlow(flow);
         }
-        else
-        {
+        else  {
             // Handle the case when the MFC key is not found in the recipe map
             qDebug() << "MFC" << i+1 << "setpoint not found in recipe map.";
         }
@@ -86,49 +105,47 @@ void PlasmaRecipe::setMFCsActualFlow()
 }
 
 void PlasmaRecipe::setRFSetpoint() {
-    if (recipeMap_.contains("RF"))
-    {
-        int watts = recipeMap_["RF"].toInt();
-        CTL_->pwr.setRecipeWatts(watts);
+    if (m_recipeMap.contains("RF")) {
+        int watts = m_recipeMap["RF"].toInt();
+        CTL_->m_pwr.setRecipeWatts(watts);
     }
-    else
-    {
+    else {
         // Handle the case when "RF" key is not found in the recipe map
         qDebug() << "RF setpoint not found in recipe map.";
     }
 }
 
 void PlasmaRecipe::setTunerSetpoint() {
-    if (recipeMap_.contains("TUNER"))
-    {
-        double position = recipeMap_["TUNER"].toDouble();
-        CTL_->tuner.setRecipePosition(position);
+    if (m_recipeMap.contains("TUNER")) {
+        double position = m_recipeMap["TUNER"].toDouble();
+        CTL_->m_tuner.setRecipePosition(position);
     }
-    else
-    {
+    else {
         // Handle the case when "TUNER" key is not found in the recipe map
         qDebug() << "TUNER setpoint not found in recipe map.";
     }
 }
 
 void PlasmaRecipe::setAutoTuneOn() {
-    if (recipeMap_.contains("AUTO")) {
-        QVariant value = recipeMap_["AUTO"];
+    if (m_recipeMap.contains("AUTO")) {
+        QVariant value = m_recipeMap["AUTO"];
 
         if (value.canConvert<bool>()) {
             bool booleanValue = value.toBool();
-            CTL_->tuner.setAutoTune(booleanValue);
-        } else {
+            CTL_->m_tuner.setAutoTune(booleanValue);
+        }
+        else {
             qDebug() << "auto tune value is not a boolean.";
         }
-    } else {
+    }
+    else {
         qDebug() << "auto tune setpoint not found in recipe map.";
     }
 }
 
 QMap<QString, QVariant> PlasmaRecipe::getRecipeMap()
 {
-    return recipeMap_;
+    return m_recipeMap;
 }
 
 QList<QString> PlasmaRecipe::getCascadeRecipeList()
@@ -144,18 +161,18 @@ void PlasmaRecipe::removeRecipeFromCascade(const QString& recipeName) {
 }
 
 void PlasmaRecipe::executeCurrentRecipe() {
-    if (currentRecipeIndex_ >= 0 && currentRecipeIndex_ < cascadeRecipeList_.size()) {
-        const QString& recipeName = cascadeRecipeList_.at(currentRecipeIndex_);
+    if (m_currentRecipeIndex >= 0 && m_currentRecipeIndex < cascadeRecipeList_.size()) {
+        const QString& recipeName = cascadeRecipeList_.at(m_currentRecipeIndex);
         // Load and execute the recipe with the given recipeName
         fileReader.setFilePath(recipeName);
         setRecipeFromFile();
         // Once the recipe execution is complete, move to the next recipe
-        ++currentRecipeIndex_;
+        ++m_currentRecipeIndex;
         executeCurrentRecipe();
     } else {
         // All recipes in the cascade have been executed
         // Perform any final actions or cleanup
-        currentRecipeIndex_ = 0;
+        m_currentRecipeIndex = 0;
     }
 }
 

@@ -49,6 +49,10 @@ public:
     void setZMaxSpeed(const double maxSpeed);
     void setZHomePos(const double homePos);
 
+    int getXAxisState() { return m_Xaxis.getCurrentState(); }
+    int getYAxisState() { return m_Yaxis.getCurrentState(); }
+    int getZAxisState() { return m_Zaxis.getCurrentState(); }
+
     void AxisStartup();
 
     QString getXMaxSpeedQStr() { return m_Xaxis.getMaxSpeedQStr(); }
@@ -86,6 +90,11 @@ public:
     double getXPosition() const { return m_Xaxis.getPosition(); }
     double getYPosition() const { return m_Yaxis.getPosition(); }
     double getZPosition() const { return m_Zaxis.getPosition(); }
+
+    //translate displayed PH X,Y,Z to the Base PH X,Y,Z (for motor moves)
+    double TranslateCoordXPH2Base(double x) { return (m_Xp2Base - x); }
+    double TranslateCoordYPH2Base(double y) { return (m_Yp2Base - y); }
+    double TranslateCoordZPH2Base(double z) { return (z - m_Zp2Base); }
 
     void resetAxes();
 
@@ -172,11 +181,6 @@ private:
     void move(QString axis, QString speed, QString position);
     void setSpeed(QString axis, QString speed);
     void setAbsMove(QString axis, QString position);
-
-    //translate displayed PH X,Y,Z to the Base PH X,Y,Z (for motor moves)
-    double TranslateCoordXPH2Base(double x) { return (m_Xp2Base - x); }
-    double TranslateCoordYPH2Base(double y) { return (m_Yp2Base - y); }
-    double TranslateCoordZPH2Base(double z) { return (z - m_Zp2Base); }
 
     LEDStatus m_ledStatus;
 

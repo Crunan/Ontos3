@@ -5,17 +5,13 @@
 
 class PWR : public QObject {
     Q_OBJECT
-    Q_PROPERTY(int recipeWatts READ getRecipeWatts WRITE setRecipeWatts NOTIFY recipeWattsChanged)
-    Q_PROPERTY(int forwardWatts READ getForwardWatts WRITE setForwardWatts NOTIFY forwardWattsChanged)
-    Q_PROPERTY(int reflectedWatts READ getReflectedWatts WRITE setReflectedWatts NOTIFY reflectedWattsChanged)
-    Q_PROPERTY(int defaultRecipe READ getDefaultRecipe WRITE setDefaultRecipe NOTIFY defaultRecipeChanged)
 
 private:
-    int recipeWatts_;
-    int forwardWatts_;
-    int reflectedWatts_;
-    int defaultRecipe_;
-    int maxWatts_;
+    int m_recipeWatts;
+    int m_forwardWatts;
+    int m_reflectedWatts;
+    int m_defaultRecipe;
+    int m_maxWatts;
 
 public:
     PWR();

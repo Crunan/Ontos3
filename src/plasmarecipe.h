@@ -32,9 +32,9 @@ public:
     bool isRecipeComplete();
 private:
     PlasmaController* CTL_;
-    QMap<QString, QVariant> recipeMap_;
+    QMap<QString, QVariant> m_recipeMap;
     QList<QString> cascadeRecipeList_;
-    int currentRecipeIndex_;
+    int m_currentRecipeIndex;
 
 public:
     FileReader fileReader;

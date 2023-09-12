@@ -34,7 +34,6 @@ QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
 {
-
     Q_OBJECT
 
 public:
@@ -42,6 +41,7 @@ public:
     ~MainWindow();
 
 signals:
+    // main state machine state transiton signals
     void MSM_TransitionPolling();
     void MSM_TransitionStartup();
     void MSM_TransitionShutdown();
@@ -51,14 +51,13 @@ public slots:
     void openRecipeWindowMFC();
     void stageStatusUpdate(QString statusNow, QString statusNext);
     void stageResponseUpdate(QString status);
-    void runMainStateMachine();
+
 
     // Main CTL Serial Port
     void openMainPort();
     void closeMainPort();
     void writeMainPort(const QByteArray &data);
     QString readMainPort();
-
     void handleMainSerialError(QSerialPort::SerialPortError error);
 
     // Stage CTL Serial Port
@@ -66,8 +65,6 @@ public slots:
     void closeStagePort();
     void writeStagePort(const QByteArray &data);
     QString readStagePort();
-
-
     void handleStageSerialError(QSerialPort::SerialPortError error);
 
     // state machine ui updating slots
@@ -77,13 +74,15 @@ public slots:
     void initStateMachineDone();
     void twoSpotStateMachineStartup();
     void twoSpotStateMachineDone();
+    void runMainStateMachine();
+
+    // recipe to ui slots
+    void updateRecipeFlow(const int& mfcNumber, const double& flow);
 
     void about();
     void shutDownProgram();
 
-    void updateRecipeProgressBar(const int& mfcNumber, const double& flow);
-
-    void RFRecipeButton_clicked();
+    //void RFRecipeButton_clicked();
     void loadMBRecipeButton_clicked();
     void AutoTuneCheckbox_stateChanged(int value);
     void openRecipe();
@@ -95,7 +94,7 @@ public slots:
     void saveAsCascadeRecipeListToFile();
 
 private slots:
-    //void on_Joystick_button_clicked();
+    // button handlers
     void on_init_button_clicked();
     void on_init_button_dup_clicked();
     void on_Stagepins_button_dup_toggled(bool checked);
@@ -113,9 +112,16 @@ private slots:
     void on_n2_purge_button_toggled(bool checked);
     void on_Joystick_button_dup_toggled(bool checked);
     void on_twospot_button_dup_toggled(bool checked);
-    void on_Home_button_dup_toggled(bool checked);
     void on_Home_button_toggled(bool checked);
     void on_twospot_button_toggled(bool checked);
+    void on_Home_button_dup_toggled(bool checked);
+    void on_loadRecipeButton_clicked();
+    void on_loadRFButton_clicked();
+    void on_mainDisconnectButton_clicked();
+    void on_mainConnectButton_clicked();
+    void on_stageConnectButton_clicked();
+    void on_load_autoscan_clicked();
+    void on_load_autoscan_clicked(bool checked);
 
 private:
     // Action Button methods
@@ -125,6 +131,9 @@ private:
 
     // GUI signal Slot connections
     void connectMFCFlowBars();
+    void recipeWattsChanged();
+
+
     void connectMFCRecipeButton(QPushButton* button, const int &mfcNumber);
     // Connection for Recipes buttons
     void connectRecipeButtons();
@@ -143,9 +152,9 @@ private:
     void UpdateStatus();
 
     void AxisStatusToUI();
+    void RecipeToUI();
 
     MainLoop *m_pMainLoop;
-    //Logger& m_log;
     Ui::MainWindow* ui;
     QLabel* m_pStatus;
     SettingsDialog* m_pSettings;
@@ -154,7 +163,7 @@ private:
     AxesController m_stageCTL;
     CommandFileReader m_commandFileReader;
     Recipe m_recipe;
-    PlasmaRecipe m_plasmaRecipe; // TODO: replace with m_recipe object
+    PlasmaRecipe m_plasmaRecipe;
     Console* m_pMainCTLConsole;
     Console* m_pStageCTLConsole;
     StageWidget* m_pStageWidget;

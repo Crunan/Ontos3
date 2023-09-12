@@ -8,13 +8,6 @@ class MFC : public QObject {
 
     Q_OBJECT
 
-private:
-    int mfcNumber_;
-    double recipeFlow_;  // Private member variable for loadedSetpoint
-    double actualFlow_;  // Private member variable for actualFlow
-    double range_;
-    double defaultRecipe_; // Recipe loaded on startup
-
 public:
     MFC(int mfcNum);
 
@@ -39,6 +32,13 @@ signals:
     void actualFlowChanged(const int mfcNumber, double actualFlow);
     void rangeChanged(const int mfcNumber, double range);
     void defaultRecipeChanged(const int mfcNumber, double recipeFlow);
+
+private:
+    int m_mfcNumber;
+    double m_recipeFlow;  // Private member variable for loadedSetpoint
+    double m_actualFlow;  // Private member variable for actualFlow
+    double m_range;
+    double m_defaultRecipe; // Recipe loaded on startup
 
 };
 
