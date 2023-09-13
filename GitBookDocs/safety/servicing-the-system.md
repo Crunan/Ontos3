@@ -11,7 +11,7 @@ Proper servicing and maintenance of the ONTOS _CLEAN_ is a part of keeping the s
 {% hint style="success" %}
 1. Deactivate electrical power to prevent accidental electrical hazards.
 2. Release gas pressure to eliminate potential gas-related risks.
-3. Verify proper cooling of all machine components, eliminating the threat of overheating.
+3. Verify proper cooling of all machine components.
 4. Safeguard against any unforeseen system activity or startup during the servicing process.
 {% endhint %}
 

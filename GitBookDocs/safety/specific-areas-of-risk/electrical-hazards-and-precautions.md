@@ -10,7 +10,7 @@ The ONTOS _CLEAN_ incorporates various electrical components and systems, some o
 
 **Module Covers:** Module covers should not be removed except by personnel who have undergone factory training. Unauthorized access can result in electrical hazards or equipment malfunction.
 
-![Control Chassis Cover with Electrical Hazard Symbol](../../../.gitbook/assets/5.jpeg)
+![Control Chassis Cover with Electrical Hazard Symbol](../../../.gitbook/assets/electrical.jpg)
 
 **RF Cabling:** Under no circumstances should RF cabling be disconnected unless the system is powered down and the main power cable is disconnected from its source.
 
@@ -22,7 +22,7 @@ The ONTOS _CLEAN_ incorporates various electrical components and systems, some o
 
 **Single-Point Earth Ground:** The Control Chassis subsystem features a designated single-point-earth-ground terminal, which is clearly identified by a sticker affixed as depicted below.
 
-![Single-Point-Earth-Ground Terminal](../../../.gitbook/assets/6.png)
+![Single-Point-Earth-Ground Terminal](../../../.gitbook/assets/earthground.jpg)
 
 By heeding these precautions and understanding the potential electrical hazards, you play an essential role in ensuring your safety and the reliable operation of the ONTOS _CLEAN_.&#x20;
 
