@@ -4,7 +4,7 @@ The ONTOS _CLEAN_ is comprised of 11 distinct subsystems
 
 1. [**3-Axis Stage Assembly**](1.-axis-stage.md)**:** This assembly is for precise movement control in three dimensions of the stage, ensuring accurate positioning during processing.
 2. [**Frame Assembly**](2.-frame-assembly.md)**:** The frame assembly provides structural integrity and support, forming the foundational framework for the entire system.
-3. **Control Chassis Assembly:** This assembly houses the controls for the gas controls, RF controls, as well as system operations, contributing to the overall management of the Ontos3.
+3. **Control Chassis Assembly:** This assembly houses the controls for the gas controls, RF controls, as well as system operations, contributing to the overall management of the ONTOS _CLEAN_.
 4. [**Vacuum Capacitor Matchbox**](3.-vacuum-cap-matchbox-assembly.md)**:** Vital for maintaining a steady RF supply, the matchbox ensures efficient impedance matching in the system.
 5. [**A/C Distribution Box**](4.-a-c-distribution-box.md)**:** Responsible for effective power distribution, this component ensures a stable and reliable power supply to the system's various elements.
 6. [**Upper Control Panel**](5.-upper-control-panel.md)**:** The upper control panel hosts several controls related to gas controls as well as the stage controller.

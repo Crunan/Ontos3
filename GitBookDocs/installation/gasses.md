@@ -10,7 +10,7 @@
 *   **The minimum combined Gas flow for carrier gasses is factory set to prevent**
 
     **damage to the Plasma Head.**
-* **The amount of Hydrogen within the Helium typically is between 3% & 5%, dependent upon local LEL standards. Please consult your local gas supplier for information regarding your area.**
+* **The amount of Hydrogen within the gas mixture typically is between 3% & 5%, dependent upon local LEL standards. Please consult your local gas supplier for information regarding your area.**
 {% endhint %}
 
 The gas input ports (labelled 1-6) should be connected as follows:

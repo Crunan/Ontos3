@@ -13,7 +13,7 @@ Within the ONTOS _CLEAN_, physical risks are associated with the Plasma Head, a 
 </div>
 
 {% hint style="danger" %}
-**Warning symbols such as these may be installed on your machine to indicate areas of specific pinch or thermal hazard.**
+**Warning symbols such as these may be installed on your machine to indicate areas of thermal hazard.**
 {% endhint %}
 
 **Preventive Measures:** To minimize physical risks associated with the Plasma Head:

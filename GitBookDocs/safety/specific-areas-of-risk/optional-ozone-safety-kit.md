@@ -4,7 +4,7 @@ The Ozone Safety Kit, available as an optional package, offers users an addition
 
 **Key Components of the Optional Kit:**
 
-* **External Ozone Sensor:** Engineered to detect the presence of Ozone, this sensor plays a pivotal role in enhancing safety measures. Upon detecting Ozone, the sensor acts as a safeguard by promptly disabling the RF power through the interlock circuit.
+* **External Ozone Sensor:** Engineered to detect the presence of Ozone, this sensor plays a pivotal role in enhancing safety measures. Upon detecting Ozone, the sensor acts as a safeguard by promptly causing an ESTOP condition through the interlock circuit.
 
 **Verifying Inclusion:** To determine whether your ONTOS _CLEAN_ includes the Optional Ozone Safety Kit, please refer to your purchase order or the documentation provided upon acquisition.
 
