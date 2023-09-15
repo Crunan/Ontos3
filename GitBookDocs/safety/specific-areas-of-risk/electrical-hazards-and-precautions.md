@@ -16,6 +16,8 @@ The ONTOS _CLEAN_ incorporates various electrical components and systems, some o
 
 **Operating Voltage Areas:** Operating voltage is prevalent in all sections of the control rack, as well as within motors and actuators within the process enclosure. These regions are safeguarded by covers and/or interlocks that must remain intact and operational during machine use.
 
+**Maximum Operating Duration at Full Load:** The plasma head is able to operate at full load (550 watts) for a maximum continuous duration of 30 minutes. OES does not advise running the system in this capacity, as it does not adhere to the intended use of the system. This specified maximum operating duration is for exceptional situations and may affect the equipment's performance and longevity if consistently operated at max load. For typical operations, it is recommended to maintain loads well below this limit to ensure optimal performance and equipment longevity.
+
 **Tool Usage:** Any task necessitating tools (e.g., screwdrivers, wrenches, Allen keys) should exclusively be undertaken by factory-trained personnel.
 
 **Main Power Cable:** The main power cable is designed to be detachable from the unit. If you opt to replace this cable with a user-supplied alternative, ensure it can support power requirements of 120VAC/20A or 240VAC/10A.

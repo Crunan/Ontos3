@@ -2,6 +2,10 @@
 
 The ONTOS _CLEAN_ incorporates a critical safety feature known as the Emergency Power Off (EPO) button. This red button is strategically positioned for swift access and is an essential element of ensuring operator and equipment safety.
 
+{% hint style="warning" %}
+**E-stop Button and Power Cord:** In the event that power must be disconnected from the equipment for any reason, please ensure that the E-stop button and power cord remain easily accessible and unobstructed at all times. Do not block or obstruct these critical components to facilitate swift and safe power interruption when necessary. This is essential for emergency shutdown procedures and routine maintenance.
+{% endhint %}
+
 **Activating EPO:** In situations demanding immediate halting of the machine due to an emergency, you can activate the EPO button. A simple press of the red Emergency Power Off button will instantly halt the system's operation.
 
 {% hint style="danger" %}

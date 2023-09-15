@@ -8,11 +8,11 @@ Order of gasses may change for each tool based on customer requirements, please 
 
 {% tabs %}
 {% tab title="Machine Power" %}
-Power Consumption: 1900 W (16A@120V / 8A@240V), 50/60 Hz
+**Power Consumption:** The system's power consumption is rated at 1900 W (16A@120V / 8A@240V), 50/60 Hz with a tolerance of ±10%.
 
-Recommended Utility: 20A@120V / 10A@240V, 50/60 Hz
+**Recommended Utility:** To ensure optimal performance, it is recommended to provide a power supply of 20A@120V / 10A@240V, 50/60 Hz.
 
-Power Plug: See Below
+**Power Plug**: See Below
 
 {% hint style="danger" %}
 Ensure the detachable MAINS supply cord is adequately rated for the specified power requirements.
