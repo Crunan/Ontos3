@@ -26,6 +26,7 @@ public:
     QString errorString() { return m_serialPort.errorString(); }
     bool sendCommand(QString command);
     QString readResponse();
+    QString getLastCommand() { return m_lastSerialCommand; }
 
 private slots:
     void serialWatchdogTimerElapsed();
@@ -33,6 +34,7 @@ private slots:
 private:
     int ReadChar();
 
+    QString m_lastSerialCommand;
     QSerialPort m_serialPort;
     bool m_serialWatchdogTriggered;
     QTimer* m_pSerialWatchdogTimer;

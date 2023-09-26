@@ -11,7 +11,7 @@ MainLoop::MainLoop(QObject *parent) : QObject(parent)
     connect(m_pTimer, &QTimer::timeout, this, &MainLoop::handleTimer);
 
     // Configure the timer interval
-    setTimerInterval(200);
+    setTimerInterval(100);
 }
 
 MainLoop::~MainLoop() {

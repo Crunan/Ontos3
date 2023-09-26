@@ -1,6 +1,7 @@
 QT += core gui widgets serialport statemachine
 
-
+VERSION = 01.00.00
+DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
 greaterThan(QT_MAJOR_VERSION, 4)
 
@@ -17,15 +18,8 @@ SOURCES += \
     src/axis.cpp \
     src/axiscommands.cpp \
     src/axiscontroller.cpp \
-    src/coordinate.cpp \
-    src/initialize.cpp \
-    src/load.cpp \
     src/maneuvers.cpp \
-    src/positions.cpp \
-    src/scan.cpp \
-    src/scanrecipe.cpp \
     src/statemachine.cpp \
-    src/twospot.cpp \
     src/commandfilereader.cpp \
     src/commandmap.cpp \
     src/configuration.cpp \
@@ -40,7 +34,6 @@ SOURCES += \
     src/logger.cpp \
     src/main.cpp \
     src/mainloop.cpp \
-    src/mainstatemachine.cpp \
     src/mainwindow.cpp \
     src/mfc.cpp \
     src/plasmacontroller.cpp \
@@ -60,15 +53,8 @@ HEADERS += \
     src/axis.h \
     src/axiscommands.h \
     src/axiscontroller.h \
-    src/coordinate.h \
-    src/initialize.h \
-    src/load.h \
     src/maneuvers.h \
-    src/positions.h \
-    src/scan.h \
-    src/scanrecipe.h \
     src/statemachine.h \
-    src/twospot.h \
     src/commandfilereader.h \
     src/commandmap.h \
     src/configuration.h \

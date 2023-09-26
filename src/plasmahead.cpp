@@ -1,34 +1,37 @@
 #include "plasmahead.h"
 
-PlasmaHead::PlasmaHead()
-    : safetyGap_(0.0), slitLength_(0.0), slitWidth_(0.0), temperature_(0.0)
+PlasmaHead::PlasmaHead() :
+    m_safetyGap(0.0),
+    m_slitLength(0.0),
+    m_slitWidth(0.0),
+    m_temperature(0.0)
 {
 }
 
 double PlasmaHead::getSafetyGap() const
 {
-    return safetyGap_;
+    return m_safetyGap;
 }
 
 double PlasmaHead::getSlitLength() const
 {
-    return slitLength_;
+    return m_slitLength;
 }
 
 double PlasmaHead::getSlitWidth() const
 {
-    return slitWidth_;
+    return m_slitWidth;
 }
 
 double PlasmaHead::getTemperature() const
 {
-    return temperature_;
+    return m_temperature;
 }
 
 void PlasmaHead::setTemperature(double temperature)
 {
-    if (temperature != temperature_) {
-        temperature_ = temperature;
+    if (temperature != m_temperature) {
+        m_temperature = temperature;
         emit temperatureChanged();
     }
 }

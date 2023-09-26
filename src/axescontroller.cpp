@@ -16,7 +16,7 @@ const QString ZAXIS_QSTR = "2";
 AxesController::AxesController(QObject *parent) :
     QObject(parent),
     m_ledStatus(),
-    m_serialInterface(),
+    m_pSerialInterface(nullptr),
     m_Xaxis(this),
     m_Yaxis(this),
     m_Zaxis(this),
@@ -60,12 +60,15 @@ AxesController::~AxesController()
     delete m_pTwoSpotGetFirstState;
     delete m_pTwoSpotWaitJoyBtnOffState;
     delete m_pTwoSpotGetSecondState;
+    delete m_pTwoSpotWaitJoyBtnOff2State;
     delete m_pTwoSpotShutdownState;
     delete m_pTwoSpotIdleState;
     delete m_pTwoSpotSuperState;
 }
 
-//////////////// State Machine Setup
+//////////////////////////////////////////////////////////////////////////////////
+// State machine setup
+//////////////////////////////////////////////////////////////////////////////////
 void AxesController::SetupInitAxesStateMachine()
 {
     m_pInitAxesIdleState = new QState();
@@ -142,6 +145,7 @@ void AxesController::SetupTwoSpotStateMachine()
     m_pTwoSpotGetFirstState = new QState(m_pTwoSpotSuperState);
     m_pTwoSpotWaitJoyBtnOffState = new QState(m_pTwoSpotSuperState);
     m_pTwoSpotGetSecondState = new QState(m_pTwoSpotSuperState);
+    m_pTwoSpotWaitJoyBtnOff2State = new QState(m_pTwoSpotSuperState);
     m_pTwoSpotShutdownState = new QState();
     m_pTwoSpotIdleState = new QState();
 
@@ -162,7 +166,9 @@ void AxesController::SetupTwoSpotStateMachine()
     m_pTwoSpotStartupState->addTransition(this, SIGNAL(TSSM_TransitionGetFirst()), m_pTwoSpotGetFirstState);
     m_pTwoSpotGetFirstState->addTransition(this, SIGNAL(TSSM_TransitionJoyBtnOff()), m_pTwoSpotWaitJoyBtnOffState);
     m_pTwoSpotWaitJoyBtnOffState ->addTransition(this, SIGNAL(TSSM_TransitionGetSecond()), m_pTwoSpotGetSecondState);
-    m_pTwoSpotGetSecondState->addTransition(this, SIGNAL(TSSM_TransitionShutdown()), m_pTwoSpotShutdownState);
+    //m_pTwoSpotGetSecondState->addTransition(this, SIGNAL(TSSM_TransitionShutdown()), m_pTwoSpotShutdownState);
+    m_pTwoSpotGetSecondState->addTransition(this, SIGNAL(TSSM_TransitionJoyBtnOff2()), m_pTwoSpotWaitJoyBtnOff2State);
+    m_pTwoSpotWaitJoyBtnOff2State->addTransition(this, SIGNAL(TSSM_TransitionShutdown()), m_pTwoSpotShutdownState);
     m_pTwoSpotShutdownState->addTransition(this, SIGNAL(TSSM_TransitionIdle()), m_pTwoSpotIdleState);
 
     // set initial state
@@ -172,55 +178,48 @@ void AxesController::SetupTwoSpotStateMachine()
     m_twoSpotStateMachine.start();
 }
 
-//////////////// Serial Port
-bool AxesController::open(const SettingsDialog& settings)
-{
-    const SettingsDialog::Settings p = settings.settings();
-    m_serialInterface.setPortName(p.name);
-    m_serialInterface.setBaudRate(p.baudRate);
-    m_serialInterface.setDataBits(p.dataBits);
-    m_serialInterface.setParity(p.parity);
-    m_serialInterface.setStopBits(p.stopBits);
-    m_serialInterface.setFlowControl(p.flowControl);
-    if (!m_serialInterface.open(QIODevice::ReadWrite)) {
-        // Failed to open the serial port
-        return false;
-    }
-    // Not using async serial port interaction unless we multi thread
-    //connect(&serialPort_, &QSerialPort::readyRead, this, &AxesController::readData);
-    emit stagePortOpened();
-
-    return true;
-}
-
-void AxesController::close()
-{
-    m_serialInterface.close();
-}
+//////////////////////////////////////////////////////////////////////////////////
+// Serial Port
+//////////////////////////////////////////////////////////////////////////////////
 
 bool AxesController::sendCommand(const QString& command)
 {
-    return m_serialInterface.sendCommand(command);
+    return m_pSerialInterface->sendCommand(command);
 }
 
 // read a single response
 QString AxesController::readResponse()
 {
-    return m_serialInterface.readResponse();
+    return m_pSerialInterface->readResponse();
 }
 
 QString AxesController::getPortErrorString()
 {
-    return m_serialInterface.errorString();
+    return m_pSerialInterface->errorString();
 }
 
 bool AxesController::isOpen()
 {
-    return m_serialInterface.isOpen();
+    return m_pSerialInterface->isOpen();
+}
+
+void AxesController::setSerialInterface(SerialInterface *interface)
+{
+    // cleanup shared serial resource
+    if (m_pSerialInterface != nullptr) {
+        if (m_pSerialInterface->isOpen()) {
+            m_pSerialInterface->close();
+        }
+        delete m_pSerialInterface;
+        m_pSerialInterface = nullptr;
+    }
+    m_pSerialInterface = interface;
 }
 
 
-//////////////// State Machines
+//////////////////////////////////////////////////////////////////////////////////
+// State machines
+//////////////////////////////////////////////////////////////////////////////////
 void AxesController::RunInitAxesSM()
 {
     if (m_initStateMachine.configuration().contains(m_pInitAxesStartupState)) { // in Startup state
@@ -409,9 +408,15 @@ void AxesController::RunTwoSpotSM()
 
             // translate into ph coordinates and save
             m_Xaxis.setTwoSpotFirstPoint(TranslateCoordXPH2Base(m_Xaxis.getPosition()));
-            m_Yaxis.setTwoSpotFirstPoint(TranslateCoordYPH2Base(m_Yaxis.getPosition()));
+            m_Yaxis.setTwoSpotFirstPoint(TranslateCoordY2PH(m_Yaxis.getPosition()));
+
 
             Logger::logInfo("TwoSpotSM Got First");
+
+            /*QString msg = QString("Xpos = %1 Ypos = %2 first spot X = %3 first spot Y = %4 xPH2Base = %5 ys2PH = %6")
+                              .arg(m_Xaxis.getPosition()).arg(m_Yaxis.getPosition()).arg(m_Xaxis.getTwoSpotFirstPoint())
+                              .arg(m_Yaxis.getTwoSpotFirstPoint()).arg(getXPH2Base()).arg(getYs2PHval());
+            Logger::logDebug(msg);*/
 
 
             emit TSSM_TransitionJoyBtnOff();
@@ -419,31 +424,47 @@ void AxesController::RunTwoSpotSM()
     }
     else if (m_twoSpotStateMachine.configuration().contains(m_pTwoSpotWaitJoyBtnOffState)) {
 
+        if (m_joystickOn && !m_joyButtonOn) {
+
             Logger::logInfo("TwoSpotSM Getting Second");
 
             emit stageStatusUpdate("Use Controller for Stage", "Spot Second Point");
 
             emit TSSM_TransitionGetSecond();
+        }
 
     }
     else if (m_twoSpotStateMachine.configuration().contains(m_pTwoSpotGetSecondState)) {
 
         if (m_joystickOn && m_joyButtonOn) {
 
+            emit stageStatusUpdate("Use Controller for Stage", "Release JoyStick Button");
+
             // translate to ph coordinates and save
             m_Xaxis.setTwoSpotSecondPoint(TranslateCoordXPH2Base(m_Xaxis.getPosition()));
-            m_Yaxis.setTwoSpotSecondPoint(TranslateCoordYPH2Base(m_Yaxis.getPosition()));
+            m_Yaxis.setTwoSpotSecondPoint(TranslateCoordY2PH(m_Yaxis.getPosition()));
+
+            /*QString msg = QString("Xpos = %1 Ypos = %2 second spot X = %3 second spot Y = %4 xPH2Base = %5 ys2PH = %6")
+                              .arg(m_Xaxis.getPosition()).arg(m_Yaxis.getPosition()).arg(m_Xaxis.getTwoSpotSecondPoint())
+                              .arg(m_Yaxis.getTwoSpotSecondPoint()).arg(getXPH2Base()).arg(getYs2PHval());
+            Logger::logDebug(msg);*/
 
             //determine box orientation and corners for scanning
             m_Xaxis.checkAndSetDimensions();
             m_Yaxis.checkAndSetDimensions();
 
-            // updateTwoSpotXYText(); TODO: Needs implementing
-
             Logger::logInfo("TwoSpotSM Got Second - done");
+
+            emit TSSM_TransitionJoyBtnOff2();
+        }
+    }
+    else if (m_twoSpotStateMachine.configuration().contains(m_pTwoSpotWaitJoyBtnOff2State)) {
+
+        if (m_joystickOn && !m_joyButtonOn) {
 
             emit TSSM_TransitionShutdown();
         }
+
     }
     else if (m_twoSpotStateMachine.configuration().contains(m_pTwoSpotShutdownState)) {
 
@@ -551,7 +572,7 @@ void AxesController::sendInitCMD()
     readResponse();
 }
 
-//////////////// Axis
+
 void AxesController::AxisStartup()
 {
     getXMaxSpeed();
@@ -700,8 +721,7 @@ void AxesController::getXMaxSpeed()
         }
     }
     else
-        //Logger::logCritical("Could Not get max speed for X, last requestData: " + requestData );
-        Logger::logCritical("Could Not get max speed for X");
+        Logger::logCritical("Could Not get max speed for X, last requestData: " + getLastCommand());
 }
 
 void AxesController::getYMaxSpeed()
@@ -718,8 +738,7 @@ void AxesController::getYMaxSpeed()
         }
     }
     else
-        //logCritical("Could Not get max speed for Y, last requestData: " + requestData );
-        Logger::logCritical("Could Not get max speed for Y");
+        Logger::logCritical("Could Not get max speed for Y, last requestData: " + getLastCommand());
 }
 void AxesController::getZMaxSpeed()
 {
@@ -735,8 +754,7 @@ void AxesController::getZMaxSpeed()
         }
     }
     else
-        //logCritical("Could Not get max speed for Z, last requestData: " + requestData );
-        Logger::logCritical("Could Not get max speed for Z");
+        Logger::logCritical("Could Not get max speed for Z, last requestData: " + getLastCommand());
 }
 void AxesController::getXp2Base()
 {
@@ -747,13 +765,11 @@ void AxesController::getXp2Base()
         bool ok = false;
         m_Xp2Base = StrVar.toDouble(&ok);
         if (ok) {
-            //CoordParam.setXp2Base(StrVar); // TODO: need to implement
             Logger::logInfo("Xp to Base: " + StrVar + "");
         }
     }
     else
-        //logCritical("Could Not get X relative to Base, last requestData: " + requestData );
-        Logger::logCritical("Could Not get X relative to Base");
+        Logger::logCritical("Could Not get X relative to Base, last requestData: " + getLastCommand());
 }
 void AxesController::getYp2Base()
 {
@@ -764,13 +780,11 @@ void AxesController::getYp2Base()
         bool ok = false;
         m_Yp2Base = StrVar.toDouble(&ok);
         if (ok) {
-            //CoordParam.setYp2Base(StrVar); // TODO: need to implement
             Logger::logInfo("Yp to Base: " + StrVar + "");
         }
     }
     else
-        //logCritical("Could Not get Y relative to Base, last requestData: " + requestData );
-        Logger::logCritical("Could Not get Y relative to Base");
+        Logger::logCritical("Could Not get Y relative to Base, last requestData: " + getLastCommand());
 }
 void AxesController::getZp2Base()
 {
@@ -781,14 +795,14 @@ void AxesController::getZp2Base()
         bool ok = false;
         m_Zp2Base = StrVar.toDouble(&ok);
         if (ok) {
-            //CoordParam.setZp2Base(StrVar); // TODO: need to implement
             Logger::logInfo("Zp to Base: " + StrVar + "");
         }
     }
     else
-        //logCritical("Could Not get Z relative to Base, last requestData: " + requestData);
-        Logger::logCritical("Could Not get Z relative to Base");
+        Logger::logCritical("Could Not get Z relative to Base, last requestData: " + getLastCommand());
 }
+
+// laser x to base coordinates
 void AxesController::getXs2PH()
 {
     sendCommand("$DA511%"); //GET Xs_2_PH  $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value
@@ -798,14 +812,14 @@ void AxesController::getXs2PH()
         bool ok = false;
         m_Xs2PH = StrVar.toDouble(&ok);
         if (ok) {
-            //CoordParam.setlaserX2Base(StrVar); // TODO: need to implement
             Logger::logInfo("Xs to Plasma Head: " + StrVar + "");
         }
     }
     else
-        //logCritical("Could Not get X relative to Plasma head, last requestData: " + requestData );
-        Logger::logCritical("Could Not get X relative to Plasma head");
+        Logger::logCritical("Could Not get X relative to Plasma head, last requestData: " + getLastCommand());
 }
+
+// laser y to base coordinates
 void AxesController::getYs2PH()
 {
     sendCommand("$DA521%"); //GET Ys_2_PH  $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value
@@ -815,13 +829,11 @@ void AxesController::getYs2PH()
         bool ok = false;
         m_Ys2PH = StrVar.toDouble(&ok);
         if (ok) {
-            //CoordParam.setlaserY2Base(StrVar); // TODO: need to implement
             Logger::logInfo("Ys to Plasma Head: " + StrVar + "");
         }
     }
     else
-        //logCritical("Could Not get Y relative to Plasma head, last requestData: " + requestData );
-        Logger::logCritical("Could Not get Y relative to Plasma head");
+        Logger::logCritical("Could Not get Y relative to Plasma head, last requestData: " + getLastCommand());
 }
 void AxesController::getPHSlitLength()
 {
@@ -832,13 +844,12 @@ void AxesController::getPHSlitLength()
         bool ok = false;
         double PHSlitLength = StrVar.toDouble(&ok);
         if (ok) {
-            //plasmahead.setPlasmaHeadSlitLength(StrVar); // TODO: need to implement
+            //plasmahead.setPlasmaHeadSlitLength(StrVar);
             Logger::logInfo("Plasma Head Slit Length: " + StrVar + " (mm)");
         }
     }
     else
-        //logCritical("Could Not get Plasma head slit length, last requestData: " + requestData );
-        Logger::logCritical("Could Not get Plasma head slit length");
+        Logger::logCritical("Could Not get Plasma head slit length, last requestData: " + getLastCommand());
 }
 void AxesController::getPHSlitWidth()
 {
@@ -849,13 +860,12 @@ void AxesController::getPHSlitWidth()
         bool ok = false;
         double PHSlitWidth = StrVar.toDouble(&ok);
         if (ok) {
-            //plasmahead.setPlasmaHeadSlitWidth(StrVar); // TODO: need to implement
+            //plasmahead.setPlasmaHeadSlitWidth(StrVar); // TODO
             Logger::logInfo("Plasma Head Slit Width: " + StrVar + " (mm)");
         }
     }
     else
-        //logCritical("Could Not get Plasma head slit width, last requestData: " + requestData );
-        Logger::logCritical("Could Not get Plasma head slit width");
+        Logger::logCritical("Could Not get Plasma head slit width, last requestData: " + getLastCommand());
 }
 void AxesController::getPHSafetyZGap()
 {
@@ -866,13 +876,12 @@ void AxesController::getPHSafetyZGap()
         bool ok = false;
         double PHSafetyZGap = StrVar.toDouble(&ok);
         if (ok) {
-            //plasmahead.setSafetyGap(StrVar); // TODO: need to implement
+            //plasmahead.setSafetyGap(StrVar); // TODO
             Logger::logInfo("Plasma Head Z Safety Gap: " + StrVar + " (mm)");
         }
     }
     else
-        //logCritical("Could Not get Plasma Head Z Safety Gap, last requestData: " + requestData );
-        Logger::logCritical("Could Not get Plasma Head Z Safety Gap");
+        Logger::logCritical("Could Not get Plasma Head Z Safety Gap, last requestData: " + getLastCommand());
 }
 void AxesController::getZPinsBuried()
 {
@@ -888,8 +897,7 @@ void AxesController::getZPinsBuried()
         }
     }
     else
-        //logCritical("Could Not get Z Pins Buried Position, last requestData: " + requestData );
-        Logger::logCritical("Could Not get Z Pins Buried Position");
+        Logger::logCritical("Could Not get Z Pins Buried Position, last requestData: " + getLastCommand());
 }
 void AxesController::getZPinsExposed()
 {
@@ -905,7 +913,7 @@ void AxesController::getZPinsExposed()
         }
     }
     else
-        Logger::logCritical("Could Not get Z Pins Exposed Position");
+        Logger::logCritical("Could Not get Z Pins Exposed Position, last requestData: " + getLastCommand());
 }
 void AxesController::getLoadX2Base()
 {
@@ -921,8 +929,7 @@ void AxesController::getLoadX2Base()
         }
     }
     else
-        //logCritical("Could Not get X Load position, last requestData: " + requestData );
-        Logger::logCritical("Could Not get X Load position");
+        Logger::logCritical("Could Not get X Load position, last requestData: " + getLastCommand());
 }
 void AxesController::getLoadY2Base()
 {
@@ -938,8 +945,7 @@ void AxesController::getLoadY2Base()
         }
     }
     else
-        //logCritical("Could Not get Y Load position, last requestData: " + requestData );
-        Logger::logCritical("Could Not get Y Load position");
+        Logger::logCritical("Could Not get Y Load position, last requestData: " + getLastCommand());
 }
 void AxesController::getLoadZ2Base()
 {
@@ -955,8 +961,7 @@ void AxesController::getLoadZ2Base()
         }
     }
     else
-        //logCritical("Could Not get Z Load position, last requestData: " + requestData );
-        Logger::logCritical("Could Not get Z Load position");
+        Logger::logCritical("Could Not get Z Load position, last requestData: " + getLastCommand());
 }
 
 void AxesController::setAxisStateMachinesIdle()

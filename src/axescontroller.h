@@ -27,6 +27,7 @@ public:
 
     QString getPortErrorString();
     bool isOpen();
+    void setSerialInterface(SerialInterface *interface);
 
     void StartInit() { emit ISM_TransitionStartup(); }
     void RunInitAxesSM();
@@ -64,7 +65,7 @@ public:
     double getYTwoSpotFirstPoint() { return m_Yaxis.getTwoSpotFirstPoint(); }
     double getYTwoSpotSecondPoint() { return m_Yaxis.getTwoSpotSecondPoint(); }
 
-    // command wrappers.  Maybe consider moving some to plasmacontroller
+    // command wrappers.
     void getXMaxSpeed();
     void getYMaxSpeed();
     void getZMaxSpeed();
@@ -95,6 +96,10 @@ public:
     double TranslateCoordXPH2Base(double x) { return (m_Xp2Base - x); }
     double TranslateCoordYPH2Base(double y) { return (m_Yp2Base - y); }
     double TranslateCoordZPH2Base(double z) { return (z - m_Zp2Base); }
+    double TranslateCoordY2PH(double y) { return  m_Ys2PH - y; }
+
+    double getYs2PHval() { return m_Ys2PH; }
+    double getXPH2Base() { return m_Xp2Base; }
 
     void resetAxes();
 
@@ -109,7 +114,6 @@ public:
 
 signals:
 
-    void stagePortOpened();
     void stageStatusUpdate(QString status1, QString status2);
     void stageResponseReceived(QString resonse);
 
@@ -145,6 +149,7 @@ signals:
     void TSSM_TransitionGetFirst();
     void TSSM_TransitionJoyBtnOff();
     void TSSM_TransitionGetSecond();
+    void TSSM_TransitionJoyBtnOff2();
     void TSSM_TransitionShutdown();
     void TSSM_TransitionIdle();
     void TSSM_TransitionStartup();
@@ -157,6 +162,7 @@ signals:
     void joystickOnChanged();
     void vacuumOnChanged();
     void nitrogenPurgeOnChanged();*/
+
 
 private slots:
 
@@ -175,6 +181,7 @@ private:
     void sendInitCMD();
     void setSameStateXYZsame();
     void parseStatus(QString serialResponse);
+    QString getLastCommand() { return m_pSerialInterface->getLastCommand(); }
 
     void setLEDstate(QString firstHexStrNibble, QString secondHexStrNibble);
 
@@ -210,10 +217,11 @@ private:
     QState *m_pTwoSpotGetFirstState;
     QState *m_pTwoSpotWaitJoyBtnOffState;
     QState *m_pTwoSpotGetSecondState;
+    QState *m_pTwoSpotWaitJoyBtnOff2State;
     QState *m_pTwoSpotShutdownState;
     QState *m_pTwoSpotIdleState;
 
-    SerialInterface m_serialInterface;
+    SerialInterface *m_pSerialInterface;
 
     Axis m_Xaxis, m_Yaxis, m_Zaxis;
     Stage m_stage;

@@ -5,19 +5,20 @@ const int AUX_INPUT_BUFFER_MAX_SIZE = 90;
 const int SERIAL_RESPONSE_TIMEOUT = 5000; // timeout waiting for response (milliseconds)
 const int SERIAL_WRITE_TIMEOUT = 1000; // timeout waiting for control pcb response (milliseconds)
 
-QString lastCommand("");
 
-SerialInterface::SerialInterface()
+SerialInterface::SerialInterface() :
+    m_lastSerialCommand(""),
+    m_serialPort(),
+    m_serialWatchdogTriggered(false)
 {
     // serial watchdog timer
     m_pSerialWatchdogTimer = new QTimer(this);
     connect(m_pSerialWatchdogTimer, SIGNAL(timeout()), this, SLOT(serialWatchdogTimerElapsed()));
-
-    m_serialWatchdogTriggered = false;
 }
 
 SerialInterface::~SerialInterface()
 {
+    m_serialPort.close();
     delete m_pSerialWatchdogTimer;
 }
 
@@ -46,7 +47,7 @@ bool SerialInterface::sendCommand(QString command)
         m_pSerialWatchdogTimer->start(SERIAL_RESPONSE_TIMEOUT);
 
         // record command for logging purposes
-        lastCommand = command;
+        m_lastSerialCommand = command;
 
         Logger::logDebug("AxesController::sendCommand: " + command);
 
@@ -77,7 +78,7 @@ QString SerialInterface::readResponse()
                 m_serialWatchdogTriggered = false;
                 m_pSerialWatchdogTimer->stop();
                 Logger::logDebug("AxesController::readResponse() watchdog triggered....bailing");
-                Logger::logInfo("Comms error: " + lastCommand);
+                Logger::logInfo("Comms error: " + m_lastSerialCommand);
                 return 0; // get out if timed out
             }
             m_serialPort.waitForReadyRead(100);

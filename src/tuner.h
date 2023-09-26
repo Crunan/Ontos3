@@ -6,17 +6,6 @@
 class Tuner : public QObject {
 
     Q_OBJECT
-    Q_PROPERTY(double recipePosition READ getRecipePosition WRITE setRecipePosition NOTIFY recipePositionChanged)
-    Q_PROPERTY(double actualPosition READ getActualPosition WRITE setActualPosition NOTIFY actualPositionChanged)
-    Q_PROPERTY(double defaultRecipe READ getDefaultRecipe WRITE setDefaultRecipe NOTIFY defaultRecipeChanged)
-    Q_PROPERTY(bool autoTune READ getAutoTune WRITE setAutoTune NOTIFY autoTuneChanged)
-
-
-private:
-    double actualPosition_;
-    double recipePosition_;
-    double defaultRecipe_;
-    bool autoTune_;
 
 public:
     Tuner();
@@ -39,6 +28,12 @@ signals:
     void actualPositionChanged(const double actualPosition);
     void defaultRecipeChanged(const double defaultRecipe);
     void autoTuneChanged(const bool autoTune);
+
+private:
+    double m_actualPosition;
+    double m_recipePosition;
+    double m_defaultRecipe;
+    bool m_autoTune;
 };
 
 #endif // TUNER_H

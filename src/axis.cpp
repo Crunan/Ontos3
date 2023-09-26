@@ -1,5 +1,4 @@
 #include "axis.h"
-#include "coordinate.h"
 #include "logger.h"
 
 Axis::Axis(QObject* parent)
@@ -57,8 +56,8 @@ void Axis::setCurrentPosition(const QString position)
 void Axis::checkAndSetDimensions()
 {
     if (m_twoSpotFirstPoint > m_twoSpotSecondPoint) {
-        m_scanMax = m_twoSpotFirstPoint;
         m_scanMin = m_twoSpotSecondPoint;
+        m_scanMax = m_twoSpotFirstPoint;       
     }
     else {
         m_scanMin = m_twoSpotFirstPoint;

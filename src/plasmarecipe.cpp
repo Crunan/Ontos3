@@ -7,9 +7,24 @@
 
 
 PlasmaRecipe::PlasmaRecipe(PlasmaController* CTL, QObject* parent)
-    : QObject(parent), CTL_(CTL)
-{
-}
+    : QObject(parent),
+    CTL_(CTL),
+    m_recipeMap(),
+    m_cascadeRecipeList(),
+    m_currentRecipeIndex(0),
+    m_autoScanFlag(false),
+    m_autoScan(false),
+    m_N2PurgeRecipe(false),
+    m_cycles(0),
+    m_speed(0),
+    m_overlap(0),
+    m_gap(0),
+    m_thickness(0),
+    m_xMin(0),
+    m_xMax(0),
+    m_yMin(0),
+    m_yMax(0)
+{}
 
 PlasmaRecipe::~PlasmaRecipe() {
     // Cleanup any resources here
@@ -17,8 +32,6 @@ PlasmaRecipe::~PlasmaRecipe() {
 
 void PlasmaRecipe::setRecipeFromFile()
 {
-    // this must refer to a different recipe format: static QRegularExpression regex("([^=]+)=(.*)");
-
     QString absoluteFilePath = fileReader.getFilePath();
 
     QFile file(absoluteFilePath);
@@ -52,32 +65,13 @@ void PlasmaRecipe::setRecipeFromFile()
         else {
             qDebug() << "Invalid line format:" << line;
         }
-
-        /*
-        QRegularExpressionMatch match = regex.match(line);
-        if (match.hasMatch())
-        {
-            QString name = match.captured(1);
-            QString setpoint = match.captured(2);
-
-            if (!setpoint.isEmpty())
-            {
-                recipeMap_[name] = setpoint;
-            }
-            else
-            {
-                qDebug() << "Empty setpoint for line:" << line;
-            }
-        }
-        else
-        {
-            qDebug() << "Invalid line format:" << line;
-        }*/
     }
-    processRecipeKeys();
+
+    //processRecipeKeys();
     file.close();
 }
 
+/*
 void PlasmaRecipe::processRecipeKeys()
 {
     setMFCsActualFlow();
@@ -141,7 +135,7 @@ void PlasmaRecipe::setAutoTuneOn() {
     else {
         qDebug() << "auto tune setpoint not found in recipe map.";
     }
-}
+}*/
 
 QMap<QString, QVariant> PlasmaRecipe::getRecipeMap()
 {
@@ -150,19 +144,19 @@ QMap<QString, QVariant> PlasmaRecipe::getRecipeMap()
 
 QList<QString> PlasmaRecipe::getCascadeRecipeList()
 {
-    return cascadeRecipeList_;
+    return m_cascadeRecipeList;
 }
 void PlasmaRecipe::addRecipeToCascade(const QString& recipeName) {
-    cascadeRecipeList_.append(recipeName);
+    m_cascadeRecipeList.append(recipeName);
 }
 
 void PlasmaRecipe::removeRecipeFromCascade(const QString& recipeName) {
-    cascadeRecipeList_.removeOne(recipeName);
+    m_cascadeRecipeList.removeOne(recipeName);
 }
 
 void PlasmaRecipe::executeCurrentRecipe() {
-    if (m_currentRecipeIndex >= 0 && m_currentRecipeIndex < cascadeRecipeList_.size()) {
-        const QString& recipeName = cascadeRecipeList_.at(m_currentRecipeIndex);
+    if (m_currentRecipeIndex >= 0 && m_currentRecipeIndex < m_cascadeRecipeList.size()) {
+        const QString& recipeName = m_cascadeRecipeList.at(m_currentRecipeIndex);
         // Load and execute the recipe with the given recipeName
         fileReader.setFilePath(recipeName);
         setRecipeFromFile();

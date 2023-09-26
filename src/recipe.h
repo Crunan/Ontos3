@@ -4,7 +4,6 @@
 #include <QObject>
 #include "filereader.h"
 #include "plasmarecipe.h"
-//#include "include/axiscontroller/scanrecipe.h"
 
 class Recipe : public QObject {
     Q_OBJECT
@@ -55,7 +54,6 @@ private:
     double m_overlap;
     double m_gap;
     double m_thickness;
-
 };
 
 #endif // RECIPE_H

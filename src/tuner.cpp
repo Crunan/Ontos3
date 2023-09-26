@@ -1,68 +1,71 @@
 #include "tuner.h"
 
-Tuner::Tuner()
-    : actualPosition_(0.0), recipePosition_(0.0), defaultRecipe_(0.0), autoTune_(false)
+Tuner::Tuner() :
+    m_actualPosition(0.0),
+    m_recipePosition(0.0),
+    m_defaultRecipe(0.0),
+    m_autoTune(false)
 {
 }
 
 double Tuner::getActualPosition() const
 {
-    return actualPosition_;
+    return m_actualPosition;
 }
 
 void Tuner::setActualPosition(double position)
 {
-    if (actualPosition_ != position)
+    if (m_actualPosition != position)
     {
-        actualPosition_ = position;
-        emit actualPositionChanged(actualPosition_);
+        m_actualPosition = position;
+        emit actualPositionChanged(m_actualPosition);
     }
 }
 
 double Tuner::getRecipePosition() const
 {
-    return recipePosition_;
+    return m_recipePosition;
 }
 
 void Tuner::setRecipePosition(double setpoint)
 {
-    if (recipePosition_ != setpoint)
+    if (m_recipePosition != setpoint)
     {
-        recipePosition_ = setpoint;
-        emit recipePositionChanged(recipePosition_);
+        m_recipePosition = setpoint;
+        emit recipePositionChanged(m_recipePosition);
     }
 }
 
 double Tuner::getDefaultRecipe() const
 {
-    return defaultRecipe_;
+    return m_defaultRecipe;
 }
 
 void Tuner::setDefaultRecipe(double setpoint)
 {
-    if (defaultRecipe_ != setpoint)
+    if (m_defaultRecipe != setpoint)
     {
-        defaultRecipe_ = setpoint;
-        emit defaultRecipeChanged(defaultRecipe_);
+        m_defaultRecipe = setpoint;
+        emit defaultRecipeChanged(m_defaultRecipe);
     }
 }
 
 bool Tuner::getAutoTune() const
 {
-    return autoTune_;
+    return m_autoTune;
 }
 
 void Tuner::setAutoTune(bool state)
 {
-    if (autoTune_ != state)
+    if (m_autoTune != state)
     {
-        autoTune_ = state;
-        emit autoTuneChanged(autoTune_);
+        m_autoTune = state;
+        emit autoTuneChanged(m_autoTune);
     }
 }
 
 void Tuner::toggleAutoTune()
 {
-    autoTune_ = !autoTune_;
-    emit autoTuneChanged(autoTune_);
+    m_autoTune = !m_autoTune;
+    emit autoTuneChanged(m_autoTune);
 }

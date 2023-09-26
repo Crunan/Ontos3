@@ -50,8 +50,6 @@ signals:
 public slots:
     void openRecipeWindowMFC();
     void stageStatusUpdate(QString statusNow, QString statusNext);
-    void stageResponseUpdate(QString status);
-
 
     // Main CTL Serial Port
     void openMainPort();
@@ -59,13 +57,6 @@ public slots:
     void writeMainPort(const QByteArray &data);
     QString readMainPort();
     void handleMainSerialError(QSerialPort::SerialPortError error);
-
-    // Stage CTL Serial Port
-    void openStagePort();
-    void closeStagePort();
-    void writeStagePort(const QByteArray &data);
-    QString readStagePort();
-    void handleStageSerialError(QSerialPort::SerialPortError error);
 
     // state machine ui updating slots
     void homeStateMachineStartup();
@@ -92,6 +83,13 @@ public slots:
     void addRecipeToCascadeRecipe();
     void removeRecipeFromCascadeList();
     void saveAsCascadeRecipeListToFile();
+    void setRecipeMBtuner(QString MBtunerSP);
+    void setRecipeRFpower(QString RFpowerSP);
+    void MFC4RecipeFlow(QString recipeFlow);
+    void MFC3RecipeFlow(QString recipeFlow);
+    void MFC2RecipeFlow(QString recipeFlow);
+    void MFC1RecipeFlow(QString recipeFlow);
+    void plasmaHeadTemp(double temp);
 
 private slots:
     // button handlers
@@ -99,7 +97,6 @@ private slots:
     void on_init_button_dup_clicked();
     void on_Stagepins_button_dup_toggled(bool checked);
     void on_n2_purge_button_dup_toggled(bool checked);
-    void on_stageDisconnectButton_clicked();
     void on_diameter_button_dup_clicked();
     void on_load_thick_clicked();
     void on_load_gap_clicked();
@@ -119,9 +116,10 @@ private slots:
     void on_loadRFButton_clicked();
     void on_mainDisconnectButton_clicked();
     void on_mainConnectButton_clicked();
-    void on_stageConnectButton_clicked();
     void on_load_autoscan_clicked();
     void on_load_autoscan_clicked(bool checked);
+
+    void on_pushButton_clicked();
 
 private:
     // Action Button methods
@@ -159,13 +157,11 @@ private:
     QLabel* m_pStatus;
     SettingsDialog* m_pSettings;
     PlasmaController m_mainCTL;
-    //GRBLController stageCTL;
-    AxesController m_stageCTL;
+
     CommandFileReader m_commandFileReader;
-    Recipe m_recipe;
-    PlasmaRecipe m_plasmaRecipe;
+    PlasmaRecipe m_recipe;
     Console* m_pMainCTLConsole;
-    Console* m_pStageCTLConsole;
+    //Console* m_pStageCTLConsole;
     StageWidget* m_pStageWidget;
     Configuration m_config;
 

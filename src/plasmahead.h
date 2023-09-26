@@ -6,16 +6,6 @@
 class PlasmaHead : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(double safetyGap READ getSafetyGap CONSTANT)
-    Q_PROPERTY(double slitLength READ getSlitLength CONSTANT)
-    Q_PROPERTY(double slitWidth READ getSlitWidth CONSTANT)
-    Q_PROPERTY(double temperature READ getTemperature WRITE setTemperature NOTIFY temperatureChanged)
-
-private:
-    double safetyGap_;  // Distance between plasma head & chuck when z at max height
-    double slitLength_; // Plasma head slit length
-    double slitWidth_;  // Plasma head slit width
-    double temperature_;
 
 public:
     PlasmaHead();
@@ -29,7 +19,11 @@ public:
 signals:
     void temperatureChanged();
 
-public slots:
+private:
+    double m_safetyGap;  // Distance between plasma head & chuck when z at max height
+    double m_slitLength; // Plasma head slit length
+    double m_slitWidth;  // Plasma head slit width
+    double m_temperature;
 
 };
 

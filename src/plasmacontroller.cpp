@@ -1,4 +1,5 @@
 #include "plasmacontroller.h"
+#include "logger.h"
 
 PlasmaController::PlasmaController(QWidget* parent)
   : QObject(parent),
@@ -6,12 +7,15 @@ PlasmaController::PlasmaController(QWidget* parent)
     m_pwr(),
     m_tuner(),
     m_mfcs({ new MFC(1), new MFC(2), new MFC(3), new MFC(4) }),
-    commandMap(),
-    config(),
-    axesCTL(nullptr),
-    serialPort_(),
-    ledStatus(),
-    executeRecipe(0)
+    m_commandMap(),
+    m_config(),
+    m_pSerialInterface(new SerialInterface()),
+    m_ledStatus(),
+    m_executeRecipe(0),
+    m_numMFCs(0),
+    m_readyToLoad(false),
+    m_MBtunerRecipeSP(false),
+    m_RFtunerRecipeSP(false)
 {
     // Add startup data gathering methods.
     for (MFC* mfc: m_mfcs) {
@@ -22,6 +26,8 @@ PlasmaController::PlasmaController(QWidget* parent)
     connect(&m_tuner, &Tuner::defaultRecipeChanged, this, &PlasmaController::handleSetTunerDefaultRecipeCommand);
     connect(&m_tuner, &Tuner::recipePositionChanged, this, &PlasmaController::handleSetTunerRecipePositionCommand);
     connect(&m_tuner, &Tuner::autoTuneChanged, this, &PlasmaController::handleSetTunerAutoTuneCommand);
+
+    setupScanStateMachine();
 }
 
 PlasmaController::~PlasmaController()
@@ -30,59 +36,132 @@ PlasmaController::~PlasmaController()
     for (MFC* mfc : m_mfcs) {
         delete mfc;
     }
+
+    // cleanup shared serial resource
+    if (m_pSerialInterface != nullptr) {
+        if (m_pSerialInterface->isOpen()) {
+            m_pSerialInterface->close();
+        }
+        delete m_pSerialInterface;
+        m_pSerialInterface = nullptr;
+    }
+
+    // cleanup state machine states
+    delete m_pScanStartupState;
+    delete m_pParkZSubState;
+    delete m_pGoXYStartSubState;
+    delete m_pIdleSubState;
+    delete m_pGoZScanPositionSubState;
+    delete m_pScanColSubState;
+    delete m_pScanRecycleState;
+    delete m_pScanState;
+    delete m_pScanSuperState;
+    delete m_pScanShutdownState;
+    delete m_pScanIdleState;
+}
+
+void PlasmaController::setupScanStateMachine()
+{
+    m_pScanSuperState = new QState();
+    m_pScanStartupState = new QState(m_pScanSuperState);
+    m_pScanState = new QState(m_pScanSuperState);
+    m_pScanRecycleState = new QState(m_pScanSuperState);
+    m_pScanShutdownState = new QState();
+    m_pScanIdleState = new QState();
+    // scan sub states
+    m_pParkZSubState = new QState(m_pScanState);
+    m_pGoXYStartSubState = new QState(m_pScanState);
+    m_pIdleSubState = new QState(m_pScanState);
+    m_pGoZScanPositionSubState = new QState(m_pScanState);
+    m_pScanColSubState = new QState(m_pScanState);
+
+    // set super state machine initial state and add it to the state machine
+    m_pScanSuperState->setInitialState(m_pScanStartupState);
+    m_scanStateMachine.addState(m_pScanSuperState);
+
+    // set scan state machine initial state and add it to the state machine
+    m_pScanState->setInitialState(m_pParkZSubState);
+    m_scanStateMachine.addState(m_pScanState);
+
+    // add the rest of the states
+    m_scanStateMachine.addState(m_pScanShutdownState);
+    m_scanStateMachine.addState(m_pScanIdleState);
+
+    // add transitions to and from the super state
+    m_pScanSuperState->addTransition(this, SIGNAL(SSM_TransitionIdle()), m_pScanIdleState);
+    m_pScanSuperState->addTransition(this, SIGNAL(SSM_TransitionShutdown()), m_pScanShutdownState);
+
+    // add transition to and from the scan state
+    m_pScanState->addTransition(this, SIGNAL(SSM_TransitionRecycle()), m_pScanRecycleState);
+    m_pScanRecycleState->addTransition(this, SIGNAL(SSM_TransitionScan()), m_pScanState);
+    m_pScanStartupState->addTransition(this, SIGNAL(SSM_TransitionScan()), m_pScanState);
+
+    m_pParkZSubState = new QState(m_pScanState);
+    m_pGoXYStartSubState = new QState(m_pScanState);
+    m_pIdleSubState = new QState(m_pScanState);
+    m_pGoZScanPositionSubState = new QState(m_pScanState);
+    m_pScanColSubState = new QState(m_pScanState);
+
+    // add the rest of the transitions
+    m_pParkZSubState->addTransition(this, SIGNAL(SSM_TransitionGoXYSubstate()), m_pGoXYStartSubState);
+    m_pParkZSubState->addTransition(this, SIGNAL(SSM_TransitionIdleSubstate()), m_pIdleSubState);
+    m_pGoXYStartSubState ->addTransition(this, SIGNAL(SSM_TransitionGoZPositionSubstate()), m_pGoZScanPositionSubState);
+    m_pGoZScanPositionSubState->addTransition(this, SIGNAL(SSM_TransitionColSubstate()), m_pScanColSubState);
+    m_pScanColSubState->addTransition(this, SIGNAL(SSM_TransitionIdleSubstate()), m_pIdleSubState);
+
+    // set initial state
+    m_scanStateMachine.setInitialState(m_pScanIdleState);
+
+    // start the state machine
+    m_scanStateMachine.start();
 }
 
 bool PlasmaController::open(const SettingsDialog& settings)
 {
     const SettingsDialog::Settings p = settings.settings();
-    serialPort_.setPortName(p.name);
-    serialPort_.setBaudRate(p.baudRate);
-    serialPort_.setDataBits(p.dataBits);
-    serialPort_.setParity(p.parity);
-    serialPort_.setStopBits(p.stopBits);
-    serialPort_.setFlowControl(p.flowControl);
-    if (!serialPort_.open(QIODevice::ReadWrite)) {
+    m_pSerialInterface->setPortName(p.name);
+    m_pSerialInterface->setBaudRate(p.baudRate);
+    m_pSerialInterface->setDataBits(p.dataBits);
+    m_pSerialInterface->setParity(p.parity);
+    m_pSerialInterface->setStopBits(p.stopBits);
+    m_pSerialInterface->setFlowControl(p.flowControl);
+    if (!m_pSerialInterface->open(QIODevice::ReadWrite)) {
         // Failed to open the serial port
         return false;
     }
-    // Signals connections
-    connect(&serialPort_, &QSerialPort::readyRead, this, &PlasmaController::readData);
+
+    // share the serial interface with the axes controller
+    m_stageCTL.setSerialInterface(m_pSerialInterface);
+
     emit mainPortOpened();
 
     return true;
 }
 
+
 void PlasmaController::close()
 {
-    serialPort_.close();
+    m_pSerialInterface->close();
 }
 
 
 bool PlasmaController::sendCommand(const QString& command)
 {
-    if (serialPort_.isOpen()) {
-        QByteArray requestData = command.toUtf8();
-        serialPort_.write(requestData);
-        return true;
-    }
-
-    return false;
+    return m_pSerialInterface->sendCommand(command);
 }
 
-QString PlasmaController::readData()
+QString PlasmaController::readResponse()
 {
-    QByteArray responseData = serialPort_.readAll();
-    QString response = QString::fromUtf8(responseData);
-    return response;
+    return m_pSerialInterface->readResponse();
 }
 
 void PlasmaController::setCommandMap(const QMap<QString, QPair<QString, QString>>& map)
 {
-    commandMap.setCommandMap(map);
+    m_commandMap.setCommandMap(map);
 }
 QString PlasmaController::findCommandValue(QString command) const
 {
-    return commandMap.findCommandValue(command);
+    return m_commandMap.findCommandValue(command);
 }
 
 
@@ -98,6 +177,11 @@ QString PlasmaController::formatSerialCommand(QString cmd, const QString& setpoi
     cmd += "%";
 
     return cmd;
+}
+
+void PlasmaController::RunScanAxesSM()
+{
+
 }
 
 MFC* PlasmaController::findMFCByNumber(int mfcNumber)
@@ -138,12 +222,15 @@ int PlasmaController::parseResponseForNumberOfMFCs(QString& response)
 
 QString PlasmaController::getPortErrorString()
 {
-    return serialPort_.errorString();
+    return m_pSerialInterface->errorString();
 }
 
 bool PlasmaController::isOpen()
 {
-    return serialPort_.isOpen();
+    if (m_pSerialInterface != nullptr) {
+        return m_pSerialInterface->isOpen();
+    }
+    return false;
 }
 
 double PlasmaController::handleGetMFCRecipeFlowCommand(QString& responseStr)
@@ -229,13 +316,12 @@ void PlasmaController::getCTLStatusCommand()
 //    QString command = "$91%";
 //    QString response = send(command);
 //    parseResponseForCTLStatus(response);
-
 }
 
 
 void PlasmaController::setLEDStatus(int &bits)
 {
-    ledStatus.setStatusBits(bits);
+    m_ledStatus.setStatusBits(bits);
 }
 
 void PlasmaController::parseResponseForCTLStatus(const QString& response)
@@ -290,36 +376,303 @@ void PlasmaController::parseResponseForCTLStatus(const QString& response)
 
 bool PlasmaController::getExecuteRecipe() const
 {
-    return executeRecipe;
+    return m_executeRecipe;
 }
 
 void PlasmaController::setExecuteRecipe(bool value)
 {
-    executeRecipe = value;
+    m_executeRecipe = value;
 }
-
-
 
 void PlasmaController::CTLStartup()
 {
-//    howManyMFCs();
-//    getBatchIDLogging();
-//    getRecipeMBPosition();
-//    getRecipeRFPosition();
-//    getRecipeMFC4Flow();
-//    getRecipeMFC3Flow();
-//    getRecipeMFC2Flow();
-//    getRecipeMFC1Flow();
-//    getMFC4Range();
-//    getMFC3Range();
-//    getMFC2Range();
-//    getMFC1Range();
-//    getMaxRFPowerForward();
-//    getAutoMan();
-//    turnOffExecRecipe();
-//    getTemp();
+    howManyMFCs();
+    getBatchIDLogging();
+    getRecipeMBPosition();
+    getRecipeRFPosition();
+    getRecipeMFC4Flow();
+    getRecipeMFC3Flow();
+    getRecipeMFC2Flow();
+    getRecipeMFC1Flow();
+    getMFC4Range();
+    getMFC3Range();
+    getMFC2Range();
+    getMFC1Range();
+    getMaxRFPowerForward();
+    //getAutoMan();
+    //getTemp();
+    //turnOffExecRecipe();
+
 //    setCTLStateMachinesIdle();
 }
+
+void PlasmaController::howManyMFCs()
+{
+    sendCommand("$2A002%");
+    QString response = readResponse();
+    if (response.length() > 7) {
+        QString StrVar = response.mid(7,1); //GET Number of MFCs (1-4) $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
+        bool ok = false;
+        int numMFCs = StrVar.toInt(&ok);
+        if (ok) {
+            m_numMFCs = numMFCs;
+            Logger::logInfo("Number of MFC's: " + StrVar + "");
+        }
+    }
+    else
+        Logger::logCritical("Could Not set # of MFCs, last requestData: " + getLastCommand());
+}
+
+void PlasmaController::getBatchIDLogging() {
+    sendCommand("$2A011%"); //GET BatchIDLogging $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
+    QString response = readResponse();
+    if (response.length() > 7) {
+        QString StrVar = response.mid(7, 1);
+        bool ok = false;
+        int batchLogging = StrVar.toInt(&ok);
+        if (ok) {
+            m_batchLogging = batchLogging;
+            Logger::logInfo("Batch Logging On/Off: " + StrVar);
+        }
+    }
+    else
+        Logger::logCritical("Could Not retrieve Batch Logging, last requestData sent: " + getLastCommand());
+}
+
+void PlasmaController::getRecipeMBPosition() {
+    sendCommand("$2A606%"); //GET RECIPE MB Start Position () $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
+    QString response = readResponse();
+    if (response.length() > 7) {
+        QString StrVar = response.mid(7, 7);
+        bool ok = false;
+        double loadedSP = StrVar.toDouble(&ok);
+        if (ok) {   
+            m_readyToLoad = true;
+            m_MBtunerRecipeSP = loadedSP;
+            // update UI
+            emit setRecipeMBtuner(StrVar);
+            Logger::logInfo("Loaded MB Setpoint: " + StrVar + " %");
+        }
+    }
+    else
+        Logger::logCritical("Could Not retrieve MB tuner setpoint, last requestData sent: " + getLastCommand() );
+}
+
+void PlasmaController::getRecipeRFPosition() {
+    sendCommand("$2A605%"); //GET RECIPE RF PWR Setpoint (Watts) $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
+    QString response = readResponse();
+    if (response.length() > 7) {
+        QString StrVar = response.mid(7, 4);
+        bool ok = false;
+        double rfLoadedSP = StrVar.toDouble(&ok);
+        if (ok) {
+            m_readyToLoad = true;
+            m_RFtunerRecipeSP = rfLoadedSP;
+            // update UI
+            emit setRecipeRFpower(StrVar);
+            Logger::logInfo("Loaded RF Setpoint: " + StrVar);
+        }
+    }
+    else
+        Logger::logCritical("Could Not retrieve RF setpoint, last requestData sent: " + getLastCommand());
+}
+
+void PlasmaController::getRecipeMFC4Flow() {
+    sendCommand("$2A604%"); //GET RECIPE MFC4 Flow (SLPM) $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
+    QString response = readResponse();
+    if (response.length() > 7) {
+        QString StrVar = response.mid(7, (response.length() - 8));
+        bool ok = false;
+        double mfcRecipeFlow = StrVar.toDouble(&ok);
+        if (ok) {
+            m_mfcs[3]->setRecipeFlow(mfcRecipeFlow);
+            // update the UI
+            emit MFC4RecipeFlow(QString::number(mfcRecipeFlow));
+            Logger::logInfo("Loaded MFC 4 Flow Rate: " + StrVar);
+        }
+    }
+    else
+        Logger::logCritical("Could Not retrieve MFC 4 setpoint, last requestData sent: " + getLastCommand());
+}
+
+void PlasmaController::getRecipeMFC3Flow() {
+    sendCommand("$2A603%"); //GET RECIPE MFC3 Flow (SLPM) $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
+    QString response = readResponse();
+    if (response.length() > 7) {
+        QString StrVar = response.mid(7, (response.length() - 8));
+        bool ok = false;
+        double mfcRecipeFlow = StrVar.toDouble(&ok);
+        if (ok) {
+            m_mfcs[2]->setRecipeFlow(mfcRecipeFlow);
+            // update the UI
+            emit MFC3RecipeFlow(QString::number(mfcRecipeFlow));
+            Logger::logInfo("Loaded MFC 3 Flow Rate: " + StrVar);
+        }
+    }
+    else
+        Logger::logCritical("Could Not retrieve MFC 3 setpoint, last requestData sent: " + getLastCommand() );
+}
+
+void PlasmaController::getRecipeMFC2Flow() {
+    sendCommand("$2A602%"); //GET RECIPE MFC2 Flow (SLPM) $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
+    QString response = readResponse();
+    if (response.length() > 7) {
+        QString StrVar = response.mid(7, (response.length() - 8));
+        bool ok = false;
+        double mfcRecipeFlow = StrVar.toDouble(&ok);
+        if (ok) {
+            m_mfcs[1]->setRecipeFlow(mfcRecipeFlow);
+            // update the UI
+            emit MFC2RecipeFlow(QString::number(mfcRecipeFlow));
+            Logger::logInfo("Loaded MFC 2 Flow Rate: " + StrVar);
+        }
+    }
+    else
+        Logger::logCritical("Could Not retrieve MFC 2 setpoint, last requestData sent: " + getLastCommand() );
+}
+void PlasmaController::getRecipeMFC1Flow() {
+    sendCommand("$2A601%"); //GET RECIPE MFC1 Flow (SLPM) $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
+    QString response = readResponse();
+    if (response.length() > 7) {
+        QString StrVar = response.mid(7, (response.length() - 8));
+        bool ok = false;
+        double mfcRecipeFlow = StrVar.toDouble(&ok);
+        if (ok) {
+            m_mfcs[0]->setRecipeFlow(mfcRecipeFlow);
+            // update the UI
+            emit MFC1RecipeFlow(QString::number(mfcRecipeFlow));
+            Logger::logInfo("Loaded MFC 1 Flow Rate: " + StrVar);
+        }
+    }
+    else
+        Logger::logCritical("Could Not retrieve MFC 1 setpoint, last requestData sent: " + getLastCommand() );
+}
+
+void PlasmaController::getMFC4Range() {
+    sendCommand("$8504%"); //GET_MFC_RANGE $850m% 1<=m<=4; resp[!850xxx.yy#]
+    QString response = readResponse();
+    if (response.length() > 6) {
+        QString StrVar = response.mid(5, (response.length() - 6));
+        bool ok = false;
+        double mfcRange = StrVar.toDouble(&ok);
+        if (ok) {
+            m_mfcs[3]->setRange(mfcRange);
+            Logger::logInfo("Loaded MFC 4 Range: " + StrVar);
+        }
+    }
+    else
+        Logger::logCritical("Could Not retrieve MFC 4 range, last requestData sent: " + getLastCommand() );
+}
+
+void PlasmaController::getMFC3Range() {
+    sendCommand("$8503%"); //GET_MFC_RANGE $850m% 1<=m<=4; resp[!850xxx.yy#]
+    QString response = readResponse();
+    if (response.length() > 6) {
+        QString StrVar = response.mid(5, (response.length() - 6));
+        bool ok = false;
+        double mfcRange = StrVar.toDouble(&ok);
+        if (ok) {
+            m_mfcs[2]->setRange(mfcRange);
+            Logger::logInfo("Loaded MFC 3 Range: " + StrVar);
+        }
+    }
+    else
+        Logger::logCritical("Could Not retrieve MFC 3 range, last requestData sent: " + getLastCommand() );
+}
+
+void PlasmaController::getMFC2Range() {
+    sendCommand("$8502%"); //GET_MFC_RANGE $850m% 1<=m<=4; resp[!850xxx.yy#]
+    QString response = readResponse();
+    if (response.length() > 6) {
+        QString StrVar = response.mid(5, (response.length() - 6));
+        bool ok = false;
+        double mfcRange = StrVar.toDouble(&ok);
+        if (ok) {
+            m_mfcs[1]->setRange(mfcRange);
+            Logger::logInfo("Loaded MFC 2 Range: " + StrVar);
+        }
+    }
+    else
+        Logger::logCritical("Could Not retrieve MFC 2 range, last requestData sent: " + getLastCommand() );
+}
+
+void PlasmaController::getMFC1Range() {
+    sendCommand("$8501%"); //GET_MFC_RANGE $850m% 1<=m<=4; resp[!850xxx.yy#]
+    QString response = readResponse();
+    if (response.length() > 6) {
+        QString StrVar = response.mid(5, (response.length() - 6));
+        bool ok = false;
+        double mfcRange = StrVar.toDouble(&ok);
+        if (ok) {
+            m_mfcs[0]->setRange(mfcRange);
+            Logger::logInfo("Loaded MFC 1 Range: " + StrVar);
+        }
+    }
+    else
+        Logger::logCritical("Could Not retrieve MFC 1 range, last requestData sent: " + getLastCommand() );
+}
+
+
+void PlasmaController::getMaxRFPowerForward() {
+    sendCommand("$2A705%"); //Get Max RF power forward  $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
+    QString response = readResponse();
+    if (response.length() > 7) {
+        QString StrVar = response.mid(7, 3);
+        bool ok = false;
+        int maxRFPowerForward = StrVar.toInt(&ok);
+        if (ok) {
+            m_MaxRFPowerForward = maxRFPowerForward;
+            Logger::logInfo("Loaded Max RF Forward: " + StrVar);
+        }
+    }
+    else
+        Logger::logCritical("Could Not retrieve MFC 1 range, last requestData sent: " + getLastCommand());
+}
+
+
+void PlasmaController::getAutoMan() {
+    sendCommand("$89%"); //GET_AUTO_MAN   $89%; resp [!890p#] p=1 AutoMode, p=0 ManualMode
+    QString response = readResponse();
+    if (response.length() > 3) {
+        QString StrVar = response.mid(3, 2);
+        bool ok = false;
+        int autoTune = StrVar.toInt(&ok);
+        if (ok) {
+            m_autoTune = autoTune;
+            Logger::logInfo("Loaded Tuner Auto Setting: " + StrVar);
+        }
+    }
+    else
+        Logger::logCritical("Could Not retrieve Auto/Manual setting, last requestData sent: " + getLastCommand());
+}
+
+void PlasmaController::getTemp() {
+    sendCommand("$8C%");
+    QString response = readResponse();
+    if (response.length() > 3) {
+        QString StrVar = response.mid(3, 4);
+        bool ok = false;
+        double headTemp = StrVar.toDouble(&ok);
+        if (ok) {
+            m_headTemp = headTemp;
+            // update UI
+            emit plasmaHeadTemp(m_headTemp);
+            Logger::logInfo("Loaded current temperature: " + StrVar);
+        }
+        else
+            Logger::logCritical("Could Not retrieve temperature, last requestData sent: " + getLastCommand() );
+    }
+}
+
+void PlasmaController::turnOffExecRecipe() {
+    sendCommand("$8700%"); //SET_EXEC_RECIPE  $870p% p=1 Execute Recipe, p=0 RF off, Recipe off
+    readResponse();
+    //ui->plsmaBtn->setText("START PLASMA"); // TODO
+    Logger::logInfo("Execute Recipe : Disabled");
+}
+
+
+
 
 
 //void MainWindow::UpdateStatus() {
