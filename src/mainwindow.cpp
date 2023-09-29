@@ -20,8 +20,6 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     m_pSettings(new SettingsDialog),
     m_mainCTL(),
     m_commandFileReader(),
-   // m_recipe(),
-    m_recipe(&m_mainCTL),
     m_pMainCTLConsole(),
     //m_pStageCTLConsole(),
     m_pStageWidget(new StageWidget(this)),
@@ -262,7 +260,7 @@ void MainWindow::initStateMachineDone()
     ui->init_button_dup->setChecked(false);
 }
 
-void MainWindow::twoSpotStateMachineStartup()
+void MainWindow::twoSpotStateMachineStartup()//    m_scanStateMachine.addState(m_pScanState);
 {
     ui->twospot_button->setText("STOP");
 
@@ -471,7 +469,8 @@ void MainWindow::runMainStateMachine()
             m_mainCTL.RunTwoSpotSM();
             m_mainCTL.RunHomeAxesSM();
             m_mainCTL.RunScanAxesSM();
-
+            m_mainCTL.RunCollisionSM();
+            m_mainCTL.PollForCollision();
         }
     }
     else if (m_mainStateMachine.configuration().contains(m_pMainIdleState)) { // in Idle state
@@ -701,8 +700,7 @@ void MainWindow::openRecipe()
        QString filePath = dialog.selectedFiles().first();
 
        // set recipe path and file
-       m_recipe.fileReader.setFilePath(filePath);
-       m_recipe.setRecipeFromFile();
+       m_mainCTL.setRecipe(filePath);
 
     } else {
        // User canceled the file dialog
@@ -731,7 +729,7 @@ void MainWindow::saveRecipe() {
        if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
             QTextStream out(&file);
 
-            QMap<QString, QVariant> recipe = m_recipe.getRecipeMap();
+            QMap<QString, QVariant> recipe = m_mainCTL.getRecipeMap();
             // Write each recipe name to the file
             for (auto it = recipe.begin(); it != recipe.end(); it++) {
                 const QString& key = it.key();
@@ -779,7 +777,7 @@ void MainWindow::addRecipeToCascadeRecipe()
        QString fileName = fileInfo.fileName();
 
        // Set plasma Recipe path to Cascade Recipe
-       m_recipe.addRecipeToCascade(fileName);
+       m_mainCTL.addRecipeToCascade(fileName);
 
        // Update the UI with the recipes
        ui->listCascadeRecipes->addItem(fileName);
@@ -801,7 +799,7 @@ void MainWindow::removeRecipeFromCascadeList()
        ui->listCascadeRecipes->takeItem(ui->listCascadeRecipes->row(selectedItem));
 
        // Remove the item from the cascade recipe list
-       m_recipe.removeRecipeFromCascade(recipeFileName);
+       m_mainCTL.removeRecipeFromCascade(recipeFileName);
     }
 
 }
@@ -828,7 +826,7 @@ void MainWindow::saveAsCascadeRecipeListToFile() {
             QTextStream out(&file);
 
             // Write each recipe name to the file
-            for (const QString& recipeName : m_recipe.getCascadeRecipeList()) {
+            for (const QString& recipeName : m_mainCTL.getCascadeRecipeList()) {
                 out << recipeName << "\n";
             }
 
@@ -914,17 +912,6 @@ void MainWindow::recipeWattsChanged()
 // Button handlers
 //////////////////////////////////////////////////////////////////////////////////
 
-void MainWindow::on_mainDisconnectButton_clicked()
-{
-    closeMainPort();
-}
-
-
-void MainWindow::on_mainConnectButton_clicked()
-{
-    openMainPort();
-}
-
 void MainWindow::loadMBRecipeButton_clicked()
 {
     bool ok;
@@ -985,6 +972,28 @@ void MainWindow::on_twospot_button_dup_toggled(bool checked)
     }
     else {
         m_mainCTL.StopTwoSpot();
+    }
+}
+
+// scan button on 3 axis tab
+void MainWindow::on_scan_button_dup_toggled(bool checked)
+{
+    if (checked) {
+        m_mainCTL.StartScan();
+    }
+    else {
+        m_mainCTL.StopScan();
+    }
+}
+
+// scan button on dashboard
+void MainWindow::on_scan_button_toggled(bool checked)
+{
+    if (checked) {
+        m_mainCTL.StartScan();
+    }
+    else {
+        m_mainCTL.StopScan();
     }
 }
 
@@ -1101,11 +1110,11 @@ void MainWindow::on_load_thick_clicked()
     bool ok;
     double doubVal = QInputDialog::getDouble(this, "Thickness: ","mm: ", 0, 0, 50.00, 2, &ok,Qt::WindowFlags(), 1);
     if (ok) {
-        m_recipe.setThickness(doubVal);
+        m_mainCTL.setRecipeThickness(doubVal);
         // update dashboard
-        ui->thickness_recipe->setText(m_recipe.getThickness());
+        ui->thickness_recipe->setText(m_mainCTL.getRecipeThicknessQStr());
         // update 3 axis tab
-        ui->input_thickness_dup->setText(m_recipe.getThickness());
+        ui->input_thickness_dup->setText(m_mainCTL.getRecipeThicknessQStr());
     }
 }
 
@@ -1115,11 +1124,11 @@ void MainWindow::on_load_gap_clicked()
     bool ok;
     double doubVal = QInputDialog::getDouble(this, "Gap: ","mm: ", 0, 0, 50.00, 2, &ok,Qt::WindowFlags(), 1);
     if (ok) {
-        m_recipe.setGap(doubVal);
+        m_mainCTL.setRecipeGap(doubVal);
         // update dashboard
-        ui->gap_recipe->setText(m_recipe.getGap());
+        ui->gap_recipe->setText(m_mainCTL.getRecipeGapQStr());
         // update 3 axis tab
-        ui->gap_recipe->setText(m_recipe.getGap());
+        ui->gap_recipe->setText(m_mainCTL.getRecipeGapQStr());
     }
 }
 
@@ -1129,11 +1138,11 @@ void MainWindow::on_load_overlap_clicked()
     bool ok;
     double doubVal = QInputDialog::getDouble(this, "Overlap: ","mm: ", 0, 0, 5.00, 2, &ok,Qt::WindowFlags(), 1);
     if (ok) {
-        m_recipe.setOverlap(doubVal);
+        m_mainCTL.setRecipeOverlap(doubVal);
         // update dashboard
-        ui->overlap_recipe->setText(m_recipe.getOverlap());
+        ui->overlap_recipe->setText(m_mainCTL.getRecipeOverlapQStr());
         // update 3 axis tab
-        ui->input_overlap_dup->setText(m_recipe.getOverlap());
+        ui->input_overlap_dup->setText(m_mainCTL.getRecipeOverlapQStr());
     }
 }
 
@@ -1144,11 +1153,11 @@ void MainWindow::on_loadSpeedButton_clicked()
     double doubVal = QInputDialog::getDouble(this, "Speed: ","mm: " + m_mainCTL.getXMaxSpeedQStr(), 0, 0,
                                              m_mainCTL.XMaxSpeed(), 0, &ok,Qt::WindowFlags(), 1);
     if (ok) {
-        m_recipe.setSpeed(doubVal);
+        m_mainCTL.setRecipeSpeed(doubVal);
         // update dashboard
-        ui->speed_recipe->setText(m_recipe.getSpeed());
+        ui->speed_recipe->setText(m_mainCTL.getRecipeSpeedQStr());
         // update 3 axis tab
-        ui->input_speed_dup->setText(m_recipe.getSpeed());
+        ui->input_speed_dup->setText(m_mainCTL.getRecipeSpeedQStr());
     }
 }
 
@@ -1156,13 +1165,13 @@ void MainWindow::on_loadSpeedButton_clicked()
 void MainWindow::on_load_cycles_clicked()
 {
     bool ok;
-    double doubVal = QInputDialog::getInt(this, "Number of Cycles","cycles: ", 0, 0, 200, 0, &ok);
+    int intVal = QInputDialog::getInt(this, "Number of Cycles","cycles: ", 0, 0, 200, 0, &ok);
     if (ok) {
-        m_recipe.setCycles(doubVal);
+        m_mainCTL.setRecipeCycles(intVal);
         // update dashboard
-        ui->cycles_recipe->setText(m_recipe.getCycles());
+        ui->cycles_recipe->setText(m_mainCTL.getRecipeCyclesQStr());
         // update 3 axis tab
-        ui->input_cycles_dup->setText(m_recipe.getCycles());
+        ui->input_cycles_dup->setText(m_mainCTL.getRecipeCyclesQStr());
     }
 }
 
@@ -1189,21 +1198,4 @@ void MainWindow::on_loadRFButton_clicked()
     }
 }
 
-void MainWindow::on_load_autoscan_clicked()
-{
-
-}
-
-
-
-void MainWindow::on_load_autoscan_clicked(bool checked)
-{
-
-}
-
-
-void MainWindow::on_pushButton_clicked()
-{
-    emit MSM_TransitionStartup();
-}
 

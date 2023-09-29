@@ -10,7 +10,6 @@
 #include "settingsdialog.h"
 #include "recipe.h"
 #include "logger.h"
-#include "plasmarecipe.h"
 #include "plasmacontroller.h"
 #include "stagewidget.h"
 #include "axescontroller.h"
@@ -114,12 +113,9 @@ private slots:
     void on_Home_button_dup_toggled(bool checked);
     void on_loadRecipeButton_clicked();
     void on_loadRFButton_clicked();
-    void on_mainDisconnectButton_clicked();
-    void on_mainConnectButton_clicked();
-    void on_load_autoscan_clicked();
-    void on_load_autoscan_clicked(bool checked);
+    void on_scan_button_dup_toggled(bool checked);
+    void on_scan_button_toggled(bool checked);
 
-    void on_pushButton_clicked();
 
 private:
     // Action Button methods
@@ -159,7 +155,7 @@ private:
     PlasmaController m_mainCTL;
 
     CommandFileReader m_commandFileReader;
-    PlasmaRecipe m_recipe;
+
     Console* m_pMainCTLConsole;
     //Console* m_pStageCTLConsole;
     StageWidget* m_pStageWidget;

@@ -8,7 +8,9 @@ PlasmaController::PlasmaController(QWidget* parent)
     m_tuner(),
     m_mfcs({ new MFC(1), new MFC(2), new MFC(3), new MFC(4) }),
     m_commandMap(),
+    m_stageCTL(),
     m_config(),
+    m_pRecipe(new PlasmaRecipe()),
     m_pSerialInterface(new SerialInterface()),
     m_ledStatus(),
     m_executeRecipe(0),
@@ -27,6 +29,8 @@ PlasmaController::PlasmaController(QWidget* parent)
     connect(&m_tuner, &Tuner::recipePositionChanged, this, &PlasmaController::handleSetTunerRecipePositionCommand);
     connect(&m_tuner, &Tuner::autoTuneChanged, this, &PlasmaController::handleSetTunerAutoTuneCommand);
 
+    // setup state machines
+    setupCollisionStateMachine();
     setupScanStateMachine();
 }
 
@@ -46,75 +50,96 @@ PlasmaController::~PlasmaController()
         m_pSerialInterface = nullptr;
     }
 
-    // cleanup state machine states
+    delete m_pRecipe;
+
+    // cleanup scan state machine states
     delete m_pScanStartupState;
     delete m_pParkZSubState;
     delete m_pGoXYStartSubState;
-    delete m_pIdleSubState;
     delete m_pGoZScanPositionSubState;
     delete m_pScanColSubState;
     delete m_pScanRecycleState;
-    delete m_pScanState;
-    delete m_pScanSuperState;
     delete m_pScanShutdownState;
     delete m_pScanIdleState;
+    delete m_pScanSuperState;
+
+    // collision state machine
+    delete m_pCPgetZUpstate;
+    delete m_pCPStartupState;
+    delete m_pCPScanYState;
+    delete m_pCPGetZDownState;
+    delete m_pCPIdleState;
+    delete m_pCPShutdownState;
 }
 
 void PlasmaController::setupScanStateMachine()
 {
     m_pScanSuperState = new QState();
     m_pScanStartupState = new QState(m_pScanSuperState);
-    m_pScanState = new QState(m_pScanSuperState);
     m_pScanRecycleState = new QState(m_pScanSuperState);
+    m_pParkZSubState = new QState(m_pScanSuperState);
+    m_pGoXYStartSubState = new QState(m_pScanSuperState);
+    m_pGoZScanPositionSubState = new QState(m_pScanSuperState);
+    m_pScanColSubState = new QState(m_pScanSuperState);
     m_pScanShutdownState = new QState();
     m_pScanIdleState = new QState();
-    // scan sub states
-    m_pParkZSubState = new QState(m_pScanState);
-    m_pGoXYStartSubState = new QState(m_pScanState);
-    m_pIdleSubState = new QState(m_pScanState);
-    m_pGoZScanPositionSubState = new QState(m_pScanState);
-    m_pScanColSubState = new QState(m_pScanState);
 
-    // set super state machine initial state and add it to the state machine
-    m_pScanSuperState->setInitialState(m_pScanStartupState);
+    // set super state add it to the state machine
     m_scanStateMachine.addState(m_pScanSuperState);
-
-    // set scan state machine initial state and add it to the state machine
-    m_pScanState->setInitialState(m_pParkZSubState);
-    m_scanStateMachine.addState(m_pScanState);
 
     // add the rest of the states
     m_scanStateMachine.addState(m_pScanShutdownState);
     m_scanStateMachine.addState(m_pScanIdleState);
+    m_scanStateMachine.setInitialState(m_pScanIdleState);
 
-    // add transitions to and from the super state
+    // add transitions to and from the super state and idle and shutdown
     m_pScanSuperState->addTransition(this, SIGNAL(SSM_TransitionIdle()), m_pScanIdleState);
     m_pScanSuperState->addTransition(this, SIGNAL(SSM_TransitionShutdown()), m_pScanShutdownState);
-
-    // add transition to and from the scan state
-    m_pScanState->addTransition(this, SIGNAL(SSM_TransitionRecycle()), m_pScanRecycleState);
-    m_pScanRecycleState->addTransition(this, SIGNAL(SSM_TransitionScan()), m_pScanState);
-    m_pScanStartupState->addTransition(this, SIGNAL(SSM_TransitionScan()), m_pScanState);
-
-    m_pParkZSubState = new QState(m_pScanState);
-    m_pGoXYStartSubState = new QState(m_pScanState);
-    m_pIdleSubState = new QState(m_pScanState);
-    m_pGoZScanPositionSubState = new QState(m_pScanState);
-    m_pScanColSubState = new QState(m_pScanState);
+    m_pScanIdleState->addTransition(this, SIGNAL(SSM_TransitionStartup()), m_pScanStartupState);
+    m_pScanShutdownState->addTransition(this, SIGNAL(SSM_TransitionIdle()), m_pScanIdleState);
 
     // add the rest of the transitions
+    m_pScanRecycleState->addTransition(this, SIGNAL(SSM_TransitionGoXYSubstate()), m_pGoXYStartSubState);
+    m_pScanColSubState->addTransition(this, SIGNAL(SSM_TransitionParkZSubstate()), m_pParkZSubState);
+    m_pScanStartupState->addTransition(this, SIGNAL(SSM_TransitionParkZSubstate()), m_pParkZSubState);
     m_pParkZSubState->addTransition(this, SIGNAL(SSM_TransitionGoXYSubstate()), m_pGoXYStartSubState);
-    m_pParkZSubState->addTransition(this, SIGNAL(SSM_TransitionIdleSubstate()), m_pIdleSubState);
+    m_pParkZSubState->addTransition(this, SIGNAL(SSM_TransitionRecycle()), m_pScanRecycleState);
     m_pGoXYStartSubState ->addTransition(this, SIGNAL(SSM_TransitionGoZPositionSubstate()), m_pGoZScanPositionSubState);
-    m_pGoZScanPositionSubState->addTransition(this, SIGNAL(SSM_TransitionColSubstate()), m_pScanColSubState);
-    m_pScanColSubState->addTransition(this, SIGNAL(SSM_TransitionIdleSubstate()), m_pIdleSubState);
-
-    // set initial state
-    m_scanStateMachine.setInitialState(m_pScanIdleState);
+    m_pGoZScanPositionSubState->addTransition(this, SIGNAL(SSM_TransitionScanColSubstate()), m_pScanColSubState);
 
     // start the state machine
     m_scanStateMachine.start();
 }
+
+void PlasmaController::setupCollisionStateMachine()
+{
+    m_pCPgetZUpstate = new QState();
+    m_pCPStartupState = new QState();
+    m_pCPScanYState = new QState();
+    m_pCPGetZDownState = new QState();
+    m_pCPIdleState = new QState();
+    m_pCPShutdownState = new QState();
+
+    // add states
+    m_collisionStateMachine.addState(m_pCPgetZUpstate);
+    m_collisionStateMachine.addState(m_pCPStartupState);
+    m_collisionStateMachine.addState(m_pCPScanYState);
+    m_collisionStateMachine.addState(m_pCPGetZDownState);
+    m_collisionStateMachine.addState(m_pCPIdleState);
+    m_collisionStateMachine.addState(m_pCPShutdownState);
+    m_collisionStateMachine.setInitialState(m_pCPIdleState);
+
+    // add transitions
+    m_pCPIdleState->addTransition(this, SIGNAL(CSM_TransitionStartup()), m_pCPStartupState);
+    m_pCPShutdownState->addTransition(this, SIGNAL(CSM_TransitionShutdown()), m_pCPIdleState);
+    m_pCPStartupState->addTransition(this, SIGNAL(CSM_TransitionGetZUp()), m_pCPgetZUpstate);
+    m_pCPgetZUpstate->addTransition(this, SIGNAL(CSM_TransitionScanY()), m_pCPScanYState);
+    m_pCPScanYState->addTransition(this, SIGNAL(CSM_TransitionGetZDown()), m_pCPGetZDownState);
+    m_pCPGetZDownState ->addTransition(this, SIGNAL(SSM_TransitionGoZPositionSubstate()), m_pCPShutdownState);
+
+    m_collisionStateMachine.start();
+}
+
 
 bool PlasmaController::open(const SettingsDialog& settings)
 {
@@ -179,7 +204,125 @@ QString PlasmaController::formatSerialCommand(QString cmd, const QString& setpoi
     return cmd;
 }
 
+
 void PlasmaController::RunScanAxesSM()
+{
+    if (m_scanStateMachine.configuration().contains(m_pScanStartupState)) { // in Startup state
+//        HomeAxesBtn.Visible = False
+//        SetTwoSpotBtn.Visible = False
+//        SetDiameterBtn.Visible = False
+//        RunScanBtn.Text = "STOP"
+
+        // load scan variables
+        // translate from Displayed PH coords to moveable Base coords
+        double minXPerPH = m_stageCTL.TranslateCoordXPH2Base(m_pRecipe->getXmin());
+        double maxXPerPH = m_stageCTL.TranslateCoordXPH2Base(m_pRecipe->getXmax());
+
+        if (maxXPerPH > minXPerPH) { // because coord systems can be flipped
+            m_scanMaxXPos = maxXPerPH;
+            m_scanMinXPos = minXPerPH;
+        }
+        else {
+            m_scanMaxXPos = minXPerPH;
+            m_scanMinXPos = maxXPerPH;
+        }
+
+        double minYPerPH = m_stageCTL.TranslateCoordYPH2Base(m_pRecipe->getYmin());
+        double maxYPerPH = m_stageCTL.TranslateCoordYPH2Base(m_pRecipe->getYmax());
+
+        if (maxYPerPH > minYPerPH) { // because coord systems can be flipped
+            m_scanMaxYPos = maxYPerPH;
+            m_scanMinYPos = minYPerPH;
+        }
+        else {
+            m_scanMaxYPos = minYPerPH;
+            m_scanMinYPos = maxYPerPH;
+        }
+
+        m_scanZParkPos = m_stageCTL.getZPinsBuriedPos();
+        m_scanZScanPos = m_stageCTL.getZp2BaseDbl() - m_pRecipe->getThickness() - m_pRecipe->getGap();
+
+        // get the scan row info
+        m_scanRowXWidth = m_PHSlitWidth = m_pRecipe->getOverlap();
+        double xLengthRemaining = m_scanMaxXPos - m_scanMinXPos;
+        while (xLengthRemaining >= 0) {
+            m_numXRows += 1;
+            xLengthRemaining = xLengthRemaining - m_scanRowXWidth;
+        }
+
+        m_currentXRow = 1;
+        m_numCycles = m_pRecipe->getCyclesInt();
+        m_currentCycle = 1;
+
+        if (m_numXRows == 1) { // have small substrate case, center the head over the center of the Box X
+            m_startXPosition = (m_scanMaxXPos + m_scanMinXPos) / 2;
+        }
+        else { // multiple passes, so bias first pass to maximum edge
+            m_startXPosition = m_scanMaxXPos - (m_scanRowXWidth / 2);// start position offset to center of slit
+        }
+
+        m_startYPosition;
+        double m_scanYSpeed;
+        double m_scanEndYPosition;
+
+        // Y scan range from start to finish positions
+        m_startYPosition = m_scanMaxYPos + m_PHSlitWidth;
+        m_scanEndYPosition = m_scanMinYPos - m_PHSlitWidth;
+        m_scanYSpeed = m_pRecipe->getSpeed();
+
+        emit SSM_TransitionParkZSubstate();
+
+        Logger::logInfo("In Scan Startup State");
+
+    }
+    else if (m_scanStateMachine.configuration().contains(m_pParkZSubState)) { // in parkz substate
+
+        emit SSM_TransitionGoXYSubstate();
+
+        Logger::logInfo("In Park Z Substate");
+
+    }
+    else if (m_scanStateMachine.configuration().contains(m_pGoXYStartSubState)) { // in goXY start substate
+
+        emit SSM_TransitionGoZPositionSubstate();
+
+        Logger::logInfo("In Go XY Substate");
+
+    }
+    else if (m_scanStateMachine.configuration().contains(m_pGoZScanPositionSubState)) { // in goZScanPosition substate
+
+        emit SSM_TransitionScanColSubstate();
+
+        Logger::logInfo("In Go Z Scan  Substate");
+
+    }
+    else if (m_scanStateMachine.configuration().contains(m_pScanColSubState)) { // in ScanCol substate
+
+        emit SSM_TransitionParkZSubstate();
+
+        Logger::logInfo("In Scan Col Substate");
+
+    }
+    else if (m_scanStateMachine.configuration().contains(m_pScanRecycleState)) { // in ScanRecycle substate
+
+
+        Logger::logInfo("In Recycle Substate");
+
+    }
+    else if (m_scanStateMachine.configuration().contains(m_pScanShutdownState)) { // in Scan Shutdown state
+
+        Logger::logInfo("In Shutdown state");
+
+    }
+    else if (m_scanStateMachine.configuration().contains(m_pScanIdleState)) { // in idle state
+
+        Logger::logInfo("In Idle state");
+
+    }
+
+}
+
+void PlasmaController::RunCollisionSM()
 {
 
 }
@@ -402,8 +545,35 @@ void PlasmaController::CTLStartup()
     //getAutoMan();
     //getTemp();
     //turnOffExecRecipe();
+    getPHSlitLength();
+    getPHSlitWidth();
 
 //    setCTLStateMachinesIdle();
+}
+
+void PlasmaController::LaserSenseOn()
+{
+    sendCommand("$BA01%"); // WATCH_SUBST_SENSE $BA0p%; resp[!BA0p#] p = 0, 1 turn watch (OFF, ON)
+    readResponse();
+    Logger::logInfo("Laser Sensor Active");
+}
+
+void PlasmaController::LaserSenseOff()
+{
+    sendCommand("$BA00%"); //  'WATCH_SUBST_SENSE $BA0p%; resp[!BA0p#] p = 0, 1 turn watch (OFF, ON)
+    readResponse();
+    Logger::logInfo("Laser Sense Deactived");
+}
+
+void PlasmaController::PollForCollision()
+{
+    if (m_stageCTL.getXAxisError() == 8 || // TODO: replace with symbolic constants
+        m_stageCTL.getYAxisError() == 8 ||
+        m_stageCTL.getZAxisError() == 8) {
+
+        // a collision has been detected
+        m_bCollisionDetected = true;
+    }
 }
 
 void PlasmaController::howManyMFCs()
@@ -629,7 +799,6 @@ void PlasmaController::getMaxRFPowerForward() {
         Logger::logCritical("Could Not retrieve MFC 1 range, last requestData sent: " + getLastCommand());
 }
 
-
 void PlasmaController::getAutoMan() {
     sendCommand("$89%"); //GET_AUTO_MAN   $89%; resp [!890p#] p=1 AutoMode, p=0 ManualMode
     QString response = readResponse();
@@ -671,6 +840,38 @@ void PlasmaController::turnOffExecRecipe() {
     Logger::logInfo("Execute Recipe : Disabled");
 }
 
+void PlasmaController::getPHSlitLength()
+{
+    sendCommand("$DA540%"); //GET Plasma Head Slit Length (mm)  $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value
+    QString response = readResponse();
+    if (response.length() > 7) {
+        QString StrVar = response.mid(7, (response.length() - 8));
+        bool ok = false;
+        double PHSlitLength = StrVar.toDouble(&ok);
+        if (ok) {
+            m_PHSlitLength = PHSlitLength;
+            Logger::logInfo("Plasma Head Slit Length: " + StrVar + " (mm)");
+        }
+    }
+    else
+        Logger::logCritical("Could Not get Plasma head slit length, last requestData: " + getLastCommand());
+}
+void PlasmaController::getPHSlitWidth()
+{
+    sendCommand("$DA541%"); //GET Plasma Head Slit Width (mm)  $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value
+    QString response = readResponse();
+    if (response.length() > 7) {
+        QString StrVar = response.mid(7, (response.length() - 8));
+        bool ok = false;
+        double PHSlitWidth = StrVar.toDouble(&ok);
+        if (ok) {
+            m_PHSlitWidth = PHSlitWidth;
+            Logger::logInfo("Plasma Head Slit Width: " + StrVar + " (mm)");
+        }
+    }
+    else
+        Logger::logCritical("Could Not get Plasma head slit width, last requestData: " + getLastCommand());
+}
 
 
 

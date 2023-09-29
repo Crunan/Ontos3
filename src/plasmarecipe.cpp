@@ -6,9 +6,8 @@
 #include <QRegularExpression>
 
 
-PlasmaRecipe::PlasmaRecipe(PlasmaController* CTL, QObject* parent)
-    : QObject(parent),
-    CTL_(CTL),
+PlasmaRecipe::PlasmaRecipe(QObject* parent) :
+    QObject(parent),
     m_recipeMap(),
     m_cascadeRecipeList(),
     m_currentRecipeIndex(0),

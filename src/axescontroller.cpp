@@ -583,8 +583,8 @@ void AxesController::AxisStartup()
     getZp2Base();
     getXs2PH();
     getYs2PH();
-    getPHSlitLength();
-    getPHSlitWidth();
+    //getPHSlitLength();
+    //getPHSlitWidth();
     getPHSafetyZGap();
     getZPinsBuried();
     getZPinsExposed();
@@ -835,38 +835,7 @@ void AxesController::getYs2PH()
     else
         Logger::logCritical("Could Not get Y relative to Plasma head, last requestData: " + getLastCommand());
 }
-void AxesController::getPHSlitLength()
-{
-    sendCommand("$DA540%"); //GET Plasma Head Slit Length (mm)  $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value
-    QString response = readResponse();
-    if (response.length() > 7) {
-        QString StrVar = response.mid(7, (response.length() - 8));
-        bool ok = false;
-        double PHSlitLength = StrVar.toDouble(&ok);
-        if (ok) {
-            //plasmahead.setPlasmaHeadSlitLength(StrVar);
-            Logger::logInfo("Plasma Head Slit Length: " + StrVar + " (mm)");
-        }
-    }
-    else
-        Logger::logCritical("Could Not get Plasma head slit length, last requestData: " + getLastCommand());
-}
-void AxesController::getPHSlitWidth()
-{
-    sendCommand("$DA541%"); //GET Plasma Head Slit Width (mm)  $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value
-    QString response = readResponse();
-    if (response.length() > 7) {
-        QString StrVar = response.mid(7, (response.length() - 8));
-        bool ok = false;
-        double PHSlitWidth = StrVar.toDouble(&ok);
-        if (ok) {
-            //plasmahead.setPlasmaHeadSlitWidth(StrVar); // TODO
-            Logger::logInfo("Plasma Head Slit Width: " + StrVar + " (mm)");
-        }
-    }
-    else
-        Logger::logCritical("Could Not get Plasma head slit width, last requestData: " + getLastCommand());
-}
+
 void AxesController::getPHSafetyZGap()
 {
     sendCommand("$DA542%"); //GET Plasma Head Safety Gap $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value

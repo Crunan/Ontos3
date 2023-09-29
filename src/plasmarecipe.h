@@ -2,15 +2,13 @@
 #define PLASMARECIPE_H
 
 #include "filereader.h"
-#include "plasmacontroller.h"
-
 #include <QObject>
 
 class PlasmaRecipe : public QObject {
     Q_OBJECT
 
 public:
-    PlasmaRecipe(PlasmaController* CTL, QObject* parent = nullptr);
+    PlasmaRecipe(QObject* parent = nullptr);
     ~PlasmaRecipe();
 
     void setRecipeFromFile();
@@ -35,7 +33,7 @@ public:
     bool getAutoScanFlag() const { return m_autoScanFlag; }
 
     void setAutoScan(bool toggle) { m_autoScan = toggle; }
-    QString getAutoScan() const { return QString::number(m_autoScan); }
+    QString getAutoScanQStr() const { return QString::number(m_autoScan); }
     bool getAutoScanBool() const { return m_autoScan; }
 
     void setPurge(bool toggle) { m_N2PurgeRecipe = toggle; }
@@ -43,37 +41,44 @@ public:
     QString getPurgeQStr() const { return QString::number(m_N2PurgeRecipe); }
 
     void setCycles(int cycles) { m_cycles = cycles; }
-    QString getCycles() const { return QString::number(m_cycles); }
+    QString getCyclesQStr() const { return QString::number(m_cycles); }
     int getCyclesInt() const { return m_cycles; }
 
     void setSpeed(double speed) { m_speed = speed; }
-    QString getSpeed() const { return QString::number(m_speed); }
+    double getSpeed() { return m_speed; }
+    QString getSpeedQStr() const { return QString::number(m_speed); }
 
     void setOverlap(double overlap) { m_overlap = overlap; }
-    QString getOverlap() const { return QString::number(m_overlap); }
+    double getOverlap() { return m_overlap; }
+    QString getOverlapQStr() const { return QString::number(m_overlap); }
 
     void setGap(double gap) { m_gap = gap; }
-    QString getGap() const { return QString::number(m_gap); }
+    double getGap() { return m_gap; }
+    QString getGapQStr() const { return QString::number(m_gap); }
 
     void setThickness(double thickness) { m_thickness = thickness; }
-    QString getThickness() const { return QString::number(m_thickness); }
+    double getThickness() { return m_thickness; }
+    QString getThicknessQStr() const { return QString::number(m_thickness); }
 
     void setXmin(double xmin) { m_xMin = xmin; }
-    QString getXmin() const { return QString::number(m_xMin); }
+    double getXmin() { return m_xMin; }
+    QString getXminQStr() const { return QString::number(m_xMin); }
 
     void setXmax(double xmax) { m_xMax = xmax; }
-    QString getXmax() const { return QString::number(m_xMax); }
+    double getXmax() { return m_xMax; }
+    QString getXmaxQStr() const { return QString::number(m_xMax); }
 
     void setYmin(double ymin) { m_yMin = ymin; }
-    QString getYmin() const { return QString::number(m_yMin); }
+    double getYmin() { return m_yMin; }
+    QString getYminQStr() const { return QString::number(m_yMin); }
 
     void setYmax(double ymax) { m_yMax = ymax; }
-    QString getYmax() const { return QString::number(m_yMax); }
+    double getYmax() { return m_yMax; }
+    QString getYmaxQStr() const { return QString::number(m_yMax); }
 
     FileReader fileReader;
 
 private:
-    PlasmaController* CTL_;
     QMap<QString, QVariant> m_recipeMap;
     QList<QString> m_cascadeRecipeList;
     int m_currentRecipeIndex;

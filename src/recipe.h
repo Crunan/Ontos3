@@ -24,8 +24,8 @@ public:
     QString getPurgeQStr() const { return QString::number(m_N2PurgeRecipe); }
 
     void setCycles(int cycles) { m_cycles = cycles; }
-    QString getCycles() { return QString::number(m_cycles); }
-    int getCyclesInt() { return m_cycles; }
+    QString getCyclesQStr() { return QString::number(m_cycles); }
+    int getCycles() { return m_cycles; }
 
     void setSpeed(double speed) { m_speed = speed; }
     QString getSpeed() { return QString::number(m_speed); }

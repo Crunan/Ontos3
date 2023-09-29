@@ -1,6 +1,7 @@
 #ifndef PLASMACONTROLLER_H
 #define PLASMACONTROLLER_H
 
+#include "plasmarecipe.h"
 #include "axescontroller.h"
 #include "commandmap.h"
 #include "configuration.h"
@@ -11,10 +12,10 @@
 #include "mfc.h"
 #include "settingsdialog.h"
 
+
 #include <QObject>
 #include <vector>
 #include <memory>
-#include <QSerialPort>
 
 class PlasmaController : public QObject
 {
@@ -58,6 +59,7 @@ public:
     SerialInterface* getSerialInterface() { return m_pSerialInterface; }
 
     void RunScanAxesSM();
+    void RunCollisionSM();
 
     // axes controller wrappers
     AxesController& getAxesController() { return this->m_stageCTL; }
@@ -82,22 +84,49 @@ public:
     double TranslateCoordZPH2Base(double Zpos) {  return m_stageCTL.TranslateCoordZPH2Base(Zpos); }
     QString getXMaxSpeedQStr() {  return m_stageCTL.getXMaxSpeedQStr(); }
     double XMaxSpeed() {  return m_stageCTL.XMaxSpeed(); }
-
     void StartInit() {  m_stageCTL.StartInit(); }
     void StartTwoSpot() {  m_stageCTL.StartTwoSpot(); }
     void StopTwoSpot() {  m_stageCTL.StopTwoSpot(); }
     void StartHome() {  m_stageCTL.StartHome(); }
     void StopHome() {  m_stageCTL.StopHome(); }
-
     void togglePinsOn() {  m_stageCTL.togglePinsOn(); }
     void togglePinsOff() {  m_stageCTL.togglePinsOff(); }
     void toggleN2PurgeOn() {  m_stageCTL.toggleN2PurgeOn(); }
     void toggleN2PurgeOff() {  m_stageCTL.toggleN2PurgeOff(); }
-
     void toggleJoystickOn() {  m_stageCTL.toggleJoystickOn(); }
     void toggleJoystickOff() {  m_stageCTL.toggleJoystickOff(); }
     void toggleVacOn() {  m_stageCTL.toggleVacOn(); }
     void toggleVacOff() {  m_stageCTL.toggleVacOff(); }
+
+    // Recipe wrappers
+    PlasmaRecipe *getRecipe() { return m_pRecipe; }
+
+    void setRecipe(QString filePath) {
+        m_pRecipe->fileReader.setFilePath(filePath);
+        m_pRecipe->setRecipeFromFile();
+    }
+
+    QMap<QString, QVariant> getRecipeMap() { return m_pRecipe->getRecipeMap(); }
+    void addRecipeToCascade(QString fileName) { m_pRecipe->addRecipeToCascade(fileName); }
+    void removeRecipeFromCascade(QString fileName) { m_pRecipe->removeRecipeFromCascade(fileName); }
+    QList<QString>  getCascadeRecipeList() { return m_pRecipe->getCascadeRecipeList(); }
+    void setRecipeThickness(double thickness) { m_pRecipe->setThickness(thickness); }
+    QString getRecipeThicknessQStr() const { return m_pRecipe->getThicknessQStr(); }
+    void setRecipeGap(double gap) { m_pRecipe->setGap(gap); }
+    QString getRecipeGapQStr() const { return m_pRecipe->getGapQStr(); }
+    void setRecipeOverlap(double overlap) { m_pRecipe->setOverlap(overlap); }
+    QString getRecipeOverlapQStr() const { return m_pRecipe->getOverlapQStr(); }
+    void setRecipeSpeed(double speed) { m_pRecipe->setSpeed(speed); }
+    QString getRecipeSpeedQStr() const { return m_pRecipe->getSpeedQStr(); }
+    void setRecipeCycles(int cycles) { m_pRecipe->setCycles(cycles); }
+    QString getRecipeCyclesQStr() const { return m_pRecipe->getCyclesQStr(); }
+
+    void StartScan() { emit SSM_TransitionStartup(); }
+    void StopScan() { emit SSM_TransitionShutdown(); }
+
+    void LaserSenseOn();
+    void LaserSenseOff();
+    void PollForCollision(); // sets the m_bCollisionDetected flag
 
     // query the controller
     void howManyMFCs();
@@ -116,12 +145,13 @@ public:
     void getAutoMan();
     void getTemp();
     void turnOffExecRecipe();
+    void getPHSlitLength();
+    void getPHSlitWidth();
 
     Tuner m_tuner;
     PlasmaHead m_plasmaHead;
     PWR m_pwr;
     QList<MFC*> m_mfcs; // Store the MFCs in a list
-
 
 signals:
     void responseReceived(const QString& response);
@@ -135,15 +165,23 @@ signals:
     void MFC1RecipeFlow(QString recipeFlow);
     void plasmaHeadTemp(double m_headTemp);
 
+    // scan state machine transitions
+    void SSM_TransitionStartup();
     void SSM_TransitionIdle();
     void SSM_TransitionShutdown();
-    void SSM_TransitionScanSuper();
     void SSM_TransitionRecycle();
-    void SSM_TransitionScan();
-    void SSM_TranitionGoXYSub();
-    void SSM_TransitionIdleSub();
-    void SSM_TransitionGoZSub();
-    void SSM_TransitionScanColSub();
+    void SSM_TransitionParkZSubstate();
+    void SSM_TransitionGoXYSubstate();
+    void SSM_TransitionGoZPositionSubstate();
+    void SSM_TransitionScanColSubstate();
+
+    // collision state machine transitions
+    void CSM_TransitionStartup();
+    void CSM_TransitionIdle();
+    void CSM_TransitionShutdown();
+    void CSM_TransitionGetZUp();
+    void CSM_TransitionScanY();
+    void CSM_TransitionGetZDown();
 
 public slots:
     // MFCs
@@ -167,6 +205,7 @@ public slots:
 private:
     QString getLastCommand() { return m_pSerialInterface->getLastCommand(); }
     void setupScanStateMachine();
+    void setupCollisionStateMachine();
 
     SerialInterface *m_pSerialInterface;
     LEDStatus m_ledStatus;
@@ -174,8 +213,9 @@ private:
     Configuration m_config;
     CommandMap m_commandMap;
     AxesController m_stageCTL;
+    PlasmaRecipe *m_pRecipe;
 
-    // home axes state machine
+    // scan state machine
     QStateMachine m_scanStateMachine;
     QState *m_pScanSuperState;
     QState *m_pScanStartupState;
@@ -189,6 +229,45 @@ private:
     QState *m_pScanShutdownState;
     QState *m_pScanIdleState;
 
+    // collision state machine
+    QStateMachine m_collisionStateMachine;
+    QState *m_pCPgetZUpstate;
+    QState *m_pCPStartupState;
+    QState *m_pCPScanYState;
+    QState *m_pCPGetZDownState;
+    QState *m_pCPIdleState;
+    QState *m_pCPShutdownState;
+
+    // laser state machine
+    QStateMachine m_laserStateMachine;
+    QState *m_pLaserTrippedstate;
+    QState *m_pLaserActivateState;
+    QState *m_pLaserDeactivateState;
+    QState *m_pLaserIdleState;
+
+    double m_scanMinXPos;
+    double m_scanMaxXPos;
+    double m_scanMinYPos;
+    double m_scanMaxYPos;
+    double m_scanZParkPos;
+    double m_scanZScanPos;
+    double m_scanRowXWidth;
+    double m_PHSlitLength;
+    double m_PHSlitWidth;
+    int m_numXRows;
+    int m_currentXRow;
+    int m_numCycles;
+    int m_currentCycle;
+    double m_startXPosition;
+    double m_startYPosition;
+    double m_scanYSpeed;
+    double m_scanEndYPosition;
+
+    double m_XMaxPos;
+    double m_XMinPos;
+    double m_YMaxPos;
+    double m_YMinPos;
+
     int m_numMFCs;
     int m_batchLogging;
     bool m_readyToLoad;
@@ -197,6 +276,8 @@ private:
     int m_MaxRFPowerForward;
     int m_autoTune;
     double m_headTemp;
+
+    bool m_bCollisionDetected;
 };
 
 #endif // PLASMACONTROLLER_H

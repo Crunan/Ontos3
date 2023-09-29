@@ -54,6 +54,8 @@ public:
     int getYAxisState() { return m_Yaxis.getCurrentState(); }
     int getZAxisState() { return m_Zaxis.getCurrentState(); }
 
+    double getZPinsBuriedPos() { return m_stage.getPinsBuriedPos(); }
+
     void AxisStartup();
 
     QString getXMaxSpeedQStr() { return m_Xaxis.getMaxSpeedQStr(); }
@@ -74,8 +76,6 @@ public:
     void getZp2Base();
     void getXs2PH();
     void getYs2PH();
-    void getPHSlitLength();
-    void getPHSlitWidth();
     void getPHSafetyZGap();
     void getZPinsBuried();
     void getZPinsExposed();
@@ -91,6 +91,10 @@ public:
     double getXPosition() const { return m_Xaxis.getPosition(); }
     double getYPosition() const { return m_Yaxis.getPosition(); }
     double getZPosition() const { return m_Zaxis.getPosition(); }
+    int getXAxisError() const { return m_Xaxis.getError(); }
+    int getYAxisError() const { return m_Yaxis.getError(); }
+    int getZAxisError() const { return m_Zaxis.getError(); }
+
 
     //translate displayed PH X,Y,Z to the Base PH X,Y,Z (for motor moves)
     double TranslateCoordXPH2Base(double x) { return (m_Xp2Base - x); }
@@ -100,6 +104,7 @@ public:
 
     double getYs2PHval() { return m_Ys2PH; }
     double getXPH2Base() { return m_Xp2Base; }
+    double getZp2BaseDbl() { return m_Zp2Base; }
 
     void resetAxes();
 
