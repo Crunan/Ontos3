@@ -14,10 +14,40 @@ PlasmaController::PlasmaController(QWidget* parent)
     m_pSerialInterface(new SerialInterface()),
     m_ledStatus(),
     m_executeRecipe(0),
-    m_numMFCs(0),
     m_readyToLoad(false),
     m_MBtunerRecipeSP(false),
-    m_RFtunerRecipeSP(false)
+    m_RFtunerRecipeSP(false),
+    m_scanMinXPos(0.0),
+    m_scanMaxXPos(0.0),
+    m_scanMinYPos(0.0),
+    m_scanMaxYPos(0.0),
+    m_scanZParkPos(0.0),
+    m_scanZScanPos(0.0),
+    m_scanRowXWidth(0.0),
+    m_PHSlitLength(0.0),
+    m_PHSlitWidth(0.0),
+    m_numXRows(0),
+    m_currentXRow(0),
+    m_numCycles(0),
+    m_currentCycle(0),
+    m_startXPosition(0.0),
+    m_startYPosition(0.0),
+    m_scanYSpeed(0.0),
+    m_scanEndYPosition(0.0),
+    m_XMaxPos(0.0),
+    m_XMinPos(0.0),
+    m_YMaxPos(0.0),
+    m_YMinPos(0.0),
+    m_numMFCs(0),
+    m_batchLogging(0),
+    m_MaxRFPowerForward(0),
+    m_autoTune(0),
+    m_headTemp(0.0),
+    m_collisionDetected(false),
+    m_collisionPassed(false),
+    m_bRunRecipe(false), //Turn plasma on
+    m_plannedAutoStart(false),
+    m_bPlasmaActive(false)
 {
     // Add startup data gathering methods.
     for (MFC* mfc: m_mfcs) {
@@ -93,9 +123,12 @@ void PlasmaController::setupScanStateMachine()
     m_scanStateMachine.setInitialState(m_pScanIdleState);
 
     // add transitions to and from the super state and idle and shutdown
+
+    m_pScanSuperState->addTransition(this, SIGNAL(AxesController::SSM_TransitionIdle()), m_pScanIdleState);
     m_pScanSuperState->addTransition(this, SIGNAL(SSM_TransitionIdle()), m_pScanIdleState);
     m_pScanSuperState->addTransition(this, SIGNAL(SSM_TransitionShutdown()), m_pScanShutdownState);
     m_pScanIdleState->addTransition(this, SIGNAL(SSM_TransitionStartup()), m_pScanStartupState);
+    m_pScanShutdownState->addTransition(this, SIGNAL(SSM_TransitionIdle()), m_pScanIdleState);
     m_pScanShutdownState->addTransition(this, SIGNAL(SSM_TransitionIdle()), m_pScanIdleState);
 
     // add the rest of the transitions
@@ -105,7 +138,7 @@ void PlasmaController::setupScanStateMachine()
     m_pParkZSubState->addTransition(this, SIGNAL(SSM_TransitionGoXYSubstate()), m_pGoXYStartSubState);
     m_pParkZSubState->addTransition(this, SIGNAL(SSM_TransitionRecycle()), m_pScanRecycleState);
     m_pGoXYStartSubState ->addTransition(this, SIGNAL(SSM_TransitionGoZPositionSubstate()), m_pGoZScanPositionSubState);
-    m_pGoZScanPositionSubState->addTransition(this, SIGNAL(SSM_TransitionScanColSubstate()), m_pScanColSubState);
+    m_pGoZScanPositionSubState->addTransition(this, SIGNAL(AxesController::SSM_TransitionIdle()), m_pScanColSubState);
 
     // start the state machine
     m_scanStateMachine.start();
@@ -280,7 +313,7 @@ void PlasmaController::RunScanAxesSM()
         }
         else {
             emit SSM_TransitionParkZSubstate(); // scan state machine to park z
-            emit SSM_StatusUpdate("Scanning"); // update ui
+            emit SSM_StatusUpdate("Scanning", ""); // update ui
         }
 
         emit SSM_TransitionParkZSubstate();
@@ -290,12 +323,34 @@ void PlasmaController::RunScanAxesSM()
     }
     else if (m_scanStateMachine.configuration().contains(m_pParkZSubState)) { // in parkz substate
 
-        emit SSM_TransitionGoXYSubstate();
-
-        Logger::logInfo("In Park Z Substate");
+        if (m_stageCTL.nextStateReady()) {
+            if (m_currentXRow > m_numXRows) {
+                emit SSM_TransitionRecycle();
+                QString message = "End Cycle #" + QString::number(m_currentCycle) + " of " + QString::number(m_numCycles);
+                Logger::logInfo(message);
+                emit SSM_StatusUpdate("Scanning", message); // update ui
+            }
+            else {
+                 emit SSM_TransitionGoXYSubstate();
+                 QString message = "Parking Z";
+                 Logger::logInfo(message);
+                 emit SSM_StatusUpdate("Scanning", message); // update ui
+            }
+            // turn off Substrate N2 Purge (assume it's on)
+            toggleN2PurgeOff();
+            QString command = "$B402" + m_pRecipe->getSpeedQStr() + "%";
+            sendCommand(command); //SET_SPEED  $B40xss.ss%; resp [!B40xss.ss#] 0x = axis number, ss.ss = mm/sec (float)
+            readResponse();
+            QString logStr = "Move Z Speed: " + m_pRecipe->getSpeedQStr() + " /sec ";
+            command = "$B602" + QString::number(m_scanZParkPos, 'f', 2) + "%";
+            sendCommand(command); // ABS_MOVE $B60xaa.aa%; resp [!B60xaa.aa#] 0x = axis num, aa.aa = destination in mm (float)
+            readResponse();
+            Logger::logInfo(logStr + "to " + QString::number(m_scanZParkPos, 'f', 2));
+        }
 
     }
     else if (m_scanStateMachine.configuration().contains(m_pGoXYStartSubState)) { // in goXY start substate
+        if (m_stageCTL.nextStateReady()) {}
 
         emit SSM_TransitionGoZPositionSubstate();
 
@@ -303,6 +358,7 @@ void PlasmaController::RunScanAxesSM()
 
     }
     else if (m_scanStateMachine.configuration().contains(m_pGoZScanPositionSubState)) { // in goZScanPosition substate
+        if (m_stageCTL.nextStateReady()) {}
 
         emit SSM_TransitionScanColSubstate();
 
@@ -310,6 +366,7 @@ void PlasmaController::RunScanAxesSM()
 
     }
     else if (m_scanStateMachine.configuration().contains(m_pScanColSubState)) { // in ScanCol substate
+        if (m_stageCTL.nextStateReady()) {}
 
         emit SSM_TransitionParkZSubstate();
 
@@ -342,7 +399,7 @@ void PlasmaController::RunCollisionSM()
         LaserSenseOn();
         Logger::logInfo("-------------Collision Pass Start-Up--------------");
 
-        emit CSM_StatusUpdate("Collision Test");
+        emit CSM_StatusUpdate("Collision Test", "");
 
         if (m_bPlasmaActive) {
             m_bRunRecipe = true;
@@ -403,7 +460,7 @@ void PlasmaController::RunCollisionSM()
 
         if (m_stageCTL.nextStateReady()) {
 
-            emit CSM_StatusUpdate("Scanning");
+            emit CSM_StatusUpdate("Scanning", "");
 
             LaserSenseOff();
             m_collisionPassed = true;
@@ -644,11 +701,31 @@ void PlasmaController::CTLStartup()
     getMaxRFPowerForward();
     getAutoMan();
     getTemp();
-    //turnOffExecRecipe();
+    turnOffExecRecipe();
     getPHSlitLength();
     getPHSlitWidth();
 
 //    setCTLStateMachinesIdle();
+}
+
+void PlasmaController::resetCTL()
+{
+    sendCommand("$90%");
+    readResponse();
+}
+
+void PlasmaController::turnOnExecRecipe() {
+    sendCommand("$8701%"); //SET_EXEC_RECIPE  $870p% p=1 Execute Recipe, p=0 RF off, Recipe off
+    readResponse();
+    Logger::logInfo("Execute Recipe : Enabled");
+    emit recipeExecutionStateChanged(true);
+}
+
+void PlasmaController::turnOffExecRecipe() {
+    sendCommand("$8700%"); //SET_EXEC_RECIPE  $870p% p=1 Execute Recipe, p=0 RF off, Recipe off
+    readResponse();
+    Logger::logInfo("Execute Recipe : Disabled");
+    emit recipeExecutionStateChanged(false);
 }
 
 void PlasmaController::LaserSenseOn()
@@ -931,13 +1008,6 @@ void PlasmaController::getTemp() {
         else
             Logger::logCritical("Could Not retrieve temperature, last requestData sent: " + getLastCommand() );
     }
-}
-
-void PlasmaController::turnOffExecRecipe() {
-    sendCommand("$8700%"); //SET_EXEC_RECIPE  $870p% p=1 Execute Recipe, p=0 RF off, Recipe off
-    readResponse();
-    //ui->plsmaBtn->setText("START PLASMA"); // TODO
-    Logger::logInfo("Execute Recipe : Disabled");
 }
 
 void PlasmaController::getPHSlitLength()

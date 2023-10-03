@@ -52,6 +52,8 @@ public:
 
 
     void CTLStartup();
+    void resetCTL();
+
 
     SerialInterface* getSerialInterface() { return m_pSerialInterface; }
 
@@ -128,6 +130,7 @@ public:
     void getMaxRFPowerForward();
     void getAutoMan();
     void getTemp();
+    void turnOnExecRecipe();
     void turnOffExecRecipe();
     void getPHSlitLength();
     void getPHSlitWidth();
@@ -160,7 +163,7 @@ signals:
     void SSM_TransitionScanColSubstate();
     // scan state machine signals
     void SSM_Started();
-    void SSM_StatusUpdate(QString status);
+    void SSM_StatusUpdate(QString status, QString next);
 
     // collision state machine transitions
     void CSM_TransitionStartup();
@@ -170,7 +173,9 @@ signals:
     void CSM_TransitionScanY();
     void CSM_TransitionGetZDown();
     // collision state machine status
-    void CSM_StatusUpdate(QString status);
+    void CSM_StatusUpdate(QString status, QString next);
+
+    void recipeExecutionStateChanged(bool state);
 
 public slots:
     // MFCs

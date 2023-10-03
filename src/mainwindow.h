@@ -8,7 +8,6 @@
 #include "mainloop.h"
 #include "commandfilereader.h"
 #include "settingsdialog.h"
-#include "recipe.h"
 #include "logger.h"
 #include "plasmacontroller.h"
 #include "stagewidget.h"
@@ -94,9 +93,10 @@ public slots:
     void joystickStateChanged(bool state);
     void n2StateChanged(bool state);
     void vacStateChanged(bool state);
-    void CSM_StatusUpdate(QString status);
+    void CSM_StatusUpdate(QString status, QString next);
     void SSM_Started();
-    void SSM_StatusUpdate(QString status);
+    void SSM_StatusUpdate(QString status, QString next);
+    void recipeExecutionStateChanged(bool state);
 
 private slots:
     // button handlers

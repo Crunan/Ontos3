@@ -5,7 +5,6 @@
 #include <QFileDialog>
 #include <QTextStream>
 #include <QDebug>
-#include "axiscontroller.h"
 
 int SM_PollCounter = 0;
 const int SM_POLL_PERIOD = 5;
@@ -46,6 +45,7 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(&m_mainCTL.getAxesController(), &AxesController::n2StateChanged, this, &MainWindow::n2StateChanged);
     connect(&m_mainCTL.getAxesController(), &AxesController::vacStateChanged, this, &MainWindow::vacStateChanged);
 
+    connect(&m_mainCTL, &PlasmaController::recipeExecutionStateChanged, this, &MainWindow::recipeExecutionStateChanged);
     connect(&m_mainCTL, &PlasmaController::SSM_StatusUpdate, this, &MainWindow::SSM_StatusUpdate);
     connect(&m_mainCTL, &PlasmaController::SSM_Started, this, &MainWindow::SSM_Started);
     connect(&m_mainCTL, &PlasmaController::CSM_StatusUpdate, this, &MainWindow::CSM_StatusUpdate);
@@ -269,7 +269,7 @@ void MainWindow::initStateMachineDone()
     ui->init_button_dup->setChecked(false);
 }
 
-void MainWindow::twoSpotStateMachineStartup()//    m_scanStateMachine.addState(m_pScanState);
+void MainWindow::twoSpotStateMachineStartup()
 {
     ui->twospot_button->setText("STOP");
 
@@ -335,7 +335,7 @@ void MainWindow::openMainPort()
         m_pMainCTLConsole->setLocalEchoEnabled(p.localEchoEnabled);
 
         m_mainCTL.resetAxes();
-        //resetCTL(); // TODO:  Needs implementing
+        m_mainCTL.resetCTL();
         CTLResetTimeOut = 2500ms / m_pMainLoop->getTimerInterval();
         //(DEBUG_MODE) ? MainStateMachine.setState(IDLE) : MainStateMachine.setState(STARTUP); // TODO: Needs implementing
 
@@ -603,9 +603,12 @@ void MainWindow::plasmaHeadTemp(double temp)
     ui->Temp_bar->setValue(int(temp));
 }
 
-void MainWindow::CSM_StatusUpdate(QString status)
+void MainWindow::CSM_StatusUpdate(QString status, QString next)
 {
     ui->axisstatus->setText(status);
+    ui->axisstatus_dup->setText(next);
+    ui->axisstatus_2->setText(status);
+    ui->axisstatus_2_dup->setText(next);
 }
 
 void MainWindow::SSM_Started()
@@ -620,9 +623,24 @@ void MainWindow::SSM_Started()
     ui->scan_button_dup->setText("STOP");
 }
 
-void MainWindow::SSM_StatusUpdate(QString status)
+void MainWindow::recipeExecutionStateChanged(bool state)
+{
+    if (state == true) {
+        ui->plsmaBtn->setText("PLASMA OFF");
+        ui->plsmaBtn_dup->setText("PLASMA OFF");
+    }
+    else {
+        ui->plsmaBtn->setText("START PLASMA");
+        ui->plsmaBtn_dup->setText("START PLASMA");
+    }
+}
+
+void MainWindow::SSM_StatusUpdate(QString status, QString next)
 {
     ui->axisstatus->setText(status);
+    ui->axisstatus_dup->setText(next);
+    ui->axisstatus_2->setText(status);
+    ui->axisstatus_2_dup->setText(next);
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -1159,7 +1177,6 @@ void MainWindow::on_vac_button_toggled(bool checked)
 // plasma button on dashboard
 void MainWindow::on_plsmaBtn_toggled(bool checked)
 {
-
     if (checked) {
         m_mainCTL.StopScan();
     }

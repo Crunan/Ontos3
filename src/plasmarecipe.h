@@ -33,12 +33,10 @@ public:
     bool getAutoScanFlag() const { return m_autoScanFlag; }
 
     void setAutoScan(bool toggle) { m_autoScan = toggle; }
-    QString getAutoScanQStr() const { return QString::number(m_autoScan); }
     bool getAutoScanBool() const { return m_autoScan; }
 
     void setPurge(bool toggle) { m_N2PurgeRecipe = toggle; }
     bool getPurge() const { return m_N2PurgeRecipe; }
-    QString getPurgeQStr() const { return QString::number(m_N2PurgeRecipe); }
 
     void setCycles(int cycles) { m_cycles = cycles; }
     QString getCyclesQStr() const { return QString::number(m_cycles); }
@@ -46,35 +44,35 @@ public:
 
     void setSpeed(double speed) { m_speed = speed; }
     double getSpeed() { return m_speed; }
-    QString getSpeedQStr() const { return QString::number(m_speed); }
+    QString getSpeedQStr() const { return QString::number(m_speed, 'f', 2); }
 
     void setOverlap(double overlap) { m_overlap = overlap; }
     double getOverlap() { return m_overlap; }
-    QString getOverlapQStr() const { return QString::number(m_overlap); }
+    QString getOverlapQStr() const { return QString::number(m_overlap, 'f', 2); }
 
     void setGap(double gap) { m_gap = gap; }
     double getGap() { return m_gap; }
-    QString getGapQStr() const { return QString::number(m_gap); }
+    QString getGapQStr() const { return QString::number(m_gap, 'f', 2); }
 
     void setThickness(double thickness) { m_thickness = thickness; }
     double getThickness() { return m_thickness; }
-    QString getThicknessQStr() const { return QString::number(m_thickness); }
+    QString getThicknessQStr() const { return QString::number(m_thickness, 'f', 2); }
 
     void setXmin(double xmin) { m_xMin = xmin; }
     double getXmin() { return m_xMin; }
-    QString getXminQStr() const { return QString::number(m_xMin); }
+    QString getXminQStr() const { return QString::number(m_xMin, 'f', 2); }
 
     void setXmax(double xmax) { m_xMax = xmax; }
     double getXmax() { return m_xMax; }
-    QString getXmaxQStr() const { return QString::number(m_xMax); }
+    QString getXmaxQStr() const { return QString::number(m_xMax, 'f', 2); }
 
     void setYmin(double ymin) { m_yMin = ymin; }
     double getYmin() { return m_yMin; }
-    QString getYminQStr() const { return QString::number(m_yMin); }
+    QString getYminQStr() const { return QString::number(m_yMin, 'f', 2); }
 
     void setYmax(double ymax) { m_yMax = ymax; }
     double getYmax() { return m_yMax; }
-    QString getYmaxQStr() const { return QString::number(m_yMax); }
+    QString getYmaxQStr() const { return QString::number(m_yMax, 'f', 2); }
 
     FileReader fileReader;
 

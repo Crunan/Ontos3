@@ -144,6 +144,9 @@ signals:
     void TSSM_TransitionIdle();
     void TSSM_TransitionStartup();
 
+    // scan state machine to idle
+    void SSM_TransitionIdle();
+
     /*/ update ui
     void currentStatusChanged();
     void axisStatusChanged();

@@ -4,7 +4,6 @@
 #include <QString>
 #include "logger.h"
 #include <QTimer>
-#include "recipe.h"
 
 const int AUX_INPUT_BUFFER_MAX_SIZE = 90;
 const int SERIAL_RESPONSE_TIMEOUT = 2000; // timeout waiting for control pcb response (milliseconds)
@@ -25,11 +24,11 @@ AxesController::AxesController(QObject *parent) :
     m_sameStateXYZ(false),
     m_joystickOn(false),
     m_joyButtonOn(false),
-    m_Xp2Base(0),
-    m_Yp2Base(0),
-    m_Zp2Base(0),
-    m_Xs2PH(0),
-    m_Ys2PH(0)
+    m_Xp2Base(0.0),
+    m_Yp2Base(0.0),
+    m_Zp2Base(0.0),
+    m_Xs2PH(0.0),
+    m_Ys2PH(0.0)
 {
     SetupInitAxesStateMachine();
     SetupHomeAxesStateMachine();
@@ -225,10 +224,9 @@ void AxesController::RunInitAxesSM()
     if (m_initStateMachine.configuration().contains(m_pInitAxesStartupState)) { // in Startup state
 
         //SM set to idle
-        emit TSSM_TransitionIdle();
-        emit HSM_TransitionIdle();
-        //ScanSM.setState(SASM_IDLE); // TODO: need to implement
-        //ScanSM.setSubState(SSSM_IDLE); // TODO: need to implement
+        emit TSSM_TransitionIdle(); // two spot state machine to idle
+        emit HSM_TransitionIdle(); // home state machine to idel
+        emit SSM_TransitionIdle(); // scan state machine to idle
 
         //send commands
         stopMotors();
