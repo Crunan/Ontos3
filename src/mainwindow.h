@@ -90,6 +90,14 @@ public slots:
     void MFC1RecipeFlow(QString recipeFlow);
     void plasmaHeadTemp(double temp);
 
+    void pinsStateChanged(bool state);
+    void joystickStateChanged(bool state);
+    void n2StateChanged(bool state);
+    void vacStateChanged(bool state);
+    void CSM_StatusUpdate(QString status);
+    void SSM_Started();
+    void SSM_StatusUpdate(QString status);
+
 private slots:
     // button handlers
     void on_init_button_clicked();
@@ -116,6 +124,10 @@ private slots:
     void on_scan_button_dup_toggled(bool checked);
     void on_scan_button_toggled(bool checked);
 
+
+    void on_plsmaBtn_toggled(bool checked);
+
+    void on_plsmaBtn_dup_toggled(bool checked);
 
 private:
     // Action Button methods

@@ -958,6 +958,7 @@ void AxesController::togglePinsOn()
     sendCommand(StrCmd);
     QString response = readResponse();
     Logger::logInfo("Stage Pins : enabled");
+    emit pinsStateChanged(true);
 }
 void AxesController::togglePinsOff()
 {
@@ -967,6 +968,7 @@ void AxesController::togglePinsOff()
     sendCommand(StrCmd);
     QString response = readResponse();
     Logger::logInfo("Stage Pins : disabled");
+    emit pinsStateChanged(false);
 }
 
 void AxesController::toggleJoystickOn()
@@ -975,6 +977,7 @@ void AxesController::toggleJoystickOn()
     readResponse();
     Logger::logInfo("Joystick : enabled");
     m_joystickOn = true;
+    emit joystickStateChanged(true);
 }
 
 void AxesController::toggleJoystickOff()
@@ -983,6 +986,7 @@ void AxesController::toggleJoystickOff()
     readResponse();
     Logger::logInfo("Joystick : disabled");
     m_joystickOn = false;
+    emit joystickStateChanged(false);
 }
 
 void AxesController::toggleN2PurgeOn()
@@ -990,12 +994,14 @@ void AxesController::toggleN2PurgeOn()
     sendCommand("$C701%"); //SET_VALVE_2 $C70n% resp[!C70n#] n = 0, 1 (off, on)
     readResponse();
     Logger::logInfo("N2 on");
+    emit n2StateChanged(true);
 }
 void AxesController::toggleN2PurgeOff()
 {
     sendCommand("$C700%"); //SET_VALVE_2 $C70n% resp[!C70n#] n = 0, 1 (off, on)
     readResponse();
     Logger::logInfo("N2 off");
+    emit n2StateChanged(false);
 }
 
 void AxesController::toggleVacOn()
@@ -1003,6 +1009,7 @@ void AxesController::toggleVacOn()
     sendCommand("$C801%"); //SET_VALVE_3 $C80n% resp[!C80n#] n =0, 1 (off, on)
     readResponse();
     Logger::logInfo("Vac on");
+    emit vacStateChanged(true);
 }
 
 void AxesController::toggleVacOff()
@@ -1010,5 +1017,6 @@ void AxesController::toggleVacOff()
     sendCommand("$C800%"); //SET_VALVE_3 $C80n% resp[!C80n#] n =0, 1 (off, on)
     readResponse();
     Logger::logInfo("Vac off");
+    emit vacStateChanged(false);
 }
 

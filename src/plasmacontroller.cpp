@@ -208,10 +208,8 @@ QString PlasmaController::formatSerialCommand(QString cmd, const QString& setpoi
 void PlasmaController::RunScanAxesSM()
 {
     if (m_scanStateMachine.configuration().contains(m_pScanStartupState)) { // in Startup state
-//        HomeAxesBtn.Visible = False
-//        SetTwoSpotBtn.Visible = False
-//        SetDiameterBtn.Visible = False
-//        RunScanBtn.Text = "STOP"
+
+        emit SSM_Started();
 
         // load scan variables
         // translate from Displayed PH coords to moveable Base coords
@@ -270,6 +268,21 @@ void PlasmaController::RunScanAxesSM()
         m_scanEndYPosition = m_scanMinYPos - m_PHSlitWidth;
         m_scanYSpeed = m_pRecipe->getSpeed();
 
+        Logger::logInfo("-------------Scan Start-Up--------------");
+        Logger::logInfo("Display MIN:(" + QString::number(m_scanMinXPos) + " , " + QString::number(m_scanMinYPos) + ") MAX:(" + QString::number(m_scanMaxXPos) + " , " + QString::number(m_scanMaxYPos) + ")");
+        Logger::logInfo("Num Rows: " + QString::number(m_numXRows) + " Row Width: " + QString::number(m_scanRowXWidth, 'f', 2));
+        Logger::logInfo("FirstX: " + QString::number(m_startXPosition, 'f', 2) + " StartY: " + QString::number(m_startYPosition, 'f', 2) + " EndY: " + QString::number(m_scanEndYPosition, 'f', 2));
+        Logger::logInfo("Scan Speed: " + QString::number(m_scanYSpeed, 'f', 2) + " Cycles: " + QString::number(m_numCycles));
+
+        if (m_collisionDetected == true && m_collisionPassed != true) { // if we have a laser, we need to perform collision test, once completed we can move into regualar scanning
+            emit SSM_TransitionIdle(); // scan state machine to idle
+            emit CSM_TransitionStartup(); // collision state machine to startup
+        }
+        else {
+            emit SSM_TransitionParkZSubstate(); // scan state machine to park z
+            emit SSM_StatusUpdate("Scanning"); // update ui
+        }
+
         emit SSM_TransitionParkZSubstate();
 
         Logger::logInfo("In Scan Startup State");
@@ -324,6 +337,92 @@ void PlasmaController::RunScanAxesSM()
 
 void PlasmaController::RunCollisionSM()
 {
+    if (m_collisionStateMachine.configuration().contains(m_pCPStartupState)) { // in parkz substate
+
+        LaserSenseOn();
+        Logger::logInfo("-------------Collision Pass Start-Up--------------");
+
+        emit CSM_StatusUpdate("Collision Test");
+
+        if (m_bPlasmaActive) {
+            m_bRunRecipe = true;
+        }
+
+        emit CSM_TransitionGetZUp();
+
+    }
+    else if (m_collisionStateMachine.configuration().contains(m_pCPgetZUpstate)) { // in goXY start substate
+        if (m_stageCTL.nextStateReady()) {
+            QString command = "$B402" + m_stageCTL.getZMaxSpeedQStr() + "%";
+            sendCommand(command); //SET_SPEED  $B40xss.ss%; resp [!B40xss.ss#] 0x = axis number, ss.ss = mm/sec (float)
+            QString response = readResponse();
+
+            command = "$B602" + QString::number(m_scanZScanPos, 'f', 2) + "%";
+            sendCommand(command); //ABS_MOVE $B60xaa.aa%; resp [!B60xaa.aa#] 0x = axis num, aa.aa = destination in mm (float)
+            response = readResponse();
+
+            QString LogStr = "Move Z at: " + m_stageCTL.getZMaxSpeedQStr() + "/sec ";
+            Logger::logInfo(LogStr + "to: " + QString::number(m_scanZScanPos, 'f', 2));
+
+            emit CSM_TransitionScanY();
+        }
+    }
+    else if (m_collisionStateMachine.configuration().contains(m_pCPScanYState)) { // in goZScanPosition substate
+        if (m_stageCTL.nextStateReady()) {
+            QString command = "$B40110%";
+            sendCommand(command); //SET_SPEED  $B40xss.ss%; resp [!B40xss.ss#] 0x = axis number, ss.ss = mm/sec (float)
+            QString response = readResponse();
+
+            command = "$B601" + QString::number(m_scanEndYPosition, 'f', 2) + "%";
+            sendCommand(command); //ABS_MOVE $B60xaa.aa%; resp [!B60xaa.aa#] 0x = axis num, aa.aa = destination in mm (float)
+            response = readResponse();
+
+            QString LogStr = "Move Y at 10mm/sec ";
+            Logger::logInfo(LogStr + "to: " + QString::number(m_scanEndYPosition, 'f', 2));
+
+            emit CSM_TransitionGetZDown();
+        }
+    }
+    else if (m_collisionStateMachine.configuration().contains(m_pCPGetZDownState)) { // in ScanCol substate
+        if (m_stageCTL.nextStateReady()) {
+            QString command = "$B402" + m_stageCTL.getZMaxSpeedQStr() + "%";
+            sendCommand(command); //SET_SPEED  $B40xss.ss%; resp [!B40xss.ss#] 0x = axis number, ss.ss = mm/sec (float)
+            readResponse();
+
+            command = "$B602" + m_stageCTL.getZMaxSpeedQStr() + "%";
+            sendCommand(command);  //ABS_MOVE $B60xaa.aa%; resp [!B60xaa.aa#] 0x = axis num, aa.aa = destination in mm (float)
+            readResponse();
+
+            QString LogStr = "Move Z Speed: " + m_stageCTL.getZMaxSpeedQStr() + " /sec ";
+            Logger::logInfo(LogStr + "to " + m_stageCTL.getZMaxSpeedQStr());
+
+            emit CSM_TransitionShutdown();
+        }
+    }
+    else if (m_collisionStateMachine.configuration().contains(m_pCPShutdownState)) { // in Scan Shutdown state
+
+        if (m_stageCTL.nextStateReady()) {
+
+            emit CSM_StatusUpdate("Scanning");
+
+            LaserSenseOff();
+            m_collisionPassed = true;
+            // Go here to scan
+            if (m_plannedAutoStart == true) {
+                m_bRunRecipe = true; //Turn plasma on
+                m_plannedAutoStart = false;
+            }
+            else {
+                emit SSM_TransitionStartup();
+            }
+        }
+
+        emit CSM_TransitionIdle();
+
+    }
+    else if (m_collisionStateMachine.configuration().contains(m_pCPIdleState)) { // in idle state
+        // noop
+    }
 
 }
 
@@ -339,11 +438,12 @@ MFC* PlasmaController::findMFCByNumber(int mfcNumber)
 
 int PlasmaController::numberOfMFCs()
 {
-//    QString command = "$30%";
-//    send(command);
-//    int numMFCs = parseResponseForNumberOfMFCs(response);
+    QString command = "$30%";
+    sendCommand(command);
+    QString response = readResponse();
+    int numMFCs = parseResponseForNumberOfMFCs(response);
 
-//    return numMFCs;
+    return numMFCs;
 }
 
 int PlasmaController::parseResponseForNumberOfMFCs(QString& response)
@@ -421,46 +521,46 @@ void PlasmaController::handleSetMFCRangeCommand(const int mfcNumber, const doubl
 void PlasmaController::handleSetTunerRecipePositionCommand(const double recipePosition)
 {
     QString command = "$43" + QString::number(recipePosition) + "%";
-    //serial.commandHandler.send(command);
+    sendCommand(command);
 }
 
 void PlasmaController::handleSetTunerDefaultRecipeCommand(const double defaultPosition)
 {
     QString command = "$2A606" + QString::number(defaultPosition) + "%";
-    //serial.commandHandler.send(command);
+    sendCommand(command);
 }
 
 void PlasmaController::handleSetTunerAutoTuneCommand(const bool value)
 {
     QString command = "$860" + QString::number(value) + "%";
-    //serial.commandHandler.send(command);
+    sendCommand(command);
 }
 
 void PlasmaController::handleSetPWRDefaultRecipeCommand(const double defaultWatts)
 {
     QString command = "$2A605" + QString::number(defaultWatts) + "%";
-    //serial.commandHandler.send(command);
+    sendCommand(command);
 }
 
 void PlasmaController::handleSetPWRRecipeWattsCommand(const double recipeWatts)
 {
     QString command = "$42" + QString::number(recipeWatts) + "%";
-    //serial.commandHandler.send(command);
+    sendCommand(command);
 }
 
 void PlasmaController::handleSetPWRMaxWattsCommand(const double maxWatts)
 {
     QString command = "$2A705" + QString::number(maxWatts) + "%";
-    //serial.commandHandler.send(command);
+    sendCommand(command);
 }
 
 void PlasmaController::getCTLStatusCommand()
 {
-//    QString command = "$91%";
-//    QString response = send(command);
-//    parseResponseForCTLStatus(response);
+    QString command = "$91%";
+    sendCommand(command);
+    QString response = readResponse();
+    parseResponseForCTLStatus(response);
 }
-
 
 void PlasmaController::setLEDStatus(int &bits)
 {
@@ -542,8 +642,8 @@ void PlasmaController::CTLStartup()
     getMFC2Range();
     getMFC1Range();
     getMaxRFPowerForward();
-    //getAutoMan();
-    //getTemp();
+    getAutoMan();
+    getTemp();
     //turnOffExecRecipe();
     getPHSlitLength();
     getPHSlitWidth();
@@ -572,7 +672,7 @@ void PlasmaController::PollForCollision()
         m_stageCTL.getZAxisError() == 8) {
 
         // a collision has been detected
-        m_bCollisionDetected = true;
+        m_collisionDetected = true;
     }
 }
 

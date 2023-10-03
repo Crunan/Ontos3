@@ -17,7 +17,6 @@ SOURCES += \
     src/axescontroller.cpp \
     src/axis.cpp \
     src/axiscommands.cpp \
-    src/axiscontroller.cpp \
     src/maneuvers.cpp \
     src/statemachine.cpp \
     src/commandfilereader.cpp \
@@ -41,7 +40,6 @@ SOURCES += \
     src/pwr.cpp \
     src/plasmarecipe.cpp \
     src/tuner.cpp \
-    src/recipe.cpp \
     src/settingsdialog.cpp \
     src/stage.cpp \
     src/stagewidget.cpp
@@ -52,7 +50,6 @@ HEADERS += \
     src/axescontroller.h \
     src/axis.h \
     src/axiscommands.h \
-    src/axiscontroller.h \
     src/maneuvers.h \
     src/statemachine.h \
     src/commandfilereader.h \
@@ -76,7 +73,6 @@ HEADERS += \
     src/pwr.h \
     src/plasmarecipe.h \
     src/tuner.h \
-    src/recipe.h \
     src/settingsdialog.h \
     src/stagewidget.h \
     src/serialinterface.h \

@@ -67,22 +67,6 @@ public:
     double getYTwoSpotFirstPoint() { return m_Yaxis.getTwoSpotFirstPoint(); }
     double getYTwoSpotSecondPoint() { return m_Yaxis.getTwoSpotSecondPoint(); }
 
-    // command wrappers.
-    void getXMaxSpeed();
-    void getYMaxSpeed();
-    void getZMaxSpeed();
-    void getXp2Base();
-    void getYp2Base();
-    void getZp2Base();
-    void getXs2PH();
-    void getYs2PH();
-    void getPHSafetyZGap();
-    void getZPinsBuried();
-    void getZPinsExposed();
-    void getLoadX2Base();
-    void getLoadY2Base();
-    void getLoadZ2Base();
-
     void setAxisStateMachinesIdle();
 
     void getAxisStatus();
@@ -94,7 +78,7 @@ public:
     int getXAxisError() const { return m_Xaxis.getError(); }
     int getYAxisError() const { return m_Yaxis.getError(); }
     int getZAxisError() const { return m_Zaxis.getError(); }
-
+    QString getZMaxSpeedQStr() const { return m_Zaxis.getMaxSpeedQStr(); }
 
     //translate displayed PH X,Y,Z to the Base PH X,Y,Z (for motor moves)
     double TranslateCoordXPH2Base(double x) { return (m_Xp2Base - x); }
@@ -107,6 +91,7 @@ public:
     double getZp2BaseDbl() { return m_Zp2Base; }
 
     void resetAxes();
+    bool nextStateReady();
 
     void togglePinsOn();
     void togglePinsOff();
@@ -167,18 +152,37 @@ signals:
     void joystickOnChanged();
     void vacuumOnChanged();
     void nitrogenPurgeOnChanged();*/
-
+    void pinsStateChanged(bool state);
+    void joystickStateChanged(bool state);
+    void n2StateChanged(bool state);
+    void vacStateChanged(bool state);
 
 private slots:
 
 private:
+
+    // command wrappers.
+    void getXMaxSpeed();
+    void getYMaxSpeed();
+    void getZMaxSpeed();
+    void getXp2Base();
+    void getYp2Base();
+    void getZp2Base();
+    void getXs2PH();
+    void getYs2PH();
+    void getPHSafetyZGap();
+    void getZPinsBuried();
+    void getZPinsExposed();
+    void getLoadX2Base();
+    void getLoadY2Base();
+    void getLoadZ2Base();
+
     // setup state machines
     void SetupInitAxesStateMachine();
     void SetupHomeAxesStateMachine();
     void SetupTwoSpotStateMachine();
 
     // utility functions
-    bool nextStateReady();
     void setValve2(QString toggle);
     void setValve2On();
     void setValve2Off();

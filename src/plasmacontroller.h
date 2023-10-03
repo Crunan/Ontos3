@@ -50,9 +50,6 @@ public:
     MFC* findMFCByNumber(int mfcNumber);
     int numberOfMFCs();
 
-    // Recipe functions
-    bool getExecuteRecipe() const;
-    void setExecuteRecipe(bool value);
 
     void CTLStartup();
 
@@ -98,32 +95,19 @@ public:
     void toggleVacOn() {  m_stageCTL.toggleVacOn(); }
     void toggleVacOff() {  m_stageCTL.toggleVacOff(); }
 
-    // Recipe wrappers
+    // Recipe accessor and wrappers
     PlasmaRecipe *getRecipe() { return m_pRecipe; }
-
     void setRecipe(QString filePath) {
         m_pRecipe->fileReader.setFilePath(filePath);
         m_pRecipe->setRecipeFromFile();
     }
-
-    QMap<QString, QVariant> getRecipeMap() { return m_pRecipe->getRecipeMap(); }
-    void addRecipeToCascade(QString fileName) { m_pRecipe->addRecipeToCascade(fileName); }
-    void removeRecipeFromCascade(QString fileName) { m_pRecipe->removeRecipeFromCascade(fileName); }
-    QList<QString>  getCascadeRecipeList() { return m_pRecipe->getCascadeRecipeList(); }
-    void setRecipeThickness(double thickness) { m_pRecipe->setThickness(thickness); }
-    QString getRecipeThicknessQStr() const { return m_pRecipe->getThicknessQStr(); }
-    void setRecipeGap(double gap) { m_pRecipe->setGap(gap); }
-    QString getRecipeGapQStr() const { return m_pRecipe->getGapQStr(); }
-    void setRecipeOverlap(double overlap) { m_pRecipe->setOverlap(overlap); }
-    QString getRecipeOverlapQStr() const { return m_pRecipe->getOverlapQStr(); }
-    void setRecipeSpeed(double speed) { m_pRecipe->setSpeed(speed); }
-    QString getRecipeSpeedQStr() const { return m_pRecipe->getSpeedQStr(); }
-    void setRecipeCycles(int cycles) { m_pRecipe->setCycles(cycles); }
-    QString getRecipeCyclesQStr() const { return m_pRecipe->getCyclesQStr(); }
+    bool getExecuteRecipe() const;
+    void setExecuteRecipe(bool value);
 
     void StartScan() { emit SSM_TransitionStartup(); }
     void StopScan() { emit SSM_TransitionShutdown(); }
 
+    // laser access
     void LaserSenseOn();
     void LaserSenseOff();
     void PollForCollision(); // sets the m_bCollisionDetected flag
@@ -174,6 +158,9 @@ signals:
     void SSM_TransitionGoXYSubstate();
     void SSM_TransitionGoZPositionSubstate();
     void SSM_TransitionScanColSubstate();
+    // scan state machine signals
+    void SSM_Started();
+    void SSM_StatusUpdate(QString status);
 
     // collision state machine transitions
     void CSM_TransitionStartup();
@@ -182,6 +169,8 @@ signals:
     void CSM_TransitionGetZUp();
     void CSM_TransitionScanY();
     void CSM_TransitionGetZDown();
+    // collision state machine status
+    void CSM_StatusUpdate(QString status);
 
 public slots:
     // MFCs
@@ -277,7 +266,11 @@ private:
     int m_autoTune;
     double m_headTemp;
 
-    bool m_bCollisionDetected;
+    bool m_collisionDetected;
+    bool m_collisionPassed;
+    bool m_bRunRecipe; //Turn plasma on
+    bool m_plannedAutoStart;
+    bool m_bPlasmaActive;
 };
 
 #endif // PLASMACONTROLLER_H
