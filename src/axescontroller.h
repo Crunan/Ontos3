@@ -54,6 +54,9 @@ public:
     int getYAxisState() { return m_Yaxis.getCurrentState(); }
     int getZAxisState() { return m_Zaxis.getCurrentState(); }
 
+    QString getXAxisMaxSpeedQStr() { return m_Xaxis.getMaxSpeedQStr(); }
+    QString getYAxisMaxSpeedQStr() { return m_Yaxis.getMaxSpeedQStr(); }
+
     double getZPinsBuriedPos() { return m_stage.getPinsBuriedPos(); }
 
     void AxisStartup();

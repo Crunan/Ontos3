@@ -71,8 +71,6 @@ public slots:
     void about();
     void shutDownProgram();
 
-    //void RFRecipeButton_clicked();
-    void loadMBRecipeButton_clicked();
     void AutoTuneCheckbox_stateChanged(int value);
     void openRecipe();
     void saveRecipe();
@@ -81,13 +79,15 @@ public slots:
     void addRecipeToCascadeRecipe();
     void removeRecipeFromCascadeList();
     void saveAsCascadeRecipeListToFile();
-    void setRecipeMBtuner(QString MBtunerSP);
-    void setRecipeRFpower(QString RFpowerSP);
-    void MFC4RecipeFlow(QString recipeFlow);
-    void MFC3RecipeFlow(QString recipeFlow);
-    void MFC2RecipeFlow(QString recipeFlow);
-    void MFC1RecipeFlow(QString recipeFlow);
+    void setRecipeMBtuner(double MBtunerSP);
     void plasmaHeadTemp(double temp);
+    void thicknessChanged();
+    void gapChanged();
+    void overlapChanged();
+    void speedChanged();
+    void autoScanChanged();
+    void xLimitsChanged();
+    void yLimitsChanged();
 
     void pinsStateChanged(bool state);
     void joystickStateChanged(bool state);
@@ -95,6 +95,7 @@ public slots:
     void vacStateChanged(bool state);
     void CSM_StatusUpdate(QString status, QString next);
     void SSM_Started();
+    void SSM_Done();
     void SSM_StatusUpdate(QString status, QString next);
     void recipeExecutionStateChanged(bool state);
 
@@ -129,6 +130,12 @@ private slots:
 
     void on_plsmaBtn_dup_toggled(bool checked);
 
+    void on_loadAutoTuneButton_clicked();
+
+    void on_loadMBButton_clicked();
+
+    void on_load_autoscan_clicked();
+
 private:
     // Action Button methods
     void serialButtonPreConnectState();
@@ -138,6 +145,7 @@ private:
     // GUI signal Slot connections
     void connectMFCFlowBars();
     void recipeWattsChanged();
+    void autoTuneChanged(bool autoTune);
 
 
     void connectMFCRecipeButton(QPushButton* button, const int &mfcNumber);

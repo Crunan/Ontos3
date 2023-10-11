@@ -99,12 +99,19 @@ public:
 
     // Recipe accessor and wrappers
     PlasmaRecipe *getRecipe() { return m_pRecipe; }
-    void setRecipe(QString filePath) {
-        m_pRecipe->fileReader.setFilePath(filePath);
-        m_pRecipe->setRecipeFromFile();
-    }
+    void setRecipe(QString filePath);
     bool getExecuteRecipe() const;
     void setExecuteRecipe(bool value);
+    void processRecipeKeys();
+    void setMFCsFlowFromRecipe();
+    void setRFSetpointFromRecipe();
+    void setTunerSetpointFromRecipe();
+    void setAutoTuneFromRecipe();
+    void setAutoScan(bool scan) { m_bAutoScan = scan; }
+
+    // tuner
+    Tuner& getTuner() { return m_tuner; }
+    PWR& getPower() { return m_pwr; }
 
     void StartScan() { emit SSM_TransitionStartup(); }
     void StopScan() { emit SSM_TransitionShutdown(); }
@@ -135,9 +142,8 @@ public:
     void getPHSlitLength();
     void getPHSlitWidth();
 
-    Tuner m_tuner;
+    //Tuner m_tuner;
     PlasmaHead m_plasmaHead;
-    PWR m_pwr;
     QList<MFC*> m_mfcs; // Store the MFCs in a list
 
 signals:
@@ -146,10 +152,6 @@ signals:
     void mainPortOpened();
     void setRecipeMBtuner(QString MBtunerSP);
     void setRecipeRFpower(QString RFpowerSP);
-    void MFC4RecipeFlow(QString recipeFlow);
-    void MFC3RecipeFlow(QString recipeFlow);
-    void MFC2RecipeFlow(QString recipeFlow);
-    void MFC1RecipeFlow(QString recipeFlow);
     void plasmaHeadTemp(double m_headTemp);
 
     // scan state machine transitions
@@ -163,6 +165,7 @@ signals:
     void SSM_TransitionScanColSubstate();
     // scan state machine signals
     void SSM_Started();
+    void SSM_Done();
     void SSM_StatusUpdate(QString status, QString next);
 
     // collision state machine transitions
@@ -181,7 +184,6 @@ public slots:
     // MFCs
     int parseResponseForNumberOfMFCs(QString& responseStr);
     double handleGetMFCRecipeFlowCommand(QString& responseStr);
-
     void handleSetMFCRecipeFlowCommand(const int mfcNumber, const double recipeFlow);
     void handleSetMFCDefaultRecipeCommand(const int mfcNumber, const double recipeFlow);
     void handleSetMFCRangeCommand(const int mfcNumber, const double range);
@@ -193,7 +195,7 @@ public slots:
 
     // PWR
     void handleSetPWRDefaultRecipeCommand(const double defaultWatts);
-    void handleSetPWRRecipeWattsCommand(const double recipeWatts);
+    void handleSetPWRRecipeWattsCommand(const int recipeWatts);
     void handleSetPWRMaxWattsCommand(const double maxWatts);
 
 private:
@@ -208,6 +210,8 @@ private:
     CommandMap m_commandMap;
     AxesController m_stageCTL;
     PlasmaRecipe *m_pRecipe;
+    Tuner m_tuner;
+    PWR m_pwr;
 
     // scan state machine
     QStateMachine m_scanStateMachine;
@@ -276,6 +280,7 @@ private:
     bool m_bRunRecipe; //Turn plasma on
     bool m_plannedAutoStart;
     bool m_bPlasmaActive;
+    bool m_bAutoScan;
 };
 
 #endif // PLASMACONTROLLER_H

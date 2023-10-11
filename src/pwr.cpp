@@ -16,10 +16,8 @@ int PWR::getRecipeWatts() const
 
 void PWR::setRecipeWatts(int value)
 {
-    if (m_recipeWatts != value) {
-        m_recipeWatts = value;
-        emit recipeWattsChanged();
-    }
+    m_recipeWatts = value;
+    emit recipeWattsChanged(m_recipeWatts);
 }
 
 int PWR::getForwardWatts() const
@@ -30,10 +28,8 @@ int PWR::getForwardWatts() const
 
 void PWR::setForwardWatts(int value)
 {
-    if (m_forwardWatts != value) {
-        m_forwardWatts = value;
-        emit forwardWattsChanged();
-    }
+    m_forwardWatts = value;
+    emit forwardWattsChanged();
 }
 
 int PWR::getReflectedWatts() const
@@ -42,10 +38,8 @@ int PWR::getReflectedWatts() const
 }
 void PWR::setReflectedWatts(int value)
 {
-    if (m_reflectedWatts != value) {
-        m_reflectedWatts = value;
-        emit reflectedWattsChanged();
-    }
+    m_reflectedWatts = value;
+    emit reflectedWattsChanged();
 }
 int PWR::getDefaultRecipe() const
 {
@@ -54,8 +48,6 @@ int PWR::getDefaultRecipe() const
 
 void PWR::setDefaultRecipe(int value)
 {
-    if (m_defaultRecipe != value) {
-        m_defaultRecipe = value;
-        emit defaultRecipeChanged();
-    }
+    m_defaultRecipe = value;
+    emit defaultRecipeChanged();
 }

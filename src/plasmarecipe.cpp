@@ -4,6 +4,7 @@
 #include <QDir>
 #include <QDebug>
 #include <QRegularExpression>
+#include "logger.h"
 
 
 PlasmaRecipe::PlasmaRecipe(QObject* parent) :
@@ -24,6 +25,8 @@ PlasmaRecipe::PlasmaRecipe(QObject* parent) :
     m_yMin(0),
     m_yMax(0)
 {}
+
+
 
 PlasmaRecipe::~PlasmaRecipe() {
     // Cleanup any resources here
@@ -66,75 +69,196 @@ void PlasmaRecipe::setRecipeFromFile()
         }
     }
 
-    //processRecipeKeys();
     file.close();
 }
 
-/*
 void PlasmaRecipe::processRecipeKeys()
 {
-    setMFCsActualFlow();
-    setRFSetpoint();
-    setTunerSetpoint();
-    setAutoTuneOn();
+    setThicknessFromRecipe();
+    setGapFromRecipe();
+    setOverlapFromRecipe();
+    setSpeedFromRecipe();
+    setAutoScanFromRecipe();
+    setXaxisLimitsFromRecipe();
+    setYaxisLimitsFromRecipe();
 }
 
-void PlasmaRecipe::setMFCsActualFlow()
+//////////////////////////////////////////////////////////////////////////////////
+// set from file
+//////////////////////////////////////////////////////////////////////////////////
+void PlasmaRecipe::setThicknessFromRecipe()
 {
-    for (int i = 0; i < CTL_->m_mfcs.size(); i++)
-    {
-        MFC* mfc = CTL_->m_mfcs.at(i);
-        QString mfcKey = "MFC" + QString::number(i + 1);
-
-        if (m_recipeMap.contains(mfcKey)) {
-            double flow = m_recipeMap[mfcKey].toDouble();
-            mfc->setRecipeFlow(flow);
-        }
-        else  {
-            // Handle the case when the MFC key is not found in the recipe map
-            qDebug() << "MFC" << i+1 << "setpoint not found in recipe map.";
-        }
-    }
-}
-
-void PlasmaRecipe::setRFSetpoint() {
-    if (m_recipeMap.contains("RF")) {
-        int watts = m_recipeMap["RF"].toInt();
-        CTL_->m_pwr.setRecipeWatts(watts);
+    if (m_recipeMap.contains("THICKNESS")) {
+        m_thickness = m_recipeMap["THICKNESS"].toDouble();
+        emit thicknessChanged(m_thickness);
     }
     else {
-        // Handle the case when "RF" key is not found in the recipe map
-        qDebug() << "RF setpoint not found in recipe map.";
+        // Handle the case when "THICKNESS" key is not found in the recipe map
+        Logger::logWarning("THICKNESS setpoint not found in recipe map.");
     }
 }
-
-void PlasmaRecipe::setTunerSetpoint() {
-    if (m_recipeMap.contains("TUNER")) {
-        double position = m_recipeMap["TUNER"].toDouble();
-        CTL_->m_tuner.setRecipePosition(position);
+void PlasmaRecipe::setGapFromRecipe()
+{
+    if (m_recipeMap.contains("GAP")) {
+        m_gap = m_recipeMap["GAP"].toDouble();
+        emit gapChanged(m_gap);
     }
     else {
-        // Handle the case when "TUNER" key is not found in the recipe map
-        qDebug() << "TUNER setpoint not found in recipe map.";
+        // Handle the case when "GAP" key is not found in the recipe map
+        Logger::logWarning("GAP setpoint not found in recipe map.");
     }
+
+}
+void PlasmaRecipe::setOverlapFromRecipe()
+{
+    if (m_recipeMap.contains("OVERLAP")) {
+        m_overlap = m_recipeMap["OVERLAP"].toDouble();
+        emit overlapChanged(m_overlap);
+    }
+    else {
+        // Handle the case when "OVERLAP" key is not found in the recipe map
+        Logger::logWarning("OVERLAP setpoint not found in recipe map.");
+    }
+
 }
 
-void PlasmaRecipe::setAutoTuneOn() {
-    if (m_recipeMap.contains("AUTO")) {
-        QVariant value = m_recipeMap["AUTO"];
-
-        if (value.canConvert<bool>()) {
-            bool booleanValue = value.toBool();
-            CTL_->m_tuner.setAutoTune(booleanValue);
-        }
-        else {
-            qDebug() << "auto tune value is not a boolean.";
-        }
+void PlasmaRecipe::setSpeedFromRecipe()
+{
+    if (m_recipeMap.contains("SPEED")) {
+        m_speed = m_recipeMap["SPEED"].toDouble();
+        emit speedChanged(m_speed);
     }
     else {
-        qDebug() << "auto tune setpoint not found in recipe map.";
+        // Handle the case when "SPEED" key is not found in the recipe map
+        Logger::logWarning("SPEED setpoint not found in recipe map.");
     }
-}*/
+
+}
+void PlasmaRecipe::setAutoScanFromRecipe()
+{
+    if (m_recipeMap.contains("AUTOSCAN")) {
+        m_autoScan = m_recipeMap["AUTOSCAN"].toDouble();
+        emit autoScanChanged(m_autoScan);
+    }
+    else {
+        // Handle the case when "AUTOSCAN" key is not found in the recipe map
+        Logger::logWarning("AUTOSCAN setpoint not found in recipe map.");
+    }
+
+}
+void PlasmaRecipe::setXaxisLimitsFromRecipe()
+{
+    if (m_recipeMap.contains("XMIN")) {
+        m_xMin = m_recipeMap["XMIN"].toDouble();
+    }
+    else {
+        // Handle the case when "XMIN" key is not found in the recipe map
+        Logger::logWarning("XMIN setpoint not found in recipe map.");
+    }
+    if (m_recipeMap.contains("XMAX")) {
+        m_xMax = m_recipeMap["XMAX"].toDouble();
+    }
+    else {
+        // Handle the case when "XMAX" key is not found in the recipe map
+        Logger::logWarning("XMAX setpoint not found in recipe map.");
+    }
+
+    emit xLimitsChanged(m_xMin, m_xMax);
+
+}
+void PlasmaRecipe::setYaxisLimitsFromRecipe()
+{
+    if (m_recipeMap.contains("YMIN")) {
+        m_yMin = m_recipeMap["YMIN"].toDouble();
+    }
+    else {
+        // Handle the case when "YMIN" key is not found in the recipe map
+        Logger::logWarning("YMIN setpoint not found in recipe map.");
+    }
+    if (m_recipeMap.contains("YMAX")) {
+        m_yMax = m_recipeMap["YMAX"].toDouble();
+    }
+    else {
+        // Handle the case when "THICKNESS" key is not found in the recipe map
+        Logger::logWarning("YMAX setpoint not found in recipe map.");
+    }
+
+    emit yLimitsChanged(m_yMin, m_yMax);
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+// set externally
+//////////////////////////////////////////////////////////////////////////////////
+void PlasmaRecipe::setAutoScanFlag(bool toggle)
+{
+    m_autoScanFlag = toggle;
+}
+
+
+void PlasmaRecipe::setAutoScan(bool toggle)
+{
+    m_autoScan = toggle;
+    emit autoScanChanged(m_autoScan);
+}
+
+void PlasmaRecipe::setPurge(bool toggle)
+{
+    m_N2PurgeRecipe = toggle;
+}
+
+void PlasmaRecipe::setCycles(int cycles)
+{
+    m_cycles = cycles;
+}
+
+void PlasmaRecipe::setSpeed(double speed)
+{
+    m_speed = speed;
+    emit speedChanged(m_speed);
+}
+
+void PlasmaRecipe::setOverlap(double overlap)
+{
+    m_overlap = overlap;
+    emit overlapChanged(m_overlap);
+}
+
+void PlasmaRecipe::setGap(double gap)
+{
+    m_gap = gap;
+    emit gapChanged(m_gap);
+}
+
+void PlasmaRecipe::setThickness(double thickness)
+{
+    m_thickness = thickness;
+    emit thicknessChanged(m_gap);
+}
+
+void PlasmaRecipe::setXmin(double xmin)
+{
+    m_xMin = xmin;
+    emit xLimitsChanged(m_yMin, m_yMax);
+}
+
+void PlasmaRecipe::setXmax(double xmax)
+{
+    m_xMax = xmax;
+    emit xLimitsChanged(m_yMin, m_yMax);
+}
+
+void PlasmaRecipe::setYmin(double ymin)
+{
+    m_yMin = ymin;
+    emit yLimitsChanged(m_yMin, m_yMax);
+}
+
+void PlasmaRecipe::setYmax(double ymax)
+{
+    m_yMax = ymax;
+    emit yLimitsChanged(m_yMin, m_yMax);
+}
+
 
 QMap<QString, QVariant> PlasmaRecipe::getRecipeMap()
 {

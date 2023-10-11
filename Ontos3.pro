@@ -16,15 +16,11 @@ SOURCES += \
     src/serialinterface.cpp \
     src/axescontroller.cpp \
     src/axis.cpp \
-    src/axiscommands.cpp \
-    src/maneuvers.cpp \
-    src/statemachine.cpp \
     src/commandfilereader.cpp \
     src/commandmap.cpp \
     src/configuration.cpp \
     src/console.cpp \
     src/filereader.cpp \
-    src/functions.cpp \
     src/grblcontroller.cpp \
     src/led.cpp \
     src/ledfactory.cpp \
@@ -41,24 +37,19 @@ SOURCES += \
     src/plasmarecipe.cpp \
     src/tuner.cpp \
     src/settingsdialog.cpp \
-    src/stage.cpp \
-    src/stagewidget.cpp
+    src/stage.cpp
 
 
 HEADERS += \
     src/diameter.h \
     src/axescontroller.h \
     src/axis.h \
-    src/axiscommands.h \
-    src/maneuvers.h \
-    src/statemachine.h \
     src/commandfilereader.h \
     src/commandmap.h \
     src/configuration.h \
     src/console.h \
     src/diameter.h \
     src/filereader.h \
-    src/functions.h \
     src/grblcontroller.h \
     src/led.h \
     src/ledfactory.h \
@@ -74,7 +65,6 @@ HEADERS += \
     src/plasmarecipe.h \
     src/tuner.h \
     src/settingsdialog.h \
-    src/stagewidget.h \
     src/serialinterface.h \
     src/stage.h
 

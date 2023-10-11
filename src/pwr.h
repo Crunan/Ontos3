@@ -6,13 +6,6 @@
 class PWR : public QObject {
     Q_OBJECT
 
-private:
-    int m_recipeWatts;
-    int m_forwardWatts;
-    int m_reflectedWatts;
-    int m_defaultRecipe;
-    int m_maxWatts;
-
 public:
     PWR();
 
@@ -29,10 +22,17 @@ public:
     void setDefaultRecipe(int value);
 
 signals:
-    void recipeWattsChanged();
+    void recipeWattsChanged(int watts);
     void forwardWattsChanged();
     void reflectedWattsChanged();
     void defaultRecipeChanged();
+
+private:
+    int m_recipeWatts;
+    int m_forwardWatts;
+    int m_reflectedWatts;
+    int m_defaultRecipe;
+    int m_maxWatts;
 
 };
 

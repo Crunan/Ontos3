@@ -54,7 +54,7 @@ bool SerialInterface::sendCommand(QString command)
         return true;
     }
 
-    return false;
+    return false; // consider using the return value
 }
 
 // read a single response
@@ -64,34 +64,37 @@ QString SerialInterface::readResponse()
 
     QString serialResponse = "";
 
-    // wait up to 100ms for data to be ready
-    m_serialPort.waitForReadyRead(250);
+    if (m_serialPort.isOpen()) {
 
-    while (responseVal != QChar('#').toLatin1()) {
+        // wait up to 100ms for data to be ready
+        m_serialPort.waitForReadyRead(250);
 
-        responseVal = ReadChar();
+        while (responseVal != QChar('#').toLatin1()) {
 
-        // if the response was zero give it more time for the data to arrive
-        while (responseVal == 0) {
-            // check the watchdog timer
-            if (m_serialWatchdogTriggered) {
-                m_serialWatchdogTriggered = false;
-                m_pSerialWatchdogTimer->stop();
-                Logger::logDebug("AxesController::readResponse() watchdog triggered....bailing");
-                Logger::logInfo("Comms error: " + m_lastSerialCommand);
-                return 0; // get out if timed out
-            }
-            m_serialPort.waitForReadyRead(100);
             responseVal = ReadChar();
+
+            // if the response was zero give it more time for the data to arrive
+            while (responseVal == 0) {
+                // check the watchdog timer
+                if (m_serialWatchdogTriggered) {
+                    m_serialWatchdogTriggered = false;
+                    m_pSerialWatchdogTimer->stop();
+                    Logger::logDebug("AxesController::readResponse() watchdog triggered....bailing");
+                    Logger::logInfo("Comms error: " + m_lastSerialCommand);
+                    return 0; // get out if timed out
+                }
+                m_serialPort.waitForReadyRead(100);
+                responseVal = ReadChar();
+            }
+
+            serialResponse += char(responseVal);
+
+            // response received so stop the watchdog timer
+           m_pSerialWatchdogTimer->stop();
         }
 
-        serialResponse += char(responseVal);
-
-        // response received so stop the watchdog timer
-       m_pSerialWatchdogTimer->stop();
+        Logger::logDebug("SerialResponse = " + serialResponse);
     }
-
-    Logger::logDebug("SerialResponse = " + serialResponse);
 
     return serialResponse;
 }

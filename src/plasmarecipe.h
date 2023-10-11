@@ -14,11 +14,6 @@ public:
     void setRecipeFromFile();
     void processRecipeKeys();
 
-    void setMFCsActualFlow();
-    void setRFSetpoint();
-    void setTunerSetpoint();
-    void setAutoTuneOn();
-
     QMap<QString, QVariant> getRecipeMap();
     QList<QString> getCascadeRecipeList();
 
@@ -29,52 +24,69 @@ public:
 
     bool isRecipeComplete();
 
-    void setAutoScanFlag(bool toggle) { m_autoScanFlag = toggle; }
+    void setThicknessFromRecipe();
+    void setGapFromRecipe();
+    void setOverlapFromRecipe();
+    void setSpeedFromRecipe();
+    void setAutoScanFromRecipe();
+    void setXaxisLimitsFromRecipe();
+    void setYaxisLimitsFromRecipe();
+
+    void setAutoScanFlag(bool toggle);
     bool getAutoScanFlag() const { return m_autoScanFlag; }
 
-    void setAutoScan(bool toggle) { m_autoScan = toggle; }
+    void setAutoScan(bool toggle);
     bool getAutoScanBool() const { return m_autoScan; }
 
-    void setPurge(bool toggle) { m_N2PurgeRecipe = toggle; }
+    void setPurge(bool toggle);
     bool getPurge() const { return m_N2PurgeRecipe; }
 
-    void setCycles(int cycles) { m_cycles = cycles; }
+    void setCycles(int cycles);
     QString getCyclesQStr() const { return QString::number(m_cycles); }
     int getCyclesInt() const { return m_cycles; }
 
-    void setSpeed(double speed) { m_speed = speed; }
+    void setSpeed(double speed);
     double getSpeed() { return m_speed; }
     QString getSpeedQStr() const { return QString::number(m_speed, 'f', 2); }
 
-    void setOverlap(double overlap) { m_overlap = overlap; }
+    void setOverlap(double overlap);
     double getOverlap() { return m_overlap; }
     QString getOverlapQStr() const { return QString::number(m_overlap, 'f', 2); }
 
-    void setGap(double gap) { m_gap = gap; }
+    void setGap(double gap);
     double getGap() { return m_gap; }
     QString getGapQStr() const { return QString::number(m_gap, 'f', 2); }
 
-    void setThickness(double thickness) { m_thickness = thickness; }
+    void setThickness(double thickness);
     double getThickness() { return m_thickness; }
     QString getThicknessQStr() const { return QString::number(m_thickness, 'f', 2); }
 
-    void setXmin(double xmin) { m_xMin = xmin; }
+    void setXmin(double xmin);
     double getXmin() { return m_xMin; }
     QString getXminQStr() const { return QString::number(m_xMin, 'f', 2); }
 
-    void setXmax(double xmax) { m_xMax = xmax; }
+    void setXmax(double xmax);
     double getXmax() { return m_xMax; }
     QString getXmaxQStr() const { return QString::number(m_xMax, 'f', 2); }
 
-    void setYmin(double ymin) { m_yMin = ymin; }
+    void setYmin(double ymin);
     double getYmin() { return m_yMin; }
     QString getYminQStr() const { return QString::number(m_yMin, 'f', 2); }
 
-    void setYmax(double ymax) { m_yMax = ymax; }
+    void setYmax(double ymax);
     double getYmax() { return m_yMax; }
     QString getYmaxQStr() const { return QString::number(m_yMax, 'f', 2); }
 
     FileReader fileReader;
+
+signals:
+    void thicknessChanged(double thickness);
+    void gapChanged(double gap);
+    void overlapChanged(double overlap);
+    void speedChanged(double speed);
+    void autoScanChanged(bool autoscan);
+    void xLimitsChanged(double xmin, double xmax);
+    void yLimitsChanged(double ymin, double ymax);
 
 private:
     QMap<QString, QVariant> m_recipeMap;

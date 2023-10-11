@@ -47,7 +47,8 @@ PlasmaController::PlasmaController(QWidget* parent)
     m_collisionPassed(false),
     m_bRunRecipe(false), //Turn plasma on
     m_plannedAutoStart(false),
-    m_bPlasmaActive(false)
+    m_bPlasmaActive(false),
+    m_bAutoScan(false)
 {
     // Add startup data gathering methods.
     for (MFC* mfc: m_mfcs) {
@@ -59,9 +60,14 @@ PlasmaController::PlasmaController(QWidget* parent)
     connect(&m_tuner, &Tuner::recipePositionChanged, this, &PlasmaController::handleSetTunerRecipePositionCommand);
     connect(&m_tuner, &Tuner::autoTuneChanged, this, &PlasmaController::handleSetTunerAutoTuneCommand);
 
+    connect(&m_pwr, &PWR::recipeWattsChanged, this, &PlasmaController::handleSetPWRRecipeWattsCommand);
+
     // setup state machines
     setupCollisionStateMachine();
     setupScanStateMachine();
+
+    // share the serial interface with the axes controller
+    m_stageCTL.setSerialInterface(m_pSerialInterface);
 }
 
 PlasmaController::~PlasmaController()
@@ -188,9 +194,6 @@ bool PlasmaController::open(const SettingsDialog& settings)
         return false;
     }
 
-    // share the serial interface with the axes controller
-    m_stageCTL.setSerialInterface(m_pSerialInterface);
-
     emit mainPortOpened();
 
     return true;
@@ -292,12 +295,8 @@ void PlasmaController::RunScanAxesSM()
             m_startXPosition = m_scanMaxXPos - (m_scanRowXWidth / 2);// start position offset to center of slit
         }
 
-        m_startYPosition;
-        double m_scanYSpeed;
-        double m_scanEndYPosition;
-
         // Y scan range from start to finish positions
-        m_startYPosition = m_scanMaxYPos + m_PHSlitWidth;
+        double m_startYPosition = m_scanMaxYPos + m_PHSlitWidth;
         m_scanEndYPosition = m_scanMinYPos - m_PHSlitWidth;
         m_scanYSpeed = m_pRecipe->getSpeed();
 
@@ -338,55 +337,173 @@ void PlasmaController::RunScanAxesSM()
             }
             // turn off Substrate N2 Purge (assume it's on)
             toggleN2PurgeOff();
-            QString command = "$B402" + m_pRecipe->getSpeedQStr() + "%";
+            QString command = "$B402" + m_stageCTL.getZMaxSpeedQStr() + "%";
             sendCommand(command); //SET_SPEED  $B40xss.ss%; resp [!B40xss.ss#] 0x = axis number, ss.ss = mm/sec (float)
             readResponse();
-            QString logStr = "Move Z Speed: " + m_pRecipe->getSpeedQStr() + " /sec ";
+            QString logStr = "Move Z Speed: " + m_stageCTL.getZMaxSpeedQStr() + " /sec ";
             command = "$B602" + QString::number(m_scanZParkPos, 'f', 2) + "%";
             sendCommand(command); // ABS_MOVE $B60xaa.aa%; resp [!B60xaa.aa#] 0x = axis num, aa.aa = destination in mm (float)
             readResponse();
             Logger::logInfo(logStr + "to " + QString::number(m_scanZParkPos, 'f', 2));
         }
-
     }
     else if (m_scanStateMachine.configuration().contains(m_pGoXYStartSubState)) { // in goXY start substate
-        if (m_stageCTL.nextStateReady()) {}
+        if (m_stageCTL.nextStateReady()) {
+            QString message = "Scan Cycle #" + QString::number(m_currentCycle) + " of " + QString::number(m_numCycles) +
+                              " Traversal #" + QString::number(m_currentXRow) + " of " + QString::number(m_numXRows);
+            Logger::logInfo(message);
 
-        emit SSM_TransitionGoZPositionSubstate();
+            emit SSM_StatusUpdate("Scanning", message); // update ui
 
-        Logger::logInfo("In Go XY Substate");
+            QString command = "$B400" + m_stageCTL.getXMaxSpeedQStr() + "%";
+            sendCommand(command);  // SET_SPEED  $B40xss.ss%; resp [!B40xss.ss#] 0x = axis number, ss.ss = mm/sec (float)
+            readResponse();
+            QString logStr = "X Speed: " + m_stageCTL.getXMaxSpeedQStr() + " /sec ";
 
+            command = "$B401" + m_stageCTL.getYAxisMaxSpeedQStr() + "%";
+            sendCommand(command); //SET_SPEED  $B40xss.ss%; resp [!B40xss.ss#] 0x = axis number, ss.ss = mm/sec (float)
+            readResponse();         
+            Logger::logInfo(logStr + "Y Speed: " + m_stageCTL.getYAxisMaxSpeedQStr() + "/sec");
+
+            if (m_currentXRow > 1) {
+                m_startXPosition = m_startXPosition- m_scanRowXWidth; // move over one
+            }
+            command = "$B600" + QString::number(m_startXPosition, 'f', 2) + "%";
+            sendCommand(command); //ABS_MOVE $B60xaa.aa%; resp [!B60xaa.aa#] 0x = axis num, aa.aa = destination in mm (float)
+            readResponse();
+            logStr = "X to: " + QString::number(m_startXPosition, 'f', 2);
+            command = "$B601" + QString::number(m_startYPosition, 'f', 2) + "%";
+            sendCommand(command);  // ABS_MOVE $B60xaa.aa%; resp [!B60xaa.aa#] 0x = axis num, aa.aa = destination in mm (float)
+            readResponse();
+            Logger::logInfo(logStr + " Y to: " + QString::number(m_startYPosition, 'f', 2));
+            emit SSM_TransitionGoZPositionSubstate();
+        }
     }
     else if (m_scanStateMachine.configuration().contains(m_pGoZScanPositionSubState)) { // in goZScanPosition substate
-        if (m_stageCTL.nextStateReady()) {}
-
-        emit SSM_TransitionScanColSubstate();
-
-        Logger::logInfo("In Go Z Scan  Substate");
-
+        if (m_stageCTL.nextStateReady()) {
+            if (m_pRecipe->getPurge()) { // turn on the substrate N2 Purge
+                sendCommand("$C701%"); // SET_VALVE_2 $C70n% resp[!C70n#] n = 0, 1 (off, on)
+                readResponse();
+            }
+            QString command = "$B402" + m_stageCTL.getZMaxSpeedQStr() + "%";
+            sendCommand(command); // SET_SPEED  $B40xss.ss%; resp [!B40xss.ss#] 0x = axis number, ss.ss = mm/sec (float)
+            readResponse();
+            QString logStr = "Move Z at: " + m_stageCTL.getZMaxSpeedQStr() + " /sec ";
+            command = "$B602" + QString::number(m_scanZScanPos, 'f', 2) + "%";
+            sendCommand(command); // ABS_MOVE $B60xaa.aa%; resp [!B60xaa.aa#] 0x = axis num, aa.aa = destination in mm (float)
+            readResponse();
+            Logger::logInfo(logStr + "to: " + QString::number(m_scanZScanPos, 'f', 2));
+            emit SSM_TransitionScanColSubstate();
+        }
     }
     else if (m_scanStateMachine.configuration().contains(m_pScanColSubState)) { // in ScanCol substate
-        if (m_stageCTL.nextStateReady()) {}
-
-        emit SSM_TransitionParkZSubstate();
-
-        Logger::logInfo("In Scan Col Substate");
-
+        if (m_stageCTL.nextStateReady()) {
+            QString command = "$B401" + QString::number(m_scanYSpeed, 'f', 2) + "%";
+            sendCommand(command); //SET_SPEED  $B40xss.ss%; resp [!B40xss.ss#] 0x = axis number, ss.ss = mm/sec (float)
+            readResponse();
+            QString logStr = "Move Y at " + QString::number(m_scanYSpeed, 'f', 2) + " /sec ";
+            command = "$B601" + QString::number(m_scanEndYPosition, 'f', 2) + "%";
+            sendCommand(command); // ABS_MOVE $B60xaa.aa%; resp [!B60xaa.aa#] 0x = axis num, aa.aa = destination in mm (float)
+            readResponse();
+            Logger::logInfo(logStr + "to: " + QString::number(m_scanEndYPosition, 'f', 2));
+            m_currentXRow += 1; // increment row counter
+            emit SSM_TransitionParkZSubstate();
+        }
     }
     else if (m_scanStateMachine.configuration().contains(m_pScanRecycleState)) { // in ScanRecycle substate
+        if (m_currentCycle > m_numCycles) { // do not recycle
+
+            // Assume N2 is on, turn it off
+            sendCommand("$C700%"); //SET_VALVE_2 $C70n% resp[!C70n#] n = 0, 1 (off, on)
+            readResponse();
+
+            emit SSM_TransitionIdle();
+            emit SSM_Done();
+
+//                    'Engineer buttons become visible in ENG mode
+//                    If b_ENG_mode Then
+//                  SetTwoSpotBtn.Visible = True
+//                  SetDiameterBtn.Visible = True
+//                End If
 
 
-        Logger::logInfo("In Recycle Substate");
+            // Reset the collision flag if using a collision system
+            if (m_collisionPassed == true) {
+                m_collisionPassed = false; // reset the collision flag
+            }
 
+
+//                'If a cascaded recipe was used then run the next recipe
+//                If CascadingRecipesDialog.CascadeRecipeListBox.Items.Count - 1 > CasRecipeNumber Then
+//                    'This increments in order to keep track of which recipe we are on in the cascade recipe.
+//                    CasRecipeNumber += 1
+//                    'This is to make sure we start the scan automatically
+//                    b_toggleAutoScan = True
+//                    'Now load the recipe
+//                    LoadRecipeValues()
+//                Else
+//                    SMHomeAxes.State = HASM_START 'Go to the Load position everytime you finish scanning
+//                    // Auto off will turn the recipe off and PLASMA.
+//                    if (m_pRecipe->getAutoScanBool()) {
+//                        Logger::logInfo("Plasma turned off (Auto-Off is active)");
+//                        sendCommand("$8700%");
+//                        readResponse();
+//                    }
+
+
+
+        }
+        else { // recycle the scan
+            m_currentCycle += 1;
+            m_currentXRow = 1;
+
+            if (m_numXRows == 1) { // 'have small substrate case, center the head over the center of the Box X
+                m_startXPosition = (m_scanMaxXPos + m_scanMinXPos) / 2;
+            }
+            else { // multiple passes, so bias first pass to maximum edge
+                m_startXPosition = m_scanMaxXPos - (m_scanRowXWidth / 2); // start position offset to center of slit
+            }
+
+            Logger::logInfo("-------------Scan Recycle Start-Up--------------This Cycle: " + QString::number(m_currentCycle));
+            Logger::logInfo("Display MIN:(" + m_pRecipe->getXminQStr() + " , " + m_pRecipe->getYminQStr() + ") MAX:(" + m_pRecipe->getXmaxQStr() + " , " + m_pRecipe->getYmaxQStr() + ")");
+            Logger::logInfo("Num Rows: " + QString::number(m_numXRows) + " Row Width: " + QString::number(m_scanRowXWidth, 'f', 2));
+            Logger::logInfo("FirstX: " + QString::number(m_startXPosition, 'f', 2) + " StartY: " + QString::number(m_startYPosition, 'f', 2) + " EndY: " + QString::number(m_scanEndYPosition, 'f', 2));
+            Logger::logInfo("Scan Speed: " + QString::number(m_scanYSpeed, 'f', 2) + " Cycles: " + QString::number(m_numCycles));
+
+            emit SSM_TransitionGoXYSubstate(); // reenter here because already Parked Z
+        }
     }
     else if (m_scanStateMachine.configuration().contains(m_pScanShutdownState)) { // in Scan Shutdown state
 
-        Logger::logInfo("In Shutdown state");
+        emit SSM_StatusUpdate("Scanning Stopped - Parking Z", ""); // update ui
 
+        sendCommand("$B3%"); //stop any motors in motion
+        readResponse();
+        // turn of Substrate N2 Purge (assume it's on)
+        sendCommand("$C700%"); //SET_VALVE_2 $C70n% resp[!C70n#] n = 0, 1 (off, on)
+        readResponse();
+        QString command = "$B402" + m_stageCTL.getZMaxSpeedQStr() + "%";
+        sendCommand(command); //SET_SPEED  $B40xss.ss%; resp [!B40xss.ss#] 0x = axis number, ss.ss = mm/sec (float)
+        readResponse();
+        QString logStr = "Move Z at " + m_stageCTL.getZMaxSpeedQStr() + " /sec ";
+        command = "$B602" + QString::number(m_scanZParkPos, 'f', 2) + "%";
+        sendCommand(command); //ABS_MOVE $B60xaa.aa%; resp [!B60xaa.aa#] 0x = axis num, aa.aa = destination in mm (float)
+        readResponse();
+        Logger::logInfo(logStr + "to: " + QString::number(m_scanZParkPos, 'f', 2));
+
+        // done
+        emit SSM_TransitionIdle();
+        emit SSM_StatusUpdate("Scanning Manually Stopped", ""); // update ui
+        emit SSM_Done();
+
+        m_collisionPassed = false; // reset the collision flag
+
+//                    If b_ENG_mode Then
+//                        SetTwoSpotBtn.Visible = True
+//                        SetDiameterBtn.Visible = True
+//                    End If
     }
     else if (m_scanStateMachine.configuration().contains(m_pScanIdleState)) { // in idle state
-
-        Logger::logInfo("In Idle state");
 
     }
 
@@ -564,51 +681,66 @@ double PlasmaController::handleGetMFCRecipeFlowCommand(QString& responseStr)
 // MFC
 void PlasmaController::handleSetMFCRecipeFlowCommand(const int mfcNumber, const double recipeFlow)
 {
-
+    QString mfcNum = "0" + QString::number(mfcNumber);
+    QString mfcRecipeFlow = QStringLiteral("%1").arg(recipeFlow, 6, 'f', 2, QChar('0')); // number, 6=total field length, 'f'=dont use scientific notation, 2=number of decimal places, padding char
+    QString command = "$41" + mfcNum + mfcRecipeFlow + "%";
+    sendCommand(command);  // SET_RCP_MFC_FLOW   $410mxxx.yy% 1<=m<=4, xxx.yy = flow rate; resp[!410mxxx.yy#]
+    readResponse();
 }
+
 void PlasmaController::handleSetMFCDefaultRecipeCommand(const int mfcNumber, const double recipeFlow)
 {
 
 }
+
 void PlasmaController::handleSetMFCRangeCommand(const int mfcNumber, const double range)
 {
 
 }
+
 // TUNER
 void PlasmaController::handleSetTunerRecipePositionCommand(const double recipePosition)
 {
-    QString command = "$43" + QString::number(recipePosition) + "%";
-    sendCommand(command);
+    //QString number = QString("%1").arg(recipePosition, 4, 10, QChar('0')); // number, field width, base, fill char
+//    QString command = "$43" + number + "%"; // SET_RCP_MS_POS  $43xxxx$ xxxx = Base10 MB Motor Pos; resp[!43xxxx#]
+//    sendCommand(command);
+//    readResponse();
 }
 
 void PlasmaController::handleSetTunerDefaultRecipeCommand(const double defaultPosition)
 {
     QString command = "$2A606" + QString::number(defaultPosition) + "%";
     sendCommand(command);
+    readResponse();
 }
 
 void PlasmaController::handleSetTunerAutoTuneCommand(const bool value)
 {
-    QString command = "$860" + QString::number(value) + "%";
+    QString command = "$860" + QString::number(value) + "%"; // SET_AUTO_MAN 0x86 //$860p% p=1 AutoMode, p=0 ManualMode
     sendCommand(command);
+    readResponse();
 }
 
 void PlasmaController::handleSetPWRDefaultRecipeCommand(const double defaultWatts)
 {
     QString command = "$2A605" + QString::number(defaultWatts) + "%";
     sendCommand(command);
+    readResponse();
 }
 
-void PlasmaController::handleSetPWRRecipeWattsCommand(const double recipeWatts)
+void PlasmaController::handleSetPWRRecipeWattsCommand(const int recipeWatts)
 {
-    QString command = "$42" + QString::number(recipeWatts) + "%";
+    QString number = QString("%1").arg(recipeWatts, 4, 10, QChar('0')); // number, field width, base, fill char
+    QString command = "$42" + number + "%"; // SET_RCP_RF_WATTS  $42xxxx% xxxx = Watts; resp[!42xxxx#]
     sendCommand(command);
+    readResponse();
 }
 
 void PlasmaController::handleSetPWRMaxWattsCommand(const double maxWatts)
 {
     QString command = "$2A705" + QString::number(maxWatts) + "%";
     sendCommand(command);
+    readResponse();
 }
 
 void PlasmaController::getCTLStatusCommand()
@@ -674,6 +806,10 @@ void PlasmaController::parseResponseForCTLStatus(const QString& response)
     m_plasmaHead.setTemperature(temperature);
 }
 
+//////////////////////////////////////////////////////////////////////////////////
+// Recipe
+//////////////////////////////////////////////////////////////////////////////////
+
 bool PlasmaController::getExecuteRecipe() const
 {
     return m_executeRecipe;
@@ -684,16 +820,89 @@ void PlasmaController::setExecuteRecipe(bool value)
     m_executeRecipe = value;
 }
 
+void PlasmaController::setRecipe(QString filePath)
+{
+    m_pRecipe->fileReader.setFilePath(filePath);
+    m_pRecipe->setRecipeFromFile();
+    m_pRecipe->processRecipeKeys(); // process the keys that keep values in memory only
+    // process the keys that have CTL board interaction
+    setMFCsFlowFromRecipe();
+    setRFSetpointFromRecipe();
+    setTunerSetpointFromRecipe();
+    setAutoTuneFromRecipe();
+}
+
+void PlasmaController::setMFCsFlowFromRecipe()
+{
+    for (int i = 0; i < m_mfcs.size(); i++)
+    {
+        MFC* mfc = m_mfcs.at(i);
+        QString mfcKey = "MFC" + QString::number(i + 1);
+
+        if (m_pRecipe->getRecipeMap().contains(mfcKey)) {
+            double flow = m_pRecipe->getRecipeMap()[mfcKey].toDouble();
+            mfc->setRecipeFlow(flow);
+        }
+        else  {
+            // Handle the case when the MFC key is not found in the recipe map
+            Logger::logWarning("MFC" + QString::number(i+1) + " setpoint not found in recipe map.");
+        }
+    }
+}
+
+void PlasmaController::setRFSetpointFromRecipe()
+{
+    if (m_pRecipe->getRecipeMap().contains("PWR")) {
+        int watts = m_pRecipe->getRecipeMap()["PWR"].toInt();
+        m_pwr.setRecipeWatts(watts);
+    }
+    else {
+        // Handle the case when "RF" key is not found in the recipe map
+        Logger::logWarning("RF setpoint not found in recipe map.");
+    }
+}
+
+void PlasmaController::setTunerSetpointFromRecipe()
+{
+    if (m_pRecipe->getRecipeMap().contains("TUNER")) {
+        double position = m_pRecipe->getRecipeMap()["TUNER"].toDouble();
+        m_tuner.setRecipePosition(position);
+    }
+    else {
+        // Handle the case when "TUNER" key is not found in the recipe map
+        Logger::logWarning("TUNER setpoint not found in recipe map.");
+    }
+}
+
+void PlasmaController::setAutoTuneFromRecipe()
+{
+    if (m_pRecipe->getRecipeMap().contains("AUTO")) {
+        QVariant value = m_pRecipe->getRecipeMap()["AUTO"];
+
+        if (value.canConvert<bool>()) {
+            bool booleanValue = value.toBool();
+            m_tuner.setAutoTune(booleanValue);
+        }
+        else {
+            Logger::logWarning("auto tune value is not a boolean.");
+        }
+    }
+    else {
+        Logger::logWarning("auto tune setpoint not found in recipe map.");
+    }
+}
+
+
 void PlasmaController::CTLStartup()
 {
     howManyMFCs();
     getBatchIDLogging();
-    getRecipeMBPosition();
-    getRecipeRFPosition();
-    getRecipeMFC4Flow();
-    getRecipeMFC3Flow();
-    getRecipeMFC2Flow();
-    getRecipeMFC1Flow();
+//    getRecipeMBPosition();  // removing these as per Cory.  Recipe values are not read from the controller only set
+//    getRecipeRFPosition();
+//    getRecipeMFC4Flow();
+//    getRecipeMFC3Flow();
+//    getRecipeMFC2Flow();
+//    getRecipeMFC1Flow();
     getMFC4Range();
     getMFC3Range();
     getMFC2Range();
@@ -832,9 +1041,8 @@ void PlasmaController::getRecipeMFC4Flow() {
         bool ok = false;
         double mfcRecipeFlow = StrVar.toDouble(&ok);
         if (ok) {
+            // this sets the command // TODO: needs implementation
             m_mfcs[3]->setRecipeFlow(mfcRecipeFlow);
-            // update the UI
-            emit MFC4RecipeFlow(QString::number(mfcRecipeFlow));
             Logger::logInfo("Loaded MFC 4 Flow Rate: " + StrVar);
         }
     }
@@ -851,8 +1059,6 @@ void PlasmaController::getRecipeMFC3Flow() {
         double mfcRecipeFlow = StrVar.toDouble(&ok);
         if (ok) {
             m_mfcs[2]->setRecipeFlow(mfcRecipeFlow);
-            // update the UI
-            emit MFC3RecipeFlow(QString::number(mfcRecipeFlow));
             Logger::logInfo("Loaded MFC 3 Flow Rate: " + StrVar);
         }
     }
@@ -869,8 +1075,6 @@ void PlasmaController::getRecipeMFC2Flow() {
         double mfcRecipeFlow = StrVar.toDouble(&ok);
         if (ok) {
             m_mfcs[1]->setRecipeFlow(mfcRecipeFlow);
-            // update the UI
-            emit MFC2RecipeFlow(QString::number(mfcRecipeFlow));
             Logger::logInfo("Loaded MFC 2 Flow Rate: " + StrVar);
         }
     }
@@ -886,8 +1090,6 @@ void PlasmaController::getRecipeMFC1Flow() {
         double mfcRecipeFlow = StrVar.toDouble(&ok);
         if (ok) {
             m_mfcs[0]->setRecipeFlow(mfcRecipeFlow);
-            // update the UI
-            emit MFC1RecipeFlow(QString::number(mfcRecipeFlow));
             Logger::logInfo("Loaded MFC 1 Flow Rate: " + StrVar);
         }
     }

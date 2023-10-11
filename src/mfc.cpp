@@ -33,11 +33,8 @@ double MFC::getRecipeFlow() const
 
 void MFC::setRecipeFlow(double value)
 {
-    if (m_recipeFlow != value)
-    {
-        m_recipeFlow = value;
-        emit recipeFlowChanged(m_mfcNumber, m_recipeFlow);
-    }
+    m_recipeFlow = value;
+    emit recipeFlowChanged(m_mfcNumber, m_recipeFlow);
 }
 
 double MFC::getActualFlow() const
@@ -47,11 +44,8 @@ double MFC::getActualFlow() const
 
 void MFC::setActualFlow(double value)
 {
-    if (m_actualFlow != value)
-    {
-        m_actualFlow = value;
-        emit actualFlowChanged(m_mfcNumber, m_actualFlow);
-    }
+    m_actualFlow = value;
+    emit actualFlowChanged(m_mfcNumber, m_actualFlow);
 }
 
 double MFC::getRange() const
@@ -61,10 +55,8 @@ double MFC::getRange() const
 
 void MFC::setRange(double value)
 {
-    if (m_range != value)
-    {
-        m_range = value;
-        emit rangeChanged(m_mfcNumber, m_range);    }
+    m_range = value;
+    emit rangeChanged(m_mfcNumber, m_range);
 }
 
 double MFC::getDefaultRecipe() const
@@ -74,8 +66,6 @@ double MFC::getDefaultRecipe() const
 
 void MFC::setDefaultRecipe(double value)
 {
-    if (m_defaultRecipe!= value)
-    {
-        m_defaultRecipe = value;
-        emit defaultRecipeChanged(m_mfcNumber, m_defaultRecipe);    }
+    m_defaultRecipe = value;
+    emit defaultRecipeChanged(m_mfcNumber, m_defaultRecipe);
 }
