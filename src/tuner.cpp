@@ -24,6 +24,11 @@ double Tuner::getRecipePosition() const
     return m_recipePosition;
 }
 
+QString Tuner::getRecipePositionQStr() const
+{
+    return QString::number(m_recipePosition, 'f', 2);
+}
+
 void Tuner::setRecipePosition(double setpoint)
 {
     m_recipePosition = setpoint;

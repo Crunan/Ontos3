@@ -12,12 +12,16 @@ public:
 
     double getSafetyGap() const;
     double getSlitLength() const;
+    void setSlitlength(double slitLength);
     double getSlitWidth() const;
+    void setSlitWidth(double slitWidth);
     double getTemperature() const;
     void setTemperature(double temperature);
 
 signals:
-    void temperatureChanged();
+    void headTemperatureChanged();
+    void headSlitLengthChanged();
+    void headSlitWidthChanged();
 
 private:
     double m_safetyGap;  // Distance between plasma head & chuck when z at max height

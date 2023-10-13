@@ -8,7 +8,6 @@
 
 class LEDStatus : public QObject {
     Q_OBJECT
-    Q_PROPERTY(int statusBits READ getStatusBits WRITE setStatusBits NOTIFY statusBitsChanged)
 
 public:
     explicit LEDStatus(QObject *parent = nullptr);

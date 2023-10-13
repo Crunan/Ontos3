@@ -11,12 +11,10 @@ PlasmaController::PlasmaController(QWidget* parent)
     m_stageCTL(),
     m_config(),
     m_pRecipe(new PlasmaRecipe()),
+    m_lightTower(),
     m_pSerialInterface(new SerialInterface()),
     m_ledStatus(),
     m_executeRecipe(0),
-    m_readyToLoad(false),
-    m_MBtunerRecipeSP(false),
-    m_RFtunerRecipeSP(false),
     m_scanMinXPos(0.0),
     m_scanMaxXPos(0.0),
     m_scanMinYPos(0.0),
@@ -24,8 +22,6 @@ PlasmaController::PlasmaController(QWidget* parent)
     m_scanZParkPos(0.0),
     m_scanZScanPos(0.0),
     m_scanRowXWidth(0.0),
-    m_PHSlitLength(0.0),
-    m_PHSlitWidth(0.0),
     m_numXRows(0),
     m_currentXRow(0),
     m_numCycles(0),
@@ -34,21 +30,13 @@ PlasmaController::PlasmaController(QWidget* parent)
     m_startYPosition(0.0),
     m_scanYSpeed(0.0),
     m_scanEndYPosition(0.0),
-    m_XMaxPos(0.0),
-    m_XMinPos(0.0),
-    m_YMaxPos(0.0),
-    m_YMinPos(0.0),
     m_numMFCs(0),
     m_batchLogging(0),
-    m_MaxRFPowerForward(0),
-    m_autoTune(0),
-    m_headTemp(0.0),
     m_collisionDetected(false),
     m_collisionPassed(false),
     m_bRunRecipe(false), //Turn plasma on
     m_plannedAutoStart(false),
-    m_bPlasmaActive(false),
-    m_bAutoScan(false)
+    m_bPlasmaActive(false)
 {
     // Add startup data gathering methods.
     for (MFC* mfc: m_mfcs) {
@@ -59,6 +47,7 @@ PlasmaController::PlasmaController(QWidget* parent)
     connect(&m_tuner, &Tuner::defaultRecipeChanged, this, &PlasmaController::handleSetTunerDefaultRecipeCommand);
     connect(&m_tuner, &Tuner::recipePositionChanged, this, &PlasmaController::handleSetTunerRecipePositionCommand);
     connect(&m_tuner, &Tuner::autoTuneChanged, this, &PlasmaController::handleSetTunerAutoTuneCommand);
+    connect(&m_lightTower, &LightTower::lightTowerStateChanged, this, &PlasmaController::handleLightTowerStateChange);
 
     connect(&m_pwr, &PWR::recipeWattsChanged, this, &PlasmaController::handleSetPWRRecipeWattsCommand);
 
@@ -128,9 +117,10 @@ void PlasmaController::setupScanStateMachine()
     m_scanStateMachine.addState(m_pScanIdleState);
     m_scanStateMachine.setInitialState(m_pScanIdleState);
 
-    // add transitions to and from the super state and idle and shutdown
+    // this allows AxesController to set the state machine to idle
+    connect(&m_stageCTL, &AxesController::ScanSM_TransitionIdle, this, &PlasmaController::scanningStateMachineToIdle);
 
-    m_pScanSuperState->addTransition(this, SIGNAL(AxesController::SSM_TransitionIdle()), m_pScanIdleState);
+    // add transitions to and from the super state and idle and shutdown
     m_pScanSuperState->addTransition(this, SIGNAL(SSM_TransitionIdle()), m_pScanIdleState);
     m_pScanSuperState->addTransition(this, SIGNAL(SSM_TransitionShutdown()), m_pScanShutdownState);
     m_pScanIdleState->addTransition(this, SIGNAL(SSM_TransitionStartup()), m_pScanStartupState);
@@ -144,7 +134,7 @@ void PlasmaController::setupScanStateMachine()
     m_pParkZSubState->addTransition(this, SIGNAL(SSM_TransitionGoXYSubstate()), m_pGoXYStartSubState);
     m_pParkZSubState->addTransition(this, SIGNAL(SSM_TransitionRecycle()), m_pScanRecycleState);
     m_pGoXYStartSubState ->addTransition(this, SIGNAL(SSM_TransitionGoZPositionSubstate()), m_pGoZScanPositionSubState);
-    m_pGoZScanPositionSubState->addTransition(this, SIGNAL(AxesController::SSM_TransitionIdle()), m_pScanColSubState);
+    m_pGoZScanPositionSubState->addTransition(this, SIGNAL(SSM_TransitionScanColSubstate()), m_pScanColSubState);
 
     // start the state machine
     m_scanStateMachine.start();
@@ -225,22 +215,6 @@ QString PlasmaController::findCommandValue(QString command) const
     return m_commandMap.findCommandValue(command);
 }
 
-
-QString PlasmaController::formatSerialCommand(QString cmd, const QString& setpoint)
-{
-    // Remove the trailing '%' character
-    cmd.chop(1);
-
-    // Add the setpoint to the command
-    cmd += setpoint;
-
-    // Add the '%' character back to the command
-    cmd += "%";
-
-    return cmd;
-}
-
-
 void PlasmaController::RunScanAxesSM()
 {
     if (m_scanStateMachine.configuration().contains(m_pScanStartupState)) { // in Startup state
@@ -277,7 +251,7 @@ void PlasmaController::RunScanAxesSM()
         m_scanZScanPos = m_stageCTL.getZp2BaseDbl() - m_pRecipe->getThickness() - m_pRecipe->getGap();
 
         // get the scan row info
-        m_scanRowXWidth = m_PHSlitWidth = m_pRecipe->getOverlap();
+        m_scanRowXWidth = m_plasmaHead.getSlitWidth() - m_pRecipe->getOverlap();
         double xLengthRemaining = m_scanMaxXPos - m_scanMinXPos;
         while (xLengthRemaining >= 0) {
             m_numXRows += 1;
@@ -296,8 +270,8 @@ void PlasmaController::RunScanAxesSM()
         }
 
         // Y scan range from start to finish positions
-        double m_startYPosition = m_scanMaxYPos + m_PHSlitWidth;
-        m_scanEndYPosition = m_scanMinYPos - m_PHSlitWidth;
+        double m_startYPosition = m_scanMaxYPos + m_plasmaHead.getSlitWidth();
+        m_scanEndYPosition = m_scanMinYPos - m_plasmaHead.getSlitWidth();
         m_scanYSpeed = m_pRecipe->getSpeed();
 
         Logger::logInfo("-------------Scan Start-Up--------------");
@@ -336,7 +310,7 @@ void PlasmaController::RunScanAxesSM()
                  emit SSM_StatusUpdate("Scanning", message); // update ui
             }
             // turn off Substrate N2 Purge (assume it's on)
-            toggleN2PurgeOff();
+            m_stageCTL.toggleN2PurgeOff();
             QString command = "$B402" + m_stageCTL.getZMaxSpeedQStr() + "%";
             sendCommand(command); //SET_SPEED  $B40xss.ss%; resp [!B40xss.ss#] 0x = axis number, ss.ss = mm/sec (float)
             readResponse();
@@ -700,11 +674,11 @@ void PlasmaController::handleSetMFCRangeCommand(const int mfcNumber, const doubl
 
 // TUNER
 void PlasmaController::handleSetTunerRecipePositionCommand(const double recipePosition)
-{
-    //QString number = QString("%1").arg(recipePosition, 4, 10, QChar('0')); // number, field width, base, fill char
-//    QString command = "$43" + number + "%"; // SET_RCP_MS_POS  $43xxxx$ xxxx = Base10 MB Motor Pos; resp[!43xxxx#]
-//    sendCommand(command);
-//    readResponse();
+{   
+    QString number = QString("%1").arg(int(recipePosition), 4, 10, QChar('0')); // number, field width, base, fill char
+    QString command = "$43" + number + "%"; // SET_RCP_MS_POS  $43xxxx$ xxxx = Base10 MB Motor Pos; resp[!43xxxx#]
+    sendCommand(command);
+    readResponse();
 }
 
 void PlasmaController::handleSetTunerDefaultRecipeCommand(const double defaultPosition)
@@ -719,6 +693,29 @@ void PlasmaController::handleSetTunerAutoTuneCommand(const bool value)
     QString command = "$860" + QString::number(value) + "%"; // SET_AUTO_MAN 0x86 //$860p% p=1 AutoMode, p=0 ManualMode
     sendCommand(command);
     readResponse();
+}
+
+void PlasmaController::handleLightTowerStateChange()
+{
+    LightTower::LightState currentState = m_lightTower.getState();
+
+    switch (currentState) {
+    case LightTower::ERROR:
+        sendCommand("$CB01%"); //$CB0n% resp[!CB0n#] n = 0,1,2,3 (none, red, amber, green)
+        readResponse();
+        break;
+    case LightTower::READY:
+        sendCommand("$CB02%");
+        readResponse();
+        break;
+    case LightTower::ACTIVE:
+        sendCommand("$CB03%");
+        readResponse();
+        break;
+    case LightTower::INACTIVE:
+        //Do nothing
+        break;
+    }
 }
 
 void PlasmaController::handleSetPWRDefaultRecipeCommand(const double defaultWatts)
@@ -798,12 +795,26 @@ void PlasmaController::parseResponseForCTLStatus(const QString& response)
         MFC* mfc = findMFCByNumber(i);
         double mfcFlow = subsystemData[4 + i].toDouble();
         mfc->setActualFlow(mfcFlow);
-
     }
 
     // Extract and update plasmahead temperature
     double temperature = subsystemData[9].toDouble();
     m_plasmaHead.setTemperature(temperature);
+}
+
+bool PlasmaController::setLightTower()
+{
+    //    if ( ((GlobalmyStatusBits && 0x80) > 0) || (doorsOpen) ) {
+    //        m_lightTower.setState(ERROR);
+    //    }
+    //    else if ( (!doorsOpen) && (RunRecipeOn) ) {
+    //        m_lightTower.setState(ACTIVE);
+    //    }
+    //    else {
+    //        if (currentState != READY) {
+    //            m_lightTower.setState(READY);
+    //        }
+    //    }
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -829,7 +840,8 @@ void PlasmaController::setRecipe(QString filePath)
     setMFCsFlowFromRecipe();
     setRFSetpointFromRecipe();
     setTunerSetpointFromRecipe();
-    setAutoTuneFromRecipe();
+    // as per cory Auto Tune should be set to on when loading any recipe
+    m_tuner.setAutoTune(true);
 }
 
 void PlasmaController::setMFCsFlowFromRecipe()
@@ -837,7 +849,7 @@ void PlasmaController::setMFCsFlowFromRecipe()
     for (int i = 0; i < m_mfcs.size(); i++)
     {
         MFC* mfc = m_mfcs.at(i);
-        QString mfcKey = "MFC" + QString::number(i + 1);
+        QString mfcKey = RECIPE_MFC_KEY + QString::number(i + 1);
 
         if (m_pRecipe->getRecipeMap().contains(mfcKey)) {
             double flow = m_pRecipe->getRecipeMap()[mfcKey].toDouble();
@@ -845,59 +857,40 @@ void PlasmaController::setMFCsFlowFromRecipe()
         }
         else  {
             // Handle the case when the MFC key is not found in the recipe map
-            Logger::logWarning("MFC" + QString::number(i+1) + " setpoint not found in recipe map.");
+            Logger::logWarning(RECIPE_MFC_KEY + QString::number(i+1) + " setpoint not found in recipe map.");
         }
     }
 }
 
 void PlasmaController::setRFSetpointFromRecipe()
 {
-    if (m_pRecipe->getRecipeMap().contains("PWR")) {
-        int watts = m_pRecipe->getRecipeMap()["PWR"].toInt();
+    if (m_pRecipe->getRecipeMap().contains(RECIPE_PWR_KEY)) {
+        int watts = m_pRecipe->getRecipeMap()[RECIPE_PWR_KEY].toInt();
         m_pwr.setRecipeWatts(watts);
     }
     else {
-        // Handle the case when "RF" key is not found in the recipe map
-        Logger::logWarning("RF setpoint not found in recipe map.");
+        // Handle the case when "PWR" key is not found in the recipe map
+        Logger::logWarning(RECIPE_PWR_KEY + " setpoint not found in recipe map.");
     }
 }
 
 void PlasmaController::setTunerSetpointFromRecipe()
 {
-    if (m_pRecipe->getRecipeMap().contains("TUNER")) {
-        double position = m_pRecipe->getRecipeMap()["TUNER"].toDouble();
+    if (m_pRecipe->getRecipeMap().contains(RECIPE_TUNER_KEY)) {
+        double position = m_pRecipe->getRecipeMap()[RECIPE_TUNER_KEY].toDouble();
         m_tuner.setRecipePosition(position);
     }
     else {
         // Handle the case when "TUNER" key is not found in the recipe map
-        Logger::logWarning("TUNER setpoint not found in recipe map.");
+        Logger::logWarning(RECIPE_TUNER_KEY + " setpoint not found in recipe map.");
     }
 }
-
-void PlasmaController::setAutoTuneFromRecipe()
-{
-    if (m_pRecipe->getRecipeMap().contains("AUTO")) {
-        QVariant value = m_pRecipe->getRecipeMap()["AUTO"];
-
-        if (value.canConvert<bool>()) {
-            bool booleanValue = value.toBool();
-            m_tuner.setAutoTune(booleanValue);
-        }
-        else {
-            Logger::logWarning("auto tune value is not a boolean.");
-        }
-    }
-    else {
-        Logger::logWarning("auto tune setpoint not found in recipe map.");
-    }
-}
-
 
 void PlasmaController::CTLStartup()
 {
     howManyMFCs();
     getBatchIDLogging();
-//    getRecipeMBPosition();  // removing these as per Cory.  Recipe values are not read from the controller only set
+//    getRecipeMBPosition();  // comes in status bits
 //    getRecipeRFPosition();
 //    getRecipeMFC4Flow();
 //    getRecipeMFC3Flow();
@@ -907,13 +900,12 @@ void PlasmaController::CTLStartup()
     getMFC3Range();
     getMFC2Range();
     getMFC1Range();
-    getMaxRFPowerForward();
+// comes in status bits    getMaxRFPowerForward();
     getAutoMan();
     getTemp();
     turnOffExecRecipe();
     getPHSlitLength();
     getPHSlitWidth();
-
 //    setCTLStateMachinesIdle();
 }
 
@@ -995,107 +987,7 @@ void PlasmaController::getBatchIDLogging() {
         Logger::logCritical("Could Not retrieve Batch Logging, last requestData sent: " + getLastCommand());
 }
 
-void PlasmaController::getRecipeMBPosition() {
-    sendCommand("$2A606%"); //GET RECIPE MB Start Position () $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
-    QString response = readResponse();
-    if (response.length() > 7) {
-        QString StrVar = response.mid(7, 7);
-        bool ok = false;
-        double loadedSP = StrVar.toDouble(&ok);
-        if (ok) {   
-            m_readyToLoad = true;
-            m_MBtunerRecipeSP = loadedSP;
-            // update UI
-            emit setRecipeMBtuner(StrVar);
-            Logger::logInfo("Loaded MB Setpoint: " + StrVar + " %");
-        }
-    }
-    else
-        Logger::logCritical("Could Not retrieve MB tuner setpoint, last requestData sent: " + getLastCommand() );
-}
 
-void PlasmaController::getRecipeRFPosition() {
-    sendCommand("$2A605%"); //GET RECIPE RF PWR Setpoint (Watts) $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
-    QString response = readResponse();
-    if (response.length() > 7) {
-        QString StrVar = response.mid(7, 4);
-        bool ok = false;
-        double rfLoadedSP = StrVar.toDouble(&ok);
-        if (ok) {
-            m_readyToLoad = true;
-            m_RFtunerRecipeSP = rfLoadedSP;
-            // update UI
-            emit setRecipeRFpower(StrVar);
-            Logger::logInfo("Loaded RF Setpoint: " + StrVar);
-        }
-    }
-    else
-        Logger::logCritical("Could Not retrieve RF setpoint, last requestData sent: " + getLastCommand());
-}
-
-void PlasmaController::getRecipeMFC4Flow() {
-    sendCommand("$2A604%"); //GET RECIPE MFC4 Flow (SLPM) $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
-    QString response = readResponse();
-    if (response.length() > 7) {
-        QString StrVar = response.mid(7, (response.length() - 8));
-        bool ok = false;
-        double mfcRecipeFlow = StrVar.toDouble(&ok);
-        if (ok) {
-            // this sets the command // TODO: needs implementation
-            m_mfcs[3]->setRecipeFlow(mfcRecipeFlow);
-            Logger::logInfo("Loaded MFC 4 Flow Rate: " + StrVar);
-        }
-    }
-    else
-        Logger::logCritical("Could Not retrieve MFC 4 setpoint, last requestData sent: " + getLastCommand());
-}
-
-void PlasmaController::getRecipeMFC3Flow() {
-    sendCommand("$2A603%"); //GET RECIPE MFC3 Flow (SLPM) $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
-    QString response = readResponse();
-    if (response.length() > 7) {
-        QString StrVar = response.mid(7, (response.length() - 8));
-        bool ok = false;
-        double mfcRecipeFlow = StrVar.toDouble(&ok);
-        if (ok) {
-            m_mfcs[2]->setRecipeFlow(mfcRecipeFlow);
-            Logger::logInfo("Loaded MFC 3 Flow Rate: " + StrVar);
-        }
-    }
-    else
-        Logger::logCritical("Could Not retrieve MFC 3 setpoint, last requestData sent: " + getLastCommand() );
-}
-
-void PlasmaController::getRecipeMFC2Flow() {
-    sendCommand("$2A602%"); //GET RECIPE MFC2 Flow (SLPM) $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
-    QString response = readResponse();
-    if (response.length() > 7) {
-        QString StrVar = response.mid(7, (response.length() - 8));
-        bool ok = false;
-        double mfcRecipeFlow = StrVar.toDouble(&ok);
-        if (ok) {
-            m_mfcs[1]->setRecipeFlow(mfcRecipeFlow);
-            Logger::logInfo("Loaded MFC 2 Flow Rate: " + StrVar);
-        }
-    }
-    else
-        Logger::logCritical("Could Not retrieve MFC 2 setpoint, last requestData sent: " + getLastCommand() );
-}
-void PlasmaController::getRecipeMFC1Flow() {
-    sendCommand("$2A601%"); //GET RECIPE MFC1 Flow (SLPM) $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
-    QString response = readResponse();
-    if (response.length() > 7) {
-        QString StrVar = response.mid(7, (response.length() - 8));
-        bool ok = false;
-        double mfcRecipeFlow = StrVar.toDouble(&ok);
-        if (ok) {
-            m_mfcs[0]->setRecipeFlow(mfcRecipeFlow);
-            Logger::logInfo("Loaded MFC 1 Flow Rate: " + StrVar);
-        }
-    }
-    else
-        Logger::logCritical("Could Not retrieve MFC 1 setpoint, last requestData sent: " + getLastCommand() );
-}
 
 void PlasmaController::getMFC4Range() {
     sendCommand("$8504%"); //GET_MFC_RANGE $850m% 1<=m<=4; resp[!850xxx.yy#]
@@ -1161,23 +1053,6 @@ void PlasmaController::getMFC1Range() {
         Logger::logCritical("Could Not retrieve MFC 1 range, last requestData sent: " + getLastCommand() );
 }
 
-
-void PlasmaController::getMaxRFPowerForward() {
-    sendCommand("$2A705%"); //Get Max RF power forward  $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
-    QString response = readResponse();
-    if (response.length() > 7) {
-        QString StrVar = response.mid(7, 3);
-        bool ok = false;
-        int maxRFPowerForward = StrVar.toInt(&ok);
-        if (ok) {
-            m_MaxRFPowerForward = maxRFPowerForward;
-            Logger::logInfo("Loaded Max RF Forward: " + StrVar);
-        }
-    }
-    else
-        Logger::logCritical("Could Not retrieve MFC 1 range, last requestData sent: " + getLastCommand());
-}
-
 void PlasmaController::getAutoMan() {
     sendCommand("$89%"); //GET_AUTO_MAN   $89%; resp [!890p#] p=1 AutoMode, p=0 ManualMode
     QString response = readResponse();
@@ -1186,7 +1061,7 @@ void PlasmaController::getAutoMan() {
         bool ok = false;
         int autoTune = StrVar.toInt(&ok);
         if (ok) {
-            m_autoTune = autoTune;
+            m_tuner.setAutoTune(autoTune);
             Logger::logInfo("Loaded Tuner Auto Setting: " + StrVar);
         }
     }
@@ -1202,9 +1077,7 @@ void PlasmaController::getTemp() {
         bool ok = false;
         double headTemp = StrVar.toDouble(&ok);
         if (ok) {
-            m_headTemp = headTemp;
-            // update UI
-            emit plasmaHeadTemp(m_headTemp);
+            m_plasmaHead.setTemperature(headTemp);
             Logger::logInfo("Loaded current temperature: " + StrVar);
         }
         else
@@ -1221,7 +1094,7 @@ void PlasmaController::getPHSlitLength()
         bool ok = false;
         double PHSlitLength = StrVar.toDouble(&ok);
         if (ok) {
-            m_PHSlitLength = PHSlitLength;
+            m_plasmaHead.setSlitlength(PHSlitLength);
             Logger::logInfo("Plasma Head Slit Length: " + StrVar + " (mm)");
         }
     }
@@ -1237,15 +1110,13 @@ void PlasmaController::getPHSlitWidth()
         bool ok = false;
         double PHSlitWidth = StrVar.toDouble(&ok);
         if (ok) {
-            m_PHSlitWidth = PHSlitWidth;
+            m_plasmaHead.setSlitWidth(PHSlitWidth);
             Logger::logInfo("Plasma Head Slit Width: " + StrVar + " (mm)");
         }
     }
     else
         Logger::logCritical("Could Not get Plasma head slit width, last requestData: " + getLastCommand());
 }
-
-
 
 
 //void MainWindow::UpdateStatus() {

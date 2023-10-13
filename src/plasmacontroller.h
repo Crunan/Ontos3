@@ -11,6 +11,7 @@
 #include "tuner.h"
 #include "mfc.h"
 #include "settingsdialog.h"
+#include "lighttower.h"
 
 
 #include <QObject>
@@ -24,17 +25,16 @@ class PlasmaController : public QObject
 public:
     explicit PlasmaController(QWidget* parent = nullptr);
     ~PlasmaController();
+
     // Serial Functions
     bool open(const SettingsDialog& settings);
     void close();
-    QString formatSerialCommand(QString cmd, const QString& setpoint);
     bool sendCommand(const QString& command);
     QString readResponse();
-
     QString getPortErrorString();
     bool isOpen();
 
-    // Commands Map functions
+    // Commands Map functions.  TODO: remove
     void setCommandMap(const QMap<QString, QPair<QString, QString>>& map);
     QString findCommandValue(QString command) const;
 
@@ -45,60 +45,26 @@ public:
     // CTL Status
     void setLEDStatus(int& bits);
 
-    // MFC public commands
-    // MFC functions
     MFC* findMFCByNumber(int mfcNumber);
     int numberOfMFCs();
 
-
+    // startup and reset
     void CTLStartup();
     void resetCTL();
 
-
-    SerialInterface* getSerialInterface() { return m_pSerialInterface; }
-
+    // state machines
     void RunScanAxesSM();
     void RunCollisionSM();
+    void StartScan() { emit SSM_TransitionStartup(); }
+    void StopScan() { emit SSM_TransitionShutdown(); }
 
     // axes controller wrappers
     AxesController& getAxesController() { return this->m_stageCTL; }
-    void AxisStartup() { m_stageCTL.AxisStartup(); }
-    void resetAxes() { m_stageCTL.resetAxes(); }
-    double getXTwoSpotFirstPoint() { return m_stageCTL.getXTwoSpotFirstPoint(); }
-    double getXTwoSpotSecondPoint() { return m_stageCTL.getXTwoSpotSecondPoint(); }
-    double getYTwoSpotFirstPoint() { return m_stageCTL.getYTwoSpotFirstPoint(); }
-    double getYTwoSpotSecondPoint() { return m_stageCTL.getYTwoSpotSecondPoint(); }
-    void RunInitAxesSM() {  m_stageCTL.RunInitAxesSM(); }
-    void RunTwoSpotSM() {  m_stageCTL.RunTwoSpotSM(); }
-    void RunHomeAxesSM() {  m_stageCTL.RunHomeAxesSM(); }
-    void getAxisStatus() {  m_stageCTL.getAxisStatus(); }
-    int getXAxisState() { return m_stageCTL.getXAxisState(); }
-    double getXPosition() {  return m_stageCTL.getXPosition(); }
     double TranslateCoordXPH2Base(double Xpos) {  return m_stageCTL.TranslateCoordXPH2Base(Xpos); }
-    int getYAxisState() { return m_stageCTL.getYAxisState(); }
-    double getYPosition() { return m_stageCTL.getYPosition(); }
     double TranslateCoordYPH2Base(double Ypos) {  return m_stageCTL.TranslateCoordYPH2Base(Ypos); }
-    int getZAxisState() { return m_stageCTL.getYAxisState(); }
-    double getZPosition() { return m_stageCTL.getYPosition(); }
     double TranslateCoordZPH2Base(double Zpos) {  return m_stageCTL.TranslateCoordZPH2Base(Zpos); }
-    QString getXMaxSpeedQStr() {  return m_stageCTL.getXMaxSpeedQStr(); }
-    double XMaxSpeed() {  return m_stageCTL.XMaxSpeed(); }
-    void StartInit() {  m_stageCTL.StartInit(); }
-    void StartTwoSpot() {  m_stageCTL.StartTwoSpot(); }
-    void StopTwoSpot() {  m_stageCTL.StopTwoSpot(); }
-    void StartHome() {  m_stageCTL.StartHome(); }
-    void StopHome() {  m_stageCTL.StopHome(); }
-    void togglePinsOn() {  m_stageCTL.togglePinsOn(); }
-    void togglePinsOff() {  m_stageCTL.togglePinsOff(); }
-    void toggleN2PurgeOn() {  m_stageCTL.toggleN2PurgeOn(); }
-    void toggleN2PurgeOff() {  m_stageCTL.toggleN2PurgeOff(); }
-    void toggleJoystickOn() {  m_stageCTL.toggleJoystickOn(); }
-    void toggleJoystickOff() {  m_stageCTL.toggleJoystickOff(); }
-    void toggleVacOn() {  m_stageCTL.toggleVacOn(); }
-    void toggleVacOff() {  m_stageCTL.toggleVacOff(); }
 
-    // Recipe accessor and wrappers
-    PlasmaRecipe *getRecipe() { return m_pRecipe; }
+    // Recipe
     void setRecipe(QString filePath);
     bool getExecuteRecipe() const;
     void setExecuteRecipe(bool value);
@@ -106,15 +72,15 @@ public:
     void setMFCsFlowFromRecipe();
     void setRFSetpointFromRecipe();
     void setTunerSetpointFromRecipe();
-    void setAutoTuneFromRecipe();
-    void setAutoScan(bool scan) { m_bAutoScan = scan; }
+    void setAutoScanFromRecipe();
 
-    // tuner
+    // accessors
     Tuner& getTuner() { return m_tuner; }
     PWR& getPower() { return m_pwr; }
-
-    void StartScan() { emit SSM_TransitionStartup(); }
-    void StopScan() { emit SSM_TransitionShutdown(); }
+    QList<MFC*>& getMFCs() { return m_mfcs; }
+    PlasmaHead& getPlasmaHead() { return m_plasmaHead; }
+    SerialInterface* getSerialInterface() { return m_pSerialInterface; }
+    PlasmaRecipe *getRecipe() { return m_pRecipe; }
 
     // laser access
     void LaserSenseOn();
@@ -142,8 +108,6 @@ public:
     void getPHSlitLength();
     void getPHSlitWidth();
 
-    //Tuner m_tuner;
-    PlasmaHead m_plasmaHead;
     QList<MFC*> m_mfcs; // Store the MFCs in a list
 
 signals:
@@ -198,11 +162,19 @@ public slots:
     void handleSetPWRRecipeWattsCommand(const int recipeWatts);
     void handleSetPWRMaxWattsCommand(const double maxWatts);
 
+    // light tower
+    void handleLightTowerStateChange();
+    bool setLightTower();
+
+    // scan state machine to idle
+    void scanningStateMachineToIdle() { emit SSM_TransitionIdle(); }
+
 private:
     QString getLastCommand() { return m_pSerialInterface->getLastCommand(); }
     void setupScanStateMachine();
     void setupCollisionStateMachine();
 
+    LightTower m_lightTower;
     SerialInterface *m_pSerialInterface;
     LEDStatus m_ledStatus;
     bool m_executeRecipe;
@@ -210,6 +182,7 @@ private:
     CommandMap m_commandMap;
     AxesController m_stageCTL;
     PlasmaRecipe *m_pRecipe;
+    PlasmaHead m_plasmaHead;
     Tuner m_tuner;
     PWR m_pwr;
 
@@ -250,8 +223,6 @@ private:
     double m_scanZParkPos;
     double m_scanZScanPos;
     double m_scanRowXWidth;
-    double m_PHSlitLength;
-    double m_PHSlitWidth;
     int m_numXRows;
     int m_currentXRow;
     int m_numCycles;
@@ -261,26 +232,14 @@ private:
     double m_scanYSpeed;
     double m_scanEndYPosition;
 
-    double m_XMaxPos;
-    double m_XMinPos;
-    double m_YMaxPos;
-    double m_YMinPos;
-
     int m_numMFCs;
     int m_batchLogging;
-    bool m_readyToLoad;
-    double m_MBtunerRecipeSP;
-    double m_RFtunerRecipeSP;
-    int m_MaxRFPowerForward;
-    int m_autoTune;
-    double m_headTemp;
 
     bool m_collisionDetected;
     bool m_collisionPassed;
     bool m_bRunRecipe; //Turn plasma on
     bool m_plannedAutoStart;
     bool m_bPlasmaActive;
-    bool m_bAutoScan;
 };
 
 #endif // PLASMACONTROLLER_H

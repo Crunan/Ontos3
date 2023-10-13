@@ -11,10 +11,10 @@ class MFC : public QObject {
 public:
     MFC(int mfcNum);
 
-    QString getMFCNumberAsString() const;
+    QString getMFCNumberQStr() const;
     int getMFCNumber() const;
 
-    QString getRecipeFlowAsString() const;
+    QString getRecipeFlowQStr() const;
     double getRecipeFlow() const;
     void setRecipeFlow(double value);
 

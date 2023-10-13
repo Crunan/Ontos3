@@ -50,7 +50,7 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(&m_mainCTL, &PlasmaController::SSM_Done, this, &MainWindow::SSM_Done);
     connect(&m_mainCTL, &PlasmaController::CSM_StatusUpdate, this, &MainWindow::CSM_StatusUpdate);
     connect(&m_mainCTL.getTuner(), &Tuner::recipePositionChanged, this, &MainWindow::setRecipeMBtuner);
-    connect(&m_mainCTL, &PlasmaController::plasmaHeadTemp, this, &MainWindow::plasmaHeadTemp);
+    //connect(&m_mainCTL, &PlasmaController::plasmaHeadTemp, this, &MainWindow::plasmaHeadTemp);
     // main state machine from main loop
     connect(m_pMainLoop, &MainLoop::runMainStateMachine, this, &MainWindow::runMainStateMachine);
     // ui updates from recipe
@@ -61,16 +61,17 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(m_mainCTL.getRecipe(), &PlasmaRecipe::autoScanChanged, this, &MainWindow::autoScanChanged);
     connect(m_mainCTL.getRecipe(), &PlasmaRecipe::xLimitsChanged, this, &MainWindow::xLimitsChanged);
     connect(m_mainCTL.getRecipe(), &PlasmaRecipe::yLimitsChanged, this, &MainWindow::yLimitsChanged);
+    connect(m_mainCTL.getRecipe(), &PlasmaRecipe::cyclesChanged, this, &MainWindow::cyclesChanged);
     connect(&m_mainCTL.getPower(), &PWR::recipeWattsChanged, this, &MainWindow::recipeWattsChanged);
+    connect(&m_mainCTL.getPower(), &PWR::forwardWattsChanged, this, &MainWindow::forwardWattsChanged);
+    connect(&m_mainCTL.getPower(), &PWR::reflectedWattsChanged, this, &MainWindow::reflectedWattsChanged);
     connect(&m_mainCTL.getTuner(), &Tuner::autoTuneChanged, this, &MainWindow::autoTuneChanged);
+    connect(&m_mainCTL.getTuner(), &Tuner::actualPositionChanged, this, &MainWindow::MBactualPositionChanged);
 
-    // TODO: create stage area for custom pathing
-//    ui->verticalLayout_4->addWidget(m_pStageWidget);
-//    m_pStageWidget->setStageBounds(0.0, 100.0, 0.0, 50.0);
+
 
     // Make signal/slot connections here
     connectRecipeButtons(); // TODO: remove these and replace with designer click handlers
-    connectCascadeRecipeButtons(); // TODO: remove these and replace with designer click handlers
 
     // recipe slots
     connectMFCFlowBars();
@@ -153,12 +154,7 @@ void MainWindow::connectRecipeButtons()
     connectMFCRecipeButton(ui->loadMFC4Button, 4);
 }
 
-void MainWindow::connectCascadeRecipeButtons()
-{
-    connect(ui->addCascadeRecipeButton, &QPushButton::clicked, this, &MainWindow::addRecipeToCascadeRecipe);
-    connect(ui->removeCascadeRecipeButton, &QPushButton::clicked, this, &MainWindow::removeRecipeFromCascadeList);
-    connect(ui->saveAsCascadeRecipeButton, &QPushButton::clicked, this, &MainWindow::saveAsCascadeRecipeListToFile);
-}
+
 
 void MainWindow::connectMFCFlowBars()
 {
@@ -166,6 +162,7 @@ void MainWindow::connectMFCFlowBars()
     // to the GUI updateFlowbars function.
     for (int i = 0; i < m_mainCTL.m_mfcs.size(); ++i) {
         connect(m_mainCTL.m_mfcs[i], &MFC::recipeFlowChanged, this, &MainWindow::updateRecipeFlow);
+        connect(m_mainCTL.m_mfcs[i], &MFC::actualFlowChanged, this, &MainWindow::actualFlowChanged);
     }
 }
 
@@ -180,7 +177,7 @@ void MainWindow::RunStartup()
     //GetExeCfg();
     //loadConfigGUI(Values); // TODO
     m_mainCTL.CTLStartup();
-    m_mainCTL.AxisStartup();
+    m_mainCTL.getAxesController().AxisStartup();
 }
 
 
@@ -192,7 +189,7 @@ void MainWindow::loadConfigGUI(QStringList value)
     ui->gas2_label->setText(value[1]);
     //config.setMFC3(value[5]);
     ui->gas3_label->setText(value[2]);
-    //config.setMFC4(value[7]);plasmaHeadTemp
+    //config.setMFC4(value[7]);
     ui->gas4_label->setText(value[3]);
 }
 
@@ -204,110 +201,172 @@ void MainWindow::loadConfigGUI(QStringList value)
 // set ui elements accordingly
 void MainWindow::homeStateMachineStartup()
 {
-    //    RunScanBtn.Visible = False
-    //    SetTwoSpotBtn.Visible = False
-    //    SetDiameterBtn.Visible = False
-    //    HomeAxesBtn.Text = "STOP"
-    //            PinsSquare.BackColor = Color.Gainsboro
-    //            b_HasPins = False 'This is so the first time the button is hit, the button will bury the pins
+    // put the button in the checked state and change text
+    ui->Home_button->setText("STOP");
+    ui->Home_button_dup->setText("STOP");
+    ui->Home_button->setChecked(true);
+    ui->Home_button_dup->setChecked(true);
 
+    // disable other stage movement buttons
+    ui->init_button->setEnabled(false);
+    ui->init_button_dup->setEnabled(false);
     ui->twospot_button->setEnabled(false);
     ui->twospot_button_dup->setEnabled(false);
     ui->diameter_button->setEnabled(false);
     ui->diameter_button_dup->setEnabled(false);
-    ui->Home_button->setText("STOP");
-    ui->Home_button_dup->setText("STOP");
+    ui->scan_button->setEnabled(false);
+    ui->scan_button_dup->setEnabled(false);
 }
 
 // set ui elements accordingly
 void MainWindow::homeStateMachineDone()
 {
-    ui->twospot_button->setEnabled(true);
-    ui->twospot_button_dup->setEnabled(true);
-    ui->diameter_button->setEnabled(true);
-    ui->diameter_button_dup->setEnabled(true);
+    // put the button in the unchecked state and change text
     ui->Home_button->setText("LOAD");
     ui->Home_button_dup->setText("LOAD");
     ui->Home_button->setChecked(false);
     ui->Home_button_dup->setChecked(false);
+
+    // enable other stage movement buttons
+    ui->init_button->setEnabled(true);
+    ui->init_button_dup->setEnabled(true);
+    ui->twospot_button->setEnabled(true);
+    ui->twospot_button_dup->setEnabled(true);
+    ui->diameter_button->setEnabled(true);
+    ui->diameter_button_dup->setEnabled(true);
+    ui->scan_button->setEnabled(true);
+    ui->scan_button_dup->setEnabled(true);
 }
 
 // set ui elements accordingly
 void MainWindow::initStateMachineStartup()
 {
-    //GUI status
-    //ui->Stagepins_button->setChecked(true); // TODO: need to implement
-    //RunScanBtn.Visible = False
+    // put the button in the checked state
+    ui->init_button->setChecked(true);
+    ui->init_button_dup->setChecked(true);
+
+    // disable the other state movement buttons
     ui->twospot_button->setEnabled(false);
     ui->twospot_button_dup->setEnabled(false);
     ui->diameter_button->setEnabled(false);
     ui->diameter_button_dup->setEnabled(false);
+    ui->scan_button->setEnabled(false);
+    ui->scan_button_dup->setEnabled(false);
     ui->Home_button->setEnabled(false);
     ui->Home_button_dup->setEnabled(false);
-    ui->init_button->setEnabled(false);
-    ui->init_button_dup->setEnabled(false);
 }
 
 // set ui elements accordingly
 void MainWindow::initStateMachineDone()
 {
-    //    RunScanBtn.Visible = True
-    //    Vacbtn.Visible = True
-    //    RecipeButtonPins.Visible = True
-    //    AutoVacSquare.Visible = True
-    //    PinsSquare.Visible = True
-    //    PinsSquare.BackColor = Color.Lime
-    //    b_HasPins = True 'This is so the first time the button is hit, the button will bury the pins
-    //    If b_ENG_mode Then
-    //        SetTwoSpotBtn.Visible = True
-    //        SetDiameterBtn.Visible = True
-    //    End If
+    // put the init buttons in the unchecked state
+    ui->init_button->setChecked(false);
+    ui->init_button_dup->setChecked(false);
+
+    // enable the other stage movement buttons
     ui->twospot_button->setEnabled(true);
     ui->twospot_button_dup->setEnabled(true);
     ui->diameter_button->setEnabled(true);
     ui->diameter_button_dup->setEnabled(true);
     ui->Home_button->setEnabled(true);
     ui->Home_button_dup->setEnabled(true);
-    ui->init_button->setEnabled(true);
-    ui->init_button_dup->setEnabled(true);
-    ui->init_button->setChecked(false);
-    ui->init_button_dup->setChecked(false);
+    ui->scan_button->setEnabled(true);
+    ui->scan_button_dup->setEnabled(true);
 }
 
 void MainWindow::twoSpotStateMachineStartup()
 {
+    // put the button in the checked state and change text
     ui->twospot_button->setText("STOP");
+    ui->twospot_button_dup->setText("STOP");
+    ui->twospot_button->setChecked(true);
+    ui->twospot_button_dup->setChecked(true);
 
+    // disable the other stage movement buttons
     ui->Home_button->setEnabled(false);
     ui->Home_button_dup->setEnabled(false);
     ui->init_button->setEnabled(false);
     ui->init_button_dup->setEnabled(false);
-    ui->init_button->setChecked(false);
-    ui->init_button_dup->setChecked(false);
+    ui->scan_button->setEnabled(false);
+    ui->scan_button_dup->setEnabled(false);
+    ui->diameter_button->setEnabled(false);
+    ui->diameter_button_dup->setEnabled(false);
 }
 
 void MainWindow::twoSpotStateMachineDone()
 {
+    // put the button in the unchecked state and change text
     ui->twospot_button->setText("TWO SPOT");
+    ui->twospot_button_dup->setText("TWO SPOT");
+    ui->twospot_button->setChecked(false);
+    ui->twospot_button_dup->setChecked(false);
 
     // 3 axis tab
-    ui->xmin_controls_dup->setText(QString::number(m_mainCTL.getXTwoSpotFirstPoint()));
-    ui->xmax_controls_dup->setText(QString::number(m_mainCTL.getXTwoSpotSecondPoint()));
-    ui->ymin_controls_dup->setText(QString::number(m_mainCTL.getYTwoSpotFirstPoint()));
-    ui->ymax_controls_dup->setText(QString::number(m_mainCTL.getYTwoSpotSecondPoint()));
+    ui->xmin_controls_dup->setText(QString::number(m_mainCTL.getAxesController().getXTwoSpotFirstPoint()));
+    ui->xmax_controls_dup->setText(QString::number(m_mainCTL.getAxesController().getXTwoSpotSecondPoint()));
+    ui->ymin_controls_dup->setText(QString::number(m_mainCTL.getAxesController().getYTwoSpotFirstPoint()));
+    ui->ymax_controls_dup->setText(QString::number(m_mainCTL.getAxesController().getYTwoSpotSecondPoint()));
 
     // dashboard tab
-    ui->x1_recipe->setText(QString::number(m_mainCTL.getXTwoSpotFirstPoint()));
-    ui->x2_recipe->setText(QString::number(m_mainCTL.getXTwoSpotSecondPoint()));
-    ui->y1_recipe->setText(QString::number(m_mainCTL.getYTwoSpotFirstPoint()));
-    ui->y2_recipe->setText(QString::number(m_mainCTL.getYTwoSpotSecondPoint()));
+    ui->x1_recipe->setText(QString::number(m_mainCTL.getAxesController().getXTwoSpotFirstPoint()));
+    ui->x2_recipe->setText(QString::number(m_mainCTL.getAxesController().getXTwoSpotSecondPoint()));
+    ui->y1_recipe->setText(QString::number(m_mainCTL.getAxesController().getYTwoSpotFirstPoint()));
+    ui->y2_recipe->setText(QString::number(m_mainCTL.getAxesController().getYTwoSpotSecondPoint()));
 
+    // enable the buttons that we disabled
     ui->Home_button->setEnabled(true);
     ui->Home_button_dup->setEnabled(true);
     ui->init_button->setEnabled(true);
     ui->init_button_dup->setEnabled(true);
-    ui->twospot_button->setChecked(false);
-    ui->twospot_button->setChecked(false);
+    ui->scan_button->setEnabled(true);
+    ui->scan_button_dup->setEnabled(true);
+    ui->diameter_button->setEnabled(true);
+    ui->diameter_button_dup->setEnabled(true);
+}
+
+void MainWindow::SSM_Started()
+{
+    // put the button in the checked state and change text
+    ui->scan_button->setText("STOP");
+    ui->scan_button_dup->setText("STOP");
+    ui->scan_button->setChecked(true);
+    ui->scan_button_dup->setChecked(true);
+
+    // disable other stage movement buttons
+    ui->init_button->setEnabled(false);
+    ui->init_button_dup->setEnabled(false);
+    ui->Home_button->setEnabled(false);
+    ui->Home_button_dup->setEnabled(false);
+    ui->twospot_button->setEnabled(false);
+    ui->twospot_button_dup->setEnabled(false);
+    ui->diameter_button->setEnabled(false);
+    ui->diameter_button_dup->setEnabled(false);
+}
+
+void MainWindow::SSM_Done()
+{
+    // put buttons in unchecked state and change text
+    ui->scan_button->setChecked(false);
+    ui->scan_button_dup->setChecked(false);
+    ui->scan_button->setText("SCAN");
+    ui->scan_button_dup->setText("SCAN");
+
+    // update status
+    QString status = "Scanning Completed";
+    ui->axisstatus->setText(status);
+    ui->axisstatus_2->setText("");
+    ui->axisstatus_dup->setText(status);
+    ui->axisstatus_2_dup->setText("");
+
+    // enable other stage movement buttons
+    ui->init_button->setEnabled(true);
+    ui->init_button_dup->setEnabled(true);
+    ui->Home_button->setEnabled(true);
+    ui->Home_button_dup->setEnabled(true);
+    ui->twospot_button->setEnabled(true);
+    ui->twospot_button_dup->setEnabled(true);
+    ui->diameter_button->setEnabled(true);
+    ui->diameter_button_dup->setEnabled(true);
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -339,7 +398,7 @@ void MainWindow::openMainPort()
         m_pMainCTLConsole->setEnabled(true);
         m_pMainCTLConsole->setLocalEchoEnabled(p.localEchoEnabled);
 
-        m_mainCTL.resetAxes();
+        m_mainCTL.getAxesController().resetAxes();
         m_mainCTL.resetCTL();
         CTLResetTimeOut = 2500ms / m_pMainLoop->getTimerInterval();
         // (DEBUG_MODE) ? MainStateMachine.setState(IDLE) : MainStateMachine.setState(STARTUP); // TODO: Needs implementing
@@ -480,9 +539,9 @@ void MainWindow::runMainStateMachine()
             UpdateStatus();
             // setLightTower(); TODO: Need to implement
             // HandleDoorAbort() TODO: Need to implement // run the Door Abort state machine
-            m_mainCTL.RunInitAxesSM();
-            m_mainCTL.RunTwoSpotSM();
-            m_mainCTL.RunHomeAxesSM();
+            m_mainCTL.getAxesController().RunInitAxesSM();
+            m_mainCTL.getAxesController().RunTwoSpotSM();
+            m_mainCTL.getAxesController().RunHomeAxesSM();
             m_mainCTL.RunScanAxesSM();
             m_mainCTL.RunCollisionSM();
             m_mainCTL.PollForCollision();
@@ -533,7 +592,8 @@ void MainWindow::RunPolling()
     //! [10]
     //UpdateHandshakeStatus();*/
     //! [11]
-    m_mainCTL.getAxisStatus();
+    m_mainCTL.getCTLStatusCommand();
+    m_mainCTL.getAxesController().getAxisStatus();
     AxisStatusToUI();
 }
 
@@ -546,43 +606,12 @@ void MainWindow::setRecipeMBtuner(double MBtunerSP)
     ui->mb_recipe->setText(QString::number(MBtunerSP, 'f', 2));
 }
 
-void MainWindow::plasmaHeadTemp(double temp)
-{
-    ui->temp_LCD->display(temp);
-    ui->Temp_bar->setValue(int(temp));
-}
-
 void MainWindow::CSM_StatusUpdate(QString status, QString next)
 {
     ui->axisstatus->setText(status);
     ui->axisstatus_2->setText(next);
     ui->axisstatus_dup->setText(status);
     ui->axisstatus_2_dup->setText(next);
-}
-
-void MainWindow::SSM_Started()
-{
-    ui->Home_button->setEnabled(false);
-    ui->Home_button_dup->setEnabled(false);
-    ui->twospot_button->setEnabled(false);
-    ui->twospot_button_dup->setEnabled(false);
-    ui->diameter_button->setEnabled(false);
-    ui->diameter_button_dup->setEnabled(false);
-    ui->scan_button->setText("STOP");
-    ui->scan_button_dup->setText("STOP");
-}
-
-void MainWindow::SSM_Done()
-{
-    QString status = "Scanning Completed";
-    ui->axisstatus->setText(status);
-    ui->axisstatus_2->setText("");
-    ui->axisstatus_dup->setText(status);
-    ui->axisstatus_2_dup->setText("");
-    ui->Home_button->setEnabled(true);
-    ui->Home_button_dup->setEnabled(true);
-    ui->scan_button->setText("START SCAN");
-    ui->scan_button_dup->setText("START SCAN");
 }
 
 void MainWindow::recipeExecutionStateChanged(bool state)
@@ -669,8 +698,8 @@ void MainWindow::stageStatusUpdate(QString statusNow, QString statusNext)
 void MainWindow::AxisStatusToUI()
 {
     // XAxis
-    if (m_mainCTL.getXAxisState() >= AXIS_IDLE) {
-        double Xpos = m_mainCTL.getXPosition();
+    if (m_mainCTL.getAxesController().getXAxisState() >= AXIS_IDLE) {
+        double Xpos = m_mainCTL.getAxesController().getXPosition();
         ui->X_relative_PH->setText(QString::number(m_mainCTL.TranslateCoordXPH2Base(Xpos)));
         ui->X_relative_PH_dup->setText(QString::number(m_mainCTL.TranslateCoordXPH2Base(Xpos)));
     }
@@ -679,8 +708,8 @@ void MainWindow::AxisStatusToUI()
         ui->X_relative_PH_dup->setText("???");
     }
     // YAxis
-    if (m_mainCTL.getYAxisState() >= AXIS_IDLE) {
-        double Ypos = m_mainCTL.getYPosition();
+    if (m_mainCTL.getAxesController().getYAxisState() >= AXIS_IDLE) {
+        double Ypos = m_mainCTL.getAxesController().getYPosition();
         ui->Y_relative_PH->setText(QString::number(m_mainCTL.TranslateCoordYPH2Base(Ypos)));
         ui->Y_relative_PH_dup->setText(QString::number(m_mainCTL.TranslateCoordYPH2Base(Ypos)));
     }
@@ -689,8 +718,8 @@ void MainWindow::AxisStatusToUI()
         ui->Y_relative_PH_dup->setText("???");
     }
     // ZAxis
-    if (m_mainCTL.getZAxisState() >= AXIS_IDLE) {
-        double Zpos = m_mainCTL.getZPosition();
+    if (m_mainCTL.getAxesController().getZAxisState() >= AXIS_IDLE) {
+        double Zpos = m_mainCTL.getAxesController().getZPosition();
         ui->Z_relative_PH->setText(QString::number(m_mainCTL.TranslateCoordZPH2Base(Zpos)));
         ui->Z_relative_PH_dup->setText(QString::number(m_mainCTL.TranslateCoordZPH2Base(Zpos)));
     }
@@ -755,15 +784,19 @@ void MainWindow::openRecipe()
 
     // Execute the file dialog
     if (dialog.exec()) {
-       // Get the selected file path
-       QString filePath = dialog.selectedFiles().first();
+        // Get the selected file path
+        QString filePath = dialog.selectedFiles().first();
 
-       // set recipe path and file
-       m_mainCTL.setRecipe(filePath);
+        // set the filename
+        QFileInfo fi(filePath);
+        ui->name_recipe->setText(fi.baseName());
+
+        // set recipe path and file
+        m_mainCTL.setRecipe(filePath);
 
     } else {
-       // User canceled the file dialog
-       qDebug() << "File selection canceled.";
+        // User canceled the file dialog
+        qDebug() << "File selection canceled.";
     }
 }
 
@@ -783,6 +816,11 @@ void MainWindow::saveRecipe() {
        // Create the file path
        QString filePath = selectedFileName;
 
+       // determine is we need to add the file extension
+       QFileInfo fi(filePath);
+       if (fi.completeSuffix() != "rcp")
+            filePath += ".rcp";
+
        // Open the file for writing
        QFile file(filePath);
        if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -792,9 +830,48 @@ void MainWindow::saveRecipe() {
             // Write each recipe name to the file
             for (auto it = recipe.begin(); it != recipe.end(); it++) {
                 const QString& key = it.key();
-                const QVariant& value = it.value();
+                QVariant value;
 
-                out << key << "=" << value.toString() << "\n";
+                if (key == RECIPE_MFC1_KEY)
+                    value = m_mainCTL.getMFCs()[0]->getRecipeFlowQStr();
+                else if (key == RECIPE_MFC2_KEY)
+                    value = m_mainCTL.getMFCs()[1]->getRecipeFlowQStr();
+                else if (key == RECIPE_MFC3_KEY)
+                    value = m_mainCTL.getMFCs()[2]->getRecipeFlowQStr();
+                else if (key == RECIPE_MFC4_KEY)
+                    value = m_mainCTL.getMFCs()[3]->getRecipeFlowQStr();
+                else if (key == RECIPE_PWR_KEY)
+                    value = m_mainCTL.getPower().getRecipeWattsQStr();
+                else if (key == RECIPE_TUNER_KEY)
+                    value = m_mainCTL.getTuner().getRecipePositionQStr();
+                else if (key == RECIPE_THICKNESS_KEY)
+                    value = m_mainCTL.getRecipe()->getThicknessQStr();
+                else if (key == RECIPE_GAP_KEY)
+                    value = m_mainCTL.getRecipe()->getGapQStr();
+                else if (key == RECIPE_OVERLAP_KEY)
+                    value = m_mainCTL.getRecipe()->getOverlapQStr();
+                else if (key == RECIPE_SPEED_KEY)
+                    value = m_mainCTL.getRecipe()->getSpeedQStr();
+                else if (key == RECIPE_CYCLES_KEY)
+                    value = m_mainCTL.getRecipe()->getCyclesQStr();
+                else if (key == RECIPE_XMIN_KEY)
+                    value = m_mainCTL.getRecipe()->getXminQStr();
+                else if (key == RECIPE_YMIN_KEY)
+                    value = m_mainCTL.getRecipe()->getYminQStr();
+                else if (key == RECIPE_XMAX_KEY)
+                    value = m_mainCTL.getRecipe()->getXmaxQStr();
+                else if (key == RECIPE_YMAX_KEY)
+                    value = m_mainCTL.getRecipe()->getYmaxQStr();
+                else if (key == RECIPE_PURGE_KEY)
+                    value = m_mainCTL.getRecipe()->getPurgeQStr();
+                else if (key == RECIPE_AUTOSCAN_KEY)
+                    value = m_mainCTL.getRecipe()->getAutoScanQStr();
+                else if (key == RECIPE_HEATER_KEY)
+                    value = m_mainCTL.getRecipe()->getHeaterQStr();
+                else
+                    Logger::logCritical("Encountered unknown recipe key when saving recipe: " + key);
+
+                out << "<" << key << ">" << value.toString() << "\n";
             }
 
             file.close();
@@ -805,12 +882,314 @@ void MainWindow::saveRecipe() {
     }
 }
 
-void MainWindow::openCascadeRecipe()
+
+// update the recipe progress bar and value
+void MainWindow::updateRecipeFlow(const int mfcNumber, const double recipeFlow)
 {
-    //  plasmaRecipe.currentRecipeIndex_;
+    // This uses the parameters passed in the signal
+    if (mfcNumber == 1) {
+       // set vertical progress bar
+       double range = m_mainCTL.findMFCByNumber(1)->getRange();
+       int percentage = 0;
+       if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
+       ui->gas1_sliderBar->setValue(int(percentage));
+       ui->gas1_sliderbar_dup->setValue(int(percentage));
+
+       // set dashboard and plasma tab recipe edit box
+       ui->mfc1_recipe->setText(QString::number(recipeFlow));
+
+       // set the dashboard and plasma tab edit box below the progress bar
+       ui->gas1_recipe_SLPM->setText(QString::number(percentage));
+       ui->gas1_recipe_SLPM_dup->setText(QString::number(percentage));
+    }
+    else if (mfcNumber == 2) {
+       // set vertical progress bar
+       double range = m_mainCTL.findMFCByNumber(2)->getRange();
+       int percentage = 0;
+       if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
+       ui->gas2_sliderBar->setValue(int(percentage));
+       ui->gas2_sliderbar_dup->setValue(int(percentage));
+
+       // set dashboard and plasma tab recipe edit box
+       ui->mfc2_recipe->setText(QString::number(recipeFlow));
+
+       // set the dashboard and plasma tab edit box below the progress bar
+       ui->gas2_recipe_SLPM->setText(QString::number(percentage));
+       ui->gas2_recipe_SLPM_dup->setText(QString::number(percentage));
+    }
+    else if (mfcNumber == 3) {
+       // set vertical progress bar
+       double range = m_mainCTL.findMFCByNumber(3)->getRange();
+       int percentage = 0;
+       if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
+       ui->gas3_sliderBar->setValue(int(percentage));
+       ui->gas3_sliderbar_dup->setValue(int(percentage));
+
+       // set dashboard and plasma tab recipe edit box
+       ui->mfc3_recipe->setText(QString::number(recipeFlow));
+
+       // set the dashboard and plasma tab edit box below the progress bar
+       ui->gas3_recipe_SLPM->setText(QString::number(percentage));
+       ui->gas3_recipe_SLPM_dup->setText(QString::number(percentage));
+    }
+    else if (mfcNumber == 4) {
+       // set vertical progress bar
+       double range = m_mainCTL.findMFCByNumber(4)->getRange();
+       int percentage = 0;
+       if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
+       ui->gas4_sliderBar->setValue(int(percentage));
+       ui->gas4_sliderbar_dup->setValue(int(percentage));
+
+       // set dashboard and plasma tab recipe edit box
+       ui->mfc4_recipe->setText(QString::number(recipeFlow));
+
+       // set the dashboard and plasma tab edit box below the progress bar
+       ui->gas4_recipe_SLPM->setText(QString::number(percentage));
+       ui->gas4_recipe_SLPM_dup->setText(QString::number(percentage));
+    }
 }
 
-void MainWindow::addRecipeToCascadeRecipe()
+// update the recipe watts
+void MainWindow::recipeWattsChanged()
+{
+    int watts = m_mainCTL.getPower().getRecipeWatts();
+    ui->RF_recipe_watts->setText(QString::number(watts));
+}
+
+// update the recipe auto tune
+void MainWindow::autoTuneChanged(bool autoTune)
+{
+    (autoTune) ? ui->autotune_recipe->setText("ON") : ui->autotune_recipe->setText("OFF");
+}
+
+// update recipe thickness
+void MainWindow::thicknessChanged()
+{
+    // update dashboard
+    ui->thickness_recipe->setText(m_mainCTL.getRecipe()->getThicknessQStr());
+    // update 3 axis tab
+    ui->input_thickness_dup->setText(m_mainCTL.getRecipe()->getThicknessQStr());
+}
+
+// update recipe gap
+void MainWindow::gapChanged()
+{
+    // update dashboard
+    ui->gap_recipe->setText(m_mainCTL.getRecipe()->getGapQStr());
+    // update 3 axis tab
+    ui->input_gap_dup->setText(m_mainCTL.getRecipe()->getGapQStr());
+}
+
+// update recipe overlap
+void MainWindow::overlapChanged()
+{
+    // update dashboard
+    ui->overlap_recipe->setText(m_mainCTL.getRecipe()->getOverlapQStr());
+    // update 3 axis tab
+    ui->input_overlap_dup->setText(m_mainCTL.getRecipe()->getOverlapQStr());
+}
+
+// update recipe speed
+void MainWindow::speedChanged()
+{
+    // update dashboard
+    ui->speed_recipe->setText(m_mainCTL.getRecipe()->getSpeedQStr());
+    // update 3 axis tab
+    ui->input_speed_dup->setText(m_mainCTL.getRecipe()->getSpeedQStr());
+}
+
+// update recipe auto scan
+void MainWindow::autoScanChanged()
+{
+    (m_mainCTL.getRecipe()->getAutoScanBool()) ? ui->autoscan_recipe->setText("ON") : ui->autoscan_recipe->setText("OFF");
+}
+
+// update recipe xlimits
+void MainWindow::xLimitsChanged()
+{
+    // update dashboard
+    ui->x1_recipe->setText(m_mainCTL.getRecipe()->getXminQStr());
+    ui->x2_recipe->setText(m_mainCTL.getRecipe()->getXmaxQStr());
+
+    // update 3 axis
+    ui->xmin_controls_dup->setText(m_mainCTL.getRecipe()->getXminQStr());
+    ui->xmax_controls_dup->setText(m_mainCTL.getRecipe()->getXmaxQStr());
+}
+
+// update recipe y limits
+void MainWindow::yLimitsChanged()
+{
+    // update dashboard
+    ui->y1_recipe->setText(m_mainCTL.getRecipe()->getYminQStr());
+    ui->y2_recipe->setText(m_mainCTL.getRecipe()->getYmaxQStr());
+
+    // update 3 axis
+    ui->ymin_controls_dup->setText(m_mainCTL.getRecipe()->getYminQStr());
+    ui->ymax_controls_dup->setText(m_mainCTL.getRecipe()->getYmaxQStr());
+}
+
+// update recipe cycles
+void MainWindow::cyclesChanged()
+{
+    // update dashboard
+    ui->cycles_recipe->setText(m_mainCTL.getRecipe()->getCyclesQStr());
+
+    // update 3 axis
+    ui->input_cycles_dup->setText(m_mainCTL.getRecipe()->getCyclesQStr());
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+// runtime updates
+//////////////////////////////////////////////////////////////////////////////////
+void MainWindow::forwardWattsChanged()
+{
+    int watts = m_mainCTL.getPower().getForwardWatts();
+
+    // dashboard
+    ui->RF_Actual_LCD->display(watts);
+    ui->RF_bar->setValue(watts);
+    // plasma tab
+    ui->RF_Actual_LCD_dup->display(watts);
+    ui->RF_bar_dup->setValue(watts);
+}
+
+void MainWindow::reflectedWattsChanged()
+{
+    int watts = m_mainCTL.getPower().getReflectedWatts();
+
+    // dashboard
+    ui->RefRF_Actual_LCD->display(watts);
+    ui->RefRF_bar->setValue(watts);
+    // plasma tab
+    ui->RefRF_Actual_LCD_dup->display(watts);
+    ui->RefRF_bar_dup->setValue(watts);
+}
+
+void MainWindow::MBactualPositionChanged(const double actualPosition)
+{
+    // dashboard
+    ui->MB_Actual_LCD->display(actualPosition);
+    ui->MB_Pos_Bar->setValue(int(actualPosition));
+    // plasma tab
+    ui->MB_Actual_LCD_dup->display(actualPosition);
+    ui->MB_Pos_Bar_dup->setValue(int(actualPosition));
+}
+
+void MainWindow::headTemperatureChanged()
+{
+    double temp = m_mainCTL.getPlasmaHead().getTemperature();
+
+    // dashboard
+    ui->temp_LCD->display(temp);
+    ui->Temp_bar->setValue(int(temp));
+    // plasma tab
+    ui->temp_LCD_dup->display(temp);
+    ui->Temp_bar_dup->setValue(int(temp));
+}
+
+void MainWindow::actualFlowChanged(const int mfcNumber, const double actualFlow)
+{
+    // This uses the parameters passed in the signal
+    if (mfcNumber == 1) {
+       // set vertical progress bar
+       double range = m_mainCTL.findMFCByNumber(1)->getRange();
+       int percentage = 0;
+       if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
+       ui->gas1ProgressBar->setValue(int(percentage));
+       ui->gas1_progressbar_dup->setValue(int(percentage));
+
+       // set the dashboard and plasma tab edit box below the progress bar
+       ui->gas1_actual_SLPM->setText(QString::number(percentage));
+       ui->gas1_actual_SLPM_dup->setText(QString::number(percentage));
+    }
+    else if (mfcNumber == 2) {
+       // set vertical progress bar
+       double range = m_mainCTL.findMFCByNumber(2)->getRange();
+       int percentage = 0;
+       if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
+       ui->gas2ProgressBar->setValue(int(percentage));
+       ui->gas2_progressbar_dup->setValue(int(percentage));
+
+       // set the dashboard and plasma tab edit box below the progress bar
+       ui->gas2_actual_SLPM->setText(QString::number(percentage));
+       ui->gas2_actual_SLPM_dup->setText(QString::number(percentage));
+    }
+    else if (mfcNumber == 3) {
+       // set vertical progress bar
+       double range = m_mainCTL.findMFCByNumber(3)->getRange();
+       int percentage = 0;
+       if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
+       ui->gas3ProgressBar->setValue(int(percentage));
+       ui->gas3_progressbar_dup->setValue(int(percentage));
+
+       // set the dashboard and plasma tab edit box below the progress bar
+       ui->gas3_actual_SLPM->setText(QString::number(percentage));
+       ui->gas3_actual_SLPM_dup->setText(QString::number(percentage));
+    }
+    else if (mfcNumber == 4) {
+       // set vertical progress bar
+       double range = m_mainCTL.findMFCByNumber(4)->getRange();
+       int percentage = 0;
+       if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
+       ui->gas4ProgressBar->setValue(int(percentage));
+       ui->gas4_progressbar_dup->setValue(int(percentage));
+
+       // set the dashboard and plasma tab edit box below the progress bar
+       ui->gas4_actual_SLPM->setText(QString::number(percentage));
+       ui->gas4_actual_SLPM_dup->setText(QString::number(percentage));
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+// cascade recipe
+//////////////////////////////////////////////////////////////////////////////////
+
+//save cascade recipe button
+void MainWindow::on_saveAsCascadeRecipeButton_clicked()
+{
+    // Create the directory path
+    QString directoryPath = QCoreApplication::applicationDirPath() + "/Cascade Recipes";
+
+    // Create the directory if it doesn't exist
+    QDir directory;
+    if (!directory.exists(directoryPath)) {
+       directory.mkpath(directoryPath);
+    }
+
+    // Open the file dialog for saving
+    QString selectedFileName = QFileDialog::getSaveFileName(this, "Save Cascade Recipe List", directoryPath, "Text Files (*.txt)");
+    if (!selectedFileName.isEmpty()) {
+       // Create the file path
+       QString filePath = selectedFileName;
+
+       // Open the file for writing
+       QFile file(filePath);
+       if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            QTextStream out(&file);
+
+            // Write each recipe name to the file
+            for (const QString& recipeName : m_mainCTL.getRecipe()->getCascadeRecipeList()) {
+                out << recipeName << "\n";
+            }
+
+            file.close();
+            qDebug() << "Cascade recipe list saved to file: " << filePath;
+       } else {
+            qDebug() << "Failed to open file for writing: " << file.errorString();
+       }
+    }
+
+}
+
+// load cascade recipe button
+void MainWindow::on_loadCascadeRecipeButton_clicked()
+{
+
+}
+
+// add cascade recipe button
+void MainWindow::on_addCascadeRecipeButton_clicked()
 {
     // Create a file dialog
     QFileDialog dialog;
@@ -844,9 +1223,11 @@ void MainWindow::addRecipeToCascadeRecipe()
        // User canceled the file dialog
        qDebug() << "File selection canceled.";
     }
+
 }
 
-void MainWindow::removeRecipeFromCascadeList()
+// remove cascade recipe button
+void MainWindow::on_removeCascadeRecipeButton_clicked()
 {
     // Get the selected item in the list widget
     QListWidgetItem* selectedItem = ui->listCascadeRecipes->currentItem();
@@ -863,166 +1244,17 @@ void MainWindow::removeRecipeFromCascadeList()
 
 }
 
-void MainWindow::saveAsCascadeRecipeListToFile() {
-    // Create the directory path
-    QString directoryPath = QCoreApplication::applicationDirPath() + "/Cascade Recipes";
-
-    // Create the directory if it doesn't exist
-    QDir directory;
-    if (!directory.exists(directoryPath)) {
-       directory.mkpath(directoryPath);
-    }
-
-    // Open the file dialog for saving
-    QString selectedFileName = QFileDialog::getSaveFileName(this, "Save Cascade Recipe List", directoryPath, "Text Files (*.txt)");
-    if (!selectedFileName.isEmpty()) {
-       // Create the file path
-       QString filePath = selectedFileName;
-
-       // Open the file for writing
-       QFile file(filePath);
-       if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            QTextStream out(&file);
-
-            // Write each recipe name to the file
-            for (const QString& recipeName : m_mainCTL.getRecipe()->getCascadeRecipeList()) {
-                out << recipeName << "\n";
-            }
-
-            file.close();
-            qDebug() << "Cascade recipe list saved to file: " << filePath;
-       } else {
-            qDebug() << "Failed to open file for writing: " << file.errorString();
-       }
-    }
-}
-
-// update the recipe progress bar and value
-void MainWindow::updateRecipeFlow(const int& mfcNumber, const double& flow)
+// clear cascade recipe button
+void MainWindow::on_clear_cascade_recipe_button_clicked()
 {
-    // This uses the parameters passed in the signal
-    if (mfcNumber == 1) {
 
-       // set vertical progress bar
-       double range = m_mainCTL.findMFCByNumber(1)->getRange();
-       double percentage = 100;
-       if (range != 0) percentage = (flow / range) * 100.0; // divide by zero protection
-       ui->gas1_sliderBar->setValue(int(percentage));
-
-       // set dashboard recipe edit box
-       ui->mfc1_recipe->setText(QString::number(flow));
-
-       // set the dashboard edit box below the progress bar
-       ui->gas1_recipe_SLPM->setText(QString::number(percentage));
-    }
-    else if (mfcNumber == 2) {
-
-       // set vertical progress bar
-       double range = m_mainCTL.findMFCByNumber(2)->getRange();
-       double percentage = 100;
-       if (range != 0) percentage = (flow / range) * 100.0; // divide by zero protection
-       ui->gas2_sliderBar->setValue(int(percentage));
-
-       // set dashboard recipe edit box
-       ui->mfc2_recipe->setText(QString::number(flow));
-
-       // set the dashboard edit box below the progress bar
-       ui->gas2_recipe_SLPM->setText(QString::number(percentage));
-    }
-    else if (mfcNumber == 3) {
-
-       // set vertical progress bar
-       double range = m_mainCTL.findMFCByNumber(3)->getRange();
-       double percentage = 100;
-       if (range != 0) percentage = (flow / range) * 100.0; // divide by zero protection
-       ui->gas3_sliderBar->setValue(int(percentage));
-
-       // set dashboard recipe edit box
-       ui->mfc3_recipe->setText(QString::number(flow));
-
-       // set the dashboard edit box below the progress bar
-       ui->gas3_recipe_SLPM->setText(QString::number(percentage));
-    }
-    else if (mfcNumber == 4) {
-
-       // set vertical progress bar
-       double range = m_mainCTL.findMFCByNumber(4)->getRange();
-       double percentage = 100;
-       if (range != 0) percentage = (flow / range) * 100.0; // divide by zero protection
-       ui->gas4_sliderBar->setValue(int(percentage));
-
-       // set dashboard recipe edit box
-       ui->mfc4_recipe->setText(QString::number(flow));
-
-       // set the dashboard edit box below the progress bar
-       ui->gas4_recipe_SLPM->setText(QString::number(percentage));
-    }
 }
 
-// update the recipe watts
-void MainWindow::recipeWattsChanged()
+// open cascade recipe button
+void MainWindow::openCascadeRecipe()
 {
-    int watts = m_mainCTL.getPower().getRecipeWatts();
-    ui->RF_recipe_watts->setText(QString::number(watts));
+    //  plasmaRecipe.currentRecipeIndex_;
 }
-
-// update the recipe auto tune
-void MainWindow::autoTuneChanged(bool autoTune)
-{
-    (autoTune) ? ui->autotune_recipe->setText("ON") : ui->autotune_recipe->setText("OFF");
-}
-
-void MainWindow::thicknessChanged()
-{
-    // update dashboard
-    ui->thickness_recipe->setText(m_mainCTL.getRecipe()->getThicknessQStr());
-    // update 3 axis tab
-    ui->input_thickness_dup->setText(m_mainCTL.getRecipe()->getThicknessQStr());
-}
-
-void MainWindow::gapChanged()
-{
-    // update dashboard
-    ui->gap_recipe->setText(m_mainCTL.getRecipe()->getGapQStr());
-    // update 3 axis tab
-    ui->gap_recipe->setText(m_mainCTL.getRecipe()->getGapQStr());
-}
-
-void MainWindow::overlapChanged()
-{
-    // update dashboard
-    ui->overlap_recipe->setText(m_mainCTL.getRecipe()->getOverlapQStr());
-    // update 3 axis tab
-    ui->input_overlap_dup->setText(m_mainCTL.getRecipe()->getOverlapQStr());
-}
-
-void MainWindow::speedChanged()
-{
-    // update dashboard
-    ui->speed_recipe->setText(m_mainCTL.getRecipe()->getSpeedQStr());
-    // update 3 axis tab
-    ui->input_speed_dup->setText(m_mainCTL.getRecipe()->getSpeedQStr());
-}
-
-void MainWindow::autoScanChanged()
-{
-    (m_mainCTL.getRecipe()->getAutoScanBool()) ? ui->autoscan_recipe->setText("ON") : ui->autoscan_recipe->setText("OFF");
-}
-
-void MainWindow::xLimitsChanged()
-{
-    // update dashboard
-    ui->x1_recipe->setText(m_mainCTL.getRecipe()->getXminQStr());
-    ui->x2_recipe->setText(m_mainCTL.getRecipe()->getXmaxQStr());
-}
-
-void MainWindow::yLimitsChanged()
-{
-    // update dashboard
-    ui->y1_recipe->setText(m_mainCTL.getRecipe()->getYminQStr());
-    ui->y2_recipe->setText(m_mainCTL.getRecipe()->getYmaxQStr());
-}
-
 
 //////////////////////////////////////////////////////////////////////////////////
 // Button handlers
@@ -1031,13 +1263,13 @@ void MainWindow::yLimitsChanged()
 // init button on dash
 void MainWindow::on_init_button_clicked()
 {
-    m_mainCTL.StartInit();
+    m_mainCTL.getAxesController().StartInit();
 }
 
 // init button on 3 axis tab
 void MainWindow::on_init_button_dup_clicked()
 {
-    m_mainCTL.StartInit();
+    m_mainCTL.getAxesController().StartInit();
 }
 
 // home button on dash
@@ -1050,10 +1282,10 @@ void MainWindow::on_Home_button_toggled(bool checked)
 void MainWindow::on_Home_button_dup_toggled(bool checked)
 {
     if (checked) {
-        m_mainCTL.StartHome();
+        m_mainCTL.getAxesController().StartHome();
     }
     else {
-        m_mainCTL.StopHome();
+        m_mainCTL.getAxesController().StopHome();
     }
 }
 
@@ -1067,10 +1299,10 @@ void MainWindow::on_twospot_button_toggled(bool checked)
 void MainWindow::on_twospot_button_dup_toggled(bool checked)
 {
     if (checked) {
-        m_mainCTL.StartTwoSpot();
+        m_mainCTL.getAxesController().StartTwoSpot();
     }
     else {
-        m_mainCTL.StopTwoSpot();
+        m_mainCTL.getAxesController().StopTwoSpot();
     }
 }
 
@@ -1100,10 +1332,10 @@ void MainWindow::on_scan_button_toggled(bool checked)
 void MainWindow::on_Stagepins_button_dup_toggled(bool checked)
 {
     if (checked) {
-        m_mainCTL.togglePinsOn();
+        m_mainCTL.getAxesController().togglePinsOn();
     }
     else {
-        m_mainCTL.togglePinsOff();
+        m_mainCTL.getAxesController().togglePinsOff();
     }
 }
 
@@ -1111,10 +1343,10 @@ void MainWindow::on_Stagepins_button_dup_toggled(bool checked)
 void MainWindow::on_n2_purge_button_dup_toggled(bool checked)
 {
     if (checked) {
-        m_mainCTL.toggleN2PurgeOn();     
+        m_mainCTL.getAxesController().toggleN2PurgeOn();
     }
     else {
-        m_mainCTL.toggleN2PurgeOff();
+        m_mainCTL.getAxesController().toggleN2PurgeOff();
 
     }
 }
@@ -1123,10 +1355,10 @@ void MainWindow::on_n2_purge_button_dup_toggled(bool checked)
 void MainWindow::on_n2_purge_button_toggled(bool checked)
 {
     if (checked) {
-        m_mainCTL.toggleN2PurgeOn();
+        m_mainCTL.getAxesController().toggleN2PurgeOn();
     }
     else {
-        m_mainCTL.toggleN2PurgeOff();
+        m_mainCTL.getAxesController().toggleN2PurgeOff();
     }
 
 }
@@ -1134,10 +1366,10 @@ void MainWindow::on_n2_purge_button_toggled(bool checked)
 void MainWindow::on_Joystick_button_dup_toggled(bool checked)
 {
     if (checked) {
-        m_mainCTL.toggleJoystickOn();       
+        m_mainCTL.getAxesController().toggleJoystickOn();
     }
     else {
-        m_mainCTL.toggleJoystickOff();
+        m_mainCTL.getAxesController().toggleJoystickOff();
     }
 }
 
@@ -1157,10 +1389,10 @@ void MainWindow::on_wafer_diameter_dup_currentIndexChanged(int index)
 void MainWindow::on_vac_button_dup_toggled(bool checked)
 {
     if (checked) {
-        m_mainCTL.toggleVacOn();
+        m_mainCTL.getAxesController().toggleVacOn();
     }
     else {
-        m_mainCTL.toggleVacOff();
+        m_mainCTL.getAxesController().toggleVacOff();
     }
 }
 
@@ -1168,10 +1400,10 @@ void MainWindow::on_vac_button_dup_toggled(bool checked)
 void MainWindow::on_vac_button_toggled(bool checked)
 {
     if (checked) {
-        m_mainCTL.toggleVacOn();
+        m_mainCTL.getAxesController().toggleVacOn();
     }
     else {
-        m_mainCTL.toggleVacOff();
+        m_mainCTL.getAxesController().toggleVacOff();
     }
 }
 
@@ -1231,8 +1463,8 @@ void MainWindow::on_load_overlap_clicked()
 void MainWindow::on_loadSpeedButton_clicked()
 {
     bool ok;
-    double doubVal = QInputDialog::getDouble(this, "Speed: ","mm: " + m_mainCTL.getXMaxSpeedQStr(), 0, 0,
-                                             m_mainCTL.XMaxSpeed(), 0, &ok,Qt::WindowFlags(), 1);
+    double doubVal = QInputDialog::getDouble(this, "Speed: ","mm: " + m_mainCTL.getAxesController().getXMaxSpeedQStr(), 0, 0,
+                                             m_mainCTL.getAxesController().XMaxSpeed(), 0, &ok,Qt::WindowFlags(), 1);
     if (ok) {
         m_mainCTL.getRecipe()->setSpeed(doubVal);
     }
@@ -1245,16 +1477,19 @@ void MainWindow::on_load_cycles_clicked()
     int intVal = QInputDialog::getInt(this, "Number of Cycles","cycles: ", 0, 0, 200, 0, &ok);
     if (ok) {
         m_mainCTL.getRecipe()->setCycles(intVal);
-        // update dashboard
-        ui->cycles_recipe->setText(m_mainCTL.getRecipe()->getCyclesQStr());
-        // update 3 axis tab
-        ui->input_cycles_dup->setText(m_mainCTL.getRecipe()->getCyclesQStr());
     }
 }
 
+// open recipe button
 void MainWindow::on_loadRecipeButton_clicked()
 {
     openRecipe();
+}
+
+// save recipe button
+void MainWindow::on_save_recipe_button_clicked()
+{
+    saveRecipe();
 }
 
 void MainWindow::on_loadRFButton_clicked()
@@ -1316,15 +1551,17 @@ void MainWindow::on_load_autoscan_clicked()
     items << "OFF" << "ON";
 
     bool ok;
-    QString item = QInputDialog::getItem(nullptr, "Tuner Auto scan", "Please choose an auto scan state", items, 0, false, &ok);
+    QString item = QInputDialog::getItem(nullptr, "Auto scan", "Please choose an auto scan state", items, 0, false, &ok);
 
     if (ok && !item.isEmpty()) {
         if (item == "OFF") {
-            m_mainCTL.setAutoScan(false);
+            m_mainCTL.getRecipe()->setAutoScan(false);
         }
         else {
-            m_mainCTL.setAutoScan(true);
+            m_mainCTL.getRecipe()->setAutoScan(true);
         }
     }
 }
+
+
 

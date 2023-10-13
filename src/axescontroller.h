@@ -105,6 +105,10 @@ public:
     void toggleVacOn();
     void toggleVacOff();
 
+    // helper
+    bool isBitSet(int test_int, int bit_pos);
+    bool getDoorStatus() { return m_doorsOpen; }
+
 signals:
 
     void stageStatusUpdate(QString status1, QString status2);
@@ -148,24 +152,26 @@ signals:
     void TSSM_TransitionStartup();
 
     // scan state machine to idle
-    void SSM_TransitionIdle();
+    void ScanSM_TransitionIdle();
 
-    /*/ update ui
-    void currentStatusChanged();
-    void axisStatusChanged();
-    void ledStatesChanged();
-    void doorsOpenChanged();
-    void joystickOnChanged();
-    void vacuumOnChanged();
-    void nitrogenPurgeOnChanged();*/
+    // update ui
     void pinsStateChanged(bool state);
     void joystickStateChanged(bool state);
     void n2StateChanged(bool state);
     void vacStateChanged(bool state);
 
 private slots:
+    // state machine on entry handlers
+    void InitIdleOnEntry();
+    void TwoSpotIdleOnEntry();
+    void HomeIdleOnEntry();
 
 private:
+    // status bit parsers
+    void doorsStatus();
+    void joyBtnStatus();
+    void vacStatus();
+    void N2PurgeStatus();
 
     // command wrappers.
     void getXMaxSpeed();
@@ -246,6 +252,9 @@ private:
     bool m_sameStateXYZ;
     bool m_joystickOn;
     bool m_joyButtonOn;
+    bool m_doorsOpen;
+    bool m_vacOn;
+    bool m_N2PurgeOn;
 
     // coordinate transforms
     double m_Xp2Base;

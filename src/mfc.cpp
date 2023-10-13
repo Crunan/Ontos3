@@ -7,11 +7,9 @@ MFC::MFC(int mfcNumber)
     m_actualFlow(0.0),
     m_range(0.0),
     m_defaultRecipe(0.0)
-{
+{}
 
-}
-
-QString MFC::getMFCNumberAsString() const
+QString MFC::getMFCNumberQStr() const
 {
     return QString::number(m_mfcNumber);
 }
@@ -21,9 +19,9 @@ int MFC::getMFCNumber() const
     return m_mfcNumber;
 }
 
-QString MFC::getRecipeFlowAsString() const
+QString MFC::getRecipeFlowQStr() const
 {
-    return QString::number(m_recipeFlow);
+    return QString::number(m_recipeFlow, 'f', 2);
 }
 
 double MFC::getRecipeFlow() const

@@ -13,6 +13,7 @@ CONFIG += c++17
 
 SOURCES += \
     src/diameter.cpp \
+    src/lighttower.cpp \
     src/serialinterface.cpp \
     src/axescontroller.cpp \
     src/axis.cpp \
@@ -25,7 +26,6 @@ SOURCES += \
     src/led.cpp \
     src/ledfactory.cpp \
     src/ledstatus.cpp \
-    src/lighttowerstatemachine.cpp \
     src/logger.cpp \
     src/main.cpp \
     src/mainloop.cpp \
@@ -54,7 +54,7 @@ HEADERS += \
     src/led.h \
     src/ledfactory.h \
     src/ledstatus.h \
-    src/lighttowerstatemachine.h \
+    src/lighttower.h \
     src/logger.h \
     src/mainwindow.h \
     src/mainloop.h \

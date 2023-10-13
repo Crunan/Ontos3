@@ -10,6 +10,7 @@ public:
     PWR();
 
     int getRecipeWatts() const;
+    QString getRecipeWattsQStr() const;
     void setRecipeWatts(int value);
 
     int getForwardWatts() const;

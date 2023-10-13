@@ -14,6 +14,11 @@ int PWR::getRecipeWatts() const
     return m_recipeWatts;
 }
 
+QString PWR::getRecipeWattsQStr() const
+{
+    return QString::number(m_recipeWatts);
+}
+
 void PWR::setRecipeWatts(int value)
 {
     m_recipeWatts = value;
@@ -24,7 +29,6 @@ int PWR::getForwardWatts() const
 {
     return m_forwardWatts;
 }
-
 
 void PWR::setForwardWatts(int value)
 {

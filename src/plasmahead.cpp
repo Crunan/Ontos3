@@ -13,9 +13,21 @@ double PlasmaHead::getSafetyGap() const
     return m_safetyGap;
 }
 
+void PlasmaHead::setSlitlength(double slitLength)
+{
+    m_slitLength = slitLength;
+    emit headSlitLengthChanged();
+}
+
 double PlasmaHead::getSlitLength() const
 {
     return m_slitLength;
+}
+
+void PlasmaHead::setSlitWidth(double slitWidth)
+{
+    m_slitWidth = slitWidth;
+    emit headSlitWidthChanged();
 }
 
 double PlasmaHead::getSlitWidth() const
@@ -30,8 +42,6 @@ double PlasmaHead::getTemperature() const
 
 void PlasmaHead::setTemperature(double temperature)
 {
-    if (temperature != m_temperature) {
-        m_temperature = temperature;
-        emit temperatureChanged();
-    }
+    m_temperature = temperature;
+    emit headTemperatureChanged();
 }

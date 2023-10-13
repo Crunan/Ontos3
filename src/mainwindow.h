@@ -65,8 +65,18 @@ public slots:
     void twoSpotStateMachineDone();
     void runMainStateMachine();
 
-    // recipe to ui slots
-    void updateRecipeFlow(const int& mfcNumber, const double& flow);
+    // real time data updates
+    void recipeWattsChanged();
+    void autoTuneChanged(bool autoTune);
+    void forwardWattsChanged();
+    void reflectedWattsChanged();
+    void MBactualPositionChanged(const double actualPosition);
+    void headTemperatureChanged();
+
+    // mfc
+    void connectMFCFlowBars();
+    void updateRecipeFlow(const int mfcNumber, const double recipeflow);
+    void actualFlowChanged(const int mfcNumber, const double actualFlow);
 
     void about();
     void shutDownProgram();
@@ -76,11 +86,8 @@ public slots:
     void saveRecipe();
     void openCascadeRecipe();
 
-    void addRecipeToCascadeRecipe();
-    void removeRecipeFromCascadeList();
-    void saveAsCascadeRecipeListToFile();
     void setRecipeMBtuner(double MBtunerSP);
-    void plasmaHeadTemp(double temp);
+  //  void plasmaHeadTemp(double temp);
     void thicknessChanged();
     void gapChanged();
     void overlapChanged();
@@ -88,6 +95,7 @@ public slots:
     void autoScanChanged();
     void xLimitsChanged();
     void yLimitsChanged();
+    void cyclesChanged();
 
     void pinsStateChanged(bool state);
     void joystickStateChanged(bool state);
@@ -124,29 +132,23 @@ private slots:
     void on_loadRFButton_clicked();
     void on_scan_button_dup_toggled(bool checked);
     void on_scan_button_toggled(bool checked);
-
-
     void on_plsmaBtn_toggled(bool checked);
-
     void on_plsmaBtn_dup_toggled(bool checked);
-
     void on_loadAutoTuneButton_clicked();
-
     void on_loadMBButton_clicked();
-
     void on_load_autoscan_clicked();
+    void on_save_recipe_button_clicked();
+    void on_saveAsCascadeRecipeButton_clicked();
+    void on_loadCascadeRecipeButton_clicked();
+    void on_addCascadeRecipeButton_clicked();
+    void on_removeCascadeRecipeButton_clicked();
+    void on_clear_cascade_recipe_button_clicked();
 
 private:
     // Action Button methods
     void serialButtonPreConnectState();
     void showStatusMessage(const QString &message);
     // Serial Port methods
-
-    // GUI signal Slot connections
-    void connectMFCFlowBars();
-    void recipeWattsChanged();
-    void autoTuneChanged(bool autoTune);
-
 
     void connectMFCRecipeButton(QPushButton* button, const int &mfcNumber);
     // Connection for Recipes buttons

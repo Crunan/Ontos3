@@ -4,6 +4,26 @@
 #include "filereader.h"
 #include <QObject>
 
+const QString RECIPE_PWR_KEY = "PWR";
+const QString RECIPE_TUNER_KEY = "TUNER";
+const QString RECIPE_MFC_KEY = "MFC";
+const QString RECIPE_MFC1_KEY = "MFC1";
+const QString RECIPE_MFC2_KEY = "MFC2";
+const QString RECIPE_MFC3_KEY = "MFC3";
+const QString RECIPE_MFC4_KEY = "MFC4";
+const QString RECIPE_THICKNESS_KEY = "THICKNESS";
+const QString RECIPE_GAP_KEY = "GAP";
+const QString RECIPE_OVERLAP_KEY = "OVERLAP";
+const QString RECIPE_SPEED_KEY = "SPEED";
+const QString RECIPE_CYCLES_KEY = "CYCLES";
+const QString RECIPE_XMIN_KEY = "XMIN";
+const QString RECIPE_YMIN_KEY = "YMIN";
+const QString RECIPE_XMAX_KEY = "XMAX";
+const QString RECIPE_YMAX_KEY = "YMAX";
+const QString RECIPE_PURGE_KEY = "PURGE";
+const QString RECIPE_AUTOSCAN_KEY = "AUTOSCAN";
+const QString RECIPE_HEATER_KEY = "HEATER";
+
 class PlasmaRecipe : public QObject {
     Q_OBJECT
 
@@ -31,15 +51,24 @@ public:
     void setAutoScanFromRecipe();
     void setXaxisLimitsFromRecipe();
     void setYaxisLimitsFromRecipe();
+    void setPurgeFromRecipe();
+    void setHeaterFromRecipe();
+    void setCyclesFromRecipe();
 
     void setAutoScanFlag(bool toggle);
     bool getAutoScanFlag() const { return m_autoScanFlag; }
 
     void setAutoScan(bool toggle);
     bool getAutoScanBool() const { return m_autoScan; }
+    QString getAutoScanQStr() const { return QString::number(m_autoScan);  }
 
     void setPurge(bool toggle);
     bool getPurge() const { return m_N2PurgeRecipe; }
+    QString getPurgeQStr() const { return QString::number(m_N2PurgeRecipe); }
+
+    void setHeater(bool heater);
+    bool getHeater() const { return m_heater; }
+    QString getHeaterQStr() const { return QString::number(m_heater);; }
 
     void setCycles(int cycles);
     QString getCyclesQStr() const { return QString::number(m_cycles); }
@@ -80,13 +109,14 @@ public:
     FileReader fileReader;
 
 signals:
-    void thicknessChanged(double thickness);
-    void gapChanged(double gap);
-    void overlapChanged(double overlap);
-    void speedChanged(double speed);
-    void autoScanChanged(bool autoscan);
-    void xLimitsChanged(double xmin, double xmax);
-    void yLimitsChanged(double ymin, double ymax);
+    void thicknessChanged();
+    void gapChanged();
+    void overlapChanged();
+    void speedChanged();
+    void autoScanChanged();
+    void xLimitsChanged();
+    void yLimitsChanged();
+    void cyclesChanged();
 
 private:
     QMap<QString, QVariant> m_recipeMap;
@@ -96,6 +126,7 @@ private:
     bool m_autoScanFlag;
     bool m_autoScan;
     bool m_N2PurgeRecipe;
+    bool m_heater;
     int m_cycles;
     double m_speed;
     double m_overlap;

@@ -83,6 +83,9 @@ void AxesController::SetupInitAxesStateMachine()
     m_pInitAxesWaitForDoneState->addTransition(this, SIGNAL(ISM_TransitionIdle()), m_pInitAxesIdleState);
     m_pInitAxesStartupState->addTransition(this, SIGNAL(ISM_TransitionIdle()), m_pInitAxesIdleState);
 
+    // entry and exit connections
+    connect(m_pInitAxesIdleState, SIGNAL(entered()), this, SLOT(InitIdleOnEntry()));
+
     // add states to the machine
     m_initStateMachine.addState(m_pInitAxesIdleState);
     m_initStateMachine.addState(m_pInitAxesStartupState);
@@ -130,6 +133,9 @@ void AxesController::SetupHomeAxesStateMachine()
     m_pHomeAxesShutdownState->addTransition(this, SIGNAL(HSM_TransitionIdle()), m_pHomeAxesIdleState);
     m_pHomeAxesIdleState->addTransition(this, SIGNAL(HSM_TransitionShutdown()), m_pHomeAxesShutdownState);
 
+    // entry and exit connections
+    connect(m_pHomeAxesIdleState, SIGNAL(entered()), this, SLOT(HomeIdleOnEntry()));
+
     // set initial state
     m_homeStateMachine.setInitialState(m_pHomeAxesIdleState);
 
@@ -169,6 +175,9 @@ void AxesController::SetupTwoSpotStateMachine()
     m_pTwoSpotGetSecondState->addTransition(this, SIGNAL(TSSM_TransitionJoyBtnOff2()), m_pTwoSpotWaitJoyBtnOff2State);
     m_pTwoSpotWaitJoyBtnOff2State->addTransition(this, SIGNAL(TSSM_TransitionShutdown()), m_pTwoSpotShutdownState);
     m_pTwoSpotShutdownState->addTransition(this, SIGNAL(TSSM_TransitionIdle()), m_pTwoSpotIdleState);
+
+    // entry and exit connections
+    connect(m_pTwoSpotIdleState, SIGNAL(entered()), this, SLOT(TwoSpotIdleOnEntry()));
 
     // set initial state
     m_twoSpotStateMachine.setInitialState(m_pTwoSpotIdleState);
@@ -226,7 +235,7 @@ void AxesController::RunInitAxesSM()
         //SM set to idle
         emit TSSM_TransitionIdle(); // two spot state machine to idle
         emit HSM_TransitionIdle(); // home state machine to idel
-        emit SSM_TransitionIdle(); // scan state machine to idle
+        emit ScanSM_TransitionIdle(); // scan state machine to idle
 
         //send commands
         stopMotors();
@@ -249,19 +258,26 @@ void AxesController::RunInitAxesSM()
         }
     }
     else if (m_initStateMachine.configuration().contains(m_pInitAxesIdleState)) { // in Idle state
+
         // no op
     }
     else if (m_initStateMachine.configuration().contains(m_pInitAxesInitializedState)) { // in initialized state
 
         // update UI
         emit stageStatusUpdate("Stage Initialized", "");
-        emit setUIInitSMDone();
+
 
         Logger::logInfo("Stage Initialized");
 
         // initiate transtion to Idle state
         emit ISM_TransitionIdle();
     }
+}
+
+void AxesController::InitIdleOnEntry()
+{
+    //  update the UI
+    emit setUIInitSMDone();
 }
 
 void AxesController::RunHomeAxesSM()
@@ -371,8 +387,18 @@ void AxesController::RunHomeAxesSM()
 
         // update UI
         emit stageStatusUpdate("", "");
-        emit setUIHomeSMDone();
+
     }
+    else if (m_homeStateMachine.configuration().contains(m_pHomeAxesIdleState)) { // in idle state
+
+        // no op
+    }
+}
+
+void AxesController::HomeIdleOnEntry()
+{
+    // updat the ui
+    emit setUIHomeSMDone();
 }
 
 void AxesController::RunTwoSpotSM()
@@ -381,6 +407,11 @@ void AxesController::RunTwoSpotSM()
 
         toggleJoystickOn();
 
+        // disable other state machines if they are active
+        emit TSSM_TransitionIdle();
+        emit HSM_TransitionIdle();
+        emit ScanSM_TransitionIdle();
+
         // update UI
         emit setUITwoSpotSMStartup();
         emit stageStatusUpdate("Use Controller for Stage", "Spot First Point");
@@ -388,15 +419,6 @@ void AxesController::RunTwoSpotSM()
         Logger::logInfo("TwoSpotSM Start Up");
 
         emit TSSM_TransitionGetFirst();
-
-//        RunScanBtn.Visible = False
-//        HomeAxesBtn.Visible = False
-//        SetDiameterBtn.Visible = False
-//        PinsSquare.Visible = False
-//        RecipeButtonPins.Visible = False
-//        AutoVacSquare.Visible = False
-//        Vacbtn.Visible = False
-//        SetTwoSpotBtn.Text = "STOP"
     }
     else if (m_twoSpotStateMachine.configuration().contains(m_pTwoSpotGetFirstState)) {
 
@@ -408,14 +430,7 @@ void AxesController::RunTwoSpotSM()
             m_Xaxis.setTwoSpotFirstPoint(TranslateCoordXPH2Base(m_Xaxis.getPosition()));
             m_Yaxis.setTwoSpotFirstPoint(TranslateCoordY2PH(m_Yaxis.getPosition()));
 
-
             Logger::logInfo("TwoSpotSM Got First");
-
-            /*QString msg = QString("Xpos = %1 Ypos = %2 first spot X = %3 first spot Y = %4 xPH2Base = %5 ys2PH = %6")
-                              .arg(m_Xaxis.getPosition()).arg(m_Yaxis.getPosition()).arg(m_Xaxis.getTwoSpotFirstPoint())
-                              .arg(m_Yaxis.getTwoSpotFirstPoint()).arg(getXPH2Base()).arg(getYs2PHval());
-            Logger::logDebug(msg);*/
-
 
             emit TSSM_TransitionJoyBtnOff();
         }
@@ -442,11 +457,6 @@ void AxesController::RunTwoSpotSM()
             m_Xaxis.setTwoSpotSecondPoint(TranslateCoordXPH2Base(m_Xaxis.getPosition()));
             m_Yaxis.setTwoSpotSecondPoint(TranslateCoordY2PH(m_Yaxis.getPosition()));
 
-            /*QString msg = QString("Xpos = %1 Ypos = %2 second spot X = %3 second spot Y = %4 xPH2Base = %5 ys2PH = %6")
-                              .arg(m_Xaxis.getPosition()).arg(m_Yaxis.getPosition()).arg(m_Xaxis.getTwoSpotSecondPoint())
-                              .arg(m_Yaxis.getTwoSpotSecondPoint()).arg(getXPH2Base()).arg(getYs2PHval());
-            Logger::logDebug(msg);*/
-
             //determine box orientation and corners for scanning
             m_Xaxis.checkAndSetDimensions();
             m_Yaxis.checkAndSetDimensions();
@@ -471,24 +481,20 @@ void AxesController::RunTwoSpotSM()
         emit TSSM_TransitionIdle();
 
         // update UI
-        emit setUITwoSpotSMDone();
         emit stageStatusUpdate("", "");
 
-        //setTwoSpotBtnText("TWO SPOT"); TODO: needs implementing
-//        CurrentStepTxtBox.Text = ""
-//        NextStepTxtBox.Text = ""
-//        RunScanBtn.Visible = True
-//        HomeAxesBtn.Visible = True
-//        SetDiameterBtn.Visible = True
-//        PinsSquare.Visible = True
-//        RecipeButtonPins.Visible = True
-//        AutoVacSquare.Visible = True
-//        Vacbtn.Visible = True
-//        SetTwoSpotBtn.Text = "SET TWO SPOT"
     }
     else if (m_twoSpotStateMachine.configuration().contains(m_pTwoSpotIdleState)) {
+
         // no op
     }
+}
+
+
+void AxesController::TwoSpotIdleOnEntry()
+{
+    // updat the UI
+    emit setUITwoSpotSMDone();
 }
 
 
@@ -581,8 +587,6 @@ void AxesController::AxisStartup()
     getZp2Base();
     getXs2PH();
     getYs2PH();
-    //getPHSlitLength();
-    //getPHSlitWidth();
     getPHSafetyZGap();
     getZPinsBuried();
     getZPinsExposed();
@@ -605,6 +609,7 @@ void AxesController::getAxisStatus()
 {
     sendCommand("$C0%"); //GET_STATUS $C0%; resp[!C0nn;nn;X state;X error;X pos; Y state; Y error, Y pos; Z state; Z error; Z pos#]
     QString response = readResponse();
+    if (response.length() < 30) Logger::logCritical("Bad axis status response = " + response);
     parseStatus(response);
 }
 
@@ -643,21 +648,51 @@ void AxesController::updateAxisStatus()
         m_Zaxis.setCurrentPosition(m_axisStatus[10]);
         //XYZ same? (probably stopped)
         setSameStateXYZsame();
-        //update GUI positions
-        //updateAxisPosition();
-        //set doors
-    //    setDoors(); // TODO: Need to implement
-//        toggleJoystickOn();
-//        toggleVacOn();
-//        toggleN2PurgeOn();
+
+        // Check various status bits
+        doorsStatus();
+        joyBtnStatus();
+        vacStatus();
+        N2PurgeStatus();
+
 
         //log any change
         //    if (didStatusChange()) {
         //        logAxesStatus();
         //    }
     }
+}
 
-    emit
+void AxesController::doorsStatus() {
+    //m_doorsOpen = isBitSet(LEDstates, 6);
+}
+
+void AxesController::joyBtnStatus() {
+    //m_joystickOn = isBitSet(LEDstates, 14);
+    //emit joystickStateChanged(m_joystickOn);
+}
+
+void AxesController::vacStatus() {
+   // m_vacOn = isBitSet(LEDstates, 12);
+    //emit vacStateChanged(m_vacOn);
+}
+
+void AxesController::N2PurgeStatus() {
+    //m_N2PurgeOn = isBitSet(LEDstates, 11);
+   // emit n2StateChanged(true);
+}
+
+bool AxesController::isBitSet(int test_int, int bit_pos)
+{
+    int bitmask{};
+
+    bitmask = 1<<bit_pos;
+    if (test_int & bitmask) {
+        return true;
+    }
+    else {
+        return false;
+    }
 }
 
 void AxesController::setXMaxPos(const double maxPos)
@@ -936,10 +971,7 @@ void AxesController::setAxisStateMachinesIdle()
     emit ISM_TransitionIdle(); // init state machine to idle
     emit HSM_TransitionIdle(); // home state machine to idle
     emit TSSM_TransitionIdle();// two spot state machine to idle
-
-
-    //ScanSM.setState(SASM_IDLE); // TODO: need to implement
-    //ScanSM.setSubState(SSSM_IDLE); // TODO: need to implement
+    emit ScanSM_TransitionIdle(); // scan state machine
 }
 
 void AxesController::resetAxes()
@@ -974,8 +1006,6 @@ void AxesController::toggleJoystickOn()
     sendCommand("$BE%");
     readResponse();
     Logger::logInfo("Joystick : enabled");
-    m_joystickOn = true;
-    emit joystickStateChanged(true);
 }
 
 void AxesController::toggleJoystickOff()
@@ -983,8 +1013,6 @@ void AxesController::toggleJoystickOff()
     sendCommand("$BF%");
     readResponse();
     Logger::logInfo("Joystick : disabled");
-    m_joystickOn = false;
-    emit joystickStateChanged(false);
 }
 
 void AxesController::toggleN2PurgeOn()
@@ -992,14 +1020,12 @@ void AxesController::toggleN2PurgeOn()
     sendCommand("$C701%"); //SET_VALVE_2 $C70n% resp[!C70n#] n = 0, 1 (off, on)
     readResponse();
     Logger::logInfo("N2 on");
-    emit n2StateChanged(true);
 }
 void AxesController::toggleN2PurgeOff()
 {
     sendCommand("$C700%"); //SET_VALVE_2 $C70n% resp[!C70n#] n = 0, 1 (off, on)
     readResponse();
     Logger::logInfo("N2 off");
-    emit n2StateChanged(false);
 }
 
 void AxesController::toggleVacOn()
@@ -1007,7 +1033,6 @@ void AxesController::toggleVacOn()
     sendCommand("$C801%"); //SET_VALVE_3 $C80n% resp[!C80n#] n =0, 1 (off, on)
     readResponse();
     Logger::logInfo("Vac on");
-    emit vacStateChanged(true);
 }
 
 void AxesController::toggleVacOff()
@@ -1015,6 +1040,5 @@ void AxesController::toggleVacOff()
     sendCommand("$C800%"); //SET_VALVE_3 $C80n% resp[!C80n#] n =0, 1 (off, on)
     readResponse();
     Logger::logInfo("Vac off");
-    emit vacStateChanged(false);
 }
 

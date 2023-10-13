@@ -14,6 +14,7 @@ public:
     void setActualPosition(double position);
 
     double getRecipePosition() const;
+    QString getRecipePositionQStr() const;
     void setRecipePosition(double setpoint);
 
     double getDefaultRecipe() const;
