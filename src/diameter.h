@@ -18,7 +18,7 @@ public:
 
     int getNumWaferSizes() const;
 private:
-    int *m_pWaferDiameter;
+    int* m_pWaferDiameter;
     QStringList m_WaferDiameterText;
 
     int m_currentWaferDiameter;

@@ -12,6 +12,11 @@ const QString XAXIS_QSTR = "0";
 const QString YAXIS_QSTR = "1";
 const QString ZAXIS_QSTR = "2";
 
+bool joystickOnLast = false;
+bool N2OnLast = false;
+bool vacOnLast = false;
+bool doorsOpenLast = false;
+
 AxesController::AxesController(QObject *parent) :
     QObject(parent),
     m_ledStatus(),
@@ -432,6 +437,11 @@ void AxesController::RunTwoSpotSM()
 
             Logger::logInfo("TwoSpotSM Got First");
 
+            /*QString msg = QString("Xpos = %1 Ypos = %2 first spot X = %3 first spot Y = %4 xPH2Base = %5 ys2PH = %6")
+                              .arg(m_Xaxis.getPosition()).arg(m_Yaxis.getPosition()).arg(m_Xaxis.getTwoSpotFirstPoint())
+                              .arg(m_Yaxis.getTwoSpotFirstPoint()).arg(getXPH2Base()).arg(getYs2PHval());
+            Logger::logDebug(msg);*/
+
             emit TSSM_TransitionJoyBtnOff();
         }
     }
@@ -456,6 +466,11 @@ void AxesController::RunTwoSpotSM()
             // translate to ph coordinates and save
             m_Xaxis.setTwoSpotSecondPoint(TranslateCoordXPH2Base(m_Xaxis.getPosition()));
             m_Yaxis.setTwoSpotSecondPoint(TranslateCoordY2PH(m_Yaxis.getPosition()));
+
+            /*QString msg = QString("Xpos = %1 Ypos = %2 second spot X = %3 second spot Y = %4 xPH2Base = %5 ys2PH = %6")
+                              .arg(m_Xaxis.getPosition()).arg(m_Yaxis.getPosition()).arg(m_Xaxis.getTwoSpotSecondPoint())
+                              .arg(m_Yaxis.getTwoSpotSecondPoint()).arg(getXPH2Base()).arg(getYs2PHval());
+            Logger::logDebug(msg);*/
 
             //determine box orientation and corners for scanning
             m_Xaxis.checkAndSetDimensions();
@@ -617,10 +632,10 @@ void AxesController::getAxisStatus()
 void AxesController::setLEDstate(QString firstHexStrNibble, QString secondHexStrNibble)
 {
     bool ok;
-    int LEDstates = firstHexStrNibble.toInt(&ok, 16); //First byte
-    LEDstates = LEDstates<<8;
-    LEDstates += secondHexStrNibble.toInt(&ok, 16); //First byte
-    m_ledStatus.setStatusBits(LEDstates);
+    m_LEDstates = firstHexStrNibble.toInt(&ok, 16); //First byte
+    m_LEDstates = m_LEDstates<<8;
+    m_LEDstates += secondHexStrNibble.toInt(&ok, 16); //First byte
+    m_ledStatus.setStatusBits(m_LEDstates);
 }
 
 void AxesController::updateAxisStatus()
@@ -663,23 +678,69 @@ void AxesController::updateAxisStatus()
     }
 }
 
-void AxesController::doorsStatus() {
-    //m_doorsOpen = isBitSet(LEDstates, 6);
+
+
+void AxesController::doorsStatus()
+{
+    m_doorsOpen = isBitSet(m_LEDstates, 6);
+
+    if (m_doorsOpen != doorsOpenLast) {
+        doorsOpenLast = m_doorsOpen;
+
+        if (m_doorsOpen)
+            Logger::logInfo("Doors : open");
+        else
+            Logger::logInfo("Doors : closed");
+    }
 }
 
-void AxesController::joyBtnStatus() {
-    //m_joystickOn = isBitSet(LEDstates, 14);
-    //emit joystickStateChanged(m_joystickOn);
+void AxesController::joyBtnStatus()
+{
+    m_joystickOn = isBitSet(m_LEDstates, 15);
+
+    if (m_joystickOn != joystickOnLast) {
+        joystickOnLast = m_joystickOn;
+
+        if (m_joystickOn)
+            Logger::logInfo("Joystick : enabled");
+        else
+            Logger::logInfo("Joystick : disabled");
+
+        emit joystickStateChanged(m_joystickOn);
+    }
 }
 
-void AxesController::vacStatus() {
-   // m_vacOn = isBitSet(LEDstates, 12);
-    //emit vacStateChanged(m_vacOn);
+void AxesController::vacStatus()
+{
+    m_vacOn = isBitSet(m_LEDstates, 12);
+
+    if (m_vacOn != vacOnLast) {
+        vacOnLast = m_vacOn;
+
+        if (m_vacOn)
+            Logger::logInfo("Vac : enabled");
+        else
+            Logger::logInfo("Vac : disabled");
+
+        emit vacStateChanged(m_vacOn);
+    }
 }
 
-void AxesController::N2PurgeStatus() {
-    //m_N2PurgeOn = isBitSet(LEDstates, 11);
-   // emit n2StateChanged(true);
+void AxesController::N2PurgeStatus()
+{
+
+    m_N2PurgeOn = isBitSet(m_LEDstates, 11);
+
+    if (m_N2PurgeOn != N2OnLast) {
+        N2OnLast = m_N2PurgeOn;
+
+        if (m_N2PurgeOn)
+            Logger::logInfo("N2 Purge : enabled");
+        else
+            Logger::logInfo("N2 Purge : disabled");
+
+        emit n2StateChanged(true);
+    }
 }
 
 bool AxesController::isBitSet(int test_int, int bit_pos)
@@ -894,7 +955,7 @@ void AxesController::getZPinsBuried()
         bool ok = false;
         double ZPinsBuried = StrVar.toDouble(&ok);
         if (ok) {
-            m_stage.setPinsBuried(StrVar); // TODO: need to implement
+            m_stage.setPinsBuried(ZPinsBuried);
             Logger::logInfo("Z Pins Buried Position: " + StrVar + " (mm)");
         }
     }
@@ -910,7 +971,7 @@ void AxesController::getZPinsExposed()
         bool ok = false;
         double ZPinsExposed = StrVar.toDouble(&ok);
         if (ok) {
-            m_stage.setPinsExposed(StrVar); // TODO: need to implement
+            m_stage.setPinsExposed(ZPinsExposed);
             Logger::logInfo("Z Pins Exposed Position: " + StrVar + " (mm)");
         }
     }
@@ -1005,40 +1066,34 @@ void AxesController::toggleJoystickOn()
 {
     sendCommand("$BE%");
     readResponse();
-    Logger::logInfo("Joystick : enabled");
 }
 
 void AxesController::toggleJoystickOff()
 {
     sendCommand("$BF%");
     readResponse();
-    Logger::logInfo("Joystick : disabled");
 }
 
 void AxesController::toggleN2PurgeOn()
 {    
     sendCommand("$C701%"); //SET_VALVE_2 $C70n% resp[!C70n#] n = 0, 1 (off, on)
     readResponse();
-    Logger::logInfo("N2 on");
 }
 void AxesController::toggleN2PurgeOff()
 {
     sendCommand("$C700%"); //SET_VALVE_2 $C70n% resp[!C70n#] n = 0, 1 (off, on)
     readResponse();
-    Logger::logInfo("N2 off");
 }
 
 void AxesController::toggleVacOn()
 {
     sendCommand("$C801%"); //SET_VALVE_3 $C80n% resp[!C80n#] n =0, 1 (off, on)
     readResponse();
-    Logger::logInfo("Vac on");
 }
 
 void AxesController::toggleVacOff()
 {
     sendCommand("$C800%"); //SET_VALVE_3 $C80n% resp[!C80n#] n =0, 1 (off, on)
     readResponse();
-    Logger::logInfo("Vac off");
 }
 

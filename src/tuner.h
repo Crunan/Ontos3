@@ -10,12 +10,12 @@ class Tuner : public QObject {
 public:
     Tuner();
 
-    double getActualPosition() const;
-    void setActualPosition(double position);
+    int getActualPosition() const;
+    void setActualPosition(int position);
 
-    double getRecipePosition() const;
+    int getRecipePosition() const;
     QString getRecipePositionQStr() const;
-    void setRecipePosition(double setpoint);
+    void setRecipePosition(int setpoint);
 
     double getDefaultRecipe() const;
     void setDefaultRecipe(double setpoint);
@@ -25,14 +25,14 @@ public:
     void toggleAutoTune();
 
 signals:
-    void recipePositionChanged(const double recipePosition);
-    void actualPositionChanged(const double actualPosition);
+    void recipePositionChanged(const int recipePosition);
+    void actualPositionChanged(const int actualPosition);
     void defaultRecipeChanged(const double defaultRecipe);
     void autoTuneChanged(const bool autoTune);
 
 private:
-    double m_actualPosition;
-    double m_recipePosition;
+    int m_actualPosition;
+    int m_recipePosition;
     double m_defaultRecipe;
     bool m_autoTune;
 };

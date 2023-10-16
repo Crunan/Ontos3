@@ -66,13 +66,6 @@ void Axis::checkAndSetDimensions()
 }
 
 
-/*void Axis::setCurrentState(AxisState state)
-{
-    if (currentState != state) {
-        currentState = state;
-        emit currentStateChanged();
-    }
-}*/
 
 
 

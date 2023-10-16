@@ -65,10 +65,21 @@ public:
     double XMaxSpeed() { return m_Xaxis.getMaxSpeed(); }
     QString getXHomePosQStr() { return m_Xaxis.getHomePosQStr(); }
 
-    double getXTwoSpotFirstPoint() { return m_Xaxis.getTwoSpotFirstPoint(); }
-    double getXTwoSpotSecondPoint() { return m_Xaxis.getTwoSpotSecondPoint(); }
-    double getYTwoSpotFirstPoint() { return m_Yaxis.getTwoSpotFirstPoint(); }
-    double getYTwoSpotSecondPoint() { return m_Yaxis.getTwoSpotSecondPoint(); }
+//    double getXTwoSpotFirstPoint() { return m_Xaxis.getTwoSpotFirstPoint(); }
+//    double getXTwoSpotSecondPoint() { return m_Xaxis.getTwoSpotSecondPoint(); }
+//    double getYTwoSpotFirstPoint() { return m_Yaxis.getTwoSpotFirstPoint(); }
+//    double getYTwoSpotSecondPoint() { return m_Yaxis.getTwoSpotSecondPoint(); }
+
+    double getXScanMin() { return m_Xaxis.getScanMin(); }
+    double getXScanMax() { return m_Xaxis.getScanMax(); }
+    double getYScanMin() { return m_Yaxis.getScanMin(); }
+    double getYScanMax() { return m_Yaxis.getScanMax(); }
+
+    void setXScanMin(double xmin) { return m_Xaxis.setScanMin(xmin); }
+    void setXScanMax(double xmax) { return m_Xaxis.setScanMax(xmax); }
+
+    void setYScanMin(double ymin) { return m_Yaxis.setScanMin(ymin); }
+    void setYScanMax(double ymax) { return m_Yaxis.setScanMax(ymax); }
 
     void setAxisStateMachinesIdle();
 
@@ -91,6 +102,7 @@ public:
 
     double getYs2PHval() { return m_Ys2PH; }
     double getXPH2Base() { return m_Xp2Base; }
+    double getYPH2Base() { return m_Yp2Base; }
     double getZp2BaseDbl() { return m_Zp2Base; }
 
     void resetAxes();
@@ -249,6 +261,7 @@ private:
 
     QStringList m_axisStatus;
 
+    int m_LEDstates;
     bool m_sameStateXYZ;
     bool m_joystickOn;
     bool m_joyButtonOn;

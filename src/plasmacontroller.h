@@ -12,6 +12,7 @@
 #include "mfc.h"
 #include "settingsdialog.h"
 #include "lighttower.h"
+#include "diameter.h"
 
 
 #include <QObject>
@@ -47,6 +48,7 @@ public:
 
     MFC* findMFCByNumber(int mfcNumber);
     int numberOfMFCs();
+    void runDiameter();
 
     // startup and reset
     void CTLStartup();
@@ -81,6 +83,7 @@ public:
     PlasmaHead& getPlasmaHead() { return m_plasmaHead; }
     SerialInterface* getSerialInterface() { return m_pSerialInterface; }
     PlasmaRecipe *getRecipe() { return m_pRecipe; }
+    Diameter& getDiameter() { return m_waferDiameter; }
 
     // laser access
     void LaserSenseOn();
@@ -144,6 +147,8 @@ signals:
 
     void recipeExecutionStateChanged(bool state);
 
+    void scanBoxChanged();
+
 public slots:
     // MFCs
     int parseResponseForNumberOfMFCs(QString& responseStr);
@@ -154,7 +159,7 @@ public slots:
 
     // Tuner
     void handleSetTunerDefaultRecipeCommand(const double defaultPosition);
-    void handleSetTunerRecipePositionCommand(const double recipePosition);
+    void handleSetTunerRecipePositionCommand(const int recipePosition);
     void handleSetTunerAutoTuneCommand(const bool value);
 
     // PWR
@@ -169,6 +174,8 @@ public slots:
     // scan state machine to idle
     void scanningStateMachineToIdle() { emit SSM_TransitionIdle(); }
 
+
+
 private:
     QString getLastCommand() { return m_pSerialInterface->getLastCommand(); }
     void setupScanStateMachine();
@@ -181,6 +188,7 @@ private:
     Configuration m_config;
     CommandMap m_commandMap;
     AxesController m_stageCTL;
+    Diameter m_waferDiameter;
     PlasmaRecipe *m_pRecipe;
     PlasmaHead m_plasmaHead;
     Tuner m_tuner;

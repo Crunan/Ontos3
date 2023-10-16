@@ -611,6 +611,26 @@ int PlasmaController::parseResponseForNumberOfMFCs(QString& response)
     return numMFCs;
 }
 
+void PlasmaController::runDiameter()
+{
+    double radius;
+    double newXmin, newXmax, newYmin, newYmax;
+
+    radius =  m_waferDiameter.getCurrentWaferDiameterSelection() / 2.0;
+
+    double Xp2Base = m_stageCTL.getXPH2Base();
+    double Yp2Base = m_stageCTL.getYPH2Base();
+
+    //find the points defining the box
+    m_stageCTL.setXScanMin(Xp2Base - radius);
+    m_stageCTL.setXScanMax(Xp2Base + radius);
+    m_stageCTL.setYScanMin(Yp2Base - radius);
+    m_stageCTL.setYScanMax(Yp2Base + radius);
+
+    // trigger a ui update
+    emit scanBoxChanged();
+}
+
 QString PlasmaController::getPortErrorString()
 {
     return m_pSerialInterface->errorString();
@@ -673,9 +693,9 @@ void PlasmaController::handleSetMFCRangeCommand(const int mfcNumber, const doubl
 }
 
 // TUNER
-void PlasmaController::handleSetTunerRecipePositionCommand(const double recipePosition)
+void PlasmaController::handleSetTunerRecipePositionCommand(const int recipePosition)
 {   
-    QString number = QString("%1").arg(int(recipePosition), 4, 10, QChar('0')); // number, field width, base, fill char
+    QString number = QString("%1").arg(recipePosition, 4, 10, QChar('0')); // number, field width, base, fill char
     QString command = "$43" + number + "%"; // SET_RCP_MS_POS  $43xxxx$ xxxx = Base10 MB Motor Pos; resp[!43xxxx#]
     sendCommand(command);
     readResponse();

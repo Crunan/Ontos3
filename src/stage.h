@@ -9,8 +9,8 @@ class Stage : public QObject
 public:
     explicit Stage(QObject *parent = nullptr);
 
-    void setPinsBuried(QString pos) { pinsBuriedPos = pos.toDouble(); }
-    void setPinsExposed(QString pos) { pinsExposedPos = pos.toDouble(); }
+    void setPinsBuried(double pos) { pinsBuriedPos = pos; }
+    void setPinsExposed(double pos) { pinsExposedPos = pos; }
 
     double getPinsBuriedPos() { return pinsBuriedPos; }
     double getPinsExposedPos() { return pinsExposedPos; }

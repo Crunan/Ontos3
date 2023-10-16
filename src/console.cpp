@@ -50,6 +50,7 @@
 ****************************************************************************/
 
 #include "console.h"
+#include "logger.h"
 
 #include <QScrollBar>
 
@@ -89,6 +90,8 @@ void Console::keyPressEvent(QKeyEvent *e)
         if (localEchoEnabled_)
             QPlainTextEdit::keyPressEvent(e);
         emit getData(e->text().toLocal8Bit());
+        QString smsg = e->text().toLocal8Bit();
+        Logger::logInfo(smsg + " !!!!!!!!!!!!!!!!!!!!!!!!!!1");
     }
 }
 

@@ -20,7 +20,6 @@
 #include <memory>
 #include <QInputDialog>
 #include <QLineEdit>
-#include "diameter.h"
 
 using namespace std::literals;
 
@@ -106,6 +105,7 @@ public slots:
     void SSM_Done();
     void SSM_StatusUpdate(QString status, QString next);
     void recipeExecutionStateChanged(bool state);
+    void scanBoxChanged();
 
 private slots:
     // button handlers
@@ -120,6 +120,7 @@ private slots:
     void on_loadSpeedButton_clicked();
     void on_load_cycles_clicked();
     void on_wafer_diameter_dup_currentIndexChanged(int index);
+    void on_wafer_diameter_currentIndexChanged(int index);
     void on_vac_button_dup_toggled(bool checked);
     void on_vac_button_toggled(bool checked);
     void on_n2_purge_button_toggled(bool checked);
@@ -143,6 +144,9 @@ private slots:
     void on_addCascadeRecipeButton_clicked();
     void on_removeCascadeRecipeButton_clicked();
     void on_clear_cascade_recipe_button_clicked();
+    void on_Joystick_button_toggled(bool checked);
+    void on_Stagepins_button_toggled(bool checked);   
+    void on_diameter_button_clicked();
 
 private:
     // Action Button methods
@@ -189,7 +193,5 @@ private:
     QState *m_pMainIdleState;
     QState *m_pMainPollingState;
     QState *m_pMainShutdownState;
-
-    Diameter m_waferDiameter;
 };
 #endif // MAINWINDOW_H

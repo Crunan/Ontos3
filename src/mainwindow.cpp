@@ -22,8 +22,7 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     m_pMainCTLConsole(),
     //m_pStageCTLConsole(),
     //m_pStageWidget(new StageWidget(this)),
-    m_config(),
-    m_waferDiameter()
+    m_config()
 {
     ui->setupUi(this);
     this->setWindowTitle("ONTOS3 INTERFACE v" + QString(APP_VERSION));
@@ -49,6 +48,7 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(&m_mainCTL, &PlasmaController::SSM_Started, this, &MainWindow::SSM_Started);
     connect(&m_mainCTL, &PlasmaController::SSM_Done, this, &MainWindow::SSM_Done);
     connect(&m_mainCTL, &PlasmaController::CSM_StatusUpdate, this, &MainWindow::CSM_StatusUpdate);
+    connect(&m_mainCTL, &PlasmaController::scanBoxChanged, this, &MainWindow::scanBoxChanged);
     connect(&m_mainCTL.getTuner(), &Tuner::recipePositionChanged, this, &MainWindow::setRecipeMBtuner);
     //connect(&m_mainCTL, &PlasmaController::plasmaHeadTemp, this, &MainWindow::plasmaHeadTemp);
     // main state machine from main loop
@@ -81,10 +81,9 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     ui->statusBar->addWidget(m_pStatus);
 
     // setup wafer diamter combo box
-    ui->wafer_diameter->addItems(m_waferDiameter.getWaferDiameterTextList());
-    ui->wafer_diameter_dup->addItems(m_waferDiameter.getWaferDiameterTextList());
+    ui->wafer_diameter->addItems(m_mainCTL.getDiameter().getWaferDiameterTextList());
+    ui->wafer_diameter_dup->addItems(m_mainCTL.getDiameter().getWaferDiameterTextList());
 
-    //this->openMainPort();
     // give things a little time to settle before opening the serial port
     QTimer::singleShot(50, this, SLOT(openMainPort()));
 }
@@ -131,7 +130,7 @@ void MainWindow::consoleMainCTLSetup()
     m_pMainCTLConsole = new Console(ui->mainTabWidget);
 
     // Step 2: Add the console instance to a new tab
-    //int tabIndex = ui->mainTabWidget->addTab(m_pMainCTLConsole, "Main CTL Terminal");
+    int tabIndex = ui->mainTabWidget->addTab(m_pMainCTLConsole, "Main CTL Terminal");
 
     // Step 3: Set the Qt theme icon for the tab
     QIcon icon = QIcon::fromTheme("utilities-system");
@@ -302,16 +301,16 @@ void MainWindow::twoSpotStateMachineDone()
     ui->twospot_button_dup->setChecked(false);
 
     // 3 axis tab
-    ui->xmin_controls_dup->setText(QString::number(m_mainCTL.getAxesController().getXTwoSpotFirstPoint()));
-    ui->xmax_controls_dup->setText(QString::number(m_mainCTL.getAxesController().getXTwoSpotSecondPoint()));
-    ui->ymin_controls_dup->setText(QString::number(m_mainCTL.getAxesController().getYTwoSpotFirstPoint()));
-    ui->ymax_controls_dup->setText(QString::number(m_mainCTL.getAxesController().getYTwoSpotSecondPoint()));
+    ui->xmin_controls_dup->setText(QString::number(m_mainCTL.getAxesController().getXScanMin()));
+    ui->xmax_controls_dup->setText(QString::number(m_mainCTL.getAxesController().getXScanMax()));
+    ui->ymin_controls_dup->setText(QString::number(m_mainCTL.getAxesController().getYScanMin()));
+    ui->ymax_controls_dup->setText(QString::number(m_mainCTL.getAxesController().getYScanMax()));
 
     // dashboard tab
-    ui->x1_recipe->setText(QString::number(m_mainCTL.getAxesController().getXTwoSpotFirstPoint()));
-    ui->x2_recipe->setText(QString::number(m_mainCTL.getAxesController().getXTwoSpotSecondPoint()));
-    ui->y1_recipe->setText(QString::number(m_mainCTL.getAxesController().getYTwoSpotFirstPoint()));
-    ui->y2_recipe->setText(QString::number(m_mainCTL.getAxesController().getYTwoSpotSecondPoint()));
+    ui->x1_recipe->setText(QString::number(m_mainCTL.getAxesController().getXScanMin()));
+    ui->x2_recipe->setText(QString::number(m_mainCTL.getAxesController().getXScanMax()));
+    ui->y1_recipe->setText(QString::number(m_mainCTL.getAxesController().getYScanMin()));
+    ui->y2_recipe->setText(QString::number(m_mainCTL.getAxesController().getYScanMax()));
 
     // enable the buttons that we disabled
     ui->Home_button->setEnabled(true);
@@ -369,6 +368,21 @@ void MainWindow::SSM_Done()
     ui->diameter_button_dup->setEnabled(true);
 }
 
+void MainWindow::scanBoxChanged()
+{
+    // 3 axis tab
+    ui->xmin_controls_dup->setText(QString::number(m_mainCTL.getAxesController().getXScanMin()));
+    ui->xmax_controls_dup->setText(QString::number(m_mainCTL.getAxesController().getXScanMax()));
+    ui->ymin_controls_dup->setText(QString::number(m_mainCTL.getAxesController().getYScanMin()));
+    ui->ymax_controls_dup->setText(QString::number(m_mainCTL.getAxesController().getYScanMax()));
+
+    // dashboard tab
+    ui->x1_recipe->setText(QString::number(m_mainCTL.getAxesController().getXScanMin()));
+    ui->x2_recipe->setText(QString::number(m_mainCTL.getAxesController().getXScanMax()));
+    ui->y1_recipe->setText(QString::number(m_mainCTL.getAxesController().getYScanMin()));
+    ui->y2_recipe->setText(QString::number(m_mainCTL.getAxesController().getYScanMax()));
+}
+
 //////////////////////////////////////////////////////////////////////////////////
 // Serial Ports
 //////////////////////////////////////////////////////////////////////////////////
@@ -394,9 +408,9 @@ void MainWindow::openMainPort()
     if (m_mainCTL.open(*m_pSettings)) {
 
         // Terminal Tab setup for console commands
-        consoleMainCTLSetup();
-        m_pMainCTLConsole->setEnabled(true);
-        m_pMainCTLConsole->setLocalEchoEnabled(p.localEchoEnabled);
+//        consoleMainCTLSetup();
+//        m_pMainCTLConsole->setEnabled(true);
+//        m_pMainCTLConsole->setLocalEchoEnabled(p.localEchoEnabled);
 
         m_mainCTL.getAxesController().resetAxes();
         m_mainCTL.resetCTL();
@@ -1328,6 +1342,17 @@ void MainWindow::on_scan_button_toggled(bool checked)
     }
 }
 
+// pins on dashboard
+void MainWindow::on_Stagepins_button_toggled(bool checked)
+{
+    if (checked) {
+        m_mainCTL.getAxesController().togglePinsOn();
+    }
+    else {
+        m_mainCTL.getAxesController().togglePinsOff();
+    }
+}
+
 // pins button on 3 axis tab
 void MainWindow::on_Stagepins_button_dup_toggled(bool checked)
 {
@@ -1363,6 +1388,18 @@ void MainWindow::on_n2_purge_button_toggled(bool checked)
 
 }
 
+// joystick button on dashboard
+void MainWindow::on_Joystick_button_toggled(bool checked)
+{
+    if (checked) {
+        m_mainCTL.getAxesController().toggleJoystickOn();
+    }
+    else {
+        m_mainCTL.getAxesController().toggleJoystickOff();
+    }
+}
+
+// joystick button on 3 axis
 void MainWindow::on_Joystick_button_dup_toggled(bool checked)
 {
     if (checked) {
@@ -1373,17 +1410,74 @@ void MainWindow::on_Joystick_button_dup_toggled(bool checked)
     }
 }
 
+// diameter button on dashboard
+void MainWindow::on_diameter_button_clicked()
+{
+    // get the index of the current displayed diameter
+    int comboboxCurrentIndex = ui->wafer_diameter->currentIndex();
+
+    // set our diameter object
+    m_mainCTL.getDiameter().setCurrentWaferDiameter(m_mainCTL.getDiameter().getWaferDiameterByIndex(comboboxCurrentIndex));
+
+    // update the combox box on the 3axis tab
+    ui->wafer_diameter_dup->setCurrentIndex(comboboxCurrentIndex);
+
+    // reset the scan box
+    m_mainCTL.runDiameter();
+}
+
 // diameter button on 3 axis tab
 void MainWindow::on_diameter_button_dup_clicked()
 {
-
+    // reset the scan box
+    m_mainCTL.runDiameter();
 }
+
+// wafer combo box on the dashboard
+void MainWindow::on_wafer_diameter_currentIndexChanged(int index)
+{
+    // get the index of the current displayed diameter
+    int comboboxCurrentIndex = ui->wafer_diameter->currentIndex();
+
+    // get the current diameter
+    int currentDiameter = m_mainCTL.getDiameter().getCurrentWaferDiameterSelection();
+
+    // proposed diameter
+    int proposedDiameter = m_mainCTL.getDiameter().getWaferDiameterByIndex(comboboxCurrentIndex);
+
+    if (currentDiameter != proposedDiameter) {
+
+        // set our diameter object
+        m_mainCTL.getDiameter().setCurrentWaferDiameter(m_mainCTL.getDiameter().getWaferDiameterByIndex(comboboxCurrentIndex));
+
+        // update the combo box on the dashboard tab
+        ui->wafer_diameter_dup->setCurrentIndex(comboboxCurrentIndex);
+    }
+}
+
 
 // wafer combo box on the 3 axis page
 void MainWindow::on_wafer_diameter_dup_currentIndexChanged(int index)
 {
-    m_waferDiameter.setCurrentWaferDiameter(m_waferDiameter.getWaferDiameterByIndex(index));
+    // get the index of the current displayed diameter
+    int comboboxCurrentIndex = ui->wafer_diameter_dup->currentIndex();
+
+    // get the current diameter
+    int currentDiameter = m_mainCTL.getDiameter().getCurrentWaferDiameterSelection();
+
+    // proposed diameter
+    int proposedDiameter = m_mainCTL.getDiameter().getWaferDiameterByIndex(comboboxCurrentIndex);
+
+    if (currentDiameter != proposedDiameter) {
+
+        // set our diameter object
+        m_mainCTL.getDiameter().setCurrentWaferDiameter(m_mainCTL.getDiameter().getWaferDiameterByIndex(comboboxCurrentIndex));
+
+        // update the combo box on the dashboard tab
+        ui->wafer_diameter->setCurrentIndex(comboboxCurrentIndex);
+    }
 }
+
 
 // vacuum button on 3 axis tab
 void MainWindow::on_vac_button_dup_toggled(bool checked)
@@ -1439,7 +1533,7 @@ void MainWindow::on_load_thick_clicked()
     }
 }
 
-
+// gap button on dashboard
 void MainWindow::on_load_gap_clicked()
 {
     bool ok;
@@ -1449,7 +1543,7 @@ void MainWindow::on_load_gap_clicked()
     }
 }
 
-
+// overlap button on dashboard
 void MainWindow::on_load_overlap_clicked()
 {
     bool ok;
@@ -1459,7 +1553,7 @@ void MainWindow::on_load_overlap_clicked()
     }
 }
 
-
+// speed button on dashboard
 void MainWindow::on_loadSpeedButton_clicked()
 {
     bool ok;
@@ -1471,6 +1565,7 @@ void MainWindow::on_loadSpeedButton_clicked()
 }
 
 
+// cycles button on dashboard
 void MainWindow::on_load_cycles_clicked()
 {
     bool ok;
@@ -1479,6 +1574,7 @@ void MainWindow::on_load_cycles_clicked()
         m_mainCTL.getRecipe()->setCycles(intVal);
     }
 }
+
 
 // open recipe button
 void MainWindow::on_loadRecipeButton_clicked()
@@ -1512,11 +1608,11 @@ void MainWindow::on_loadRFButton_clicked()
 void MainWindow::on_loadMBButton_clicked()
 {
     bool ok;
-    QString recipeStr = QInputDialog::getText(nullptr, "Tuner Setpoint", "Please enter a setpoint for MB Tuner:", QLineEdit::Normal, "", &ok);
+    QString recipeStr = QInputDialog::getText(nullptr, "Tuner Setpoint", "Please enter a percentage for MB Tuner:", QLineEdit::Normal, "", &ok);
 
     if (ok && !recipeStr.isEmpty()) {
         // User entered a string and clicked OK
-        double recipe = recipeStr.toDouble();
+        int recipe = recipeStr.toInt();
         m_mainCTL.getTuner().setRecipePosition(recipe);
     }
     else {
@@ -1562,6 +1658,14 @@ void MainWindow::on_load_autoscan_clicked()
         }
     }
 }
+
+
+
+
+
+
+
+
 
 
 

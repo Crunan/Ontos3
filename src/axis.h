@@ -54,6 +54,9 @@ public:
     double getTwoSpotFirstPoint() { return m_twoSpotFirstPoint; }
     double getTwoSpotSecondPoint() { return m_twoSpotSecondPoint; }
 
+    double getScanMin() { return m_scanMin; }
+    double getScanMax() { return m_scanMax; }
+
     void checkAndSetDimensions();
 
     //void setCurrentState(AxisState state);
