@@ -20,6 +20,7 @@
 #include <memory>
 #include <QInputDialog>
 #include <QLineEdit>
+#include "passworddialog.h"
 
 using namespace std::literals;
 
@@ -147,6 +148,16 @@ private slots:
     void on_Joystick_button_toggled(bool checked);
     void on_Stagepins_button_toggled(bool checked);   
     void on_diameter_button_clicked();
+    void on_x1_set_clicked();
+    void on_x2_set_clicked();
+    void on_Y1_set_clicked();
+    void on_Y2_set_clicked();
+    void on_gas1_setpoint_button_dup_clicked();
+    void on_gas2_setpoint_button_dup_clicked();
+    void on_gas3_setpoint_button_dup_clicked();
+    void on_gas4_setpoint_button_dup_clicked();
+    void on_actionEngineer_Mode_triggered();
+    void on_actionOperator_Mode_triggered();
 
 private:
     // Action Button methods
@@ -177,6 +188,7 @@ private:
     MainLoop *m_pMainLoop;
     Ui::MainWindow* ui;
     QLabel* m_pStatus;
+    PasswordDialog m_passDialog;
     SettingsDialog* m_pSettings;
     PlasmaController m_mainCTL;
 

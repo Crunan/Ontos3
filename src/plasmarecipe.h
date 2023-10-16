@@ -90,21 +90,21 @@ public:
     double getThickness() { return m_thickness; }
     QString getThicknessQStr() const { return QString::number(m_thickness, 'f', 2); }
 
-    void setXmin(double xmin);
-    double getXmin() { return m_xMin; }
-    QString getXminQStr() const { return QString::number(m_xMin, 'f', 2); }
+    void setXminPH(double xmin);
+    double getXminPH() { return m_xMinPH; }
+    QString getXminPHQStr() const { return QString::number(m_xMinPH, 'f', 2); }
 
-    void setXmax(double xmax);
-    double getXmax() { return m_xMax; }
-    QString getXmaxQStr() const { return QString::number(m_xMax, 'f', 2); }
+    void setXmaxPH(double xmax);
+    double getXmaxPH() { return m_xMaxPH; }
+    QString getXmaxPHQStr() const { return QString::number(m_xMaxPH, 'f', 2); }
 
-    void setYmin(double ymin);
-    double getYmin() { return m_yMin; }
-    QString getYminQStr() const { return QString::number(m_yMin, 'f', 2); }
+    void setYminPH(double ymin);
+    double getYminPH() { return m_yMinPH; }
+    QString getYminPHQStr() const { return QString::number(m_yMinPH, 'f', 2); }
 
-    void setYmax(double ymax);
-    double getYmax() { return m_yMax; }
-    QString getYmaxQStr() const { return QString::number(m_yMax, 'f', 2); }
+    void setYmaxPH(double ymax);
+    double getYmaxPH() { return m_yMaxPH; }
+    QString getYmaxPHQStr() const { return QString::number(m_yMaxPH, 'f', 2); }
 
     FileReader fileReader;
 
@@ -132,10 +132,11 @@ private:
     double m_overlap;
     double m_gap;
     double m_thickness;
-    double m_xMin;
-    double m_xMax;
-    double m_yMin;
-    double m_yMax;
+    // PH coordinates
+    double m_xMinPH;
+    double m_xMaxPH;
+    double m_yMinPH;
+    double m_yMaxPH;
 };
 
 #endif // PLASMARECIPE_H

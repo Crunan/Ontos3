@@ -65,22 +65,6 @@ public:
     double XMaxSpeed() { return m_Xaxis.getMaxSpeed(); }
     QString getXHomePosQStr() { return m_Xaxis.getHomePosQStr(); }
 
-//    double getXTwoSpotFirstPoint() { return m_Xaxis.getTwoSpotFirstPoint(); }
-//    double getXTwoSpotSecondPoint() { return m_Xaxis.getTwoSpotSecondPoint(); }
-//    double getYTwoSpotFirstPoint() { return m_Yaxis.getTwoSpotFirstPoint(); }
-//    double getYTwoSpotSecondPoint() { return m_Yaxis.getTwoSpotSecondPoint(); }
-
-    double getXScanMin() { return m_Xaxis.getScanMin(); }
-    double getXScanMax() { return m_Xaxis.getScanMax(); }
-    double getYScanMin() { return m_Yaxis.getScanMin(); }
-    double getYScanMax() { return m_Yaxis.getScanMax(); }
-
-    void setXScanMin(double xmin) { return m_Xaxis.setScanMin(xmin); }
-    void setXScanMax(double xmax) { return m_Xaxis.setScanMax(xmax); }
-
-    void setYScanMin(double ymin) { return m_Yaxis.setScanMin(ymin); }
-    void setYScanMax(double ymax) { return m_Yaxis.setScanMax(ymax); }
-
     void setAxisStateMachinesIdle();
 
     void getAxisStatus();
@@ -94,11 +78,15 @@ public:
     int getZAxisError() const { return m_Zaxis.getError(); }
     QString getZMaxSpeedQStr() const { return m_Zaxis.getMaxSpeedQStr(); }
 
+    // translate coordinates from base coordinates to PH coordinates
+    double TranslateCoordXBase2PH(double Base_x){ return (m_Xp2Base - Base_x); }
+    double TranslateCoordYBase2PH(double Base_y){ return (m_Yp2Base - Base_y); }
+    double TranslateCoordZBase2PH(double Base_z){ return (Base_z - m_Zp2Base); }
+
     //translate displayed PH X,Y,Z to the Base PH X,Y,Z (for motor moves)
-    double TranslateCoordXPH2Base(double x) { return (m_Xp2Base - x); }
-    double TranslateCoordYPH2Base(double y) { return (m_Yp2Base - y); }
-    double TranslateCoordZPH2Base(double z) { return (z - m_Zp2Base); }
-    double TranslateCoordY2PH(double y) { return  m_Ys2PH - y; }
+    double TranslateCoordXPH2Base(double PHx) { return (m_Xp2Base - PHx); }
+    double TranslateCoordYPH2Base(double PHy) { return (m_Yp2Base - PHy); }
+    double TranslateCoordZPH2Base(double PHz) { return (PHz + m_Zp2Base); }
 
     double getYs2PHval() { return m_Ys2PH; }
     double getXPH2Base() { return m_Xp2Base; }
@@ -171,6 +159,8 @@ signals:
     void joystickStateChanged(bool state);
     void n2StateChanged(bool state);
     void vacStateChanged(bool state);
+    void xLimitsChanged(double xmin, double xmax);
+    void yLimitsChanged(double ymin, double ymax);
 
 private slots:
     // state machine on entry handlers
@@ -218,6 +208,9 @@ private:
 
     void setLEDstate(QString firstHexStrNibble, QString secondHexStrNibble);
 
+    void checkAndSetXDimensions();
+    void checkAndSetYDimensions();
+
     void move(QString axis, QString speed, QString position);
     void setSpeed(QString axis, QString speed);
     void setAbsMove(QString axis, QString position);
@@ -253,6 +246,12 @@ private:
     QState *m_pTwoSpotWaitJoyBtnOff2State;
     QState *m_pTwoSpotShutdownState;
     QState *m_pTwoSpotIdleState;
+
+    // two spot variables
+    double m_twoSpotXFirstPoint;
+    double m_twoSpotXSecondPoint;
+    double m_twoSpotYFirstPoint;
+    double m_twoSpotYSecondPoint;
 
     SerialInterface *m_pSerialInterface;
 

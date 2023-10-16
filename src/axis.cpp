@@ -9,13 +9,9 @@ Axis::Axis(QObject* parent)
     m_maxPos(0),
     m_maxSpeed(0),
     m_homePos(0),
-    m_twoSpotFirstPoint(0),
-    m_twoSpotSecondPoint(0),
-    m_scanMax(0),
-    m_scanMin(0)
+    m_scanMinBase(0),
+    m_scanMaxBase(0)
 {
-    // Initialize the position coordinate
-    //position.setPosition(0.0);
 }
 
 Axis::~Axis()
@@ -53,17 +49,6 @@ void Axis::setCurrentPosition(const QString position)
     }
 }
 
-void Axis::checkAndSetDimensions()
-{
-    if (m_twoSpotFirstPoint > m_twoSpotSecondPoint) {
-        m_scanMin = m_twoSpotSecondPoint;
-        m_scanMax = m_twoSpotFirstPoint;       
-    }
-    else {
-        m_scanMin = m_twoSpotFirstPoint;
-        m_scanMax = m_twoSpotSecondPoint;
-    }
-}
 
 
 

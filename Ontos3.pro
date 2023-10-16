@@ -12,6 +12,7 @@ CONFIG += c++17
 # DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    src/passworddialog.cpp \
     src/diameter.cpp \
     src/lighttower.cpp \
     src/serialinterface.cpp \
@@ -41,6 +42,7 @@ SOURCES += \
 
 
 HEADERS += \
+    src/passworddialog.h \
     src/diameter.h \
     src/axescontroller.h \
     src/axis.h \
@@ -69,6 +71,7 @@ HEADERS += \
     src/stage.h
 
 FORMS += \
+    src/passworddialog.ui \
     src/mainwindow.ui \
     src/settingsdialog.ui
 

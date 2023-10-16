@@ -22,11 +22,13 @@ PlasmaRecipe::PlasmaRecipe(QObject* parent) :
     m_overlap(0),
     m_gap(0),
     m_thickness(0),
-    m_xMin(0),
-    m_xMax(0),
-    m_yMin(0),
-    m_yMax(0)
-{}
+    m_xMinPH(0),
+    m_xMaxPH(0),
+    m_yMinPH(0),
+    m_yMaxPH(0)
+{
+}
+
 
 PlasmaRecipe::~PlasmaRecipe() {
     // Cleanup any resources here
@@ -152,14 +154,14 @@ void PlasmaRecipe::setAutoScanFromRecipe()
 void PlasmaRecipe::setXaxisLimitsFromRecipe()
 {
     if (m_recipeMap.contains(RECIPE_XMIN_KEY)) {
-        m_xMin = m_recipeMap[RECIPE_XMIN_KEY].toDouble();
+        m_xMinPH = m_recipeMap[RECIPE_XMIN_KEY].toDouble();
     }
     else {
         // Handle the case when "XMIN" key is not found in the recipe map
         Logger::logWarning(RECIPE_XMIN_KEY + " setpoint not found in recipe map.");
     }
     if (m_recipeMap.contains(RECIPE_XMAX_KEY)) {
-        m_xMax = m_recipeMap[RECIPE_XMAX_KEY].toDouble();
+        m_xMaxPH = m_recipeMap[RECIPE_XMAX_KEY].toDouble();
     }
     else {
         // Handle the case when "XMAX" key is not found in the recipe map
@@ -172,14 +174,14 @@ void PlasmaRecipe::setXaxisLimitsFromRecipe()
 void PlasmaRecipe::setYaxisLimitsFromRecipe()
 {
     if (m_recipeMap.contains(RECIPE_YMIN_KEY)) {
-        m_yMin = m_recipeMap[RECIPE_YMIN_KEY].toDouble();
+        m_yMinPH = m_recipeMap[RECIPE_YMIN_KEY].toDouble();
     }
     else {
         // Handle the case when "YMIN" key is not found in the recipe map
         Logger::logWarning(RECIPE_YMIN_KEY + " setpoint not found in recipe map.");
     }
     if (m_recipeMap.contains(RECIPE_YMAX_KEY)) {
-        m_yMax = m_recipeMap[RECIPE_YMAX_KEY].toDouble();
+        m_yMaxPH = m_recipeMap[RECIPE_YMAX_KEY].toDouble();
     }
     else {
         // Handle the case when "THICKNESS" key is not found in the recipe map
@@ -278,27 +280,27 @@ void PlasmaRecipe::setThickness(double thickness)
     emit thicknessChanged();
 }
 
-void PlasmaRecipe::setXmin(double xmin)
+void PlasmaRecipe::setXminPH(double xmin)
 {
-    m_xMin = xmin;
+    m_xMinPH = xmin;
     emit xLimitsChanged();
 }
 
-void PlasmaRecipe::setXmax(double xmax)
+void PlasmaRecipe::setXmaxPH(double xmax)
 {
-    m_xMax = xmax;
+    m_xMaxPH = xmax;
     emit xLimitsChanged();
 }
 
-void PlasmaRecipe::setYmin(double ymin)
+void PlasmaRecipe::setYminPH(double ymin)
 {
-    m_yMin = ymin;
+    m_yMinPH = ymin;
     emit yLimitsChanged();
 }
 
-void PlasmaRecipe::setYmax(double ymax)
+void PlasmaRecipe::setYmaxPH(double ymax)
 {
-    m_yMax = ymax;
+    m_yMaxPH = ymax;
     emit yLimitsChanged();
 }
 

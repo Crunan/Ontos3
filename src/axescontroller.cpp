@@ -20,15 +20,23 @@ bool doorsOpenLast = false;
 AxesController::AxesController(QObject *parent) :
     QObject(parent),
     m_ledStatus(),
+    m_twoSpotXFirstPoint(0),
+    m_twoSpotXSecondPoint(0),
+    m_twoSpotYFirstPoint(0),
+    m_twoSpotYSecondPoint(0),
     m_pSerialInterface(nullptr),
     m_Xaxis(this),
     m_Yaxis(this),
     m_Zaxis(this),
     m_stage(),
     m_axisStatus(),
+    m_LEDstates(0),
     m_sameStateXYZ(false),
     m_joystickOn(false),
     m_joyButtonOn(false),
+    m_doorsOpen(false),
+    m_vacOn(false),
+    m_N2PurgeOn(false),
     m_Xp2Base(0.0),
     m_Yp2Base(0.0),
     m_Zp2Base(0.0),
@@ -432,15 +440,10 @@ void AxesController::RunTwoSpotSM()
             emit stageStatusUpdate("Use Controller for Stage", "Release JoyStick Button");
 
             // translate into ph coordinates and save
-            m_Xaxis.setTwoSpotFirstPoint(TranslateCoordXPH2Base(m_Xaxis.getPosition()));
-            m_Yaxis.setTwoSpotFirstPoint(TranslateCoordY2PH(m_Yaxis.getPosition()));
+            m_twoSpotXFirstPoint = TranslateCoordXBase2PH(m_Xaxis.getPosition());
+            m_twoSpotXSecondPoint = TranslateCoordYBase2PH(m_Yaxis.getPosition());
 
             Logger::logInfo("TwoSpotSM Got First");
-
-            /*QString msg = QString("Xpos = %1 Ypos = %2 first spot X = %3 first spot Y = %4 xPH2Base = %5 ys2PH = %6")
-                              .arg(m_Xaxis.getPosition()).arg(m_Yaxis.getPosition()).arg(m_Xaxis.getTwoSpotFirstPoint())
-                              .arg(m_Yaxis.getTwoSpotFirstPoint()).arg(getXPH2Base()).arg(getYs2PHval());
-            Logger::logDebug(msg);*/
 
             emit TSSM_TransitionJoyBtnOff();
         }
@@ -455,7 +458,6 @@ void AxesController::RunTwoSpotSM()
 
             emit TSSM_TransitionGetSecond();
         }
-
     }
     else if (m_twoSpotStateMachine.configuration().contains(m_pTwoSpotGetSecondState)) {
 
@@ -464,17 +466,12 @@ void AxesController::RunTwoSpotSM()
             emit stageStatusUpdate("Use Controller for Stage", "Release JoyStick Button");
 
             // translate to ph coordinates and save
-            m_Xaxis.setTwoSpotSecondPoint(TranslateCoordXPH2Base(m_Xaxis.getPosition()));
-            m_Yaxis.setTwoSpotSecondPoint(TranslateCoordY2PH(m_Yaxis.getPosition()));
-
-            /*QString msg = QString("Xpos = %1 Ypos = %2 second spot X = %3 second spot Y = %4 xPH2Base = %5 ys2PH = %6")
-                              .arg(m_Xaxis.getPosition()).arg(m_Yaxis.getPosition()).arg(m_Xaxis.getTwoSpotSecondPoint())
-                              .arg(m_Yaxis.getTwoSpotSecondPoint()).arg(getXPH2Base()).arg(getYs2PHval());
-            Logger::logDebug(msg);*/
+            m_twoSpotXSecondPoint = TranslateCoordXBase2PH(m_Xaxis.getPosition());
+            m_twoSpotYSecondPoint = TranslateCoordYBase2PH(m_Yaxis.getPosition());
 
             //determine box orientation and corners for scanning
-            m_Xaxis.checkAndSetDimensions();
-            m_Yaxis.checkAndSetDimensions();
+            checkAndSetXDimensions();
+            checkAndSetYDimensions();
 
             Logger::logInfo("TwoSpotSM Got Second - done");
 
@@ -510,6 +507,36 @@ void AxesController::TwoSpotIdleOnEntry()
 {
     // updat the UI
     emit setUITwoSpotSMDone();
+}
+
+void AxesController::checkAndSetXDimensions()
+{
+    double min = 0, max = 0;
+
+    if (m_twoSpotXFirstPoint > m_twoSpotXSecondPoint) {
+        min = m_twoSpotXSecondPoint;
+        max = m_twoSpotXFirstPoint;
+    }
+    else {
+        min = m_twoSpotXFirstPoint;
+        max = m_twoSpotXSecondPoint;
+    }
+    emit xLimitsChanged(min, max);
+}
+
+void AxesController::checkAndSetYDimensions()
+{
+    double min = 0, max = 0;
+
+    if (m_twoSpotYFirstPoint > m_twoSpotYSecondPoint) {
+        min = m_twoSpotYSecondPoint;
+        max = m_twoSpotYFirstPoint;
+    }
+    else {
+        min = m_twoSpotYFirstPoint;
+        max = m_twoSpotYSecondPoint;
+    }
+    emit yLimitsChanged(min, max);
 }
 
 
@@ -1034,6 +1061,7 @@ void AxesController::setAxisStateMachinesIdle()
     emit TSSM_TransitionIdle();// two spot state machine to idle
     emit ScanSM_TransitionIdle(); // scan state machine
 }
+
 
 void AxesController::resetAxes()
 {

@@ -16,6 +16,7 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     m_pMainLoop(loop),
     ui(new Ui::MainWindow),
     m_pStatus(new QLabel),
+    m_passDialog(),
     m_pSettings(new SettingsDialog),
     m_mainCTL(),
     m_commandFileReader(),
@@ -300,17 +301,7 @@ void MainWindow::twoSpotStateMachineDone()
     ui->twospot_button->setChecked(false);
     ui->twospot_button_dup->setChecked(false);
 
-    // 3 axis tab
-    ui->xmin_controls_dup->setText(QString::number(m_mainCTL.getAxesController().getXScanMin()));
-    ui->xmax_controls_dup->setText(QString::number(m_mainCTL.getAxesController().getXScanMax()));
-    ui->ymin_controls_dup->setText(QString::number(m_mainCTL.getAxesController().getYScanMin()));
-    ui->ymax_controls_dup->setText(QString::number(m_mainCTL.getAxesController().getYScanMax()));
-
-    // dashboard tab
-    ui->x1_recipe->setText(QString::number(m_mainCTL.getAxesController().getXScanMin()));
-    ui->x2_recipe->setText(QString::number(m_mainCTL.getAxesController().getXScanMax()));
-    ui->y1_recipe->setText(QString::number(m_mainCTL.getAxesController().getYScanMin()));
-    ui->y2_recipe->setText(QString::number(m_mainCTL.getAxesController().getYScanMax()));
+    scanBoxChanged();
 
     // enable the buttons that we disabled
     ui->Home_button->setEnabled(true);
@@ -369,18 +360,18 @@ void MainWindow::SSM_Done()
 }
 
 void MainWindow::scanBoxChanged()
-{
+{   
     // 3 axis tab
-    ui->xmin_controls_dup->setText(QString::number(m_mainCTL.getAxesController().getXScanMin()));
-    ui->xmax_controls_dup->setText(QString::number(m_mainCTL.getAxesController().getXScanMax()));
-    ui->ymin_controls_dup->setText(QString::number(m_mainCTL.getAxesController().getYScanMin()));
-    ui->ymax_controls_dup->setText(QString::number(m_mainCTL.getAxesController().getYScanMax()));
+    ui->xmin_controls_dup->setText(m_mainCTL.getRecipe()->getXminPHQStr());
+    ui->xmax_controls_dup->setText(m_mainCTL.getRecipe()->getXmaxPHQStr());
+    ui->ymin_controls_dup->setText(m_mainCTL.getRecipe()->getYminPHQStr());
+    ui->ymax_controls_dup->setText(m_mainCTL.getRecipe()->getYmaxPHQStr());
 
     // dashboard tab
-    ui->x1_recipe->setText(QString::number(m_mainCTL.getAxesController().getXScanMin()));
-    ui->x2_recipe->setText(QString::number(m_mainCTL.getAxesController().getXScanMax()));
-    ui->y1_recipe->setText(QString::number(m_mainCTL.getAxesController().getYScanMin()));
-    ui->y2_recipe->setText(QString::number(m_mainCTL.getAxesController().getYScanMax()));
+    ui->x1_recipe->setText(m_mainCTL.getRecipe()->getXminPHQStr());
+    ui->x2_recipe->setText(m_mainCTL.getRecipe()->getXmaxPHQStr());
+    ui->y1_recipe->setText(m_mainCTL.getRecipe()->getYminPHQStr());
+    ui->y2_recipe->setText(m_mainCTL.getRecipe()->getYmaxPHQStr());
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -714,8 +705,8 @@ void MainWindow::AxisStatusToUI()
     // XAxis
     if (m_mainCTL.getAxesController().getXAxisState() >= AXIS_IDLE) {
         double Xpos = m_mainCTL.getAxesController().getXPosition();
-        ui->X_relative_PH->setText(QString::number(m_mainCTL.TranslateCoordXPH2Base(Xpos)));
-        ui->X_relative_PH_dup->setText(QString::number(m_mainCTL.TranslateCoordXPH2Base(Xpos)));
+        ui->X_relative_PH->setText(QString::number(m_mainCTL.getAxesController().TranslateCoordXBase2PH(Xpos)));
+        ui->X_relative_PH_dup->setText(QString::number(m_mainCTL.getAxesController().TranslateCoordXBase2PH(Xpos)));
     }
     else {
         ui->X_relative_PH->setText("???");
@@ -724,8 +715,8 @@ void MainWindow::AxisStatusToUI()
     // YAxis
     if (m_mainCTL.getAxesController().getYAxisState() >= AXIS_IDLE) {
         double Ypos = m_mainCTL.getAxesController().getYPosition();
-        ui->Y_relative_PH->setText(QString::number(m_mainCTL.TranslateCoordYPH2Base(Ypos)));
-        ui->Y_relative_PH_dup->setText(QString::number(m_mainCTL.TranslateCoordYPH2Base(Ypos)));
+        ui->Y_relative_PH->setText(QString::number(m_mainCTL.getAxesController().TranslateCoordYBase2PH(Ypos)));
+        ui->Y_relative_PH_dup->setText(QString::number(m_mainCTL.getAxesController().TranslateCoordYBase2PH(Ypos)));
     }
     else {
         ui->Y_relative_PH->setText("???");
@@ -734,8 +725,8 @@ void MainWindow::AxisStatusToUI()
     // ZAxis
     if (m_mainCTL.getAxesController().getZAxisState() >= AXIS_IDLE) {
         double Zpos = m_mainCTL.getAxesController().getZPosition();
-        ui->Z_relative_PH->setText(QString::number(m_mainCTL.TranslateCoordZPH2Base(Zpos)));
-        ui->Z_relative_PH_dup->setText(QString::number(m_mainCTL.TranslateCoordZPH2Base(Zpos)));
+        ui->Z_relative_PH->setText(QString::number(m_mainCTL.getAxesController().TranslateCoordZBase2PH(Zpos)));
+        ui->Z_relative_PH_dup->setText(QString::number(m_mainCTL.getAxesController().TranslateCoordZBase2PH(Zpos)));
     }
     else {
         ui->Z_relative_PH->setText("???");
@@ -869,13 +860,13 @@ void MainWindow::saveRecipe() {
                 else if (key == RECIPE_CYCLES_KEY)
                     value = m_mainCTL.getRecipe()->getCyclesQStr();
                 else if (key == RECIPE_XMIN_KEY)
-                    value = m_mainCTL.getRecipe()->getXminQStr();
+                    value = m_mainCTL.getRecipe()->getXminPHQStr();
                 else if (key == RECIPE_YMIN_KEY)
-                    value = m_mainCTL.getRecipe()->getYminQStr();
+                    value = m_mainCTL.getRecipe()->getYminPHQStr();
                 else if (key == RECIPE_XMAX_KEY)
-                    value = m_mainCTL.getRecipe()->getXmaxQStr();
+                    value = m_mainCTL.getRecipe()->getXmaxPHQStr();
                 else if (key == RECIPE_YMAX_KEY)
-                    value = m_mainCTL.getRecipe()->getYmaxQStr();
+                    value = m_mainCTL.getRecipe()->getYmaxPHQStr();
                 else if (key == RECIPE_PURGE_KEY)
                     value = m_mainCTL.getRecipe()->getPurgeQStr();
                 else if (key == RECIPE_AUTOSCAN_KEY)
@@ -1022,24 +1013,24 @@ void MainWindow::autoScanChanged()
 void MainWindow::xLimitsChanged()
 {
     // update dashboard
-    ui->x1_recipe->setText(m_mainCTL.getRecipe()->getXminQStr());
-    ui->x2_recipe->setText(m_mainCTL.getRecipe()->getXmaxQStr());
+    ui->x1_recipe->setText(m_mainCTL.getRecipe()->getXminPHQStr());
+    ui->x2_recipe->setText(m_mainCTL.getRecipe()->getXmaxPHQStr());
 
     // update 3 axis
-    ui->xmin_controls_dup->setText(m_mainCTL.getRecipe()->getXminQStr());
-    ui->xmax_controls_dup->setText(m_mainCTL.getRecipe()->getXmaxQStr());
+    ui->xmin_controls_dup->setText(m_mainCTL.getRecipe()->getXminPHQStr());
+    ui->xmax_controls_dup->setText(m_mainCTL.getRecipe()->getXmaxPHQStr());
 }
 
 // update recipe y limits
 void MainWindow::yLimitsChanged()
 {
     // update dashboard
-    ui->y1_recipe->setText(m_mainCTL.getRecipe()->getYminQStr());
-    ui->y2_recipe->setText(m_mainCTL.getRecipe()->getYmaxQStr());
+    ui->y1_recipe->setText(m_mainCTL.getRecipe()->getYminPHQStr());
+    ui->y2_recipe->setText(m_mainCTL.getRecipe()->getYmaxPHQStr());
 
     // update 3 axis
-    ui->ymin_controls_dup->setText(m_mainCTL.getRecipe()->getYminQStr());
-    ui->ymax_controls_dup->setText(m_mainCTL.getRecipe()->getYmaxQStr());
+    ui->ymin_controls_dup->setText(m_mainCTL.getRecipe()->getYminPHQStr());
+    ui->ymax_controls_dup->setText(m_mainCTL.getRecipe()->getYmaxPHQStr());
 }
 
 // update recipe cycles
@@ -1659,13 +1650,151 @@ void MainWindow::on_load_autoscan_clicked()
     }
 }
 
+void MainWindow::on_x1_set_clicked()
+{
+    bool ok;
+    QString input = QInputDialog::getText(nullptr, "X min", "Please enter X min", QLineEdit::Normal, "", &ok);
+
+    if (ok && !input.isEmpty()) {
+        double x1 = input.toDouble();
+        m_mainCTL.getRecipe()->setXminPH(x1);
+    }
+    else {
+        // User either clicked Cancel or did not enter any string
+        // Handle accordingly
+        return;
+    }
+
+}
 
 
+void MainWindow::on_x2_set_clicked()
+{
+    bool ok;
+    QString input = QInputDialog::getText(nullptr, "X max", "Please enter X max", QLineEdit::Normal, "", &ok);
+
+    if (ok && !input.isEmpty()) {
+        double x2 = input.toDouble();
+        m_mainCTL.getRecipe()->setXmaxPH(x2);
+    }
+    else {
+        // User either clicked Cancel or did not enter any string
+        // Handle accordingly
+        return;
+    }
+}
 
 
+void MainWindow::on_Y1_set_clicked()
+{
+    bool ok;
+    QString input = QInputDialog::getText(nullptr, "Y min", "Please enter Y min", QLineEdit::Normal, "", &ok);
+
+    if (ok && !input.isEmpty()) {
+        double y1 = input.toDouble();
+        m_mainCTL.getRecipe()->setYminPH(y1);
+    }
+    else {
+        // User either clicked Cancel or did not enter any string
+        // Handle accordingly
+        return;
+    }
+}
 
 
+void MainWindow::on_Y2_set_clicked()
+{
+    bool ok;
+    QString input = QInputDialog::getText(nullptr, "Y max", "Please enter Y max", QLineEdit::Normal, "", &ok);
+
+    if (ok && !input.isEmpty()) {
+        double y2 = input.toDouble();
+        m_mainCTL.getRecipe()->setYmaxPH(y2);
+    }
+    else {
+        // User either clicked Cancel or did not enter any string
+        // Handle accordingly
+        return;
+    }
+
+}
 
 
+void MainWindow::on_gas1_setpoint_button_dup_clicked()
+{
+    bool ok;
+    QString input = QInputDialog::getText(nullptr, "Gas setpoint", "Please enter a setpoint", QLineEdit::Normal, "", &ok);
 
+    if (ok && !input.isEmpty()) {
+        double gas1 = input.toDouble();
+        m_mainCTL.getMFCs()[0]->setRecipeFlow(gas1);
+    }
+    else {
+        // User either clicked Cancel or did not enter any string
+        // Handle accordingly
+        return;
+    }
+}
+
+
+void MainWindow::on_gas2_setpoint_button_dup_clicked()
+{
+    bool ok;
+    QString input = QInputDialog::getText(nullptr, "Gas setpoint", "Please enter a setpoint", QLineEdit::Normal, "", &ok);
+
+    if (ok && !input.isEmpty()) {
+        double gas2 = input.toDouble();
+        m_mainCTL.getMFCs()[1]->setRecipeFlow(gas2);
+    }
+    else {
+        // User either clicked Cancel or did not enter any string
+        // Handle accordingly
+        return;
+    }
+}
+
+
+void MainWindow::on_gas3_setpoint_button_dup_clicked()
+{
+    bool ok;
+    QString input = QInputDialog::getText(nullptr, "Gas setpoint", "Please enter a setpoint", QLineEdit::Normal, "", &ok);
+
+    if (ok && !input.isEmpty()) {
+        double gas2 = input.toDouble();
+        m_mainCTL.getMFCs()[2]->setRecipeFlow(gas2);
+    }
+    else {
+        // User either clicked Cancel or did not enter any string
+        // Handle accordingly
+        return;
+    }
+}
+
+
+void MainWindow::on_gas4_setpoint_button_dup_clicked()
+{
+    bool ok;
+    QString input = QInputDialog::getText(nullptr, "Gas setpoint", "Please enter a setpoint", QLineEdit::Normal, "", &ok);
+
+    if (ok && !input.isEmpty()) {
+        double gas4 = input.toDouble();
+        m_mainCTL.getMFCs()[3]->setRecipeFlow(gas4);
+    }
+    else {
+        // User either clicked Cancel or did not enter any string
+        // Handle accordingly
+        return;
+    }
+}
+
+void MainWindow::on_actionEngineer_Mode_triggered()
+{
+    m_passDialog.show();
+}
+
+
+void MainWindow::on_actionOperator_Mode_triggered()
+{
+
+}
 

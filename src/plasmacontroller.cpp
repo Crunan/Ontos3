@@ -48,8 +48,9 @@ PlasmaController::PlasmaController(QWidget* parent)
     connect(&m_tuner, &Tuner::recipePositionChanged, this, &PlasmaController::handleSetTunerRecipePositionCommand);
     connect(&m_tuner, &Tuner::autoTuneChanged, this, &PlasmaController::handleSetTunerAutoTuneCommand);
     connect(&m_lightTower, &LightTower::lightTowerStateChanged, this, &PlasmaController::handleLightTowerStateChange);
-
     connect(&m_pwr, &PWR::recipeWattsChanged, this, &PlasmaController::handleSetPWRRecipeWattsCommand);
+    connect(&m_stageCTL, &AxesController::xLimitsChanged, this, &PlasmaController::xLimitsChanged);
+    connect(&m_stageCTL, &AxesController::yLimitsChanged, this, &PlasmaController::yLimitsChanged);
 
     // setup state machines
     setupCollisionStateMachine();
@@ -223,8 +224,8 @@ void PlasmaController::RunScanAxesSM()
 
         // load scan variables
         // translate from Displayed PH coords to moveable Base coords
-        double minXPerPH = m_stageCTL.TranslateCoordXPH2Base(m_pRecipe->getXmin());
-        double maxXPerPH = m_stageCTL.TranslateCoordXPH2Base(m_pRecipe->getXmax());
+        double minXPerPH = m_stageCTL.TranslateCoordXPH2Base(m_pRecipe->getXminPH());
+        double maxXPerPH = m_stageCTL.TranslateCoordXPH2Base(m_pRecipe->getXmaxPH());
 
         if (maxXPerPH > minXPerPH) { // because coord systems can be flipped
             m_scanMaxXPos = maxXPerPH;
@@ -235,8 +236,8 @@ void PlasmaController::RunScanAxesSM()
             m_scanMinXPos = maxXPerPH;
         }
 
-        double minYPerPH = m_stageCTL.TranslateCoordYPH2Base(m_pRecipe->getYmin());
-        double maxYPerPH = m_stageCTL.TranslateCoordYPH2Base(m_pRecipe->getYmax());
+        double minYPerPH = m_stageCTL.TranslateCoordYPH2Base(m_pRecipe->getYminPH());
+        double maxYPerPH = m_stageCTL.TranslateCoordYPH2Base(m_pRecipe->getYmaxPH());
 
         if (maxYPerPH > minYPerPH) { // because coord systems can be flipped
             m_scanMaxYPos = maxYPerPH;
@@ -262,6 +263,7 @@ void PlasmaController::RunScanAxesSM()
         m_numCycles = m_pRecipe->getCyclesInt();
         m_currentCycle = 1;
 
+
         if (m_numXRows == 1) { // have small substrate case, center the head over the center of the Box X
             m_startXPosition = (m_scanMaxXPos + m_scanMinXPos) / 2;
         }
@@ -275,7 +277,8 @@ void PlasmaController::RunScanAxesSM()
         m_scanYSpeed = m_pRecipe->getSpeed();
 
         Logger::logInfo("-------------Scan Start-Up--------------");
-        Logger::logInfo("Display MIN:(" + QString::number(m_scanMinXPos) + " , " + QString::number(m_scanMinYPos) + ") MAX:(" + QString::number(m_scanMaxXPos) + " , " + QString::number(m_scanMaxYPos) + ")");
+        Logger::logInfo("Display MIN:(" + QString::number(m_scanMinXPos, 'f', 2) + " , " + QString::number(m_scanMinYPos, 'f', 2) + ") MAX:(" +
+                        QString::number(m_scanMaxXPos, 'f', 2) + " , " + QString::number(m_scanMaxYPos, 'f', 2) + ")");
         Logger::logInfo("Num Rows: " + QString::number(m_numXRows) + " Row Width: " + QString::number(m_scanRowXWidth, 'f', 2));
         Logger::logInfo("FirstX: " + QString::number(m_startXPosition, 'f', 2) + " StartY: " + QString::number(m_startYPosition, 'f', 2) + " EndY: " + QString::number(m_scanEndYPosition, 'f', 2));
         Logger::logInfo("Scan Speed: " + QString::number(m_scanYSpeed, 'f', 2) + " Cycles: " + QString::number(m_numCycles));
@@ -288,8 +291,6 @@ void PlasmaController::RunScanAxesSM()
             emit SSM_TransitionParkZSubstate(); // scan state machine to park z
             emit SSM_StatusUpdate("Scanning", ""); // update ui
         }
-
-        emit SSM_TransitionParkZSubstate();
 
         Logger::logInfo("In Scan Startup State");
 
@@ -439,7 +440,7 @@ void PlasmaController::RunScanAxesSM()
             }
 
             Logger::logInfo("-------------Scan Recycle Start-Up--------------This Cycle: " + QString::number(m_currentCycle));
-            Logger::logInfo("Display MIN:(" + m_pRecipe->getXminQStr() + " , " + m_pRecipe->getYminQStr() + ") MAX:(" + m_pRecipe->getXmaxQStr() + " , " + m_pRecipe->getYmaxQStr() + ")");
+            Logger::logInfo("Display MIN:(" + m_pRecipe->getXminPHQStr() + " , " + m_pRecipe->getYminPHQStr() + ") MAX:(" + m_pRecipe->getXmaxPHQStr() + " , " + m_pRecipe->getYmaxPHQStr() + ")");
             Logger::logInfo("Num Rows: " + QString::number(m_numXRows) + " Row Width: " + QString::number(m_scanRowXWidth, 'f', 2));
             Logger::logInfo("FirstX: " + QString::number(m_startXPosition, 'f', 2) + " StartY: " + QString::number(m_startYPosition, 'f', 2) + " EndY: " + QString::number(m_scanEndYPosition, 'f', 2));
             Logger::logInfo("Scan Speed: " + QString::number(m_scanYSpeed, 'f', 2) + " Cycles: " + QString::number(m_numCycles));
@@ -621,11 +622,27 @@ void PlasmaController::runDiameter()
     double Xp2Base = m_stageCTL.getXPH2Base();
     double Yp2Base = m_stageCTL.getYPH2Base();
 
-    //find the points defining the box
+    //find the base coordinate points defining the box
+    /* Mike: Don't think this is necessary
     m_stageCTL.setXScanMin(Xp2Base - radius);
     m_stageCTL.setXScanMax(Xp2Base + radius);
     m_stageCTL.setYScanMin(Yp2Base - radius);
-    m_stageCTL.setYScanMax(Yp2Base + radius);
+    m_stageCTL.setYScanMax(Yp2Base + radius);*/
+
+    double xBaseMin = (Xp2Base - radius);
+    double xBaseMax = (Xp2Base + radius);
+    double yBaseMin = (Yp2Base - radius);
+    double yBaseMax = (Yp2Base + radius);
+
+    // update the "actual" display after coord sys translation
+    double dbVal = m_stageCTL.TranslateCoordXBase2PH(xBaseMin);
+    m_pRecipe->setXminPH(dbVal);
+    dbVal = m_stageCTL.TranslateCoordXBase2PH(xBaseMax);
+    m_pRecipe->setXmaxPH(dbVal);
+    dbVal = m_stageCTL.TranslateCoordYBase2PH(yBaseMin);
+    m_pRecipe->setYminPH(dbVal);
+    dbVal = m_stageCTL.TranslateCoordYBase2PH(yBaseMax);
+    m_pRecipe->setYmaxPH(dbVal);
 
     // trigger a ui update
     emit scanBoxChanged();
@@ -766,6 +783,18 @@ void PlasmaController::getCTLStatusCommand()
     sendCommand(command);
     QString response = readResponse();
     parseResponseForCTLStatus(response);
+}
+
+void PlasmaController::xLimitsChanged(double xmin, double xmax)
+{
+    m_pRecipe->setXminPH(xmin);
+    m_pRecipe->setXmaxPH(xmax);
+}
+
+void PlasmaController::yLimitsChanged(double ymin, double ymax)
+{
+    m_pRecipe->setYminPH(ymin);
+    m_pRecipe->setYmaxPH(ymax);
 }
 
 void PlasmaController::setLEDStatus(int &bits)

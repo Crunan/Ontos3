@@ -5481,6 +5481,24 @@ font: 18pt &quot;Ubuntu Bold&quot;;
     </font>
    </property>
   </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1665</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuService">
+    <property name="title">
+     <string>Service</string>
+    </property>
+    <addaction name="actionEngineer_Mode"/>
+    <addaction name="actionOperator_Mode"/>
+   </widget>
+   <addaction name="menuService"/>
+  </widget>
   <action name="actionConnect">
    <property name="icon">
     <iconset resource="ONTOS3.qrc">
@@ -5884,6 +5902,16 @@ font: 18pt &quot;Ubuntu Bold&quot;;
    </property>
    <property name="toolTip">
     <string>RUN_P</string>
+   </property>
+  </action>
+  <action name="actionEngineer_Mode">
+   <property name="text">
+    <string>Engineer Mode</string>
+   </property>
+  </action>
+  <action name="actionOperator_Mode">
+   <property name="text">
+    <string>Operator Mode</string>
    </property>
   </action>
  </widget>

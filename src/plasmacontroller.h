@@ -60,12 +60,6 @@ public:
     void StartScan() { emit SSM_TransitionStartup(); }
     void StopScan() { emit SSM_TransitionShutdown(); }
 
-    // axes controller wrappers
-    AxesController& getAxesController() { return this->m_stageCTL; }
-    double TranslateCoordXPH2Base(double Xpos) {  return m_stageCTL.TranslateCoordXPH2Base(Xpos); }
-    double TranslateCoordYPH2Base(double Ypos) {  return m_stageCTL.TranslateCoordYPH2Base(Ypos); }
-    double TranslateCoordZPH2Base(double Zpos) {  return m_stageCTL.TranslateCoordZPH2Base(Zpos); }
-
     // Recipe
     void setRecipe(QString filePath);
     bool getExecuteRecipe() const;
@@ -74,7 +68,6 @@ public:
     void setMFCsFlowFromRecipe();
     void setRFSetpointFromRecipe();
     void setTunerSetpointFromRecipe();
-    void setAutoScanFromRecipe();
 
     // accessors
     Tuner& getTuner() { return m_tuner; }
@@ -84,6 +77,7 @@ public:
     SerialInterface* getSerialInterface() { return m_pSerialInterface; }
     PlasmaRecipe *getRecipe() { return m_pRecipe; }
     Diameter& getDiameter() { return m_waferDiameter; }
+    AxesController& getAxesController() { return this->m_stageCTL; }
 
     // laser access
     void LaserSenseOn();
@@ -174,7 +168,9 @@ public slots:
     // scan state machine to idle
     void scanningStateMachineToIdle() { emit SSM_TransitionIdle(); }
 
-
+    // axes
+    void xLimitsChanged(double xmin, double xmax);
+    void yLimitsChanged(double ymin, double ymax);
 
 private:
     QString getLastCommand() { return m_pSerialInterface->getLastCommand(); }
@@ -224,6 +220,7 @@ private:
     QState *m_pLaserDeactivateState;
     QState *m_pLaserIdleState;
 
+    // base coordinates
     double m_scanMinXPos;
     double m_scanMaxXPos;
     double m_scanMinYPos;
