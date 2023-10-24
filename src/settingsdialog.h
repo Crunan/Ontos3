@@ -91,6 +91,7 @@ public:
     ~SettingsDialog();
 
     Settings settings() const;
+    void setName(QString name) { currentSettings.name = name; }
 
 private slots:
     void showPortInfo(int idx);

@@ -67,14 +67,10 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
 
     ui->baudRateBox->setInsertPolicy(QComboBox::NoInsert);
 
-    connect(ui->applyButton, &QPushButton::clicked,
-            this, &SettingsDialog::apply);
-    connect(ui->serialPortInfoListBox, &QComboBox::currentIndexChanged,
-            this, &SettingsDialog::showPortInfo);
-    connect(ui->baudRateBox,  &QComboBox::currentIndexChanged,
-            this, &SettingsDialog::checkCustomBaudRatePolicy);
-    connect(ui->serialPortInfoListBox, &QComboBox::currentIndexChanged,
-            this, &SettingsDialog::checkCustomDevicePathPolicy);
+    connect(ui->applyButton, &QPushButton::clicked,this, &SettingsDialog::apply);
+    connect(ui->serialPortInfoListBox, &QComboBox::currentIndexChanged,this, &SettingsDialog::showPortInfo);
+    connect(ui->baudRateBox,  &QComboBox::currentIndexChanged,this, &SettingsDialog::checkCustomBaudRatePolicy);
+    connect(ui->serialPortInfoListBox, &QComboBox::currentIndexChanged,this, &SettingsDialog::checkCustomDevicePathPolicy);
 
     fillPortsParameters();
     fillPortsInfo();

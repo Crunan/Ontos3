@@ -8,6 +8,7 @@
 #include "axis.h"
 #include "stage.h"
 #include "ledstatus.h"
+#include "configuration.h"
 
 class QEventLoop;
 class Recipe;
@@ -20,15 +21,16 @@ public:
     explicit AxesController(QObject *parent = nullptr);
     ~AxesController();
 
+    // serial port
     bool open(const SettingsDialog& settings);
     void close();
     bool sendCommand(const QString& command);
     QString readResponse();
-
     QString getPortErrorString();
     bool isOpen();
     void setSerialInterface(SerialInterface *interface);
 
+    // state machines
     void StartInit() { emit ISM_TransitionStartup(); }
     void RunInitAxesSM();
     void StartHome() { emit HSM_TransitionStartup(); }
@@ -37,46 +39,40 @@ public:
     void StartTwoSpot() { emit TSSM_TransitionStartup(); }
     void StopTwoSpot() { emit TSSM_TransitionShutdown(); }
     void RunTwoSpotSM();
-
-    void setXMaxPos(const double maxPos);
-    void setXMaxSpeed(const double maxSpeed);
-    void setXHomePos(const double homePos);
-
-    void setYMaxPos(const double maxPos);
-    void setYMaxSpeed(const double maxSpeed);
-    void setYHomePos(const double homePos);
-
-    void setZMaxPos(const double maxPos);
-    void setZMaxSpeed(const double maxSpeed);
-    void setZHomePos(const double homePos);
-
-    int getXAxisState() { return m_Xaxis.getCurrentState(); }
-    int getYAxisState() { return m_Yaxis.getCurrentState(); }
-    int getZAxisState() { return m_Zaxis.getCurrentState(); }
-
-    QString getXAxisMaxSpeedQStr() { return m_Xaxis.getMaxSpeedQStr(); }
-    QString getYAxisMaxSpeedQStr() { return m_Yaxis.getMaxSpeedQStr(); }
-
-    double getZPinsBuriedPos() { return m_stage.getPinsBuriedPos(); }
-
-    void AxisStartup();
-
-    QString getXMaxSpeedQStr() { return m_Xaxis.getMaxSpeedQStr(); }
-    double XMaxSpeed() { return m_Xaxis.getMaxSpeed(); }
-    QString getXHomePosQStr() { return m_Xaxis.getHomePosQStr(); }
-
     void setAxisStateMachinesIdle();
+    bool nextStateReady();
+    bool getAxesInitilizedStatus() { return m_axesInitialized; }
 
+    // axis accessors
+    void moveAxisAbsolute(int axisCommandNum, float targetPosition);
+    void setAxisSpeed(int axisCommandNum, float targetSpeed);
+    void stopAllMotors();
+    void AxisStartup();
+    void resetAxes();
     void getAxisStatus();
     void updateAxisStatus();
-
+    // x axis
+    int getXAxisState() { return m_Xaxis.getCurrentState(); }
+    QString getXAxisMaxSpeedQStr() { return m_Xaxis.getMaxSpeedQStr(); }
+    double XMaxSpeed() { return m_Xaxis.getMaxSpeed(); }
+    QString getXHomePosQStr() { return m_Xaxis.getHomePosQStr(); }
     double getXPosition() const { return m_Xaxis.getPosition(); }
-    double getYPosition() const { return m_Yaxis.getPosition(); }
-    double getZPosition() const { return m_Zaxis.getPosition(); }
     int getXAxisError() const { return m_Xaxis.getError(); }
+
+    // y axis
+    int getYAxisState() { return m_Yaxis.getCurrentState(); }
+    QString getYAxisMaxSpeedQStr() { return m_Yaxis.getMaxSpeedQStr(); }
+    double getYPosition() const { return m_Yaxis.getPosition(); }
     int getYAxisError() const { return m_Yaxis.getError(); }
+    double YMaxSpeed() const { return m_Yaxis.getMaxSpeed(); }
+
+    // z axis
+    int getZAxisState() { return m_Zaxis.getCurrentState(); }
+    double getZPinsBuriedPos() { return m_stage.getPinsBuriedPos(); }
+    double getZPosition() const { return m_Zaxis.getPosition(); }
     int getZAxisError() const { return m_Zaxis.getError(); }
-    QString getZMaxSpeedQStr() const { return m_Zaxis.getMaxSpeedQStr(); }
+    QString getZMaxSpeedQStr() const { return m_Zaxis.getMaxSpeedQStr(); } // TODO: delete me
+    double ZMaxSpeed() const { return m_Zaxis.getMaxSpeed(); }
 
     // translate coordinates from base coordinates to PH coordinates
     double TranslateCoordXBase2PH(double Base_x){ return (m_Xp2Base - Base_x); }
@@ -88,14 +84,14 @@ public:
     double TranslateCoordYPH2Base(double PHy) { return (m_Yp2Base - PHy); }
     double TranslateCoordZPH2Base(double PHz) { return (PHz + m_Zp2Base); }
 
+    double TranslateCoordLaserY2PH(double Base_y) { return (m_Ys2PH - Base_y); }
+
     double getYs2PHval() { return m_Ys2PH; }
     double getXPH2Base() { return m_Xp2Base; }
     double getYPH2Base() { return m_Yp2Base; }
     double getZp2BaseDbl() { return m_Zp2Base; }
 
-    void resetAxes();
-    bool nextStateReady();
-
+    // command wrappers
     void togglePinsOn();
     void togglePinsOff();
     void toggleJoystickOn();
@@ -108,6 +104,7 @@ public:
     // helper
     bool isBitSet(int test_int, int bit_pos);
     bool getDoorStatus() { return m_doorsOpen; }
+    Configuration& getConfig() { return m_config; }
 
 signals:
 
@@ -115,8 +112,8 @@ signals:
     void stageResponseReceived(QString resonse);
 
     // init state machine UI updating signals
-    void setUIInitSMStartup();
-    void setUIInitSMDone();
+    void initSMStartup();
+    void initSMDone();
 
     // home state machine UI updating signals
     void setUIHomeSMStartup();
@@ -184,7 +181,6 @@ private:
     void getZp2Base();
     void getXs2PH();
     void getYs2PH();
-    void getPHSafetyZGap();
     void getZPinsBuried();
     void getZPinsExposed();
     void getLoadX2Base();
@@ -214,6 +210,8 @@ private:
     void move(QString axis, QString speed, QString position);
     void setSpeed(QString axis, QString speed);
     void setAbsMove(QString axis, QString position);
+
+    void checkAndLogAxesStatusChange();
 
     LEDStatus m_ledStatus;
 
@@ -255,6 +253,8 @@ private:
 
     SerialInterface *m_pSerialInterface;
 
+    Configuration m_config;
+
     Axis m_Xaxis, m_Yaxis, m_Zaxis;
     Stage m_stage;
 
@@ -267,6 +267,7 @@ private:
     bool m_doorsOpen;
     bool m_vacOn;
     bool m_N2PurgeOn;
+    bool m_axesInitialized;
 
     // coordinate transforms
     double m_Xp2Base;

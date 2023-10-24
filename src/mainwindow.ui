@@ -170,6 +170,9 @@ color: rgb(52, 101, 164);</string>
             <string notr="true">QPushButton {
 background-color: rgb(119, 136, 153);
 font: 14pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
 }</string>
            </property>
            <property name="text">
@@ -214,6 +217,9 @@ font: 16pt &quot;Ubuntu Bold&quot;;
             <string notr="true">QPushButton {
 background-color: rgb(119, 136, 153);
 font: 16pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
 }</string>
            </property>
            <property name="text">
@@ -267,6 +273,9 @@ color: rgb(52, 101, 164);</string>
             <string notr="true">QPushButton {
 background-color: rgb(119, 136, 153);
 font: 10pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
 }</string>
            </property>
            <property name="text">
@@ -370,6 +379,9 @@ color: white;
 background-color: rgb(119, 136, 153);
 font: 14pt &quot;Ubuntu Bold&quot;;
 }
+QPushButton:disabled {
+color:gray;
+}
 </string>
          </property>
          <property name="text">
@@ -437,6 +449,9 @@ font: 700 14pt &quot;Ubuntu Mono&quot;;</string>
             <string notr="true">QPushButton {
 background-color: rgb(119, 136, 153);
 font: 16pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
 }</string>
            </property>
            <property name="text">
@@ -456,6 +471,9 @@ font: 16pt &quot;Ubuntu Bold&quot;;
             <string notr="true">QPushButton {
 background-color: rgb(119, 136, 153);
 font: 16pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
 }</string>
            </property>
            <property name="text">
@@ -550,6 +568,9 @@ font: 16pt &quot;Ubuntu Bold&quot;;
             <string notr="true">QPushButton {
 background-color: rgb(119, 136, 153);
 font: 16pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
 }</string>
            </property>
            <property name="text">
@@ -569,6 +590,9 @@ font: 16pt &quot;Ubuntu Bold&quot;;
             <string notr="true">QPushButton {
 background-color: rgb(119, 136, 153);
 font: 16pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
 }</string>
            </property>
            <property name="text">
@@ -620,6 +644,9 @@ font: 16pt &quot;Ubuntu Bold&quot;;
             <string notr="true">QPushButton {
 background-color: rgb(119, 136, 153);
 font: 12pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
 }</string>
            </property>
            <property name="text">
@@ -639,6 +666,9 @@ font: 12pt &quot;Ubuntu Bold&quot;;
             <string notr="true">QPushButton {
 background-color: rgb(119, 136, 153);
 font: 18pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
 }</string>
            </property>
            <property name="text">
@@ -678,7 +708,7 @@ font: 16pt &quot;Ubuntu Bold&quot;;
           </widget>
          </item>
          <item row="12" column="0">
-          <widget class="QPushButton" name="Y2_set">
+          <widget class="QPushButton" name="y2_set">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -689,6 +719,9 @@ font: 16pt &quot;Ubuntu Bold&quot;;
             <string notr="true">QPushButton {
 background-color: rgb(119, 136, 153);
 font: 18pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
 }</string>
            </property>
            <property name="text">
@@ -795,6 +828,9 @@ font: 700 16pt &quot;Ubuntu Mono&quot;;</string>
             <string notr="true">QPushButton {
 background-color: rgb(119, 136, 153);
 font: 8pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
 }</string>
            </property>
            <property name="text">
@@ -854,7 +890,7 @@ color: rgb(52, 101, 164);</string>
           </widget>
          </item>
          <item row="11" column="0">
-          <widget class="QPushButton" name="Y1_set">
+          <widget class="QPushButton" name="y1_set">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -865,6 +901,9 @@ color: rgb(52, 101, 164);</string>
             <string notr="true">QPushButton {
 background-color: rgb(119, 136, 153);
 font: 18pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
 }</string>
            </property>
            <property name="text">
@@ -907,6 +946,9 @@ color: rgb(52, 101, 164);</string>
             <string notr="true">QPushButton {
 background-color: rgb(119, 136, 153);
 font: 14pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
 }</string>
            </property>
            <property name="text">
@@ -979,6 +1021,9 @@ font: 700 16pt &quot;Ubuntu Mono&quot;;</string>
             <string notr="true">QPushButton {
 background-color: rgb(119, 136, 153);
 font: 8pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
 }</string>
            </property>
            <property name="text">
@@ -1142,6 +1187,9 @@ color: rgb(52, 101, 164);</string>
             <string notr="true">QPushButton {
 background-color: rgb(119, 136, 153);
 font: 14pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
 }</string>
            </property>
            <property name="text">
@@ -1161,6 +1209,9 @@ font: 14pt &quot;Ubuntu Bold&quot;;
             <string notr="true">QPushButton {
 background-color: rgb(119, 136, 153);
 font: 10pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
 }</string>
            </property>
            <property name="text">
@@ -1220,6 +1271,9 @@ font: 700 16pt &quot;Ubuntu Mono&quot;;</string>
             <string notr="true">QPushButton {
 background-color: rgb(119, 136, 153);
 font: 18pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
 }</string>
            </property>
            <property name="text">
@@ -1566,6 +1620,9 @@ background-color: black;
               <string notr="true">QPushButton {
 background-color: rgb(119, 136, 153);
 font: 18pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
 }</string>
              </property>
              <property name="text">
@@ -1583,42 +1640,6 @@ font: 18pt &quot;Ubuntu Bold&quot;;
             </widget>
            </item>
            <item>
-            <layout class="QVBoxLayout" name="verticalLayout_15">
-             <item>
-              <widget class="QLabel" name="stepLabel">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>Step Size</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QComboBox" name="stepSizeBox">
-               <item>
-                <property name="text">
-                 <string>32</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>64</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>128</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
             <widget class="QPushButton" name="MB_Right_Button">
              <property name="sizePolicy">
               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Maximum">
@@ -1633,6 +1654,9 @@ font: 18pt &quot;Ubuntu Bold&quot;;
               <string notr="true">QPushButton {
 background-color: rgb(119, 136, 153);
 font: 18pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
 }</string>
              </property>
              <property name="text">
@@ -2453,6 +2477,9 @@ font: 16pt &quot;Arial Bold&quot;;
           <string notr="true">QPushButton {
 background-color: blue;
 font: 28pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
 }</string>
          </property>
          <property name="text">
@@ -2475,30 +2502,8 @@ font: 28pt &quot;Ubuntu Bold&quot;;
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout_8">
-       <item row="3" column="0">
-        <widget class="QPushButton" name="vac_button">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton {
-background-color: gray;
-font: 18pt &quot;Ubuntu Bold&quot;;
-}</string>
-         </property>
-         <property name="text">
-          <string>VAC</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QPushButton" name="twospot_button">
+       <item row="7" column="1">
+        <widget class="QPushButton" name="diameter_button">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
            <horstretch>0</horstretch>
@@ -2509,13 +2514,49 @@ font: 18pt &quot;Ubuntu Bold&quot;;
           <string notr="true">QPushButton {
 background-color: rgb(119, 136, 153);
 font: 14pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
+}
+</string>
+         </property>
+         <property name="text">
+          <string>DIAMETER</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QPushButton" name="vac_button">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QPushButton {
+background-color: gray;
+font: 18pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
 }</string>
          </property>
          <property name="text">
-          <string>TWO SPOT</string>
+          <string>VAC</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_54">
+         <property name="text">
+          <string>Stage Buttons</string>
          </property>
         </widget>
        </item>
@@ -2531,32 +2572,13 @@ font: 14pt &quot;Ubuntu Bold&quot;;
           <string notr="true">QPushButton {
 background-color: rgb(119, 136, 153);
 font: 14pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
 }</string>
          </property>
          <property name="text">
           <string>INITIALIZE</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QPushButton" name="Joystick_button">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton {
-background-color: gray;
-font: 18pt &quot;Ubuntu Bold&quot;;
-}</string>
-         </property>
-         <property name="text">
-          <string>JOY</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -2610,21 +2632,20 @@ font: 8pt &quot;Ubuntu Bold&quot;;
             <string notr="true">QComboBox {
 background-color: gray;
 font: 16pt &quot;Ubuntu Bold&quot;;
+}
+QComboBox:disabled {
+color:gray;
 }</string>
            </property>
           </widget>
          </item>
         </layout>
        </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_54">
-         <property name="text">
-          <string>Stage Buttons</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1">
+       <item row="3" column="1">
         <widget class="QPushButton" name="scan_button">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
            <horstretch>0</horstretch>
@@ -2635,6 +2656,9 @@ font: 16pt &quot;Ubuntu Bold&quot;;
           <string notr="true">QPushButton {
 background-color: rgb(119, 136, 153);
 font: 18pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
 }</string>
          </property>
          <property name="text">
@@ -2645,8 +2669,11 @@ font: 18pt &quot;Ubuntu Bold&quot;;
          </property>
         </widget>
        </item>
-       <item row="7" column="1">
-        <widget class="QPushButton" name="diameter_button">
+       <item row="5" column="0">
+        <widget class="QPushButton" name="n2_purge_button">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
            <horstretch>0</horstretch>
@@ -2655,16 +2682,22 @@ font: 18pt &quot;Ubuntu Bold&quot;;
          </property>
          <property name="styleSheet">
           <string notr="true">QPushButton {
-background-color: rgb(119, 136, 153);
+background-color: gray;
 font: 14pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
 }</string>
          </property>
          <property name="text">
-          <string>DIAMETER</string>
+          <string>N2 PURGE</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
-       <item row="5" column="1">
+       <item row="4" column="1">
         <widget class="QPushButton" name="Home_button">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
@@ -2676,6 +2709,9 @@ font: 14pt &quot;Ubuntu Bold&quot;;
           <string notr="true">QPushButton {
 background-color: rgb(119, 136, 153);
 font: 18pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
 }</string>
          </property>
          <property name="text">
@@ -2686,8 +2722,11 @@ font: 18pt &quot;Ubuntu Bold&quot;;
          </property>
         </widget>
        </item>
-       <item row="5" column="0">
-        <widget class="QPushButton" name="Stagepins_button">
+       <item row="5" column="1">
+        <widget class="QPushButton" name="twospot_button">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
            <horstretch>0</horstretch>
@@ -2695,8 +2734,40 @@ font: 18pt &quot;Ubuntu Bold&quot;;
           </sizepolicy>
          </property>
          <property name="styleSheet">
-          <string notr="true">QPushButton {background-color: gray;
+          <string notr="true">QPushButton {
+background-color: rgb(119, 136, 153);
+font: 14pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
+}</string>
+         </property>
+         <property name="text">
+          <string>TWO SPOT</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QPushButton" name="Stagepins_button">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QPushButton {
+background-color: gray;
 font: 18pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
 }</string>
          </property>
          <property name="text">
@@ -2711,7 +2782,10 @@ font: 18pt &quot;Ubuntu Bold&quot;;
         </widget>
        </item>
        <item row="4" column="0">
-        <widget class="QPushButton" name="n2_purge_button">
+        <widget class="QPushButton" name="Joystick_button">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
            <horstretch>0</horstretch>
@@ -2721,11 +2795,17 @@ font: 18pt &quot;Ubuntu Bold&quot;;
          <property name="styleSheet">
           <string notr="true">QPushButton {
 background-color: gray;
-font: 14pt &quot;Ubuntu Bold&quot;;
-}</string>
+font: 18pt &quot;Ubuntu Bold&quot;;
+
+}
+QPushButton:disabled {
+color:gray;
+}
+
+</string>
          </property>
          <property name="text">
-          <string>N2 PURGE</string>
+          <string>JOY</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -2964,2381 +3044,6 @@ font: 14pt &quot;Ubuntu Bold&quot;;
       </widget>
      </widget>
     </widget>
-    <widget class="QWidget" name="plasma">
-     <attribute name="icon">
-      <iconset theme="applications-science">
-       <normaloff>.</normaloff>.</iconset>
-     </attribute>
-     <attribute name="title">
-      <string>Plasma</string>
-     </attribute>
-     <widget class="QWidget" name="gridLayoutWidget_3">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>20</y>
-        <width>1608</width>
-        <height>689</height>
-       </rect>
-      </property>
-      <layout class="QGridLayout" name="gridLayout_3">
-       <item row="0" column="5">
-        <layout class="QHBoxLayout" name="matchbox_layout">
-         <item>
-          <layout class="QVBoxLayout" name="verticalLayout_4">
-           <item>
-            <layout class="QVBoxLayout" name="MB_Layout"/>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_11"/>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </item>
-       <item row="0" column="0">
-        <layout class="QHBoxLayout" name="horizontalLayout_6">
-         <item>
-          <layout class="QHBoxLayout" name="Gasses_Layout">
-           <property name="spacing">
-            <number>10</number>
-           </property>
-           <item>
-            <layout class="QVBoxLayout" name="Gas1_Layout">
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item>
-              <widget class="QLabel" name="gas1_label_dup">
-               <property name="text">
-                <string>gas1</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <layout class="QHBoxLayout" name="gas1_progress_slider_Layout">
-               <item>
-                <widget class="QSlider" name="gas1_sliderbar_dup">
-                 <property name="maximum">
-                  <number>100</number>
-                 </property>
-                 <property name="value">
-                  <number>0</number>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QProgressBar" name="gas1_progressbar_dup">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>55</width>
-                   <height>0</height>
-                  </size>
-                 </property>
-                 <property name="maximum">
-                  <number>20</number>
-                 </property>
-                 <property name="value">
-                  <number>0</number>
-                 </property>
-                 <property name="textVisible">
-                  <bool>false</bool>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <layout class="QHBoxLayout" name="gas1_button_readout_layout">
-               <property name="spacing">
-                <number>0</number>
-               </property>
-               <property name="rightMargin">
-                <number>0</number>
-               </property>
-               <property name="bottomMargin">
-                <number>0</number>
-               </property>
-               <item>
-                <widget class="QPushButton" name="gas1_setpoint_button_dup">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">color: black;</string>
-                 </property>
-                 <property name="text">
-                  <string>Enter</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <layout class="QVBoxLayout" name="gas1_recipe_actual_SLPM">
-                 <property name="spacing">
-                  <number>0</number>
-                 </property>
-                 <property name="rightMargin">
-                  <number>0</number>
-                 </property>
-                 <item>
-                  <widget class="QLabel" name="gas1_actual_SLPM_dup">
-                   <property name="font">
-                    <font>
-                     <family>Arial Bold</family>
-                     <pointsize>16</pointsize>
-                     <italic>false</italic>
-                     <bold>false</bold>
-                    </font>
-                   </property>
-                   <property name="styleSheet">
-                    <string notr="true">QLabel {
-color: red;
-font: 16pt &quot;Arial Bold&quot;;
-}</string>
-                   </property>
-                   <property name="frameShape">
-                    <enum>QFrame::NoFrame</enum>
-                   </property>
-                   <property name="frameShadow">
-                    <enum>QFrame::Plain</enum>
-                   </property>
-                   <property name="text">
-                    <string>0</string>
-                   </property>
-                   <property name="textFormat">
-                    <enum>Qt::AutoText</enum>
-                   </property>
-                   <property name="scaledContents">
-                    <bool>true</bool>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignCenter</set>
-                   </property>
-                   <property name="textInteractionFlags">
-                    <set>Qt::NoTextInteraction</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="gas1_recipe_SLPM_dup">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>75</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="font">
-                    <font>
-                     <family>Arial Bold</family>
-                     <pointsize>16</pointsize>
-                     <italic>false</italic>
-                     <bold>false</bold>
-                    </font>
-                   </property>
-                   <property name="styleSheet">
-                    <string notr="true">QLabel {
-color: #bfd5ed;
-font: 16pt &quot;Arial Bold&quot;;
-}</string>
-                   </property>
-                   <property name="frameShape">
-                    <enum>QFrame::NoFrame</enum>
-                   </property>
-                   <property name="frameShadow">
-                    <enum>QFrame::Plain</enum>
-                   </property>
-                   <property name="text">
-                    <string>0</string>
-                   </property>
-                   <property name="textFormat">
-                    <enum>Qt::AutoText</enum>
-                   </property>
-                   <property name="scaledContents">
-                    <bool>true</bool>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignCenter</set>
-                   </property>
-                   <property name="textInteractionFlags">
-                    <set>Qt::NoTextInteraction</set>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-              </layout>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QVBoxLayout" name="Gas2_Layout">
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item>
-              <widget class="QLabel" name="gas2_label_dup">
-               <property name="text">
-                <string>gas2</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <layout class="QHBoxLayout" name="gas2_progress_slider_layout">
-               <item>
-                <widget class="QSlider" name="gas2_sliderbar_dup">
-                 <property name="maximum">
-                  <number>100</number>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QProgressBar" name="gas2_progressbar_dup">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>55</width>
-                   <height>0</height>
-                  </size>
-                 </property>
-                 <property name="maximum">
-                  <number>20</number>
-                 </property>
-                 <property name="value">
-                  <number>0</number>
-                 </property>
-                 <property name="textVisible">
-                  <bool>false</bool>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <layout class="QHBoxLayout" name="gas2_buttton_readout_layout">
-               <item>
-                <widget class="QPushButton" name="gas2_setpoint_button_dup">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">color: black;</string>
-                 </property>
-                 <property name="text">
-                  <string>Enter</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <layout class="QVBoxLayout" name="gas2_recipe_actual_SLPM">
-                 <property name="spacing">
-                  <number>0</number>
-                 </property>
-                 <item>
-                  <widget class="QLabel" name="gas2_actual_SLPM_dup">
-                   <property name="font">
-                    <font>
-                     <family>Arial Bold</family>
-                     <pointsize>16</pointsize>
-                     <italic>false</italic>
-                     <bold>false</bold>
-                    </font>
-                   </property>
-                   <property name="styleSheet">
-                    <string notr="true">QLabel {
-color: red;
-font: 16pt &quot;Arial Bold&quot;;
-}</string>
-                   </property>
-                   <property name="frameShape">
-                    <enum>QFrame::NoFrame</enum>
-                   </property>
-                   <property name="frameShadow">
-                    <enum>QFrame::Plain</enum>
-                   </property>
-                   <property name="text">
-                    <string>0</string>
-                   </property>
-                   <property name="textFormat">
-                    <enum>Qt::AutoText</enum>
-                   </property>
-                   <property name="scaledContents">
-                    <bool>true</bool>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignCenter</set>
-                   </property>
-                   <property name="textInteractionFlags">
-                    <set>Qt::NoTextInteraction</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="gas2_recipe_SLPM_dup">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>75</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="font">
-                    <font>
-                     <family>Arial Bold</family>
-                     <pointsize>16</pointsize>
-                     <italic>false</italic>
-                     <bold>false</bold>
-                    </font>
-                   </property>
-                   <property name="styleSheet">
-                    <string notr="true">QLabel {
-color: #bfd5ed;
-font: 16pt &quot;Arial Bold&quot;;
-}</string>
-                   </property>
-                   <property name="frameShape">
-                    <enum>QFrame::NoFrame</enum>
-                   </property>
-                   <property name="frameShadow">
-                    <enum>QFrame::Plain</enum>
-                   </property>
-                   <property name="text">
-                    <string>0</string>
-                   </property>
-                   <property name="textFormat">
-                    <enum>Qt::AutoText</enum>
-                   </property>
-                   <property name="scaledContents">
-                    <bool>true</bool>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignCenter</set>
-                   </property>
-                   <property name="textInteractionFlags">
-                    <set>Qt::NoTextInteraction</set>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-              </layout>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QVBoxLayout" name="Gas3_Layout">
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item>
-              <widget class="QLabel" name="gas3_label_dup">
-               <property name="text">
-                <string>gas3</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_23">
-               <item>
-                <widget class="QSlider" name="gas3_sliderbar_dup">
-                 <property name="maximum">
-                  <number>100</number>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QProgressBar" name="gas3_progressbar_dup">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>55</width>
-                   <height>0</height>
-                  </size>
-                 </property>
-                 <property name="maximum">
-                  <number>30</number>
-                 </property>
-                 <property name="value">
-                  <number>0</number>
-                 </property>
-                 <property name="textVisible">
-                  <bool>false</bool>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_8">
-               <item>
-                <widget class="QPushButton" name="gas3_setpoint_button_dup">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">color: black;</string>
-                 </property>
-                 <property name="text">
-                  <string>Enter</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <layout class="QVBoxLayout" name="verticalLayout_6">
-                 <property name="spacing">
-                  <number>0</number>
-                 </property>
-                 <item>
-                  <widget class="QLabel" name="gas3_actual_SLPM_dup">
-                   <property name="font">
-                    <font>
-                     <family>Arial Bold</family>
-                     <pointsize>16</pointsize>
-                     <italic>false</italic>
-                     <bold>false</bold>
-                    </font>
-                   </property>
-                   <property name="styleSheet">
-                    <string notr="true">QLabel {
-color: red;
-font: 16pt &quot;Arial Bold&quot;;
-}</string>
-                   </property>
-                   <property name="frameShape">
-                    <enum>QFrame::NoFrame</enum>
-                   </property>
-                   <property name="frameShadow">
-                    <enum>QFrame::Plain</enum>
-                   </property>
-                   <property name="text">
-                    <string>0</string>
-                   </property>
-                   <property name="textFormat">
-                    <enum>Qt::AutoText</enum>
-                   </property>
-                   <property name="scaledContents">
-                    <bool>true</bool>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignCenter</set>
-                   </property>
-                   <property name="textInteractionFlags">
-                    <set>Qt::NoTextInteraction</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="gas3_recipe_SLPM_dup">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>75</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="font">
-                    <font>
-                     <family>Arial Bold</family>
-                     <pointsize>16</pointsize>
-                     <italic>false</italic>
-                     <bold>false</bold>
-                    </font>
-                   </property>
-                   <property name="styleSheet">
-                    <string notr="true">QLabel {
-color: #bfd5ed;
-font: 16pt &quot;Arial Bold&quot;;
-}</string>
-                   </property>
-                   <property name="frameShape">
-                    <enum>QFrame::NoFrame</enum>
-                   </property>
-                   <property name="frameShadow">
-                    <enum>QFrame::Plain</enum>
-                   </property>
-                   <property name="text">
-                    <string>0</string>
-                   </property>
-                   <property name="textFormat">
-                    <enum>Qt::AutoText</enum>
-                   </property>
-                   <property name="scaledContents">
-                    <bool>true</bool>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignCenter</set>
-                   </property>
-                   <property name="textInteractionFlags">
-                    <set>Qt::NoTextInteraction</set>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-              </layout>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QVBoxLayout" name="Gas4_Layout">
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item>
-              <widget class="QLabel" name="gas4_label_dup">
-               <property name="text">
-                <string>gas4</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_24">
-               <item>
-                <widget class="QSlider" name="gas4_sliderbar_dup">
-                 <property name="minimum">
-                  <number>0</number>
-                 </property>
-                 <property name="maximum">
-                  <number>100</number>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                 <property name="tickInterval">
-                  <number>1</number>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QProgressBar" name="gas4_progressbar_dup">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>55</width>
-                   <height>0</height>
-                  </size>
-                 </property>
-                 <property name="maximum">
-                  <number>30</number>
-                 </property>
-                 <property name="value">
-                  <number>0</number>
-                 </property>
-                 <property name="textVisible">
-                  <bool>false</bool>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                 <property name="format">
-                  <string>%p%</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_9">
-               <item>
-                <widget class="QPushButton" name="gas4_setpoint_button_dup">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">color: black;</string>
-                 </property>
-                 <property name="text">
-                  <string>Enter</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <layout class="QVBoxLayout" name="verticalLayout_8">
-                 <property name="spacing">
-                  <number>0</number>
-                 </property>
-                 <item>
-                  <widget class="QLabel" name="gas4_actual_SLPM_dup">
-                   <property name="font">
-                    <font>
-                     <family>Arial Bold</family>
-                     <pointsize>16</pointsize>
-                     <italic>false</italic>
-                     <bold>false</bold>
-                    </font>
-                   </property>
-                   <property name="styleSheet">
-                    <string notr="true">QLabel {
-color: red;
-font: 16pt &quot;Arial Bold&quot;;
-}</string>
-                   </property>
-                   <property name="frameShape">
-                    <enum>QFrame::NoFrame</enum>
-                   </property>
-                   <property name="frameShadow">
-                    <enum>QFrame::Plain</enum>
-                   </property>
-                   <property name="text">
-                    <string>0</string>
-                   </property>
-                   <property name="textFormat">
-                    <enum>Qt::AutoText</enum>
-                   </property>
-                   <property name="scaledContents">
-                    <bool>true</bool>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignCenter</set>
-                   </property>
-                   <property name="textInteractionFlags">
-                    <set>Qt::NoTextInteraction</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="gas4_recipe_SLPM_dup">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>75</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="font">
-                    <font>
-                     <family>Arial Bold</family>
-                     <pointsize>16</pointsize>
-                     <italic>false</italic>
-                     <bold>false</bold>
-                    </font>
-                   </property>
-                   <property name="styleSheet">
-                    <string notr="true">QLabel {
-color: #bfd5ed;
-font: 16pt &quot;Arial Bold&quot;;
-}</string>
-                   </property>
-                   <property name="frameShape">
-                    <enum>QFrame::NoFrame</enum>
-                   </property>
-                   <property name="frameShadow">
-                    <enum>QFrame::Plain</enum>
-                   </property>
-                   <property name="text">
-                    <string>0</string>
-                   </property>
-                   <property name="textFormat">
-                    <enum>Qt::AutoText</enum>
-                   </property>
-                   <property name="scaledContents">
-                    <bool>true</bool>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignCenter</set>
-                   </property>
-                   <property name="textInteractionFlags">
-                    <set>Qt::NoTextInteraction</set>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-              </layout>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <spacer name="verticalSpacer_2">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="Power_Layout">
-           <property name="spacing">
-            <number>6</number>
-           </property>
-           <item>
-            <layout class="QVBoxLayout" name="verticalLayout">
-             <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_4">
-               <item>
-                <widget class="QLCDNumber" name="RF_Actual_LCD_dup">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>150</width>
-                   <height>75</height>
-                  </size>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">color: rgb(204, 0, 0);</string>
-                 </property>
-                 <property name="frameShape">
-                  <enum>QFrame::Box</enum>
-                 </property>
-                 <property name="frameShadow">
-                  <enum>QFrame::Raised</enum>
-                 </property>
-                 <property name="digitCount">
-                  <number>3</number>
-                 </property>
-                 <property name="value" stdset="0">
-                  <double>0.000000000000000</double>
-                 </property>
-                 <property name="intValue" stdset="0">
-                  <number>0</number>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLabel" name="RFfor_label">
-                 <property name="styleSheet">
-                  <string notr="true">font: 18pt &quot;Ubuntu&quot;;</string>
-                 </property>
-                 <property name="text">
-                  <string> FORWARD PWR</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <widget class="QProgressBar" name="RF_bar_dup">
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>55</height>
-                </size>
-               </property>
-               <property name="maximum">
-                <number>200</number>
-               </property>
-               <property name="value">
-                <number>0</number>
-               </property>
-               <property name="textVisible">
-                <bool>false</bool>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_7">
-               <item>
-                <widget class="QLCDNumber" name="MB_Actual_LCD_dup">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>150</width>
-                   <height>75</height>
-                  </size>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">color: black;</string>
-                 </property>
-                 <property name="frameShape">
-                  <enum>QFrame::Box</enum>
-                 </property>
-                 <property name="frameShadow">
-                  <enum>QFrame::Raised</enum>
-                 </property>
-                 <property name="digitCount">
-                  <number>3</number>
-                 </property>
-                 <property name="intValue" stdset="0">
-                  <number>0</number>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLabel" name="MBfor_label_2">
-                 <property name="styleSheet">
-                  <string notr="true">font: 18pt &quot;Ubuntu&quot;;</string>
-                 </property>
-                 <property name="text">
-                  <string>MATCHBOX</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <widget class="QProgressBar" name="MB_Pos_Bar_dup">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>55</height>
-                </size>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">QProgressBar::Chunk {
-background-color: black;
-}</string>
-               </property>
-               <property name="value">
-                <number>50</number>
-               </property>
-               <property name="textVisible">
-                <bool>false</bool>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_10">
-               <item>
-                <widget class="QLCDNumber" name="RefRF_Actual_LCD_dup">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>150</width>
-                   <height>75</height>
-                  </size>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">color:  rgb(255, 242, 0);
-</string>
-                 </property>
-                 <property name="frameShape">
-                  <enum>QFrame::Box</enum>
-                 </property>
-                 <property name="frameShadow">
-                  <enum>QFrame::Raised</enum>
-                 </property>
-                 <property name="digitCount">
-                  <number>3</number>
-                 </property>
-                 <property name="value" stdset="0">
-                  <double>0.000000000000000</double>
-                 </property>
-                 <property name="intValue" stdset="0">
-                  <number>0</number>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLabel" name="ref_label">
-                 <property name="styleSheet">
-                  <string notr="true">font: 18pt &quot;Ubuntu&quot;;</string>
-                 </property>
-                 <property name="text">
-                  <string>REFLECTED PWR</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <widget class="QProgressBar" name="RefRF_bar_dup">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>55</height>
-                </size>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">QProgressBar 
-{		
-	border-radius: 26px;
-	background-color: #d3dbdd;
-}
-
-QProgressBar::Chunk
-{
-    border-radius: 26px;
-	background-color:  rgb(255, 242, 0);
-}
-</string>
-               </property>
-               <property name="value">
-                <number>24</number>
-               </property>
-               <property name="textVisible">
-                <bool>false</bool>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="invertedAppearance">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <layout class="QVBoxLayout" name="RF_Dials">
-               <item>
-                <layout class="QHBoxLayout" name="horizontalLayout_15">
-                 <item>
-                  <layout class="QVBoxLayout" name="verticalLayout_9">
-                   <item>
-                    <layout class="QHBoxLayout" name="horizontalLayout_12">
-                     <item>
-                      <widget class="QLCDNumber" name="temp_LCD_dup">
-                       <property name="sizePolicy">
-                        <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                         <horstretch>0</horstretch>
-                         <verstretch>0</verstretch>
-                        </sizepolicy>
-                       </property>
-                       <property name="minimumSize">
-                        <size>
-                         <width>150</width>
-                         <height>75</height>
-                        </size>
-                       </property>
-                       <property name="styleSheet">
-                        <string notr="true">color: blue;</string>
-                       </property>
-                       <property name="frameShape">
-                        <enum>QFrame::Box</enum>
-                       </property>
-                       <property name="frameShadow">
-                        <enum>QFrame::Raised</enum>
-                       </property>
-                       <property name="digitCount">
-                        <number>3</number>
-                       </property>
-                       <property name="intValue" stdset="0">
-                        <number>0</number>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QLabel" name="label_20">
-                       <property name="styleSheet">
-                        <string notr="true">font: 18pt &quot;Ubuntu&quot;;</string>
-                       </property>
-                       <property name="text">
-                        <string>C</string>
-                       </property>
-                       <property name="alignment">
-                        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QLabel" name="ref_label_2">
-                       <property name="styleSheet">
-                        <string notr="true">font: 18pt &quot;Ubuntu&quot;;</string>
-                       </property>
-                       <property name="text">
-                        <string>TEMPERATURE</string>
-                       </property>
-                       <property name="alignment">
-                        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                       </property>
-                      </widget>
-                     </item>
-                    </layout>
-                   </item>
-                   <item>
-                    <widget class="QProgressBar" name="Temp_bar_dup">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>55</height>
-                      </size>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true">QProgressBar::Chunk {
-background-color: blue;
-}</string>
-                     </property>
-                     <property name="value">
-                      <number>50</number>
-                     </property>
-                     <property name="textVisible">
-                      <bool>false</bool>
-                     </property>
-                     <property name="orientation">
-                      <enum>Qt::Horizontal</enum>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <layout class="QHBoxLayout" name="horizontalLayout_26"/>
-                   </item>
-                  </layout>
-                 </item>
-                </layout>
-               </item>
-              </layout>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </item>
-       <item row="0" column="2">
-        <layout class="QVBoxLayout" name="verticalLayout_13">
-         <property name="sizeConstraint">
-          <enum>QLayout::SetMaximumSize</enum>
-         </property>
-         <item>
-          <widget class="QPushButton" name="RF_Setpoint_Button">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>100</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton {
-color: white;
-background-color: red;
-font: 18pt &quot;Ubuntu Bold&quot;;
-}</string>
-           </property>
-           <property name="text">
-            <string>Enter</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_2">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="autoMode_Button_dup">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="layoutDirection">
-            <enum>Qt::LeftToRight</enum>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton {
-color: white;
-background-color: black;
-font: 18pt &quot;Ubuntu Bold&quot;;
-}</string>
-           </property>
-           <property name="text">
-            <string>Auto Mode</string>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>128</width>
-             <height>64</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="MB_Setpoint_Button">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>100</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton {
-color: white;
-background-color: black;
-font: 18pt &quot;Ubuntu Bold&quot;;
-}</string>
-           </property>
-           <property name="text">
-            <string>Enter</string>
-           </property>
-           <property name="default">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout">
-           <item>
-            <widget class="QPushButton" name="MB_Left_Button_dup">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="layoutDirection">
-              <enum>Qt::LeftToRight</enum>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">QPushButton {
-color: white;
-background-color: black;
-font: 18pt &quot;Ubuntu Bold&quot;;
-}</string>
-             </property>
-             <property name="text">
-              <string>Left</string>
-             </property>
-             <property name="iconSize">
-              <size>
-               <width>128</width>
-               <height>64</height>
-              </size>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="MB_Right_Button_dup">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="layoutDirection">
-              <enum>Qt::RightToLeft</enum>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">QPushButton {
-color: white;
-background-color: black;
-font: 18pt &quot;Ubuntu Bold&quot;;
-}</string>
-             </property>
-             <property name="text">
-              <string>Right</string>
-             </property>
-             <property name="iconSize">
-              <size>
-               <width>128</width>
-               <height>64</height>
-              </size>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_3">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="Heater_Button">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton {
-background-color: rgb(119, 136, 153);
-font: 18pt &quot;Ubuntu Bold&quot;;
-}</string>
-           </property>
-           <property name="text">
-            <string>Toggle Heater</string>
-           </property>
-           <property name="checkable">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="0" column="1">
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="0" column="4">
-        <widget class="QPushButton" name="plsmaBtn_dup">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
-           <horstretch>0</horstretch>
-           <verstretch>60</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>250</width>
-           <height>100</height>
-          </size>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton {
-background-color: blue;
-font: 28pt &quot;Ubuntu Bold&quot;;
-}</string>
-         </property>
-         <property name="text">
-          <string>Start Plasma</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="3">
-        <spacer name="verticalSpacer_3">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QLabel" name="Gasses_Label">
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>0</y>
-        <width>61</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Gases</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="Send_CMD_button">
-      <property name="geometry">
-       <rect>
-        <x>750</x>
-        <y>720</y>
-        <width>80</width>
-        <height>24</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">color: black;</string>
-      </property>
-      <property name="text">
-       <string>Send CMD</string>
-      </property>
-     </widget>
-     <widget class="QPlainTextEdit" name="textRCVbox">
-      <property name="geometry">
-       <rect>
-        <x>841</x>
-        <y>717</y>
-        <width>278</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="plainText">
-       <string/>
-      </property>
-      <property name="backgroundVisible">
-       <bool>false</bool>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="Clear_Button">
-      <property name="geometry">
-       <rect>
-        <x>380</x>
-        <y>720</y>
-        <width>80</width>
-        <height>24</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">color: black;</string>
-      </property>
-      <property name="text">
-       <string>Clear</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="CMDlabel">
-      <property name="geometry">
-       <rect>
-        <x>249</x>
-        <y>1489</y>
-        <width>168</width>
-        <height>78</height>
-       </rect>
-      </property>
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">font: 12pt &quot;Ubuntu&quot;;</string>
-      </property>
-      <property name="text">
-       <string>Commands sent to CTL</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-     <widget class="QPlainTextEdit" name="text2sendCMDbox">
-      <property name="geometry">
-       <rect>
-        <x>470</x>
-        <y>717</y>
-        <width>279</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="plainText">
-       <string/>
-      </property>
-      <property name="backgroundVisible">
-       <bool>false</bool>
-      </property>
-      <property name="placeholderText">
-       <string/>
-      </property>
-     </widget>
-     <widget class="QLabel" name="RCVlabel">
-      <property name="geometry">
-       <rect>
-        <x>1019</x>
-        <y>1489</y>
-        <width>142</width>
-        <height>78</height>
-       </rect>
-      </property>
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">font: 12pt &quot;Ubuntu&quot;;</string>
-      </property>
-      <property name="text">
-       <string>Response from CTL</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-     <widget class="QPlainTextEdit" name="textCMDbox">
-      <property name="geometry">
-       <rect>
-        <x>100</x>
-        <y>717</y>
-        <width>278</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="plainText">
-       <string/>
-      </property>
-      <property name="backgroundVisible">
-       <bool>false</bool>
-      </property>
-      <property name="placeholderText">
-       <string/>
-      </property>
-     </widget>
-    </widget>
-    <widget class="QWidget" name="axis">
-     <attribute name="icon">
-      <iconset theme="applications-development">
-       <normaloff>.</normaloff>.</iconset>
-     </attribute>
-     <attribute name="title">
-      <string>3 Axis Stage Controls</string>
-     </attribute>
-     <widget class="QLabel" name="label_39">
-      <property name="geometry">
-       <rect>
-        <x>80</x>
-        <y>360</y>
-        <width>111</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Stage Variables:</string>
-      </property>
-     </widget>
-     <widget class="QWidget" name="gridLayoutWidget">
-      <property name="geometry">
-       <rect>
-        <x>70</x>
-        <y>60</y>
-        <width>844</width>
-        <height>291</height>
-       </rect>
-      </property>
-      <layout class="QGridLayout" name="gridLayout">
-       <item row="3" column="0">
-        <widget class="QPushButton" name="init_button_dup">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="font">
-          <font>
-           <family>Ubuntu Bold</family>
-           <pointsize>18</pointsize>
-           <italic>false</italic>
-           <bold>false</bold>
-           <kerning>false</kerning>
-          </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton {
-background-color: rgb(119, 136, 153);
-font: 18pt &quot;Ubuntu Bold&quot;;
-}</string>
-         </property>
-         <property name="text">
-          <string>INITIALIZE</string>
-         </property>
-         <property name="checkable">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="3">
-        <widget class="QPushButton" name="Stagepins_button_dup">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton {background-color: gray;
-font: 18pt &quot;Ubuntu Bold&quot;;
-}</string>
-         </property>
-         <property name="text">
-          <string>PINS</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_45">
-         <property name="text">
-          <string>Stage Buttons</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="4">
-        <widget class="QPushButton" name="diameter_button_dup">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton {
-background-color: rgb(119, 136, 153);
-font: 18pt &quot;Ubuntu Bold&quot;;
-}</string>
-         </property>
-         <property name="text">
-          <string>DIAMETER</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="3">
-        <widget class="QPushButton" name="Home_button_dup">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton {
-background-color: rgb(119, 136, 153);
-font: 18pt &quot;Ubuntu Bold&quot;;
-}</string>
-         </property>
-         <property name="text">
-          <string>LOAD</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QPushButton" name="twospot_button_dup">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton {
-background-color: rgb(119, 136, 153);
-font: 18pt &quot;Ubuntu Bold&quot;;
-}</string>
-         </property>
-         <property name="text">
-          <string>TWO SPOT</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="2">
-        <widget class="QPushButton" name="scan_button_dup">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton {
-background-color: rgb(119, 136, 153);
-font: 18pt &quot;Ubuntu Bold&quot;;
-}</string>
-         </property>
-         <property name="text">
-          <string>SCAN</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QPushButton" name="vac_button_dup">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton {
-background-color: gray;
-font: 18pt &quot;Ubuntu Bold&quot;;
-}</string>
-         </property>
-         <property name="text">
-          <string>VAC</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="2">
-        <widget class="QPushButton" name="n2_purge_button_dup">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton {
-background-color: gray;
-font: 18pt &quot;Ubuntu Bold&quot;;
-}</string>
-         </property>
-         <property name="text">
-          <string>N2 PURGE</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="4">
-        <layout class="QVBoxLayout" name="verticalLayout_14">
-         <item>
-          <widget class="QLabel" name="label_33">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>30</height>
-            </size>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QLabel {
-font: 18pt &quot;Ubuntu Bold&quot;;
-}</string>
-           </property>
-           <property name="text">
-            <string>Wafer Diameter:</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="wafer_diameter_dup">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>200</width>
-             <height>50</height>
-            </size>
-           </property>
-           <property name="layoutDirection">
-            <enum>Qt::RightToLeft</enum>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QComboBox {
-background-color: gray;
-font: 16pt &quot;Ubuntu Bold&quot;;
-}</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="2" column="0">
-        <widget class="QPushButton" name="Joystick_button_dup">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton {
-background-color: gray;
-font: 18pt &quot;Ubuntu Bold&quot;;
-}</string>
-         </property>
-         <property name="text">
-          <string>JOY</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
-      <zorder>init_button_dup</zorder>
-      <zorder>Stagepins_button_dup</zorder>
-      <zorder>label_45</zorder>
-      <zorder>diameter_button_dup</zorder>
-      <zorder>twospot_button_dup</zorder>
-      <zorder>scan_button_dup</zorder>
-      <zorder>vac_button_dup</zorder>
-      <zorder>n2_purge_button_dup</zorder>
-      <zorder>Joystick_button_dup</zorder>
-      <zorder>Home_button_dup</zorder>
-     </widget>
-     <widget class="QWidget" name="verticalLayoutWidget_7">
-      <property name="geometry">
-       <rect>
-        <x>950</x>
-        <y>60</y>
-        <width>121</width>
-        <height>317</height>
-       </rect>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout_10">
-       <item>
-        <widget class="QLabel" name="label_34">
-         <property name="font">
-          <font>
-           <family>Century Gothic</family>
-           <pointsize>16</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>X:</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QTextEdit" name="X_relative_PH_dup">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">font: 28px;
-color: rgb(52, 101, 164);</string>
-         </property>
-         <property name="readOnly">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_84">
-         <property name="font">
-          <font>
-           <family>Century Gothic</family>
-           <pointsize>16</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>Y:</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QTextEdit" name="Y_relative_PH_dup">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">font: 28px;
-color: rgb(52, 101, 164);</string>
-         </property>
-         <property name="readOnly">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_85">
-         <property name="font">
-          <font>
-           <family>Century Gothic</family>
-           <pointsize>16</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>Z:</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QTextEdit" name="Z_relative_PH_dup">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">font: 28px;
-color: rgb(52, 101, 164);</string>
-         </property>
-         <property name="readOnly">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="horizontalLayoutWidget_3">
-      <property name="geometry">
-       <rect>
-        <x>80</x>
-        <y>380</y>
-        <width>741</width>
-        <height>72</height>
-       </rect>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_5">
-       <item>
-        <widget class="QLabel" name="label_43">
-         <property name="text">
-          <string>Thickness:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QTextEdit" name="input_thickness_dup">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">font: 28px;
-color: rgb(52, 101, 164);</string>
-         </property>
-         <property name="tabChangesFocus">
-          <bool>false</bool>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_42">
-         <property name="text">
-          <string>Gap:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QTextEdit" name="input_gap_dup">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">font: 28px;
-color: rgb(52, 101, 164);</string>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_38">
-         <property name="text">
-          <string>Overlap:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QTextEdit" name="input_overlap_dup">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">font: 28px;
-color: rgb(52, 101, 164);</string>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_40">
-         <property name="text">
-          <string>Speed:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QTextEdit" name="input_speed_dup">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">font: 28px;
-color: rgb(52, 101, 164);</string>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_41">
-         <property name="text">
-          <string>Cycles:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QTextEdit" name="input_cycles_dup">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">font: 28px;
-color: rgb(52, 101, 164);</string>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="gridLayoutWidget_2">
-      <property name="geometry">
-       <rect>
-        <x>770</x>
-        <y>490</y>
-        <width>310</width>
-        <height>171</height>
-       </rect>
-      </property>
-      <layout class="QGridLayout" name="gridLayout_2">
-       <item row="0" column="2">
-        <widget class="QTextEdit" name="xmin_controls_dup">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="4">
-        <widget class="QTextEdit" name="ymax_controls_dup">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QLabel" name="label_47">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>75</width>
-           <height>75</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <family>Century Gothic</family>
-           <pointsize>16</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>Y:</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2">
-        <widget class="QTextEdit" name="ymin_controls_dup">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="4">
-        <widget class="QTextEdit" name="xmax_controls_dup">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QLabel" name="label_35">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>75</width>
-           <height>75</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <family>Century Gothic</family>
-           <pointsize>16</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>X:</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="3">
-        <widget class="QLabel" name="label_44">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>75</width>
-           <height>75</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <family>Century Gothic</family>
-           <pointsize>16</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>X2:</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="3">
-        <widget class="QLabel" name="label_48">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>75</width>
-           <height>75</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <family>Century Gothic</family>
-           <pointsize>16</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>Y2:</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QLabel" name="label_46">
-      <property name="geometry">
-       <rect>
-        <x>780</x>
-        <y>470</y>
-        <width>161</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Substrate Dimensions:</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_37">
-      <property name="geometry">
-       <rect>
-        <x>950</x>
-        <y>40</y>
-        <width>119</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Stage Position:</string>
-      </property>
-     </widget>
-     <widget class="QWidget" name="gridLayoutWidget_5">
-      <property name="geometry">
-       <rect>
-        <x>60</x>
-        <y>473</y>
-        <width>681</width>
-        <height>198</height>
-       </rect>
-      </property>
-      <layout class="QGridLayout" name="gridLayout_5">
-       <item row="0" column="1">
-        <layout class="QVBoxLayout" name="verticalLayout_12">
-         <item>
-          <widget class="QLabel" name="label_24">
-           <property name="text">
-            <string>Stage Current Step Status:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QTextEdit" name="axisstatus_dup">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_25">
-           <property name="text">
-            <string>Stage Next Step Status:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QTextEdit" name="axisstatus_2_dup">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="0" column="2">
-        <widget class="QPushButton" name="door2">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton {
-background-color: rgb(119, 136, 153);
-font: 18pt &quot;Ubuntu Bold&quot;;
-}</string>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QPushButton" name="door1">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton {
-background-color: rgb(119, 136, 153);
-font: 18pt &quot;Ubuntu Bold&quot;;
-}</string>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </widget>
     <widget class="QWidget" name="settings">
      <attribute name="icon">
       <iconset theme="preferences-system">
@@ -5461,15 +3166,6 @@ font: 18pt &quot;Ubuntu Bold&quot;;
       </widget>
      </widget>
     </widget>
-    <widget class="QWidget" name="tab">
-     <attribute name="icon">
-      <iconset theme="system-lock-screen">
-       <normaloff>.</normaloff>.</iconset>
-     </attribute>
-     <attribute name="title">
-      <string>Access</string>
-     </attribute>
-    </widget>
    </widget>
   </widget>
   <widget class="QStatusBar" name="statusBar">
@@ -5494,416 +3190,22 @@ font: 18pt &quot;Ubuntu Bold&quot;;
     <property name="title">
      <string>Service</string>
     </property>
+    <addaction name="separator"/>
     <addaction name="actionEngineer_Mode"/>
     <addaction name="actionOperator_Mode"/>
+    <addaction name="actionAbout"/>
+   </widget>
+   <widget class="QMenu" name="menuSerial">
+    <property name="title">
+     <string>Serial</string>
+    </property>
+    <addaction name="actionConnect"/>
+    <addaction name="actionDisconnect"/>
+    <addaction name="actionSettings"/>
    </widget>
    <addaction name="menuService"/>
+   <addaction name="menuSerial"/>
   </widget>
-  <action name="actionConnect">
-   <property name="icon">
-    <iconset resource="ONTOS3.qrc">
-     <normaloff>:/images/connect.png</normaloff>:/images/connect.png</iconset>
-   </property>
-   <property name="text">
-    <string>Connect</string>
-   </property>
-   <property name="toolTip">
-    <string>Connect to a serial</string>
-   </property>
-  </action>
-  <action name="actionDisconnect">
-   <property name="icon">
-    <iconset resource="ONTOS3.qrc">
-     <normaloff>:/images/disconnect.png</normaloff>:/images/disconnect.png</iconset>
-   </property>
-   <property name="text">
-    <string>Disconnect</string>
-   </property>
-   <property name="toolTip">
-    <string>Disconnect from the serial</string>
-   </property>
-  </action>
-  <action name="actionQuit">
-   <property name="icon">
-    <iconset theme="system-shutdown" resource="ONTOS3.qrc">
-     <normaloff>:/images/application-exit.png</normaloff>:/images/application-exit.png</iconset>
-   </property>
-   <property name="text">
-    <string>Quit</string>
-   </property>
-   <property name="toolTip">
-    <string>Exit the program</string>
-   </property>
-  </action>
-  <action name="actionConfigure">
-   <property name="icon">
-    <iconset resource="ONTOS3.qrc">
-     <normaloff>:/images/settings.png</normaloff>:/images/settings.png</iconset>
-   </property>
-   <property name="text">
-    <string>Configure</string>
-   </property>
-   <property name="toolTip">
-    <string>Configuration settings</string>
-   </property>
-  </action>
-  <action name="actionDebug_Mode">
-   <property name="icon">
-    <iconset resource="ONTOS3.qrc">
-     <normaloff>:/images/Button-Blank-Gray-icon.png</normaloff>
-     <disabledoff>:/images/Button-Blank-Gray-icon.png</disabledoff>
-     <disabledon>:/images/Button-Blank-Green-icon.png</disabledon>
-     <activeon>:/images/Button-Blank-Green-icon.png</activeon>:/images/Button-Blank-Gray-icon.png</iconset>
-   </property>
-   <property name="text">
-    <string>Debug Mode</string>
-   </property>
-  </action>
-  <action name="actionAUTO_MODE">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="ONTOS3.qrc">
-     <normaloff>:/images/Button-Blank-Gray-icon.png</normaloff>
-     <disabledon>:/images/Button-Blank-Green-icon.png</disabledon>
-     <activeoff>:/images/Button-Blank-Red-icon.png</activeoff>
-     <activeon>:/images/Button-Blank-Green-icon.png</activeon>:/images/Button-Blank-Gray-icon.png</iconset>
-   </property>
-   <property name="text">
-    <string>AUTO_MODE</string>
-   </property>
-   <property name="toolTip">
-    <string>This is used for switching between auto mode and auto mode off</string>
-   </property>
-  </action>
-  <action name="actionEXECUTE_RECIPE">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="ONTOS3.qrc">
-     <normaloff>:/images/Button-Blank-Gray-icon.png</normaloff>
-     <disabledon>:/images/Button-Blank-Green-icon.png</disabledon>
-     <activeoff>:/images/Button-Blank-Red-icon.png</activeoff>
-     <activeon>:/images/Button-Blank-Green-icon.png</activeon>:/images/Button-Blank-Gray-icon.png</iconset>
-   </property>
-   <property name="text">
-    <string>EXECUTE_RECIPE</string>
-   </property>
-   <property name="toolTip">
-    <string>EXECUTE_RECIPE</string>
-   </property>
-  </action>
-  <action name="actionPROCESS_ABORT">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="ONTOS3.qrc">
-     <normaloff>:/images/Button-Blank-Gray-icon.png</normaloff>
-     <disabledon>:/images/Button-Blank-Red-icon.png</disabledon>
-     <activeoff>:/images/Button-Blank-Red-icon.png</activeoff>
-     <activeon>:/images/Button-Blank-Green-icon.png</activeon>:/images/Button-Blank-Gray-icon.png</iconset>
-   </property>
-   <property name="text">
-    <string>PROCESS_ABORT</string>
-   </property>
-   <property name="toolTip">
-    <string>PROCESS_ABORT</string>
-   </property>
-  </action>
-  <action name="actionGAS_1">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="ONTOS3.qrc">
-     <normaloff>:/images/Button-Blank-Gray-icon.png</normaloff>
-     <disabledon>:/images/Button-Blank-Green-icon.png</disabledon>
-     <activeoff>:/images/Button-Blank-Red-icon.png</activeoff>
-     <activeon>:/images/Button-Blank-Green-icon.png</activeon>:/images/Button-Blank-Gray-icon.png</iconset>
-   </property>
-   <property name="text">
-    <string>GAS_1</string>
-   </property>
-   <property name="toolTip">
-    <string>GAS_1</string>
-   </property>
-  </action>
-  <action name="actionGAS_2">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="ONTOS3.qrc">
-     <normaloff>:/images/Button-Blank-Gray-icon.png</normaloff>
-     <disabledon>:/images/Button-Blank-Green-icon.png</disabledon>
-     <activeoff>:/images/Button-Blank-Red-icon.png</activeoff>
-     <activeon>:/images/Button-Blank-Green-icon.png</activeon>:/images/Button-Blank-Gray-icon.png</iconset>
-   </property>
-   <property name="text">
-    <string>GAS_2</string>
-   </property>
-   <property name="toolTip">
-    <string>GAS_2</string>
-   </property>
-  </action>
-  <action name="actionGAS_3">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="ONTOS3.qrc">
-     <normaloff>:/images/Button-Blank-Gray-icon.png</normaloff>
-     <disabledon>:/images/Button-Blank-Green-icon.png</disabledon>
-     <activeoff>:/images/Button-Blank-Red-icon.png</activeoff>
-     <activeon>:/images/Button-Blank-Green-icon.png</activeon>:/images/Button-Blank-Gray-icon.png</iconset>
-   </property>
-   <property name="text">
-    <string>GAS_3</string>
-   </property>
-   <property name="toolTip">
-    <string>GAS_3</string>
-   </property>
-  </action>
-  <action name="actionGAS_4">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="ONTOS3.qrc">
-     <normaloff>:/images/Button-Blank-Gray-icon.png</normaloff>
-     <disabledon>:/images/Button-Blank-Green-icon.png</disabledon>
-     <activeoff>:/images/Button-Blank-Red-icon.png</activeoff>
-     <activeon>:/images/Button-Blank-Green-icon.png</activeon>:/images/Button-Blank-Gray-icon.png</iconset>
-   </property>
-   <property name="text">
-    <string>GAS_4</string>
-   </property>
-   <property name="toolTip">
-    <string>GAS_4</string>
-   </property>
-  </action>
-  <action name="actionRF_ENABLED">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="ONTOS3.qrc">
-     <normaloff>:/images/Button-Blank-Gray-icon.png</normaloff>
-     <disabledon>:/images/Button-Blank-Green-icon.png</disabledon>
-     <activeoff>:/images/Button-Blank-Red-icon.png</activeoff>
-     <activeon>:/images/Button-Blank-Green-icon.png</activeon>:/images/Button-Blank-Gray-icon.png</iconset>
-   </property>
-   <property name="text">
-    <string>RF_ENABLED</string>
-   </property>
-   <property name="toolTip">
-    <string>RF_ENABLED</string>
-   </property>
-  </action>
-  <action name="actionPLASMA_ON">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="ONTOS3.qrc">
-     <normaloff>:/images/Button-Blank-Gray-icon.png</normaloff>
-     <disabledon>:/images/Button-Blank-Green-icon.png</disabledon>
-     <activeoff>:/images/Button-Blank-Red-icon.png</activeoff>
-     <activeon>:/images/Button-Blank-Green-icon.png</activeon>:/images/Button-Blank-Gray-icon.png</iconset>
-   </property>
-   <property name="text">
-    <string>PLASMA_ON</string>
-   </property>
-   <property name="toolTip">
-    <string>PLASMA_ON</string>
-   </property>
-  </action>
-  <action name="actionV5">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="ONTOS3.qrc">
-     <normaloff>:/images/Button-Blank-Gray-icon.png</normaloff>
-     <disabledon>:/images/Button-Blank-Green-icon.png</disabledon>
-     <activeoff>:/images/Button-Blank-Red-icon.png</activeoff>
-     <activeon>:/images/Button-Blank-Green-icon.png</activeon>:/images/Button-Blank-Gray-icon.png</iconset>
-   </property>
-   <property name="text">
-    <string>V5</string>
-   </property>
-   <property name="toolTip">
-    <string>VALVE_5</string>
-   </property>
-  </action>
-  <action name="actionV6">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="ONTOS3.qrc">
-     <normaloff>:/images/Button-Blank-Gray-icon.png</normaloff>
-     <disabledon>:/images/Button-Blank-Green-icon.png</disabledon>
-     <activeoff>:/images/Button-Blank-Red-icon.png</activeoff>
-     <activeon>:/images/Button-Blank-Green-icon.png</activeon>:/images/Button-Blank-Gray-icon.png</iconset>
-   </property>
-   <property name="text">
-    <string>V6</string>
-   </property>
-   <property name="toolTip">
-    <string>VALVE_6</string>
-   </property>
-  </action>
-  <action name="actionV7">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="ONTOS3.qrc">
-     <normaloff>:/images/Button-Blank-Gray-icon.png</normaloff>
-     <disabledon>:/images/Button-Blank-Green-icon.png</disabledon>
-     <activeoff>:/images/Button-Blank-Red-icon.png</activeoff>
-     <activeon>:/images/Button-Blank-Green-icon.png</activeon>:/images/Button-Blank-Gray-icon.png</iconset>
-   </property>
-   <property name="text">
-    <string>V7</string>
-   </property>
-   <property name="toolTip">
-    <string>VALVE_7</string>
-   </property>
-  </action>
-  <action name="actionESTOP_ON">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="ONTOS3.qrc">
-     <normaloff>:/images/Button-Blank-Gray-icon.png</normaloff>
-     <disabledon>:/images/Button-Blank-Red-icon.png</disabledon>
-     <activeoff>:/images/Button-Blank-Red-icon.png</activeoff>
-     <activeon>:/images/Button-Blank-Green-icon.png</activeon>:/images/Button-Blank-Gray-icon.png</iconset>
-   </property>
-   <property name="text">
-    <string>ESTOP_ON</string>
-   </property>
-   <property name="toolTip">
-    <string>ESTOP_ON</string>
-   </property>
-  </action>
-  <action name="actionDO_CMD">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="ONTOS3.qrc">
-     <normaloff>:/images/Button-Blank-Gray-icon.png</normaloff>
-     <disabledon>:/images/Button-Blank-Green-icon.png</disabledon>
-     <activeoff>:/images/Button-Blank-Red-icon.png</activeoff>
-     <activeon>:/images/Button-Blank-Green-icon.png</activeon>:/images/Button-Blank-Gray-icon.png</iconset>
-   </property>
-   <property name="text">
-    <string>DO_CMD</string>
-   </property>
-   <property name="toolTip">
-    <string>DO_CMD</string>
-   </property>
-  </action>
-  <action name="actionHE_SIG">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="ONTOS3.qrc">
-     <normaloff>:/images/Button-Blank-Gray-icon.png</normaloff>
-     <disabledon>:/images/Button-Blank-Green-icon.png</disabledon>
-     <activeoff>:/images/Button-Blank-Red-icon.png</activeoff>
-     <activeon>:/images/Button-Blank-Green-icon.png</activeon>:/images/Button-Blank-Gray-icon.png</iconset>
-   </property>
-   <property name="text">
-    <string>HE_IG</string>
-   </property>
-   <property name="toolTip">
-    <string>HE_SIG</string>
-   </property>
-  </action>
-  <action name="actionTUNING">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="ONTOS3.qrc">
-     <normaloff>:/images/Button-Blank-Gray-icon.png</normaloff>
-     <disabledon>:/images/Button-Blank-Green-icon.png</disabledon>
-     <activeoff>:/images/Button-Blank-Red-icon.png</activeoff>
-     <activeon>:/images/Button-Blank-Green-icon.png</activeon>:/images/Button-Blank-Gray-icon.png</iconset>
-   </property>
-   <property name="text">
-    <string>TUNING</string>
-   </property>
-   <property name="toolTip">
-    <string>TUNING</string>
-   </property>
-  </action>
-  <action name="actionP_RDY">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="ONTOS3.qrc">
-     <normaloff>:/images/Button-Blank-Gray-icon.png</normaloff>
-     <disabledon>:/images/Button-Blank-Green-icon.png</disabledon>
-     <activeoff>:/images/Button-Blank-Red-icon.png</activeoff>
-     <activeon>:/images/Button-Blank-Green-icon.png</activeon>:/images/Button-Blank-Gray-icon.png</iconset>
-   </property>
-   <property name="text">
-    <string>P_RDY</string>
-   </property>
-   <property name="toolTip">
-    <string>P_RDY</string>
-   </property>
-  </action>
-  <action name="actionP_AVAIL">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="ONTOS3.qrc">
-     <normaloff>:/images/Button-Blank-Gray-icon.png</normaloff>
-     <disabledon>:/images/Button-Blank-Green-icon.png</disabledon>
-     <activeoff>:/images/Button-Blank-Red-icon.png</activeoff>
-     <activeon>:/images/Button-Blank-Green-icon.png</activeon>:/images/Button-Blank-Gray-icon.png</iconset>
-   </property>
-   <property name="text">
-    <string>P_AVAIL</string>
-   </property>
-   <property name="toolTip">
-    <string>P_AVAIL</string>
-   </property>
-  </action>
-  <action name="actionRUN_P">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="ONTOS3.qrc">
-     <normaloff>:/images/Button-Blank-Gray-icon.png</normaloff>
-     <disabledon>:/images/Button-Blank-Green-icon.png</disabledon>
-     <activeoff>:/images/Button-Blank-Red-icon.png</activeoff>
-     <activeon>:/images/Button-Blank-Green-icon.png</activeon>:/images/Button-Blank-Gray-icon.png</iconset>
-   </property>
-   <property name="text">
-    <string>RUN_P</string>
-   </property>
-   <property name="toolTip">
-    <string>RUN_P</string>
-   </property>
-  </action>
   <action name="actionEngineer_Mode">
    <property name="text">
     <string>Engineer Mode</string>
@@ -5912,6 +3214,26 @@ font: 18pt &quot;Ubuntu Bold&quot;;
   <action name="actionOperator_Mode">
    <property name="text">
     <string>Operator Mode</string>
+   </property>
+  </action>
+  <action name="actionConnect">
+   <property name="text">
+    <string>Connect</string>
+   </property>
+  </action>
+  <action name="actionDisconnect">
+   <property name="text">
+    <string>Disconnect</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="text">
+    <string>Settings</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
    </property>
   </action>
  </widget>

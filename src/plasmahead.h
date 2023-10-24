@@ -9,7 +9,7 @@ class PlasmaHead : public QObject
 
 public:
     PlasmaHead();
-
+    void setSafetyGap(double safetyGap);
     double getSafetyGap() const;
     double getSlitLength() const;
     void setSlitlength(double slitLength);

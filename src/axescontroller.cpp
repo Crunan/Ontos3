@@ -12,10 +12,15 @@ const QString XAXIS_QSTR = "0";
 const QString YAXIS_QSTR = "1";
 const QString ZAXIS_QSTR = "2";
 
+// file scope
 bool joystickOnLast = false;
 bool N2OnLast = false;
 bool vacOnLast = false;
 bool doorsOpenLast = false;
+int LEDStatesLast = 0;
+double XposLast = 0.0;
+double YposLast = 0.0;
+double ZposLast = 0.0;
 
 AxesController::AxesController(QObject *parent) :
     QObject(parent),
@@ -37,6 +42,7 @@ AxesController::AxesController(QObject *parent) :
     m_doorsOpen(false),
     m_vacOn(false),
     m_N2PurgeOn(false),
+    m_axesInitialized(false),
     m_Xp2Base(0.0),
     m_Yp2Base(0.0),
     m_Zp2Base(0.0),
@@ -257,7 +263,7 @@ void AxesController::RunInitAxesSM()
 
         // update UI
         emit stageStatusUpdate("Initializing Axes", "");
-        emit setUIInitSMStartup();
+        emit initSMStartup();
 
         Logger::logInfo("Initializing Axes");
 
@@ -276,8 +282,12 @@ void AxesController::RunInitAxesSM()
     }
     else if (m_initStateMachine.configuration().contains(m_pInitAxesInitializedState)) { // in initialized state
 
+        // retain the initilized state
+        m_axesInitialized = true;
+
         // update UI
         emit stageStatusUpdate("Stage Initialized", "");
+        emit initSMDone();
 
 
         Logger::logInfo("Stage Initialized");
@@ -290,7 +300,7 @@ void AxesController::RunInitAxesSM()
 void AxesController::InitIdleOnEntry()
 {
     //  update the UI
-    emit setUIInitSMDone();
+    //emit setUIInitSMDone();
 }
 
 void AxesController::RunHomeAxesSM()
@@ -441,7 +451,7 @@ void AxesController::RunTwoSpotSM()
 
             // translate into ph coordinates and save
             m_twoSpotXFirstPoint = TranslateCoordXBase2PH(m_Xaxis.getPosition());
-            m_twoSpotXSecondPoint = TranslateCoordYBase2PH(m_Yaxis.getPosition());
+            m_twoSpotYFirstPoint = TranslateCoordLaserY2PH(m_Yaxis.getPosition());
 
             Logger::logInfo("TwoSpotSM Got First");
 
@@ -467,7 +477,7 @@ void AxesController::RunTwoSpotSM()
 
             // translate to ph coordinates and save
             m_twoSpotXSecondPoint = TranslateCoordXBase2PH(m_Xaxis.getPosition());
-            m_twoSpotYSecondPoint = TranslateCoordYBase2PH(m_Yaxis.getPosition());
+            m_twoSpotYSecondPoint = TranslateCoordLaserY2PH(m_Yaxis.getPosition());
 
             //determine box orientation and corners for scanning
             checkAndSetXDimensions();
@@ -629,7 +639,6 @@ void AxesController::AxisStartup()
     getZp2Base();
     getXs2PH();
     getYs2PH();
-    getPHSafetyZGap();
     getZPinsBuried();
     getZPinsExposed();
     getLoadX2Base();
@@ -697,76 +706,130 @@ void AxesController::updateAxisStatus()
         vacStatus();
         N2PurgeStatus();
 
-
         //log any change
-        //    if (didStatusChange()) {
-        //        logAxesStatus();
-        //    }
+        checkAndLogAxesStatusChange();
+    }
+}
+
+// currently logging positional changes only
+void AxesController::checkAndLogAxesStatusChange()
+{
+    // if position is considered valid
+    if (getXAxisState() >= AXIS_IDLE && getYAxisState() >= AXIS_IDLE && getZAxisState() >= AXIS_IDLE) {
+
+        // if any axis position has changed
+        if (m_Xaxis.getPosition() != XposLast ||
+            m_Yaxis.getPosition() != YposLast ||
+            m_Zaxis.getPosition() != ZposLast) {
+
+            // update positions
+            XposLast = m_Xaxis.getPosition();
+            YposLast = m_Yaxis.getPosition();
+            ZposLast = m_Zaxis.getPosition();
+
+            // log the new position
+            Logger::logInfo(QString("Stage Xpos: %1 Ypos: %2 Zpos: %3").
+                            arg(m_Xaxis.getPositionQStr()).arg(m_Yaxis.getPositionQStr()).arg(m_Zaxis.getPositionQStr()));
+
+        }
+    }
+    else {
+        m_axesInitialized = false;  // if not in a valid state we are uninitialized
     }
 }
 
 
-
 void AxesController::doorsStatus()
 {
-    m_doorsOpen = isBitSet(m_LEDstates, 6);
+    bool ok = false;
+    int bit = m_config.getValueForKey(CONFIG_DOOR_STATUS_BIT).toInt(&ok);
 
-    if (m_doorsOpen != doorsOpenLast) {
-        doorsOpenLast = m_doorsOpen;
+    if (ok) {
+        m_doorsOpen = isBitSet(m_LEDstates, bit);
 
-        if (m_doorsOpen)
-            Logger::logInfo("Doors : open");
-        else
-            Logger::logInfo("Doors : closed");
+        if (m_doorsOpen != doorsOpenLast) {
+            doorsOpenLast = m_doorsOpen;
+
+            if (m_doorsOpen)
+                Logger::logInfo("Doors : open");
+            else
+                Logger::logInfo("Doors : closed");
+        }
+    }
+    else {
+        Logger::logCritical("Cannot find config file entry for: " + CONFIG_DOOR_STATUS_BIT);
     }
 }
 
 void AxesController::joyBtnStatus()
 {
-    m_joystickOn = isBitSet(m_LEDstates, 15);
+    bool ok = false;
+    int bit = m_config.getValueForKey(CONFIG_JOY_STATUS_BIT).toInt(&ok);
 
-    if (m_joystickOn != joystickOnLast) {
-        joystickOnLast = m_joystickOn;
+    if (ok) {
+        m_joystickOn = isBitSet(m_LEDstates, bit);
 
-        if (m_joystickOn)
-            Logger::logInfo("Joystick : enabled");
-        else
-            Logger::logInfo("Joystick : disabled");
+        if (m_joystickOn != joystickOnLast) {
+            joystickOnLast = m_joystickOn;
 
-        emit joystickStateChanged(m_joystickOn);
+            if (m_joystickOn)
+                Logger::logInfo("Joystick : enabled");
+            else
+                Logger::logInfo("Joystick : disabled");
+
+            emit joystickStateChanged(m_joystickOn);
+        }
+    }
+    else {
+        Logger::logCritical("Cannot find config file entry for: " + CONFIG_JOY_STATUS_BIT);
     }
 }
 
 void AxesController::vacStatus()
 {
-    m_vacOn = isBitSet(m_LEDstates, 12);
+    bool ok = false;
+    int bit = m_config.getValueForKey(CONFIG_VAC_STATUS_BIT).toInt(&ok);
 
-    if (m_vacOn != vacOnLast) {
-        vacOnLast = m_vacOn;
+    if (ok) {
+        m_vacOn = isBitSet(m_LEDstates, bit);
 
-        if (m_vacOn)
-            Logger::logInfo("Vac : enabled");
-        else
-            Logger::logInfo("Vac : disabled");
+        if (m_vacOn != vacOnLast) {
+            vacOnLast = m_vacOn;
 
-        emit vacStateChanged(m_vacOn);
+            if (m_vacOn)
+                Logger::logInfo("Vac : enabled");
+            else
+                Logger::logInfo("Vac : disabled");
+
+            emit vacStateChanged(m_vacOn);
+        }
+    }
+    else {
+        Logger::logCritical("Cannot find config file entry for: " + CONFIG_VAC_STATUS_BIT);
     }
 }
 
 void AxesController::N2PurgeStatus()
 {
+    bool ok = false;
+    int bit = m_config.getValueForKey(CONFIG_N2PURGE_STATUS_BIT).toInt(&ok);
 
-    m_N2PurgeOn = isBitSet(m_LEDstates, 11);
+    if (ok) {
+        m_N2PurgeOn = isBitSet(m_LEDstates, bit);
 
-    if (m_N2PurgeOn != N2OnLast) {
-        N2OnLast = m_N2PurgeOn;
+        if (m_N2PurgeOn != N2OnLast) {
+            N2OnLast = m_N2PurgeOn;
 
-        if (m_N2PurgeOn)
-            Logger::logInfo("N2 Purge : enabled");
-        else
-            Logger::logInfo("N2 Purge : disabled");
+            if (m_N2PurgeOn)
+                Logger::logInfo("N2 Purge : enabled");
+            else
+                Logger::logInfo("N2 Purge : disabled");
 
-        emit n2StateChanged(true);
+            emit n2StateChanged(m_N2PurgeOn);
+        }
+    }
+    else {
+        Logger::logCritical("Cannot find config file entry for: " + CONFIG_N2PURGE_STATUS_BIT);
     }
 }
 
@@ -783,49 +846,38 @@ bool AxesController::isBitSet(int test_int, int bit_pos)
     }
 }
 
-void AxesController::setXMaxPos(const double maxPos)
+void AxesController::moveAxisAbsolute(int axisCommandNum, float targetPosition)
 {
-    m_Xaxis.setMaxPos(maxPos);
+    if (axisCommandNum >= 0 && axisCommandNum <= 2) {
+        QString command = "$B60" + QString::number(axisCommandNum);
+        command += QString::number(targetPosition, 'f', 2); // number, 6=total field length including decimal point, 'f'=dont use scientific notation, 2=number of decimal places, padding char
+        command += "%";
+        sendCommand(command); // ABS_MOVE $B60xaa.aa%; resp [!B60xaa.aa#] 0x = axis num, aa.aa = destination in mm (float)
+        readResponse();
+    }
+    else {
+        Logger::logCritical("Bad axis command number sent to movAxisAbsolute: " + QString::number(axisCommandNum));
+    }
 }
 
-void AxesController::setXMaxSpeed(const double maxSpeed)
+void AxesController::setAxisSpeed(int axisCommandNum, float targetSpeed)
 {
-    m_Xaxis.setMaxSpeed(maxSpeed);
+    if (axisCommandNum >= 0 && axisCommandNum <= 2) {
+        QString command = "$B40" + QString::number(axisCommandNum); // SET_SPEED  $B40xss.ss%; resp [!B40xss.ss#] 0x = axis number, ss.ss = mm/sec (float)
+        command += QString::number(targetSpeed, 'f', 2); // number, 6=total field length including decimal point, 'f'=dont use scientific notation, 2=number of decimal places, padding char
+        command += "%";
+        sendCommand(command);
+        readResponse();
+    }
+    else {
+        Logger::logCritical("Bad axis command number sent to setAxisSpeed: " + QString::number(axisCommandNum));
+    }
 }
 
-void AxesController::setXHomePos(const double homePos)
+void AxesController::stopAllMotors()
 {
-    m_Xaxis.setHomePos(homePos);
-}
-
-void AxesController::setYMaxPos(const double maxPos)
-{
-    m_Yaxis.setMaxPos(maxPos);
-}
-
-void AxesController::setYMaxSpeed(const double maxSpeed)
-{
-    m_Yaxis.setMaxSpeed(maxSpeed);
-}
-
-void AxesController::setYHomePos(const double homePos)
-{
-   m_Yaxis.setHomePos(homePos);
-}
-
-void AxesController::setZMaxPos(const double maxPos)
-{
-    m_Zaxis.setMaxPos(maxPos);
-}
-
-void AxesController::setZMaxSpeed(const double maxSpeed)
-{
-    m_Zaxis.setMaxSpeed(maxSpeed);
-}
-
-void AxesController::setZHomePos(const double homePos)
-{
-    m_Zaxis.setHomePos(homePos);
+    sendCommand("$B3%"); // stop any motors in motion
+    readResponse();
 }
 
 void AxesController::getXMaxSpeed()
@@ -837,7 +889,7 @@ void AxesController::getXMaxSpeed()
         bool ok = false;
         double maxSpeed = StrVar.toDouble(&ok);
         if (ok) {
-            setXMaxSpeed(maxSpeed);
+            m_Xaxis.saveMaxSpeed(maxSpeed);
             Logger::logInfo("X Max Speed: " + StrVar + "");
         }
     }
@@ -854,7 +906,7 @@ void AxesController::getYMaxSpeed()
         bool ok = false;
         double maxSpeed = StrVar.toDouble(&ok);
         if (ok) {
-            setYMaxSpeed(maxSpeed);
+            m_Yaxis.saveMaxSpeed(maxSpeed);
             Logger::logInfo("Y Max Speed: " + StrVar + "");
         }
     }
@@ -870,7 +922,7 @@ void AxesController::getZMaxSpeed()
         bool ok = false;
         double maxSpeed = StrVar.toDouble(&ok);
         if (ok) {
-            setZMaxSpeed(maxSpeed);
+            m_Zaxis.saveMaxSpeed(maxSpeed);
             Logger::logInfo("Z Max Speed: " + StrVar + "");
         }
     }
@@ -957,22 +1009,7 @@ void AxesController::getYs2PH()
         Logger::logCritical("Could Not get Y relative to Plasma head, last requestData: " + getLastCommand());
 }
 
-void AxesController::getPHSafetyZGap()
-{
-    sendCommand("$DA542%"); //GET Plasma Head Safety Gap $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value
-    QString response = readResponse();
-    if (response.length() > 7) {
-        QString StrVar = response.mid(7, (response.length() - 8));
-        bool ok = false;
-        double PHSafetyZGap = StrVar.toDouble(&ok);
-        if (ok) {
-            //plasmahead.setSafetyGap(StrVar); // TODO
-            Logger::logInfo("Plasma Head Z Safety Gap: " + StrVar + " (mm)");
-        }
-    }
-    else
-        Logger::logCritical("Could Not get Plasma Head Z Safety Gap, last requestData: " + getLastCommand());
-}
+
 void AxesController::getZPinsBuried()
 {
     sendCommand("$DA543%"); //GET Z Pins Buried Pos (mm) $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value
@@ -1014,7 +1051,7 @@ void AxesController::getLoadX2Base()
         bool ok = false;
         double X2Base = StrVar.toDouble(&ok);
         if (ok) {
-            m_Xaxis.setHomePos(X2Base);
+            m_Xaxis.saveHomePos(X2Base);
             Logger::logInfo("X Load Position: " + StrVar + "");
         }
     }
@@ -1030,7 +1067,7 @@ void AxesController::getLoadY2Base()
         bool ok = false;
         double Y2Base = StrVar.toDouble(&ok);
         if (ok) {
-            m_Yaxis.setHomePos(Y2Base);
+            m_Yaxis.saveHomePos(Y2Base);
             Logger::logInfo("Y Load Position: " + StrVar + "");
         }
     }
@@ -1046,7 +1083,7 @@ void AxesController::getLoadZ2Base()
         bool ok = false;
         double Z2Base = StrVar.toDouble(&ok);
         if (ok) {
-            m_Zaxis.setHomePos(Z2Base);
+            m_Zaxis.saveHomePos(Z2Base);
             Logger::logInfo("Z Load Position: " + StrVar + "");
         }
     }

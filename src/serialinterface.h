@@ -20,13 +20,16 @@ public:
     void setFlowControl(QSerialPort::FlowControl flowControl) { m_serialPort.setFlowControl(flowControl); }
     QString getPortErrorString() { return m_serialPort.errorString(); }
 
-    bool open(QIODeviceBase::OpenMode openMode) { return m_serialPort.open(openMode); }
+    bool open(QIODeviceBase::OpenMode openMode);
     void close() { m_serialPort.close(); }
     bool isOpen() { return m_serialPort.isOpen(); }
     QString errorString() { return m_serialPort.errorString(); }
     bool sendCommand(QString command);
     QString readResponse();
     QString getLastCommand() { return m_lastSerialCommand; }
+
+signals:
+    void serialClosed();
 
 private slots:
     void serialWatchdogTimerElapsed();

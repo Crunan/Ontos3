@@ -17,6 +17,8 @@ int main(int argc, char *argv[]) {
     // Initialize our logger
     Logger::init();
 
+    Logger::logInfo("Current application version: " + QString(APP_VERSION));
+
     // Create our main window
     // Contains our GUI
     MainWindow window(mainLoop);

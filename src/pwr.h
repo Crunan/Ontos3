@@ -16,6 +16,9 @@ public:
     int getForwardWatts() const;
     void setForwardWatts(int value);
 
+    int getMaxForwardWatts() const;
+    void setMaxForwardWatts(int value);
+
     int getReflectedWatts() const;
     void setReflectedWatts(int value);
 

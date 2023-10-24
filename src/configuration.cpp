@@ -10,10 +10,10 @@ Configuration::Configuration(QObject *parent) : QObject(parent)
     QString buildDir = QCoreApplication::applicationDirPath();
 
     // Set the execonfigPath to the "config" folder in the build directory
-    execonfigPath = buildDir + "/config";
+    m_execonfigPath = buildDir + CONFIG_DIRECTORY_NAME;
 
     // Set the execonfigFileName to the desired file name
-    execonfigFileName = "config.ini";
+    m_execonfigFileName = CONFIG_DEFAULT_FILENAME;
 
     // Read the configuration file and populate the dictionary
     readConfigFile();
@@ -22,7 +22,7 @@ Configuration::Configuration(QObject *parent) : QObject(parent)
 void Configuration::readConfigFile()
 {
     // Open the configuration file for reading
-    QString filePath = execonfigPath + "/" + execonfigFileName;
+    QString filePath = m_execonfigPath + "/" + m_execonfigFileName;
     QFile configFile(filePath);
     if (!configFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
         // Handle the error if the file cannot be opened
@@ -34,11 +34,14 @@ void Configuration::readConfigFile()
     QTextStream in(&configFile);
     while (!in.atEnd()) {
         QString line = in.readLine().trimmed();
-        QStringList parts = line.split('=');
+        if (line.at(0) == '/' && line.at(1) == '/') continue; // comment so skip it
+        QStringList parts = line.split('>');
         if (parts.size() == 2) {
             QString key = parts[0].trimmed();
+            // remove the '<'
+            key = key.removeFirst();
             QString value = parts[1].trimmed();
-            configDictionary[key] = value;
+            m_configDictionary[key] = value;
         }
     }
 
@@ -47,8 +50,8 @@ void Configuration::readConfigFile()
 }
 QString Configuration::getValueForKey(const QString& key) const
 {
-    if (configDictionary.contains(key)) {
-        return configDictionary.value(key);
+    if (m_configDictionary.contains(key)) {
+        return m_configDictionary.value(key);
     }
 
     // Return an empty string if the key is not found
@@ -57,15 +60,15 @@ QString Configuration::getValueForKey(const QString& key) const
 
 QStringList Configuration::getAllKeys() const
 {
-    return configDictionary.keys();
+    return m_configDictionary.keys();
 }
 
 QString Configuration::getExeConfigPath() const
 {
-    return execonfigPath;
+    return m_execonfigPath;
 }
 
 QString Configuration::getExeConfigFileName() const
 {
-    return execonfigFileName;
+    return m_execonfigFileName;
 }

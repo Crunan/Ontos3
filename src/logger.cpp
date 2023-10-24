@@ -25,12 +25,12 @@ void Logger::init()
     //Create log file
     logFile = new QFile;
     logFile->setFileName("ontos3.log");
-    logFile->open(QIODevice::Append | QIODevice::Text);
+    logFile->open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
 
-#ifndef QT_DEBUG
+//#ifndef QT_DEBUG
     //Redirect logs to messageOutput
     qInstallMessageHandler(Logger::messageOutput);
-#endif
+//#endif
 
 
     //Clear file contents
@@ -50,6 +50,8 @@ void Logger::clean()
 
 void Logger::messageOutput(QtMsgType type, const QMessageLogContext& context, const QString& msg)
 {
+    if (type == QtDebugMsg)
+        return; // no debug messages in the logfile
     QString log = QObject::tr("%1 | %2 | %3 | %4 | %5 | %6\n").
             arg(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm:ss")).
             arg(Logger::contextNames.value(type)).

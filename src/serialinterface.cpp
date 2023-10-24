@@ -1,5 +1,6 @@
 #include "serialinterface.h"
 #include "logger.h"
+#include <QApplication>
 
 const int AUX_INPUT_BUFFER_MAX_SIZE = 90;
 const int SERIAL_RESPONSE_TIMEOUT = 5000; // timeout waiting for response (milliseconds)
@@ -13,7 +14,7 @@ SerialInterface::SerialInterface() :
 {
     // serial watchdog timer
     m_pSerialWatchdogTimer = new QTimer(this);
-    connect(m_pSerialWatchdogTimer, SIGNAL(timeout()), this, SLOT(serialWatchdogTimerElapsed()));
+    connect(m_pSerialWatchdogTimer, &QTimer::timeout, this, &SerialInterface::serialWatchdogTimerElapsed);
 }
 
 SerialInterface::~SerialInterface()
@@ -22,10 +23,18 @@ SerialInterface::~SerialInterface()
     delete m_pSerialWatchdogTimer;
 }
 
+bool SerialInterface::open(QIODeviceBase::OpenMode openMode)
+{
+    return m_serialPort.open(openMode);
+}
+
+
 void SerialInterface::serialWatchdogTimerElapsed()
 {
     m_serialWatchdogTriggered = true;
     m_pSerialWatchdogTimer->stop();
+    m_serialPort.close(); // somethings obviously wrong so close the serial port
+    emit serialClosed();
 }
 
 bool SerialInterface::sendCommand(QString command)
@@ -45,6 +54,7 @@ bool SerialInterface::sendCommand(QString command)
 
         // start watchdog timer
         m_pSerialWatchdogTimer->start(SERIAL_RESPONSE_TIMEOUT);
+        m_serialWatchdogTriggered = false;
 
         // record command for logging purposes
         m_lastSerialCommand = command;
@@ -77,7 +87,6 @@ QString SerialInterface::readResponse()
             while (responseVal == 0) {
                 // check the watchdog timer
                 if (m_serialWatchdogTriggered) {
-                    m_serialWatchdogTriggered = false;
                     m_pSerialWatchdogTimer->stop();
                     Logger::logDebug("AxesController::readResponse() watchdog triggered....bailing");
                     Logger::logInfo("Comms error: " + m_lastSerialCommand);
@@ -85,6 +94,7 @@ QString SerialInterface::readResponse()
                 }
                 m_serialPort.waitForReadyRead(100);
                 responseVal = ReadChar();
+                //qApp->processEvents(); // allow the timer event to be serivced if the board is not present
             }
 
             serialResponse += char(responseVal);

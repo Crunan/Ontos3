@@ -3,18 +3,18 @@
 
 PlasmaController::PlasmaController(QWidget* parent)
   : QObject(parent),
-    m_plasmaHead(),
-    m_pwr(),
-    m_tuner(),
     m_mfcs({ new MFC(1), new MFC(2), new MFC(3), new MFC(4) }),
-    m_commandMap(),
-    m_stageCTL(),
-    m_config(),
-    m_pRecipe(new PlasmaRecipe()),
     m_lightTower(),
     m_pSerialInterface(new SerialInterface()),
     m_ledStatus(),
     m_executeRecipe(0),
+    m_commandMap(),
+    m_stageCTL(),
+    m_waferDiameter(),
+    m_pRecipe(new PlasmaRecipe()),
+    m_plasmaHead(),
+    m_tuner(),
+    m_pwr(),
     m_scanMinXPos(0.0),
     m_scanMaxXPos(0.0),
     m_scanMinYPos(0.0),
@@ -30,13 +30,12 @@ PlasmaController::PlasmaController(QWidget* parent)
     m_startYPosition(0.0),
     m_scanYSpeed(0.0),
     m_scanEndYPosition(0.0),
-    m_numMFCs(0),
     m_batchLogging(0),
     m_collisionDetected(false),
     m_collisionPassed(false),
-    m_bRunRecipe(false), //Turn plasma on
+    m_runRecipe(false), //Turn plasma on
     m_plannedAutoStart(false),
-    m_bPlasmaActive(false)
+    m_plasmaActive(false)
 {
     // Add startup data gathering methods.
     for (MFC* mfc: m_mfcs) {
@@ -174,6 +173,7 @@ void PlasmaController::setupCollisionStateMachine()
 bool PlasmaController::open(const SettingsDialog& settings)
 {
     const SettingsDialog::Settings p = settings.settings();
+
     m_pSerialInterface->setPortName(p.name);
     m_pSerialInterface->setBaudRate(p.baudRate);
     m_pSerialInterface->setDataBits(p.dataBits);
@@ -223,36 +223,38 @@ void PlasmaController::RunScanAxesSM()
         emit SSM_Started();
 
         // load scan variables
-        // translate from Displayed PH coords to moveable Base coords
-        double minXPerPH = m_stageCTL.TranslateCoordXPH2Base(m_pRecipe->getXminPH());
-        double maxXPerPH = m_stageCTL.TranslateCoordXPH2Base(m_pRecipe->getXmaxPH());
+        // recipe variables are in PH so translate to moveable base coords
+        double minXBase = m_stageCTL.TranslateCoordXPH2Base(m_pRecipe->getXminPH());
+        double maxXBase = m_stageCTL.TranslateCoordXPH2Base(m_pRecipe->getXmaxPH());
 
-        if (maxXPerPH > minXPerPH) { // because coord systems can be flipped
-            m_scanMaxXPos = maxXPerPH;
-            m_scanMinXPos = minXPerPH;
+        if (maxXBase > minXBase) { // because coord systems can be flipped
+            m_scanMaxXPos = maxXBase;
+            m_scanMinXPos = minXBase;
         }
         else {
-            m_scanMaxXPos = minXPerPH;
-            m_scanMinXPos = maxXPerPH;
+            m_scanMaxXPos = minXBase;
+            m_scanMinXPos = maxXBase;
         }
 
-        double minYPerPH = m_stageCTL.TranslateCoordYPH2Base(m_pRecipe->getYminPH());
-        double maxYPerPH = m_stageCTL.TranslateCoordYPH2Base(m_pRecipe->getYmaxPH());
+        // load scan variables
+        // recipe variables are in PH so translate to moveable base coords
+        double minYBase = m_stageCTL.TranslateCoordYPH2Base(m_pRecipe->getYminPH());
+        double maxYBase = m_stageCTL.TranslateCoordYPH2Base(m_pRecipe->getYmaxPH());
 
-        if (maxYPerPH > minYPerPH) { // because coord systems can be flipped
-            m_scanMaxYPos = maxYPerPH;
-            m_scanMinYPos = minYPerPH;
+        if (maxYBase > minYBase) { // because coord systems can be flipped
+            m_scanMaxYPos = maxYBase;
+            m_scanMinYPos = minYBase;
         }
         else {
-            m_scanMaxYPos = minYPerPH;
-            m_scanMinYPos = maxYPerPH;
+            m_scanMaxYPos = minYBase;
+            m_scanMinYPos = maxYBase;
         }
 
         m_scanZParkPos = m_stageCTL.getZPinsBuriedPos();
         m_scanZScanPos = m_stageCTL.getZp2BaseDbl() - m_pRecipe->getThickness() - m_pRecipe->getGap();
 
         // get the scan row info
-        m_scanRowXWidth = m_plasmaHead.getSlitWidth() - m_pRecipe->getOverlap();
+        m_scanRowXWidth = m_plasmaHead.getSlitLength() - m_pRecipe->getOverlap();
         double xLengthRemaining = m_scanMaxXPos - m_scanMinXPos;
         while (xLengthRemaining >= 0) {
             m_numXRows += 1;
@@ -272,13 +274,13 @@ void PlasmaController::RunScanAxesSM()
         }
 
         // Y scan range from start to finish positions
-        double m_startYPosition = m_scanMaxYPos + m_plasmaHead.getSlitWidth();
+        m_startYPosition = m_scanMaxYPos + m_plasmaHead.getSlitWidth();
         m_scanEndYPosition = m_scanMinYPos - m_plasmaHead.getSlitWidth();
         m_scanYSpeed = m_pRecipe->getSpeed();
 
         Logger::logInfo("-------------Scan Start-Up--------------");
-        Logger::logInfo("Display MIN:(" + QString::number(m_scanMinXPos, 'f', 2) + " , " + QString::number(m_scanMinYPos, 'f', 2) + ") MAX:(" +
-                        QString::number(m_scanMaxXPos, 'f', 2) + " , " + QString::number(m_scanMaxYPos, 'f', 2) + ")");
+        Logger::logInfo("Display MIN:(" + m_pRecipe->getXminPHQStr() + " , " + m_pRecipe->getXmaxPHQStr() + ") MAX:(" +
+                        m_pRecipe->getYminPHQStr() + " , " + m_pRecipe->getYmaxPHQStr() + ")");
         Logger::logInfo("Num Rows: " + QString::number(m_numXRows) + " Row Width: " + QString::number(m_scanRowXWidth, 'f', 2));
         Logger::logInfo("FirstX: " + QString::number(m_startXPosition, 'f', 2) + " StartY: " + QString::number(m_startYPosition, 'f', 2) + " EndY: " + QString::number(m_scanEndYPosition, 'f', 2));
         Logger::logInfo("Scan Speed: " + QString::number(m_scanYSpeed, 'f', 2) + " Cycles: " + QString::number(m_numCycles));
@@ -312,13 +314,11 @@ void PlasmaController::RunScanAxesSM()
             }
             // turn off Substrate N2 Purge (assume it's on)
             m_stageCTL.toggleN2PurgeOff();
-            QString command = "$B402" + m_stageCTL.getZMaxSpeedQStr() + "%";
-            sendCommand(command); //SET_SPEED  $B40xss.ss%; resp [!B40xss.ss#] 0x = axis number, ss.ss = mm/sec (float)
-            readResponse();
+            // set max Z speed and move to parkZ
+            m_stageCTL.setAxisSpeed(ZAXIS_COMMAND_NUM, m_stageCTL.ZMaxSpeed());
+            m_stageCTL.moveAxisAbsolute(ZAXIS_COMMAND_NUM, m_scanZParkPos);
+            // log the move
             QString logStr = "Move Z Speed: " + m_stageCTL.getZMaxSpeedQStr() + " /sec ";
-            command = "$B602" + QString::number(m_scanZParkPos, 'f', 2) + "%";
-            sendCommand(command); // ABS_MOVE $B60xaa.aa%; resp [!B60xaa.aa#] 0x = axis num, aa.aa = destination in mm (float)
-            readResponse();
             Logger::logInfo(logStr + "to " + QString::number(m_scanZParkPos, 'f', 2));
         }
     }
@@ -330,26 +330,26 @@ void PlasmaController::RunScanAxesSM()
 
             emit SSM_StatusUpdate("Scanning", message); // update ui
 
-            QString command = "$B400" + m_stageCTL.getXMaxSpeedQStr() + "%";
-            sendCommand(command);  // SET_SPEED  $B40xss.ss%; resp [!B40xss.ss#] 0x = axis number, ss.ss = mm/sec (float)
-            readResponse();
-            QString logStr = "X Speed: " + m_stageCTL.getXMaxSpeedQStr() + " /sec ";
+            // set max X speed
+            m_stageCTL.setAxisSpeed(XAXIS_COMMAND_NUM, m_stageCTL.XMaxSpeed());
+            // set max Y speed
+            m_stageCTL.setAxisSpeed(YAXIS_COMMAND_NUM, m_stageCTL.YMaxSpeed());
 
-            command = "$B401" + m_stageCTL.getYAxisMaxSpeedQStr() + "%";
-            sendCommand(command); //SET_SPEED  $B40xss.ss%; resp [!B40xss.ss#] 0x = axis number, ss.ss = mm/sec (float)
-            readResponse();         
+            // log it
+            QString logStr = "X Speed: " + m_stageCTL.getXAxisMaxSpeedQStr() + " /sec ";
             Logger::logInfo(logStr + "Y Speed: " + m_stageCTL.getYAxisMaxSpeedQStr() + "/sec");
 
             if (m_currentXRow > 1) {
                 m_startXPosition = m_startXPosition- m_scanRowXWidth; // move over one
             }
-            command = "$B600" + QString::number(m_startXPosition, 'f', 2) + "%";
-            sendCommand(command); //ABS_MOVE $B60xaa.aa%; resp [!B60xaa.aa#] 0x = axis num, aa.aa = destination in mm (float)
-            readResponse();
+
+            // move X to starting position
+            m_stageCTL.moveAxisAbsolute(XAXIS_COMMAND_NUM, m_startXPosition);
+            // move Y to starting position
+            m_stageCTL.moveAxisAbsolute(YAXIS_COMMAND_NUM, m_startYPosition);
+
+            // log it
             logStr = "X to: " + QString::number(m_startXPosition, 'f', 2);
-            command = "$B601" + QString::number(m_startYPosition, 'f', 2) + "%";
-            sendCommand(command);  // ABS_MOVE $B60xaa.aa%; resp [!B60xaa.aa#] 0x = axis num, aa.aa = destination in mm (float)
-            readResponse();
             Logger::logInfo(logStr + " Y to: " + QString::number(m_startYPosition, 'f', 2));
             emit SSM_TransitionGoZPositionSubstate();
         }
@@ -357,50 +357,37 @@ void PlasmaController::RunScanAxesSM()
     else if (m_scanStateMachine.configuration().contains(m_pGoZScanPositionSubState)) { // in goZScanPosition substate
         if (m_stageCTL.nextStateReady()) {
             if (m_pRecipe->getPurge()) { // turn on the substrate N2 Purge
-                sendCommand("$C701%"); // SET_VALVE_2 $C70n% resp[!C70n#] n = 0, 1 (off, on)
-                readResponse();
+                m_stageCTL.toggleN2PurgeOn();
             }
-            QString command = "$B402" + m_stageCTL.getZMaxSpeedQStr() + "%";
-            sendCommand(command); // SET_SPEED  $B40xss.ss%; resp [!B40xss.ss#] 0x = axis number, ss.ss = mm/sec (float)
-            readResponse();
+            // set max Z speed and move to Z scan start
+            m_stageCTL.setAxisSpeed(ZAXIS_COMMAND_NUM, m_stageCTL.ZMaxSpeed());
+            m_stageCTL.moveAxisAbsolute(ZAXIS_COMMAND_NUM, m_scanZScanPos);
+            // log it
             QString logStr = "Move Z at: " + m_stageCTL.getZMaxSpeedQStr() + " /sec ";
-            command = "$B602" + QString::number(m_scanZScanPos, 'f', 2) + "%";
-            sendCommand(command); // ABS_MOVE $B60xaa.aa%; resp [!B60xaa.aa#] 0x = axis num, aa.aa = destination in mm (float)
-            readResponse();
             Logger::logInfo(logStr + "to: " + QString::number(m_scanZScanPos, 'f', 2));
             emit SSM_TransitionScanColSubstate();
         }
     }
     else if (m_scanStateMachine.configuration().contains(m_pScanColSubState)) { // in ScanCol substate
-        if (m_stageCTL.nextStateReady()) {
-            QString command = "$B401" + QString::number(m_scanYSpeed, 'f', 2) + "%";
-            sendCommand(command); //SET_SPEED  $B40xss.ss%; resp [!B40xss.ss#] 0x = axis number, ss.ss = mm/sec (float)
-            readResponse();
+        if (m_stageCTL.nextStateReady()) {           
+            // set Y scan speed and move to Y scan end position
+            m_stageCTL.setAxisSpeed(YAXIS_COMMAND_NUM, m_scanYSpeed);
+            m_stageCTL.moveAxisAbsolute(YAXIS_COMMAND_NUM, m_scanEndYPosition);
+            // log it
             QString logStr = "Move Y at " + QString::number(m_scanYSpeed, 'f', 2) + " /sec ";
-            command = "$B601" + QString::number(m_scanEndYPosition, 'f', 2) + "%";
-            sendCommand(command); // ABS_MOVE $B60xaa.aa%; resp [!B60xaa.aa#] 0x = axis num, aa.aa = destination in mm (float)
-            readResponse();
             Logger::logInfo(logStr + "to: " + QString::number(m_scanEndYPosition, 'f', 2));
             m_currentXRow += 1; // increment row counter
             emit SSM_TransitionParkZSubstate();
         }
     }
     else if (m_scanStateMachine.configuration().contains(m_pScanRecycleState)) { // in ScanRecycle substate
-        if (m_currentCycle > m_numCycles) { // do not recycle
+        if (m_currentCycle >= m_numCycles) { // do not recycle
 
             // Assume N2 is on, turn it off
-            sendCommand("$C700%"); //SET_VALVE_2 $C70n% resp[!C70n#] n = 0, 1 (off, on)
-            readResponse();
+            m_stageCTL.toggleN2PurgeOff();
 
             emit SSM_TransitionIdle();
             emit SSM_Done();
-
-//                    'Engineer buttons become visible in ENG mode
-//                    If b_ENG_mode Then
-//                  SetTwoSpotBtn.Visible = True
-//                  SetDiameterBtn.Visible = True
-//                End If
-
 
             // Reset the collision flag if using a collision system
             if (m_collisionPassed == true) {
@@ -425,6 +412,15 @@ void PlasmaController::RunScanAxesSM()
 //                        readResponse();
 //                    }
 
+
+            m_stageCTL.StartHome(); // Go to the Load position everytime you finish scanning
+
+            // Auto off will turn the recipe off and PLASMA.
+            if (m_pRecipe->getAutoScanBool()) {
+                Logger::logInfo("Plasma turned off (Auto-Off is active)");
+                sendCommand("$8700%");
+                readResponse();
+            }
 
 
         }
@@ -452,18 +448,16 @@ void PlasmaController::RunScanAxesSM()
 
         emit SSM_StatusUpdate("Scanning Stopped - Parking Z", ""); // update ui
 
-        sendCommand("$B3%"); //stop any motors in motion
-        readResponse();
-        // turn of Substrate N2 Purge (assume it's on)
-        sendCommand("$C700%"); //SET_VALVE_2 $C70n% resp[!C70n#] n = 0, 1 (off, on)
-        readResponse();
-        QString command = "$B402" + m_stageCTL.getZMaxSpeedQStr() + "%";
-        sendCommand(command); //SET_SPEED  $B40xss.ss%; resp [!B40xss.ss#] 0x = axis number, ss.ss = mm/sec (float)
-        readResponse();
+        // stop any motors in motion
+        m_stageCTL.stopAllMotors();
+        // turn off Substrate N2 Purge (assume it's on)
+        m_stageCTL.toggleN2PurgeOff();
+
+        // set Z max speed and move to Z park position
+        m_stageCTL.setAxisSpeed(YAXIS_COMMAND_NUM, m_scanYSpeed);
+        m_stageCTL.moveAxisAbsolute(YAXIS_COMMAND_NUM, m_scanEndYPosition);
+        // log it
         QString logStr = "Move Z at " + m_stageCTL.getZMaxSpeedQStr() + " /sec ";
-        command = "$B602" + QString::number(m_scanZParkPos, 'f', 2) + "%";
-        sendCommand(command); //ABS_MOVE $B60xaa.aa%; resp [!B60xaa.aa#] 0x = axis num, aa.aa = destination in mm (float)
-        readResponse();
         Logger::logInfo(logStr + "to: " + QString::number(m_scanZParkPos, 'f', 2));
 
         // done
@@ -472,11 +466,6 @@ void PlasmaController::RunScanAxesSM()
         emit SSM_Done();
 
         m_collisionPassed = false; // reset the collision flag
-
-//                    If b_ENG_mode Then
-//                        SetTwoSpotBtn.Visible = True
-//                        SetDiameterBtn.Visible = True
-//                    End If
     }
     else if (m_scanStateMachine.configuration().contains(m_pScanIdleState)) { // in idle state
 
@@ -493,8 +482,8 @@ void PlasmaController::RunCollisionSM()
 
         emit CSM_StatusUpdate("Collision Test", "");
 
-        if (m_bPlasmaActive) {
-            m_bRunRecipe = true;
+        if (m_plasmaActive) {
+            m_runRecipe = true;
         }
 
         emit CSM_TransitionGetZUp();
@@ -502,13 +491,10 @@ void PlasmaController::RunCollisionSM()
     }
     else if (m_collisionStateMachine.configuration().contains(m_pCPgetZUpstate)) { // in goXY start substate
         if (m_stageCTL.nextStateReady()) {
-            QString command = "$B402" + m_stageCTL.getZMaxSpeedQStr() + "%";
-            sendCommand(command); //SET_SPEED  $B40xss.ss%; resp [!B40xss.ss#] 0x = axis number, ss.ss = mm/sec (float)
-            QString response = readResponse();
 
-            command = "$B602" + QString::number(m_scanZScanPos, 'f', 2) + "%";
-            sendCommand(command); //ABS_MOVE $B60xaa.aa%; resp [!B60xaa.aa#] 0x = axis num, aa.aa = destination in mm (float)
-            response = readResponse();
+            // set max Z speed and move to Z scan position
+            m_stageCTL.setAxisSpeed(ZAXIS_COMMAND_NUM, m_stageCTL.ZMaxSpeed());
+            m_stageCTL.moveAxisAbsolute(ZAXIS_COMMAND_NUM, m_scanZScanPos);
 
             QString LogStr = "Move Z at: " + m_stageCTL.getZMaxSpeedQStr() + "/sec ";
             Logger::logInfo(LogStr + "to: " + QString::number(m_scanZScanPos, 'f', 2));
@@ -517,14 +503,10 @@ void PlasmaController::RunCollisionSM()
         }
     }
     else if (m_collisionStateMachine.configuration().contains(m_pCPScanYState)) { // in goZScanPosition substate
-        if (m_stageCTL.nextStateReady()) {
-            QString command = "$B40110%";
-            sendCommand(command); //SET_SPEED  $B40xss.ss%; resp [!B40xss.ss#] 0x = axis number, ss.ss = mm/sec (float)
-            QString response = readResponse();
-
-            command = "$B601" + QString::number(m_scanEndYPosition, 'f', 2) + "%";
-            sendCommand(command); //ABS_MOVE $B60xaa.aa%; resp [!B60xaa.aa#] 0x = axis num, aa.aa = destination in mm (float)
-            response = readResponse();
+        if (m_stageCTL.nextStateReady()) {            
+            // set Y speed = 10mm/sec and move to Y scan end position
+            m_stageCTL.setAxisSpeed(YAXIS_COMMAND_NUM, 10.0);
+            m_stageCTL.moveAxisAbsolute(YAXIS_COMMAND_NUM, m_scanEndYPosition);
 
             QString LogStr = "Move Y at 10mm/sec ";
             Logger::logInfo(LogStr + "to: " + QString::number(m_scanEndYPosition, 'f', 2));
@@ -533,17 +515,13 @@ void PlasmaController::RunCollisionSM()
         }
     }
     else if (m_collisionStateMachine.configuration().contains(m_pCPGetZDownState)) { // in ScanCol substate
-        if (m_stageCTL.nextStateReady()) {
-            QString command = "$B402" + m_stageCTL.getZMaxSpeedQStr() + "%";
-            sendCommand(command); //SET_SPEED  $B40xss.ss%; resp [!B40xss.ss#] 0x = axis number, ss.ss = mm/sec (float)
-            readResponse();
-
-            command = "$B602" + m_stageCTL.getZMaxSpeedQStr() + "%";
-            sendCommand(command);  //ABS_MOVE $B60xaa.aa%; resp [!B60xaa.aa#] 0x = axis num, aa.aa = destination in mm (float)
-            readResponse();
+        if (m_stageCTL.nextStateReady()) {            
+            // set max Z speed and move to parkZ
+            m_stageCTL.setAxisSpeed(ZAXIS_COMMAND_NUM, m_stageCTL.ZMaxSpeed());
+            m_stageCTL.moveAxisAbsolute(ZAXIS_COMMAND_NUM, m_scanZParkPos);
 
             QString LogStr = "Move Z Speed: " + m_stageCTL.getZMaxSpeedQStr() + " /sec ";
-            Logger::logInfo(LogStr + "to " + m_stageCTL.getZMaxSpeedQStr());
+            Logger::logInfo(LogStr + "to " + QString::number(m_scanZParkPos, 'f', 2));
 
             emit CSM_TransitionShutdown();
         }
@@ -558,7 +536,7 @@ void PlasmaController::RunCollisionSM()
             m_collisionPassed = true;
             // Go here to scan
             if (m_plannedAutoStart == true) {
-                m_bRunRecipe = true; //Turn plasma on
+                m_runRecipe = true; //Turn plasma on
                 m_plannedAutoStart = false;
             }
             else {
@@ -614,20 +592,10 @@ int PlasmaController::parseResponseForNumberOfMFCs(QString& response)
 
 void PlasmaController::runDiameter()
 {
-    double radius;
-    double newXmin, newXmax, newYmin, newYmax;
-
-    radius =  m_waferDiameter.getCurrentWaferDiameterSelection() / 2.0;
+    double radius =  m_waferDiameter.getCurrentWaferDiameterSelection() / 2.0;
 
     double Xp2Base = m_stageCTL.getXPH2Base();
     double Yp2Base = m_stageCTL.getYPH2Base();
-
-    //find the base coordinate points defining the box
-    /* Mike: Don't think this is necessary
-    m_stageCTL.setXScanMin(Xp2Base - radius);
-    m_stageCTL.setXScanMax(Xp2Base + radius);
-    m_stageCTL.setYScanMin(Yp2Base - radius);
-    m_stageCTL.setYScanMax(Yp2Base + radius);*/
 
     double xBaseMin = (Xp2Base - radius);
     double xBaseMax = (Xp2Base + radius);
@@ -851,7 +819,7 @@ void PlasmaController::parseResponseForCTLStatus(const QString& response)
     m_plasmaHead.setTemperature(temperature);
 }
 
-bool PlasmaController::setLightTower()
+void PlasmaController::setLightTower()
 {
     //    if ( ((GlobalmyStatusBits && 0x80) > 0) || (doorsOpen) ) {
     //        m_lightTower.setState(ERROR);
@@ -937,24 +905,27 @@ void PlasmaController::setTunerSetpointFromRecipe()
 
 void PlasmaController::CTLStartup()
 {
+    getFirmwareVersion();
     howManyMFCs();
     getBatchIDLogging();
-//    getRecipeMBPosition();  // comes in status bits
-//    getRecipeRFPosition();
-//    getRecipeMFC4Flow();
-//    getRecipeMFC3Flow();
-//    getRecipeMFC2Flow();
-//    getRecipeMFC1Flow();
     getMFC4Range();
     getMFC3Range();
     getMFC2Range();
     getMFC1Range();
-// comes in status bits    getMaxRFPowerForward();
+    getRecipeMBPosition();
+    getRecipeRFPosition();
+    getRecipeMFC4Flow();
+    getRecipeMFC3Flow();
+    getRecipeMFC2Flow();
+    getRecipeMFC1Flow();
+    getMaxRFPowerForward();
     getAutoMan();
-    getTemp();
     turnOffExecRecipe();
     getPHSlitLength();
     getPHSlitWidth();
+    getPHSafetyGap();
+    getTemp();
+
 //    setCTLStateMachinesIdle();
 }
 
@@ -1003,6 +974,16 @@ void PlasmaController::PollForCollision()
     }
 }
 
+void PlasmaController::getFirmwareVersion()
+{
+    sendCommand("$8F%"); //GET FW VERSION $8F%; resp[!8Fxx#]; xx = hard coded FW rev in Hex
+    QString response = readResponse();
+    if (response.length() > 3) {
+        QString strVar = response.mid(3, 2);
+        Logger::logInfo("CTL Firmware Version: " + strVar);
+    }
+}
+
 void PlasmaController::howManyMFCs()
 {
     sendCommand("$2A002%");
@@ -1012,7 +993,8 @@ void PlasmaController::howManyMFCs()
         bool ok = false;
         int numMFCs = StrVar.toInt(&ok);
         if (ok) {
-            m_numMFCs = numMFCs;
+            // resize the MFC qlist
+            m_mfcs.resize(numMFCs);
             Logger::logInfo("Number of MFC's: " + StrVar + "");
         }
     }
@@ -1102,6 +1084,117 @@ void PlasmaController::getMFC1Range() {
         Logger::logCritical("Could Not retrieve MFC 1 range, last requestData sent: " + getLastCommand() );
 }
 
+void PlasmaController::getRecipeMBPosition() {
+    sendCommand("$2A606%"); //GET RECIPE MB Start Position () $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
+    QString response = readResponse();
+    if (response.length() > 7) {
+        QString StrVar = response.mid(7, 7);
+        bool ok = false;
+        double loadedSP = StrVar.toDouble(&ok);
+        if (ok) {
+            m_tuner.setRecipePosition(loadedSP);
+            Logger::logInfo("Loaded MB Setpoint: " + StrVar + " %");
+        }
+    }
+    else
+        Logger::logCritical("Could Not retrieve MB tuner setpoint, last requestData sent: " + getLastCommand() );
+}
+
+void PlasmaController::getRecipeRFPosition() {
+    sendCommand("$2A605%"); //GET RECIPE RF PWR Setpoint (Watts) $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
+    QString response = readResponse();
+    if (response.length() > 7) {
+        QString StrVar = response.mid(7, 4);
+        bool ok = false;
+        double rfLoadedSP = StrVar.toDouble(&ok);
+        if (ok) {
+            m_pwr.setRecipeWatts(rfLoadedSP);
+            Logger::logInfo("Loaded RF Setpoint: " + StrVar);
+        }
+    }
+    else
+        Logger::logCritical("Could Not retrieve RF setpoint, last requestData sent: " + getLastCommand());
+}
+
+void PlasmaController::getRecipeMFC4Flow() {
+    sendCommand("$2A604%"); //GET RECIPE MFC4 Flow (SLPM) $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
+    QString response = readResponse();
+    if (response.length() > 7) {
+        QString StrVar = response.mid(7, (response.length() - 8));
+        bool ok = false;
+        double mfcRecipeFlow = StrVar.toDouble(&ok);
+        if (ok) {
+            m_mfcs[3]->setRecipeFlow(mfcRecipeFlow);
+            Logger::logInfo("Loaded MFC 4 Flow Rate: " + StrVar);
+        }
+    }
+    else
+        Logger::logCritical("Could Not retrieve MFC 4 setpoint, last requestData sent: " + getLastCommand());
+}
+
+void PlasmaController::getRecipeMFC3Flow() {
+    sendCommand("$2A603%"); //GET RECIPE MFC3 Flow (SLPM) $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
+    QString response = readResponse();
+    if (response.length() > 7) {
+        QString StrVar = response.mid(7, (response.length() - 8));
+        bool ok = false;
+        double mfcRecipeFlow = StrVar.toDouble(&ok);
+        if (ok) {
+            m_mfcs[2]->setRecipeFlow(mfcRecipeFlow);
+            Logger::logInfo("Loaded MFC 3 Flow Rate: " + StrVar);
+        }
+    }
+    else
+        Logger::logCritical("Could Not retrieve MFC 3 setpoint, last requestData sent: " + getLastCommand() );
+}
+
+void PlasmaController::getRecipeMFC2Flow() {
+    sendCommand("$2A602%"); //GET RECIPE MFC2 Flow (SLPM) $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
+    QString response = readResponse();
+    if (response.length() > 7) {
+        QString StrVar = response.mid(7, (response.length() - 8));
+        bool ok = false;
+        double mfcRecipeFlow = StrVar.toDouble(&ok);
+        if (ok) {
+            m_mfcs[1]->setRecipeFlow(mfcRecipeFlow);
+            Logger::logInfo("Loaded MFC 2 Flow Rate: " + StrVar);
+        }
+    }
+    else
+        Logger::logCritical("Could Not retrieve MFC 2 setpoint, last requestData sent: " + getLastCommand() );
+}
+void PlasmaController::getRecipeMFC1Flow() {
+    sendCommand("$2A601%"); //GET RECIPE MFC1 Flow (SLPM) $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
+    QString response = readResponse();
+    if (response.length() > 7) {
+        QString StrVar = response.mid(7, (response.length() - 8));
+        bool ok = false;
+        double mfcRecipeFlow = StrVar.toDouble(&ok);
+        if (ok) {
+            m_mfcs[0]->setRecipeFlow(mfcRecipeFlow);
+            Logger::logInfo("Loaded MFC 1 Flow Rate: " + StrVar);
+        }
+    }
+    else
+        Logger::logCritical("Could Not retrieve MFC 1 setpoint, last requestData sent: " + getLastCommand() );
+}
+
+void PlasmaController::getMaxRFPowerForward()
+{
+    sendCommand("$2A705%");  //Get Max RF power forward  $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
+    QString response = readResponse();
+    if (response.length() > 7) {
+        QString StrVar = response.mid(7, -1); // return all characters from position 7 to the end
+        StrVar = StrVar.removeLast(); // remove the last char
+        bool ok = false;
+        int maxRF = StrVar.toInt();
+        if (ok) {
+            m_pwr.setMaxForwardWatts(maxRF);
+            Logger::logInfo("Loaded max RF Power Forward");
+        }
+    }
+}
+
 void PlasmaController::getAutoMan() {
     sendCommand("$89%"); //GET_AUTO_MAN   $89%; resp [!890p#] p=1 AutoMode, p=0 ManualMode
     QString response = readResponse();
@@ -1165,6 +1258,23 @@ void PlasmaController::getPHSlitWidth()
     }
     else
         Logger::logCritical("Could Not get Plasma head slit width, last requestData: " + getLastCommand());
+}
+
+void PlasmaController::getPHSafetyGap()
+{
+    sendCommand("$DA542%"); // GET Chuck to Plasma Head safety gap (mm) $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value
+    QString response = readResponse();
+    if (response.length() > 7) {
+        QString StrVar = response.mid(7, (response.length() - 8));
+        bool ok = false;
+        double PHSafetyGap = StrVar.toDouble(&ok);
+        if (ok) {
+            m_plasmaHead.setSafetyGap(PHSafetyGap);
+            Logger::logInfo("Plasma safety gap: " + StrVar + " (mm)");
+        }
+    }
+    else
+        Logger::logCritical("Could Not get Plasma head safety gap, last requestData: " + getLastCommand());
 }
 
 

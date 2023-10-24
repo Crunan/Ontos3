@@ -8,6 +8,11 @@ PlasmaHead::PlasmaHead() :
 {
 }
 
+void PlasmaHead::setSafetyGap(double safetyGap)
+{
+    m_safetyGap = safetyGap;
+}
+
 double PlasmaHead::getSafetyGap() const
 {
     return m_safetyGap;

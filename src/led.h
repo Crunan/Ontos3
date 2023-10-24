@@ -20,10 +20,10 @@ public:
     explicit LED(const QString& name, int index = -1, LEDType type = Normal, bool state = false);
     LED(const LED& other); // Copy constructor
 
-    Q_PROPERTY(QString name READ getName WRITE setName)
+    /*Q_PROPERTY(QString name READ getName WRITE setName)
     Q_PROPERTY(int index READ getIndex WRITE setIndex)
     Q_PROPERTY(LEDType type READ getType WRITE setType)
-    Q_PROPERTY(bool state READ getState WRITE setState)
+    Q_PROPERTY(bool state READ getState WRITE setState)*/
 
     QString getName() const;
     void setName(const QString& value);

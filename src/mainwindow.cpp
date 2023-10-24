@@ -16,14 +16,13 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     m_pMainLoop(loop),
     ui(new Ui::MainWindow),
     m_pStatus(new QLabel),
-    m_passDialog(),
+    m_passDialog(this),
     m_pSettings(new SettingsDialog),
     m_mainCTL(),
     m_commandFileReader(),
     m_pMainCTLConsole(),
-    //m_pStageCTLConsole(),
-    //m_pStageWidget(new StageWidget(this)),
-    m_config()
+    m_config(),
+    m_engineeringMode(false)
 {
     ui->setupUi(this);
     this->setWindowTitle("ONTOS3 INTERFACE v" + QString(APP_VERSION));
@@ -35,8 +34,8 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(&m_mainCTL.getAxesController(), &AxesController::stageStatusUpdate, this, &MainWindow::stageStatusUpdate);
     connect(&m_mainCTL.getAxesController(), &AxesController::setUIHomeSMStartup, this, &MainWindow::homeStateMachineStartup);
     connect(&m_mainCTL.getAxesController(), &AxesController::setUIHomeSMDone, this, &MainWindow::homeStateMachineDone);
-    connect(&m_mainCTL.getAxesController(), &AxesController::setUIInitSMStartup, this, &MainWindow::initStateMachineStartup);
-    connect(&m_mainCTL.getAxesController(), &AxesController::setUIInitSMDone, this, &MainWindow::initStateMachineDone);
+    connect(&m_mainCTL.getAxesController(), &AxesController::initSMStartup, this, &MainWindow::initStateMachineStartup);
+    connect(&m_mainCTL.getAxesController(), &AxesController::initSMDone, this, &MainWindow::initStateMachineDone);
     connect(&m_mainCTL.getAxesController(), &AxesController::setUITwoSpotSMStartup, this, &MainWindow::twoSpotStateMachineStartup);
     connect(&m_mainCTL.getAxesController(), &AxesController::setUITwoSpotSMDone, this, &MainWindow::twoSpotStateMachineDone);
     connect(&m_mainCTL.getAxesController(), &AxesController::pinsStateChanged, this, &MainWindow::pinsStateChanged);
@@ -51,7 +50,7 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(&m_mainCTL, &PlasmaController::CSM_StatusUpdate, this, &MainWindow::CSM_StatusUpdate);
     connect(&m_mainCTL, &PlasmaController::scanBoxChanged, this, &MainWindow::scanBoxChanged);
     connect(&m_mainCTL.getTuner(), &Tuner::recipePositionChanged, this, &MainWindow::setRecipeMBtuner);
-    //connect(&m_mainCTL, &PlasmaController::plasmaHeadTemp, this, &MainWindow::plasmaHeadTemp);
+    connect(&m_mainCTL.getPlasmaHead(), &PlasmaHead::headTemperatureChanged, this, &MainWindow::headTemperatureChanged);
     // main state machine from main loop
     connect(m_pMainLoop, &MainLoop::runMainStateMachine, this, &MainWindow::runMainStateMachine);
     // ui updates from recipe
@@ -68,25 +67,26 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(&m_mainCTL.getPower(), &PWR::reflectedWattsChanged, this, &MainWindow::reflectedWattsChanged);
     connect(&m_mainCTL.getTuner(), &Tuner::autoTuneChanged, this, &MainWindow::autoTuneChanged);
     connect(&m_mainCTL.getTuner(), &Tuner::actualPositionChanged, this, &MainWindow::MBactualPositionChanged);
-
-
+    connect(&m_passDialog, &PasswordDialog::userEnteredPassword, this, &MainWindow::userEnteredPassword);
+    connect(m_mainCTL.getSerialInterface(), &SerialInterface::serialClosed, this, &MainWindow::closeMainPort);
 
     // Make signal/slot connections here
     connectRecipeButtons(); // TODO: remove these and replace with designer click handlers
 
-    // recipe slots
+    // MFC slots
     connectMFCFlowBars();
 
+    // MFC labels
+    setMFCLabels();
 
     // status bar
     ui->statusBar->addWidget(m_pStatus);
 
     // setup wafer diamter combo box
-    ui->wafer_diameter->addItems(m_mainCTL.getDiameter().getWaferDiameterTextList());
-    ui->wafer_diameter_dup->addItems(m_mainCTL.getDiameter().getWaferDiameterTextList());
+    ui->wafer_diameter->addItems(m_mainCTL.getDiameter().getWaferDiameterTextList());;
 
     // give things a little time to settle before opening the serial port
-    QTimer::singleShot(50, this, SLOT(openMainPort()));
+    QTimer::singleShot(50, this, &MainWindow::openMainPort);
 }
 
 MainWindow::~MainWindow() {
@@ -98,28 +98,35 @@ MainWindow::~MainWindow() {
     delete m_pMainIdleState;
     delete m_pMainPollingState;
     delete m_pMainShutdownState;
-
     delete m_pMainLoop;
 }
-
+// show status message at the bottom on MainWindow
 void MainWindow::showStatusMessage(const QString &message)
 {
     m_pStatus->setText(message);
 }
 
-void MainWindow::about() {
-    QMessageBox::about(this, tr("About Ontos 3 Interface"),
-                       tr("The <b>Ontos3 Interface</b> is the latest"
-                          "modern GUI for Plasma applications."));
-}
-
-void MainWindow::shutDownProgram() {
+void MainWindow::closeEvent(QCloseEvent *event) {
 
     if (m_mainCTL.isOpen()) {
         m_mainCTL.close();
     }
     Logger::clean();
     MainWindow::close();
+}
+
+// style sheets take a bit to load when starting up.
+// the effect is that the style sheets don't take full effect
+// until after the mainwindow is visible.  This creates a little
+// delay to handle that
+void MainWindow::showEvent(QShowEvent *)
+{
+    QTimer::singleShot(50, this, &MainWindow::setInitialUIState);
+}
+
+void MainWindow::setInitialUIState()
+{
+    setUIOperatorMode();
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -135,7 +142,7 @@ void MainWindow::consoleMainCTLSetup()
 
     // Step 3: Set the Qt theme icon for the tab
     QIcon icon = QIcon::fromTheme("utilities-system");
-    //ui->mainTabWidget->setTabIcon(tabIndex, icon);
+    ui->mainTabWidget->setTabIcon(tabIndex, icon);
 
     // Step 4: connect signals/slot
     connect(m_pMainCTLConsole, &Console::getData, this, &MainWindow::writeMainPort);
@@ -144,9 +151,6 @@ void MainWindow::consoleMainCTLSetup()
 
 void MainWindow::connectRecipeButtons()
 {
-    //connect(ui->loadMBButton, &QPushButton::clicked, this, &MainWindow::loadMBRecipeButton_clicked);
-    //connect(ui->AutoTuneCheckBox, &QCheckBox::stateChanged, this, &MainWindow::AutoTuneCheckbox_stateChanged); // MCD: should this be a checkbox?
-
     //MFC buttons
     connectMFCRecipeButton(ui->loadMFC1Button, 1);
     connectMFCRecipeButton(ui->loadMFC2Button, 2);
@@ -154,15 +158,38 @@ void MainWindow::connectRecipeButtons()
     connectMFCRecipeButton(ui->loadMFC4Button, 4);
 }
 
-
-
 void MainWindow::connectMFCFlowBars()
 {
     // This will connect the flowchanged signal along with its passed params
     // to the GUI updateFlowbars function.
-    for (int i = 0; i < m_mainCTL.m_mfcs.size(); ++i) {
-        connect(m_mainCTL.m_mfcs[i], &MFC::recipeFlowChanged, this, &MainWindow::updateRecipeFlow);
-        connect(m_mainCTL.m_mfcs[i], &MFC::actualFlowChanged, this, &MainWindow::actualFlowChanged);
+    for (int i = 0; i < m_mainCTL.getMFCs().size(); ++i) {
+        connect(m_mainCTL.getMFCs()[i], &MFC::recipeFlowChanged, this, &MainWindow::updateRecipeFlow);
+        connect(m_mainCTL.getMFCs()[i], &MFC::actualFlowChanged, this, &MainWindow::actualFlowChanged);
+    }
+}
+
+void MainWindow::setMFCLabels()
+{
+    QString MFC1_label = m_config.getValueForKey(CONFIG_MFC1_LABEL_KEY);
+    QString MFC2_label = m_config.getValueForKey(CONFIG_MFC2_LABEL_KEY);
+    QString MFC3_label = m_config.getValueForKey(CONFIG_MFC3_LABEL_KEY);
+    QString MFC4_label = m_config.getValueForKey(CONFIG_MFC4_LABEL_KEY);
+
+    // MFC1
+    if (MFC1_label != QString()) {
+        ui->gas1_label->setText(MFC1_label);
+    }
+    // MFC2
+    if (MFC2_label != QString()) {
+        ui->gas2_label->setText(MFC2_label);
+    }
+    // MFC3
+    if (MFC3_label != QString()) {
+        ui->gas3_label->setText(MFC3_label);
+    }
+    // MFC4
+    if (MFC4_label != QString()) {
+        ui->gas4_label->setText(MFC4_label);
     }
 }
 
@@ -183,13 +210,9 @@ void MainWindow::RunStartup()
 
 void MainWindow::loadConfigGUI(QStringList value)
 {
-    //config.setMFC1(value[1]);
     ui->gas1_label->setText(value[0]);
-    //config.setMFC2(value[3]);
     ui->gas2_label->setText(value[1]);
-    //config.setMFC3(value[5]);
     ui->gas3_label->setText(value[2]);
-    //config.setMFC4(value[7]);
     ui->gas4_label->setText(value[3]);
 }
 
@@ -203,19 +226,14 @@ void MainWindow::homeStateMachineStartup()
 {
     // put the button in the checked state and change text
     ui->Home_button->setText("STOP");
-    ui->Home_button_dup->setText("STOP");
-    ui->Home_button->setChecked(true);
-    ui->Home_button_dup->setChecked(true);
 
     // disable other stage movement buttons
     ui->init_button->setEnabled(false);
-    ui->init_button_dup->setEnabled(false);
     ui->twospot_button->setEnabled(false);
-    ui->twospot_button_dup->setEnabled(false);
     ui->diameter_button->setEnabled(false);
-    ui->diameter_button_dup->setEnabled(false);
     ui->scan_button->setEnabled(false);
-    ui->scan_button_dup->setEnabled(false);
+    ui->Stagepins_button->setEnabled(false);
+    ui->vac_button->setEnabled(false);
 }
 
 // set ui elements accordingly
@@ -223,150 +241,117 @@ void MainWindow::homeStateMachineDone()
 {
     // put the button in the unchecked state and change text
     ui->Home_button->setText("LOAD");
-    ui->Home_button_dup->setText("LOAD");
     ui->Home_button->setChecked(false);
-    ui->Home_button_dup->setChecked(false);
 
-    // enable other stage movement buttons
-    ui->init_button->setEnabled(true);
-    ui->init_button_dup->setEnabled(true);
-    ui->twospot_button->setEnabled(true);
-    ui->twospot_button_dup->setEnabled(true);
-    ui->diameter_button->setEnabled(true);
-    ui->diameter_button_dup->setEnabled(true);
     ui->scan_button->setEnabled(true);
-    ui->scan_button_dup->setEnabled(true);
+    ui->init_button->setEnabled(true);
+    ui->Stagepins_button->setEnabled(true);
+    ui->vac_button->setEnabled(true);
+
+    if (m_engineeringMode) {
+        // enable other stage movement buttons
+        ui->init_button->setEnabled(true);
+        ui->twospot_button->setEnabled(true);
+        ui->diameter_button->setEnabled(true);
+    }
 }
 
 // set ui elements accordingly
 void MainWindow::initStateMachineStartup()
 {
-    // put the button in the checked state
-    ui->init_button->setChecked(true);
-    ui->init_button_dup->setChecked(true);
+    // disaable the init buttons again
+    ui->init_button->setEnabled(false);
 
     // disable the other state movement buttons
     ui->twospot_button->setEnabled(false);
-    ui->twospot_button_dup->setEnabled(false);
     ui->diameter_button->setEnabled(false);
-    ui->diameter_button_dup->setEnabled(false);
+    ui->wafer_diameter->setEnabled(false);
     ui->scan_button->setEnabled(false);
-    ui->scan_button_dup->setEnabled(false);
     ui->Home_button->setEnabled(false);
-    ui->Home_button_dup->setEnabled(false);
 }
 
 // set ui elements accordingly
 void MainWindow::initStateMachineDone()
 {
-    // put the init buttons in the unchecked state
-    ui->init_button->setChecked(false);
-    ui->init_button_dup->setChecked(false);
-
-    // enable the other stage movement buttons
-    ui->twospot_button->setEnabled(true);
-    ui->twospot_button_dup->setEnabled(true);
-    ui->diameter_button->setEnabled(true);
-    ui->diameter_button_dup->setEnabled(true);
-    ui->Home_button->setEnabled(true);
-    ui->Home_button_dup->setEnabled(true);
+    // enable the init buttons again
+    ui->init_button->setEnabled(true);
     ui->scan_button->setEnabled(true);
-    ui->scan_button_dup->setEnabled(true);
+    ui->Home_button->setEnabled(true);
+    ui->vac_button->setEnabled(true);
+    ui->Stagepins_button->setEnabled(true);
+
+    if (m_engineeringMode) {
+        // enable the buttons that we disabled
+        ui->twospot_button->setEnabled(true);
+        ui->diameter_button->setEnabled(true);
+        ui->wafer_diameter->setEnabled(true);
+        ui->diameter_button->setEnabled(true);
+    }
 }
 
 void MainWindow::twoSpotStateMachineStartup()
 {
     // put the button in the checked state and change text
     ui->twospot_button->setText("STOP");
-    ui->twospot_button_dup->setText("STOP");
-    ui->twospot_button->setChecked(true);
-    ui->twospot_button_dup->setChecked(true);
 
     // disable the other stage movement buttons
     ui->Home_button->setEnabled(false);
-    ui->Home_button_dup->setEnabled(false);
     ui->init_button->setEnabled(false);
-    ui->init_button_dup->setEnabled(false);
     ui->scan_button->setEnabled(false);
-    ui->scan_button_dup->setEnabled(false);
     ui->diameter_button->setEnabled(false);
-    ui->diameter_button_dup->setEnabled(false);
 }
 
 void MainWindow::twoSpotStateMachineDone()
 {
     // put the button in the unchecked state and change text
     ui->twospot_button->setText("TWO SPOT");
-    ui->twospot_button_dup->setText("TWO SPOT");
     ui->twospot_button->setChecked(false);
-    ui->twospot_button_dup->setChecked(false);
 
     scanBoxChanged();
 
-    // enable the buttons that we disabled
-    ui->Home_button->setEnabled(true);
-    ui->Home_button_dup->setEnabled(true);
-    ui->init_button->setEnabled(true);
-    ui->init_button_dup->setEnabled(true);
-    ui->scan_button->setEnabled(true);
-    ui->scan_button_dup->setEnabled(true);
-    ui->diameter_button->setEnabled(true);
-    ui->diameter_button_dup->setEnabled(true);
+    if (m_engineeringMode) {
+        // enable the buttons that we disabled
+        ui->Home_button->setEnabled(true);
+        ui->init_button->setEnabled(true);
+        ui->scan_button->setEnabled(true);
+        ui->diameter_button->setEnabled(true);
+    }
 }
 
 void MainWindow::SSM_Started()
 {
     // put the button in the checked state and change text
     ui->scan_button->setText("STOP");
-    ui->scan_button_dup->setText("STOP");
-    ui->scan_button->setChecked(true);
-    ui->scan_button_dup->setChecked(true);
 
     // disable other stage movement buttons
     ui->init_button->setEnabled(false);
-    ui->init_button_dup->setEnabled(false);
     ui->Home_button->setEnabled(false);
-    ui->Home_button_dup->setEnabled(false);
     ui->twospot_button->setEnabled(false);
-    ui->twospot_button_dup->setEnabled(false);
     ui->diameter_button->setEnabled(false);
-    ui->diameter_button_dup->setEnabled(false);
+    ui->Stagepins_button->setEnabled(false);
+    ui->vac_button->setEnabled(false);
 }
 
 void MainWindow::SSM_Done()
 {
-    // put buttons in unchecked state and change text
-    ui->scan_button->setChecked(false);
-    ui->scan_button_dup->setChecked(false);
     ui->scan_button->setText("SCAN");
-    ui->scan_button_dup->setText("SCAN");
+    ui->scan_button->setChecked(false);
 
     // update status
     QString status = "Scanning Completed";
     ui->axisstatus->setText(status);
     ui->axisstatus_2->setText("");
-    ui->axisstatus_dup->setText(status);
-    ui->axisstatus_2_dup->setText("");
 
-    // enable other stage movement buttons
+    // after init enable
     ui->init_button->setEnabled(true);
-    ui->init_button_dup->setEnabled(true);
     ui->Home_button->setEnabled(true);
-    ui->Home_button_dup->setEnabled(true);
-    ui->twospot_button->setEnabled(true);
-    ui->twospot_button_dup->setEnabled(true);
-    ui->diameter_button->setEnabled(true);
-    ui->diameter_button_dup->setEnabled(true);
+    ui->scan_button->setEnabled(true);
+    ui->vac_button->setEnabled(true);
+    ui->Stagepins_button->setEnabled(true);
 }
 
 void MainWindow::scanBoxChanged()
 {   
-    // 3 axis tab
-    ui->xmin_controls_dup->setText(m_mainCTL.getRecipe()->getXminPHQStr());
-    ui->xmax_controls_dup->setText(m_mainCTL.getRecipe()->getXmaxPHQStr());
-    ui->ymin_controls_dup->setText(m_mainCTL.getRecipe()->getYminPHQStr());
-    ui->ymax_controls_dup->setText(m_mainCTL.getRecipe()->getYmaxPHQStr());
-
     // dashboard tab
     ui->x1_recipe->setText(m_mainCTL.getRecipe()->getXminPHQStr());
     ui->x2_recipe->setText(m_mainCTL.getRecipe()->getXmaxPHQStr());
@@ -385,28 +370,35 @@ void MainWindow::closeMainPort()
         m_mainCTL.close();
     }
 
-    // Disable Console
-    m_pMainCTLConsole->setEnabled(false);
-
     // Update Status bar
-    showStatusMessage(tr("Disconnected"));
+    showStatusMessage("Disconnected");
+
+    // enable the connect menu option
+    ui->actionConnect->setEnabled(true);
+    // disable the disconnect menu option
+    ui->actionDisconnect->setEnabled(false);
 }
 
 void MainWindow::openMainPort()
 {
-    const SettingsDialog::Settings p = m_pSettings->settings();
+    QString configPort = m_config.getValueForKey(CONFIG_COM_PORT_KEY);
+
+    // use value from config file if it exists
+    if (configPort != "")
+        m_pSettings->setName(configPort);
+
+    SettingsDialog::Settings p = m_pSettings->settings();
 
     if (m_mainCTL.open(*m_pSettings)) {
 
-        // Terminal Tab setup for console commands
-//        consoleMainCTLSetup();
-//        m_pMainCTLConsole->setEnabled(true);
-//        m_pMainCTLConsole->setLocalEchoEnabled(p.localEchoEnabled);
+        // disable the connect menu option
+        ui->actionConnect->setEnabled(false);
+        // enable the disconnect menu option
+        ui->actionDisconnect->setEnabled(true);
 
         m_mainCTL.getAxesController().resetAxes();
         m_mainCTL.resetCTL();
         CTLResetTimeOut = 2500ms / m_pMainLoop->getTimerInterval();
-        // (DEBUG_MODE) ? MainStateMachine.setState(IDLE) : MainStateMachine.setState(STARTUP); // TODO: Needs implementing
 
         // Give status on connect
         showStatusMessage(tr("Connected to %1 : %2, %3, %4, %5, %6")
@@ -417,9 +409,9 @@ void MainWindow::openMainPort()
         emit MSM_TransitionStartup();
 
     } else {
-        QMessageBox::critical(this, tr("Error"), m_mainCTL.getPortErrorString());
+        QMessageBox::critical(this, "Error:  ", m_mainCTL.getPortErrorString());
 
-        showStatusMessage(tr("Open error"));
+        showStatusMessage("Open error:  " + m_mainCTL.getPortErrorString());
     }
 }
 
@@ -483,43 +475,6 @@ void MainWindow::setupMainStateMachine()
     m_mainStateMachine.start();
 }
 
-
-
-void MainWindow::UpdateStatus()
-{
-    /*// TODO: need to implement
-     * didStatusBitsChange();
-    StatusBitsWas = StatusBits;
-
-    (StatusBits & 0x0100) > 0 ? ui->actionGAS_1->setChecked(true) : ui->actionGAS_1->setChecked(false);
-    (StatusBits & 0x0200) > 0 ? ui->actionGAS_2->setChecked(true) : ui->actionGAS_2->setChecked(false);
-    (StatusBits & 0x0400) > 0 ? ui->actionGAS_3->setChecked(true) : ui->actionGAS_3->setChecked(false);
-    (StatusBits & 0x0800) > 0 ? ui->actionGAS_4->setChecked(true) : ui->actionGAS_4->setChecked(false);
-
-    (StatusBits & 0x1000) > 0 ? ui->actionV5->setChecked(true) : ui->actionV5->setChecked(false);
-    (StatusBits & 0x2000) > 0 ? ui->actionV6->setChecked(true) : ui->actionV6->setChecked(false);
-    (StatusBits & 0x4000) > 0 ? ui->actionV7->setChecked(true) : ui->actionV7->setChecked(false);
-    (StatusBits & 0x8000) > 0 ? ui->actionRF_ENABLED->setChecked(true) : ui->actionRF_ENABLED->setChecked(false);
-
-    (StatusBits & 0x0001) > 0 ? ui->actionPLASMA_ON->setChecked(true) : ui->actionPLASMA_ON->setChecked(false);
-    (StatusBits & 0x0002) > 0 ? ui->actionTUNING->setChecked(true) : ui->actionTUNING->setChecked(false);
-    (StatusBits & 0x0004) > 0 ? ui->actionAUTO_MODE->setChecked(true) : ui->actionAUTO_MODE->setChecked(false);
-    (StatusBits & 0x0008) > 0 ? ui->actionEXECUTE_RECIPE->setChecked(true) : ui->actionEXECUTE_RECIPE->setChecked(false);
-
-    (StatusBits & 0x0010) > 0 ? ui->actionESTOP_ON->setChecked(true) : ui->actionESTOP_ON->setChecked(false);
-    (StatusBits & 0x0020) > 0 ? ui->actionDO_CMD->setChecked(true) : ui->actionDO_CMD->setChecked(false);
-    (StatusBits & 0x0040) > 0 ? ui->actionHE_SIG->setChecked(true) : ui->actionHE_SIG->setChecked(false);
-    (StatusBits & 0x0080) > 0 ? ui->actionPROCESS_ABORT->setChecked(true) : ui->actionPROCESS_ABORT->setChecked(false);
-
-    if (ui->actionEXECUTE_RECIPE->isChecked()) {
-        RunRecipeOn = true;
-    }
-    else {
-        RunRecipeOn= false;
-    }*/
-
-}
-
 void MainWindow::runMainStateMachine()
 {
     if (m_mainStateMachine.configuration().contains(m_pMainStartupState)) { // in Startup state
@@ -531,7 +486,6 @@ void MainWindow::runMainStateMachine()
             RunStartup();
             // transition to polling state
             emit MSM_TransitionPolling();
-            UpdateStatus();
         }
     }
     else if (m_mainStateMachine.configuration().contains(m_pMainPollingState)) { // in Polling state
@@ -541,8 +495,7 @@ void MainWindow::runMainStateMachine()
         if (SM_PollCounter >= SM_POLL_PERIOD) {
             SM_PollCounter = 0;
             RunPolling();
-            UpdateStatus();
-            // setLightTower(); TODO: Need to implement
+            m_mainCTL.setLightTower();
             // HandleDoorAbort() TODO: Need to implement // run the Door Abort state machine
             m_mainCTL.getAxesController().RunInitAxesSM();
             m_mainCTL.getAxesController().RunTwoSpotSM();
@@ -561,42 +514,6 @@ void MainWindow::runMainStateMachine()
 
 void MainWindow::RunPolling()
 {
-    /*
-    getCTLStatus(); // TODO: need to implement
-    //didCTLStatusChange(); //is this for logging?
-    splitRCV(); // TODO: need to implement
-    //! [0]
-    setStatusBitsFromPoll();// TODO: need to implement*/
-    //UpdateStatus();// TODO: need to implement
-    //! [1]
-    /*setTunerPosition();// TODO: need to implement
-    displayTunerPosition();// TODO: need to implement
-    //! [2]
-    setRFPower();// TODO: need to implement
-    displayRFValue();// TODO: need to implement
-    //! [3]
-    setReflectedPower();// TODO: need to implement
-    displayReflectedPower();// TODO: need to implement
-    //! [4]
-    //! setExecRecipe()
-    //! [5]
-    setMFC1();// TODO: need to implement
-    MFC1ActualFlow();// TODO: need to implement
-    //! [6]
-    setMFC2();// TODO: need to implement
-    MFC2ActualFlow();// TODO: need to implement
-    //! [7]
-    setMFC3();// TODO: need to implement
-    MFC3ActualFlow();// TODO: need to implement
-    //! [8]
-    setMFC4();// TODO: need to implement
-    MFC4ActualFlow();// TODO: need to implement
-    //! [9]
-    setTempValue();// TODO: need to implement
-    getHeadTemp();// TODO: need to implement
-    //! [10]
-    //UpdateHandshakeStatus();*/
-    //! [11]
     m_mainCTL.getCTLStatusCommand();
     m_mainCTL.getAxesController().getAxisStatus();
     AxisStatusToUI();
@@ -615,28 +532,22 @@ void MainWindow::CSM_StatusUpdate(QString status, QString next)
 {
     ui->axisstatus->setText(status);
     ui->axisstatus_2->setText(next);
-    ui->axisstatus_dup->setText(status);
-    ui->axisstatus_2_dup->setText(next);
 }
 
 void MainWindow::recipeExecutionStateChanged(bool state)
 {
     if (state == true) {
         ui->plsmaBtn->setText("PLASMA OFF");
-        ui->plsmaBtn_dup->setText("PLASMA OFF");
     }
     else {
         ui->plsmaBtn->setText("START PLASMA");
-        ui->plsmaBtn_dup->setText("START PLASMA");
     }
 }
 
 void MainWindow::SSM_StatusUpdate(QString status, QString next)
 {
     ui->axisstatus->setText(status);
-    ui->axisstatus_dup->setText(next);
-    ui->axisstatus_2->setText(status);
-    ui->axisstatus_2_dup->setText(next);
+    ui->axisstatus_2->setText(next);
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -645,11 +556,9 @@ void MainWindow::SSM_StatusUpdate(QString status, QString next)
 void MainWindow::pinsStateChanged(bool state)
 {
     if (state) {
-        ui->Stagepins_button_dup->setText("PINS OFF");
         ui->Stagepins_button->setText("PINS OFF");
     }
     else {
-        ui->Stagepins_button_dup->setText("PINS");
         ui->Stagepins_button->setText("PINS");
     }
 }
@@ -657,36 +566,29 @@ void MainWindow::pinsStateChanged(bool state)
 void MainWindow::joystickStateChanged(bool state)
 {
     if (state) {
-        ui->Joystick_button_dup->setText("JOY OFF");
         ui->Joystick_button->setText("JOY OFF");
     }
     else {
-        ui->Joystick_button_dup->setText("JOY");
         ui->Joystick_button->setText("JOY");
     }
 }
 void MainWindow::n2StateChanged(bool state)
 {
     if (state) {
-        ui->n2_purge_button_dup->setText("N2 OFF");
         ui->n2_purge_button->setText("N2 OFF");
     }
     else {
-        ui->n2_purge_button_dup->setText("N2 PURGE");
         ui->n2_purge_button->setText("N2 PURGE");
     }
 }
 void MainWindow::vacStateChanged(bool state)
 {
     if (state) {
-        ui->vac_button_dup->setText("VAC OFF");
         ui->vac_button->setText("VAC OFF");
     }
     else {
-        ui->vac_button_dup->setText("VAC");
         ui->vac_button->setText("VAC");
     }
-
 }
 
 void MainWindow::stageStatusUpdate(QString statusNow, QString statusNext)
@@ -694,43 +596,36 @@ void MainWindow::stageStatusUpdate(QString statusNow, QString statusNext)
     // dashboard
     ui->axisstatus->setText(statusNow);
     ui->axisstatus_2->setText(statusNext);
-
-    // 3 axis tab
-    ui->axisstatus_dup->setText(statusNow);
-    ui->axisstatus_2_dup->setText(statusNext);
 }
 
+// Mike: this works fine but should be refactored at some point
+// This should probably come from a signal emitted from AxesController
+// instead of polling.  Look at AxesController::checkAndLogAxesStatusChange()
 void MainWindow::AxisStatusToUI()
 {
     // XAxis
     if (m_mainCTL.getAxesController().getXAxisState() >= AXIS_IDLE) {
         double Xpos = m_mainCTL.getAxesController().getXPosition();
         ui->X_relative_PH->setText(QString::number(m_mainCTL.getAxesController().TranslateCoordXBase2PH(Xpos)));
-        ui->X_relative_PH_dup->setText(QString::number(m_mainCTL.getAxesController().TranslateCoordXBase2PH(Xpos)));
     }
     else {
         ui->X_relative_PH->setText("???");
-        ui->X_relative_PH_dup->setText("???");
     }
     // YAxis
     if (m_mainCTL.getAxesController().getYAxisState() >= AXIS_IDLE) {
         double Ypos = m_mainCTL.getAxesController().getYPosition();
         ui->Y_relative_PH->setText(QString::number(m_mainCTL.getAxesController().TranslateCoordYBase2PH(Ypos)));
-        ui->Y_relative_PH_dup->setText(QString::number(m_mainCTL.getAxesController().TranslateCoordYBase2PH(Ypos)));
     }
     else {
         ui->Y_relative_PH->setText("???");
-        ui->Y_relative_PH_dup->setText("???");
     }
     // ZAxis
     if (m_mainCTL.getAxesController().getZAxisState() >= AXIS_IDLE) {
         double Zpos = m_mainCTL.getAxesController().getZPosition();
         ui->Z_relative_PH->setText(QString::number(m_mainCTL.getAxesController().TranslateCoordZBase2PH(Zpos)));
-        ui->Z_relative_PH_dup->setText(QString::number(m_mainCTL.getAxesController().TranslateCoordZBase2PH(Zpos)));
     }
     else {
         ui->Z_relative_PH->setText("???");
-        ui->Z_relative_PH_dup->setText("???");
     }
 }
 
@@ -751,7 +646,7 @@ void MainWindow::openRecipeWindowMFC()
 
     if (ok && !recipeStr.isEmpty()) {
         // User entered a string and clicked OK
-        if (!m_mainCTL.m_mfcs.isEmpty()) {
+        if (!m_mainCTL.getMFCs().isEmpty()) {
             QPushButton* button = qobject_cast<QPushButton*>(sender());
             if (button) {
 
@@ -898,14 +793,12 @@ void MainWindow::updateRecipeFlow(const int mfcNumber, const double recipeFlow)
        int percentage = 0;
        if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
        ui->gas1_sliderBar->setValue(int(percentage));
-       ui->gas1_sliderbar_dup->setValue(int(percentage));
 
        // set dashboard and plasma tab recipe edit box
        ui->mfc1_recipe->setText(QString::number(recipeFlow));
 
        // set the dashboard and plasma tab edit box below the progress bar
        ui->gas1_recipe_SLPM->setText(QString::number(percentage));
-       ui->gas1_recipe_SLPM_dup->setText(QString::number(percentage));
     }
     else if (mfcNumber == 2) {
        // set vertical progress bar
@@ -913,14 +806,12 @@ void MainWindow::updateRecipeFlow(const int mfcNumber, const double recipeFlow)
        int percentage = 0;
        if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
        ui->gas2_sliderBar->setValue(int(percentage));
-       ui->gas2_sliderbar_dup->setValue(int(percentage));
 
        // set dashboard and plasma tab recipe edit box
        ui->mfc2_recipe->setText(QString::number(recipeFlow));
 
        // set the dashboard and plasma tab edit box below the progress bar
        ui->gas2_recipe_SLPM->setText(QString::number(percentage));
-       ui->gas2_recipe_SLPM_dup->setText(QString::number(percentage));
     }
     else if (mfcNumber == 3) {
        // set vertical progress bar
@@ -928,14 +819,12 @@ void MainWindow::updateRecipeFlow(const int mfcNumber, const double recipeFlow)
        int percentage = 0;
        if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
        ui->gas3_sliderBar->setValue(int(percentage));
-       ui->gas3_sliderbar_dup->setValue(int(percentage));
 
        // set dashboard and plasma tab recipe edit box
        ui->mfc3_recipe->setText(QString::number(recipeFlow));
 
        // set the dashboard and plasma tab edit box below the progress bar
        ui->gas3_recipe_SLPM->setText(QString::number(percentage));
-       ui->gas3_recipe_SLPM_dup->setText(QString::number(percentage));
     }
     else if (mfcNumber == 4) {
        // set vertical progress bar
@@ -943,14 +832,12 @@ void MainWindow::updateRecipeFlow(const int mfcNumber, const double recipeFlow)
        int percentage = 0;
        if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
        ui->gas4_sliderBar->setValue(int(percentage));
-       ui->gas4_sliderbar_dup->setValue(int(percentage));
 
        // set dashboard and plasma tab recipe edit box
        ui->mfc4_recipe->setText(QString::number(recipeFlow));
 
        // set the dashboard and plasma tab edit box below the progress bar
        ui->gas4_recipe_SLPM->setText(QString::number(percentage));
-       ui->gas4_recipe_SLPM_dup->setText(QString::number(percentage));
     }
 }
 
@@ -972,8 +859,6 @@ void MainWindow::thicknessChanged()
 {
     // update dashboard
     ui->thickness_recipe->setText(m_mainCTL.getRecipe()->getThicknessQStr());
-    // update 3 axis tab
-    ui->input_thickness_dup->setText(m_mainCTL.getRecipe()->getThicknessQStr());
 }
 
 // update recipe gap
@@ -981,8 +866,6 @@ void MainWindow::gapChanged()
 {
     // update dashboard
     ui->gap_recipe->setText(m_mainCTL.getRecipe()->getGapQStr());
-    // update 3 axis tab
-    ui->input_gap_dup->setText(m_mainCTL.getRecipe()->getGapQStr());
 }
 
 // update recipe overlap
@@ -990,8 +873,6 @@ void MainWindow::overlapChanged()
 {
     // update dashboard
     ui->overlap_recipe->setText(m_mainCTL.getRecipe()->getOverlapQStr());
-    // update 3 axis tab
-    ui->input_overlap_dup->setText(m_mainCTL.getRecipe()->getOverlapQStr());
 }
 
 // update recipe speed
@@ -999,8 +880,6 @@ void MainWindow::speedChanged()
 {
     // update dashboard
     ui->speed_recipe->setText(m_mainCTL.getRecipe()->getSpeedQStr());
-    // update 3 axis tab
-    ui->input_speed_dup->setText(m_mainCTL.getRecipe()->getSpeedQStr());
 }
 
 // update recipe auto scan
@@ -1015,10 +894,6 @@ void MainWindow::xLimitsChanged()
     // update dashboard
     ui->x1_recipe->setText(m_mainCTL.getRecipe()->getXminPHQStr());
     ui->x2_recipe->setText(m_mainCTL.getRecipe()->getXmaxPHQStr());
-
-    // update 3 axis
-    ui->xmin_controls_dup->setText(m_mainCTL.getRecipe()->getXminPHQStr());
-    ui->xmax_controls_dup->setText(m_mainCTL.getRecipe()->getXmaxPHQStr());
 }
 
 // update recipe y limits
@@ -1027,10 +902,6 @@ void MainWindow::yLimitsChanged()
     // update dashboard
     ui->y1_recipe->setText(m_mainCTL.getRecipe()->getYminPHQStr());
     ui->y2_recipe->setText(m_mainCTL.getRecipe()->getYmaxPHQStr());
-
-    // update 3 axis
-    ui->ymin_controls_dup->setText(m_mainCTL.getRecipe()->getYminPHQStr());
-    ui->ymax_controls_dup->setText(m_mainCTL.getRecipe()->getYmaxPHQStr());
 }
 
 // update recipe cycles
@@ -1038,9 +909,6 @@ void MainWindow::cyclesChanged()
 {
     // update dashboard
     ui->cycles_recipe->setText(m_mainCTL.getRecipe()->getCyclesQStr());
-
-    // update 3 axis
-    ui->input_cycles_dup->setText(m_mainCTL.getRecipe()->getCyclesQStr());
 }
 
 
@@ -1054,9 +922,6 @@ void MainWindow::forwardWattsChanged()
     // dashboard
     ui->RF_Actual_LCD->display(watts);
     ui->RF_bar->setValue(watts);
-    // plasma tab
-    ui->RF_Actual_LCD_dup->display(watts);
-    ui->RF_bar_dup->setValue(watts);
 }
 
 void MainWindow::reflectedWattsChanged()
@@ -1066,9 +931,6 @@ void MainWindow::reflectedWattsChanged()
     // dashboard
     ui->RefRF_Actual_LCD->display(watts);
     ui->RefRF_bar->setValue(watts);
-    // plasma tab
-    ui->RefRF_Actual_LCD_dup->display(watts);
-    ui->RefRF_bar_dup->setValue(watts);
 }
 
 void MainWindow::MBactualPositionChanged(const double actualPosition)
@@ -1076,9 +938,6 @@ void MainWindow::MBactualPositionChanged(const double actualPosition)
     // dashboard
     ui->MB_Actual_LCD->display(actualPosition);
     ui->MB_Pos_Bar->setValue(int(actualPosition));
-    // plasma tab
-    ui->MB_Actual_LCD_dup->display(actualPosition);
-    ui->MB_Pos_Bar_dup->setValue(int(actualPosition));
 }
 
 void MainWindow::headTemperatureChanged()
@@ -1088,9 +947,6 @@ void MainWindow::headTemperatureChanged()
     // dashboard
     ui->temp_LCD->display(temp);
     ui->Temp_bar->setValue(int(temp));
-    // plasma tab
-    ui->temp_LCD_dup->display(temp);
-    ui->Temp_bar_dup->setValue(int(temp));
 }
 
 void MainWindow::actualFlowChanged(const int mfcNumber, const double actualFlow)
@@ -1102,11 +958,9 @@ void MainWindow::actualFlowChanged(const int mfcNumber, const double actualFlow)
        int percentage = 0;
        if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
        ui->gas1ProgressBar->setValue(int(percentage));
-       ui->gas1_progressbar_dup->setValue(int(percentage));
 
        // set the dashboard and plasma tab edit box below the progress bar
        ui->gas1_actual_SLPM->setText(QString::number(percentage));
-       ui->gas1_actual_SLPM_dup->setText(QString::number(percentage));
     }
     else if (mfcNumber == 2) {
        // set vertical progress bar
@@ -1114,11 +968,9 @@ void MainWindow::actualFlowChanged(const int mfcNumber, const double actualFlow)
        int percentage = 0;
        if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
        ui->gas2ProgressBar->setValue(int(percentage));
-       ui->gas2_progressbar_dup->setValue(int(percentage));
 
        // set the dashboard and plasma tab edit box below the progress bar
        ui->gas2_actual_SLPM->setText(QString::number(percentage));
-       ui->gas2_actual_SLPM_dup->setText(QString::number(percentage));
     }
     else if (mfcNumber == 3) {
        // set vertical progress bar
@@ -1126,11 +978,9 @@ void MainWindow::actualFlowChanged(const int mfcNumber, const double actualFlow)
        int percentage = 0;
        if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
        ui->gas3ProgressBar->setValue(int(percentage));
-       ui->gas3_progressbar_dup->setValue(int(percentage));
 
        // set the dashboard and plasma tab edit box below the progress bar
        ui->gas3_actual_SLPM->setText(QString::number(percentage));
-       ui->gas3_actual_SLPM_dup->setText(QString::number(percentage));
     }
     else if (mfcNumber == 4) {
        // set vertical progress bar
@@ -1138,11 +988,24 @@ void MainWindow::actualFlowChanged(const int mfcNumber, const double actualFlow)
        int percentage = 0;
        if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
        ui->gas4ProgressBar->setValue(int(percentage));
-       ui->gas4_progressbar_dup->setValue(int(percentage));
 
        // set the dashboard and plasma tab edit box below the progress bar
        ui->gas4_actual_SLPM->setText(QString::number(percentage));
-       ui->gas4_actual_SLPM_dup->setText(QString::number(percentage));
+    }
+}
+
+void MainWindow::userEnteredPassword()
+{
+    QString enteredPassword = m_passDialog.getUserEnteredPassword();
+    QString password = m_config.getValueForKey(CONFIG_PASSWORD_KEY);
+
+    if (enteredPassword == password) {
+       // good password, update the UI
+       setUIEngineerMode();
+       m_engineeringMode = true;
+    }
+    else {
+        QMessageBox::critical(this, "Error", "Incorrect password");
     }
 }
 
@@ -1269,56 +1132,29 @@ void MainWindow::openCascadeRecipe()
 void MainWindow::on_init_button_clicked()
 {
     m_mainCTL.getAxesController().StartInit();
-}
 
-// init button on 3 axis tab
-void MainWindow::on_init_button_dup_clicked()
-{
-    m_mainCTL.getAxesController().StartInit();
+    // note buttons get enabled and disabled in the start/stop handler
 }
 
 // home button on dash
 void MainWindow::on_Home_button_toggled(bool checked)
 {
-    on_Home_button_dup_toggled(checked);
-}
-
-// home button on 3 axis tab
-void MainWindow::on_Home_button_dup_toggled(bool checked)
-{
     if (checked) {
-        m_mainCTL.getAxesController().StartHome();
+       m_mainCTL.getAxesController().StartHome();
     }
     else {
-        m_mainCTL.getAxesController().StopHome();
+       m_mainCTL.getAxesController().StopHome();
     }
 }
 
 // two spot on dashboard
 void MainWindow::on_twospot_button_toggled(bool checked)
 {
-    on_twospot_button_dup_toggled(checked);
-}
-
-// two spot on 3 axis tab
-void MainWindow::on_twospot_button_dup_toggled(bool checked)
-{
     if (checked) {
         m_mainCTL.getAxesController().StartTwoSpot();
     }
     else {
         m_mainCTL.getAxesController().StopTwoSpot();
-    }
-}
-
-// scan button on 3 axis tab
-void MainWindow::on_scan_button_dup_toggled(bool checked)
-{
-    if (checked) {
-        m_mainCTL.StartScan();
-    }
-    else {
-        m_mainCTL.StopScan();
     }
 }
 
@@ -1341,29 +1177,6 @@ void MainWindow::on_Stagepins_button_toggled(bool checked)
     }
     else {
         m_mainCTL.getAxesController().togglePinsOff();
-    }
-}
-
-// pins button on 3 axis tab
-void MainWindow::on_Stagepins_button_dup_toggled(bool checked)
-{
-    if (checked) {
-        m_mainCTL.getAxesController().togglePinsOn();
-    }
-    else {
-        m_mainCTL.getAxesController().togglePinsOff();
-    }
-}
-
-// n2 purge button on 3 axis tab
-void MainWindow::on_n2_purge_button_dup_toggled(bool checked)
-{
-    if (checked) {
-        m_mainCTL.getAxesController().toggleN2PurgeOn();
-    }
-    else {
-        m_mainCTL.getAxesController().toggleN2PurgeOff();
-
     }
 }
 
@@ -1390,16 +1203,6 @@ void MainWindow::on_Joystick_button_toggled(bool checked)
     }
 }
 
-// joystick button on 3 axis
-void MainWindow::on_Joystick_button_dup_toggled(bool checked)
-{
-    if (checked) {
-        m_mainCTL.getAxesController().toggleJoystickOn();
-    }
-    else {
-        m_mainCTL.getAxesController().toggleJoystickOff();
-    }
-}
 
 // diameter button on dashboard
 void MainWindow::on_diameter_button_clicked()
@@ -1411,47 +1214,18 @@ void MainWindow::on_diameter_button_clicked()
     m_mainCTL.getDiameter().setCurrentWaferDiameter(m_mainCTL.getDiameter().getWaferDiameterByIndex(comboboxCurrentIndex));
 
     // update the combox box on the 3axis tab
-    ui->wafer_diameter_dup->setCurrentIndex(comboboxCurrentIndex);
+    ui->wafer_diameter->setCurrentIndex(comboboxCurrentIndex);
 
     // reset the scan box
     m_mainCTL.runDiameter();
 }
 
-// diameter button on 3 axis tab
-void MainWindow::on_diameter_button_dup_clicked()
-{
-    // reset the scan box
-    m_mainCTL.runDiameter();
-}
 
 // wafer combo box on the dashboard
 void MainWindow::on_wafer_diameter_currentIndexChanged(int index)
 {
     // get the index of the current displayed diameter
-    int comboboxCurrentIndex = ui->wafer_diameter->currentIndex();
-
-    // get the current diameter
-    int currentDiameter = m_mainCTL.getDiameter().getCurrentWaferDiameterSelection();
-
-    // proposed diameter
-    int proposedDiameter = m_mainCTL.getDiameter().getWaferDiameterByIndex(comboboxCurrentIndex);
-
-    if (currentDiameter != proposedDiameter) {
-
-        // set our diameter object
-        m_mainCTL.getDiameter().setCurrentWaferDiameter(m_mainCTL.getDiameter().getWaferDiameterByIndex(comboboxCurrentIndex));
-
-        // update the combo box on the dashboard tab
-        ui->wafer_diameter_dup->setCurrentIndex(comboboxCurrentIndex);
-    }
-}
-
-
-// wafer combo box on the 3 axis page
-void MainWindow::on_wafer_diameter_dup_currentIndexChanged(int index)
-{
-    // get the index of the current displayed diameter
-    int comboboxCurrentIndex = ui->wafer_diameter_dup->currentIndex();
+    int comboboxCurrentIndex = index;
 
     // get the current diameter
     int currentDiameter = m_mainCTL.getDiameter().getCurrentWaferDiameterSelection();
@@ -1470,17 +1244,6 @@ void MainWindow::on_wafer_diameter_dup_currentIndexChanged(int index)
 }
 
 
-// vacuum button on 3 axis tab
-void MainWindow::on_vac_button_dup_toggled(bool checked)
-{
-    if (checked) {
-        m_mainCTL.getAxesController().toggleVacOn();
-    }
-    else {
-        m_mainCTL.getAxesController().toggleVacOff();
-    }
-}
-
 // vacuum button on dashboard
 void MainWindow::on_vac_button_toggled(bool checked)
 {
@@ -1495,17 +1258,16 @@ void MainWindow::on_vac_button_toggled(bool checked)
 // plasma button on dashboard
 void MainWindow::on_plsmaBtn_toggled(bool checked)
 {
-    if (checked) {
-        m_mainCTL.StopScan();
-    }
-    else {
-        m_mainCTL.StartScan();
-    }
-}
+//    If b_HasCollision = True And b_autoScanActive And Not CTL.isPlasmaActive() Then
+//                            b_PlannedAutoStart = True 'this will make sure we dont accidently start plasma when just clicking RUN SCAN button
+//            If SMScan.State = SCSM_IDLE Then
+//                                                                                                                                SMScan.ExternalNewState = SCSM_START_UP
+//              SMScan.b_ExternalStateChange = True  'Start Collision test while auto scan is ON
+//            End If
+//            Else
+//                b_ToggleRunRecipe = True
+//            End If
 
-// plasma button on plasma tab
-void MainWindow::on_plsmaBtn_dup_toggled(bool checked)
-{
     if (checked) {
         m_mainCTL.StopScan();
     }
@@ -1548,7 +1310,7 @@ void MainWindow::on_load_overlap_clicked()
 void MainWindow::on_loadSpeedButton_clicked()
 {
     bool ok;
-    double doubVal = QInputDialog::getDouble(this, "Speed: ","mm: " + m_mainCTL.getAxesController().getXMaxSpeedQStr(), 0, 0,
+    double doubVal = QInputDialog::getDouble(this, "Speed: ","mm: " + m_mainCTL.getAxesController().getXAxisMaxSpeedQStr(), 0, 0,
                                              m_mainCTL.getAxesController().XMaxSpeed(), 0, &ok,Qt::WindowFlags(), 1);
     if (ok) {
         m_mainCTL.getRecipe()->setSpeed(doubVal);
@@ -1664,9 +1426,7 @@ void MainWindow::on_x1_set_clicked()
         // Handle accordingly
         return;
     }
-
 }
-
 
 void MainWindow::on_x2_set_clicked()
 {
@@ -1685,7 +1445,7 @@ void MainWindow::on_x2_set_clicked()
 }
 
 
-void MainWindow::on_Y1_set_clicked()
+void MainWindow::on_y1_set_clicked()
 {
     bool ok;
     QString input = QInputDialog::getText(nullptr, "Y min", "Please enter Y min", QLineEdit::Normal, "", &ok);
@@ -1702,7 +1462,7 @@ void MainWindow::on_Y1_set_clicked()
 }
 
 
-void MainWindow::on_Y2_set_clicked()
+void MainWindow::on_y2_set_clicked()
 {
     bool ok;
     QString input = QInputDialog::getText(nullptr, "Y max", "Please enter Y max", QLineEdit::Normal, "", &ok);
@@ -1719,82 +1479,150 @@ void MainWindow::on_Y2_set_clicked()
 
 }
 
-
-void MainWindow::on_gas1_setpoint_button_dup_clicked()
-{
-    bool ok;
-    QString input = QInputDialog::getText(nullptr, "Gas setpoint", "Please enter a setpoint", QLineEdit::Normal, "", &ok);
-
-    if (ok && !input.isEmpty()) {
-        double gas1 = input.toDouble();
-        m_mainCTL.getMFCs()[0]->setRecipeFlow(gas1);
-    }
-    else {
-        // User either clicked Cancel or did not enter any string
-        // Handle accordingly
-        return;
-    }
-}
-
-
-void MainWindow::on_gas2_setpoint_button_dup_clicked()
-{
-    bool ok;
-    QString input = QInputDialog::getText(nullptr, "Gas setpoint", "Please enter a setpoint", QLineEdit::Normal, "", &ok);
-
-    if (ok && !input.isEmpty()) {
-        double gas2 = input.toDouble();
-        m_mainCTL.getMFCs()[1]->setRecipeFlow(gas2);
-    }
-    else {
-        // User either clicked Cancel or did not enter any string
-        // Handle accordingly
-        return;
-    }
-}
-
-
-void MainWindow::on_gas3_setpoint_button_dup_clicked()
-{
-    bool ok;
-    QString input = QInputDialog::getText(nullptr, "Gas setpoint", "Please enter a setpoint", QLineEdit::Normal, "", &ok);
-
-    if (ok && !input.isEmpty()) {
-        double gas2 = input.toDouble();
-        m_mainCTL.getMFCs()[2]->setRecipeFlow(gas2);
-    }
-    else {
-        // User either clicked Cancel or did not enter any string
-        // Handle accordingly
-        return;
-    }
-}
-
-
-void MainWindow::on_gas4_setpoint_button_dup_clicked()
-{
-    bool ok;
-    QString input = QInputDialog::getText(nullptr, "Gas setpoint", "Please enter a setpoint", QLineEdit::Normal, "", &ok);
-
-    if (ok && !input.isEmpty()) {
-        double gas4 = input.toDouble();
-        m_mainCTL.getMFCs()[3]->setRecipeFlow(gas4);
-    }
-    else {
-        // User either clicked Cancel or did not enter any string
-        // Handle accordingly
-        return;
-    }
-}
-
+// Engineer choice from service menu
 void MainWindow::on_actionEngineer_Mode_triggered()
 {
     m_passDialog.show();
 }
 
-
+// Operator choice from service menu
 void MainWindow::on_actionOperator_Mode_triggered()
 {
-
+    m_engineeringMode = false;
+    setUIOperatorMode();
 }
+
+void MainWindow::setUIEngineerMode()
+{
+    QString sTitle = this->windowTitle();
+    sTitle += "      ENGINEER MODE";
+    this->setWindowTitle(sTitle);
+
+    // enable recipe setpoint buttons
+    ui->loadMFC1Button->setEnabled(true);
+    ui->loadMFC2Button->setEnabled(true);
+    ui->loadMFC3Button->setEnabled(true);
+    ui->loadMFC4Button->setEnabled(true);
+    ui->load_thick->setEnabled(true);
+    ui->load_gap->setEnabled(true);
+    ui->load_autoscan->setEnabled(true);
+    ui->load_cycles->setEnabled(true);
+    ui->load_overlap->setEnabled(true);
+    ui->x1_set->setEnabled(true);
+    ui->x2_set->setEnabled(true);
+    ui->y1_set->setEnabled(true);
+    ui->y2_set->setEnabled(true);
+    ui->loadRFButton->setEnabled(true);
+    ui->loadMBButton->setEnabled(true);
+    ui->loadAutoTuneButton->setEnabled(true);
+    ui->loadSpeedButton->setEnabled(true);
+    ui->diameter_button->setEnabled(true);
+    ui->twospot_button->setEnabled(true);
+    ui->wafer_diameter->setEnabled(true);
+    ui->n2_purge_button->setEnabled(true);
+    ui->plsmaBtn->setEnabled(true);
+    ui->MB_Right_Button->setEnabled(true);
+    ui->MB_Left_Button->setEnabled(true);
+    // if initialized enable
+    if (m_mainCTL.getAxesController().getAxesInitilizedStatus()) {
+        ui->Joystick_button->setEnabled(true);
+        ui->vac_button->setEnabled(true);
+        ui->scan_button->setEnabled(true);
+        ui->Home_button->setEnabled(true);
+        ui->Stagepins_button->setEnabled(true);
+    }
+}
+void MainWindow::setUIOperatorMode()
+{
+    // remove ENGINEERING MODE from title bar
+    this->setWindowTitle("ONTOS3 INTERFACE v" + QString(APP_VERSION));
+
+    // disable recipe setpoint buttons
+    ui->loadMFC1Button->setEnabled(false);
+    ui->loadMFC2Button->setEnabled(false);
+    ui->loadMFC3Button->setEnabled(false);
+    ui->loadMFC4Button->setEnabled(false);
+    ui->load_thick->setEnabled(false);
+    ui->load_gap->setEnabled(false);
+    ui->load_autoscan->setEnabled(false);
+    ui->load_cycles->setEnabled(false);
+    ui->load_overlap->setEnabled(false);
+    ui->x1_set->setEnabled(false);
+    ui->x2_set->setEnabled(false);
+    ui->y1_set->setEnabled(false);
+    ui->y2_set->setEnabled(false);
+    ui->loadRFButton->setEnabled(false);
+    ui->loadMBButton->setEnabled(false);
+    ui->loadAutoTuneButton->setEnabled(false);
+    ui->loadSpeedButton->setEnabled(false);
+    // disable control buttons
+    ui->diameter_button->setEnabled(false);
+    ui->n2_purge_button->setEnabled(false);
+    ui->twospot_button->setEnabled(false);
+    ui->wafer_diameter->setEnabled(false);
+    ui->plsmaBtn->setEnabled(false);
+    ui->MB_Right_Button->setEnabled(false);
+    ui->MB_Left_Button->setEnabled(false);
+    // put in not initilized UI state
+    if (!m_mainCTL.getAxesController().getAxesInitilizedStatus()) {
+        ui->Joystick_button->setEnabled(false);
+        ui->vac_button->setEnabled(false);
+        ui->scan_button->setEnabled(false);
+        ui->Home_button->setEnabled(false);
+        ui->Stagepins_button->setEnabled(false);
+    }
+}
+
+// About choice from service menu
+void MainWindow::on_actionAbout_triggered()
+{
+    QMessageBox::about(this, tr("About Ontos 3 Interface"),
+                       tr("The <b>Ontos3 Interface</b> is the latest"
+                          "modern GUI for Plasma applications."));
+}
+
+// Connect choice from serial menu
+void MainWindow::on_actionConnect_triggered()
+{
+    SettingsDialog::Settings p = m_pSettings->settings();
+
+    if (m_mainCTL.open(*m_pSettings)) {
+
+        m_mainCTL.getAxesController().resetAxes();
+        m_mainCTL.resetCTL();
+        CTLResetTimeOut = 2500ms / m_pMainLoop->getTimerInterval();
+
+        // disable the connect menu option
+        ui->actionConnect->setEnabled(false);
+        // enable the disconnect menu option
+        ui->actionDisconnect->setEnabled(true);
+
+        // Give status on connect
+        showStatusMessage(tr("Connected to %1 : %2, %3, %4, %5, %6")
+                              .arg(p.name).arg(p.stringBaudRate).arg(p.stringDataBits)
+                              .arg(p.stringParity).arg(p.stringStopBits).arg(p.stringFlowControl));
+
+        // start the main state machine
+        emit MSM_TransitionStartup();
+
+    } else {
+        QMessageBox::critical(this, "Error", m_mainCTL.getPortErrorString());
+
+        showStatusMessage("Open error" + m_mainCTL.getPortErrorString());
+    }
+}
+
+// Disconnect choice from serial menu
+void MainWindow::on_actionDisconnect_triggered()
+{
+    closeMainPort();
+}
+
+// Settings choice from serial menu
+void MainWindow::on_actionSettings_triggered()
+{
+    m_pSettings->show();
+}
+
+
 

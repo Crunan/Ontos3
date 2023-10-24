@@ -38,6 +38,9 @@ public:
     explicit MainWindow(MainLoop *loop, QWidget *parent = nullptr);
     ~MainWindow();
 
+    //gets called right before the main window is about to show
+    void showEvent(QShowEvent *) override;
+
 signals:
     // main state machine state transiton signals
     void MSM_TransitionPolling();
@@ -46,6 +49,7 @@ signals:
     void MSM_TransitionIdle();
 
 public slots:
+    void setInitialUIState();
     void openRecipeWindowMFC();
     void stageStatusUpdate(QString statusNow, QString statusNext);
 
@@ -78,16 +82,12 @@ public slots:
     void updateRecipeFlow(const int mfcNumber, const double recipeflow);
     void actualFlowChanged(const int mfcNumber, const double actualFlow);
 
-    void about();
-    void shutDownProgram();
-
+    // recipe
     void AutoTuneCheckbox_stateChanged(int value);
     void openRecipe();
     void saveRecipe();
     void openCascadeRecipe();
-
     void setRecipeMBtuner(double MBtunerSP);
-  //  void plasmaHeadTemp(double temp);
     void thicknessChanged();
     void gapChanged();
     void overlapChanged();
@@ -97,6 +97,7 @@ public slots:
     void yLimitsChanged();
     void cyclesChanged();
 
+    // callbacks
     void pinsStateChanged(bool state);
     void joystickStateChanged(bool state);
     void n2StateChanged(bool state);
@@ -107,35 +108,25 @@ public slots:
     void SSM_StatusUpdate(QString status, QString next);
     void recipeExecutionStateChanged(bool state);
     void scanBoxChanged();
+    void userEnteredPassword();
 
 private slots:
-    // button handlers
+    // controls handlers
     void on_init_button_clicked();
-    void on_init_button_dup_clicked();
-    void on_Stagepins_button_dup_toggled(bool checked);
-    void on_n2_purge_button_dup_toggled(bool checked);
-    void on_diameter_button_dup_clicked();
     void on_load_thick_clicked();
     void on_load_gap_clicked();
     void on_load_overlap_clicked();
     void on_loadSpeedButton_clicked();
     void on_load_cycles_clicked();
-    void on_wafer_diameter_dup_currentIndexChanged(int index);
     void on_wafer_diameter_currentIndexChanged(int index);
-    void on_vac_button_dup_toggled(bool checked);
     void on_vac_button_toggled(bool checked);
     void on_n2_purge_button_toggled(bool checked);
-    void on_Joystick_button_dup_toggled(bool checked);
-    void on_twospot_button_dup_toggled(bool checked);
     void on_Home_button_toggled(bool checked);
     void on_twospot_button_toggled(bool checked);
-    void on_Home_button_dup_toggled(bool checked);
     void on_loadRecipeButton_clicked();
     void on_loadRFButton_clicked();
-    void on_scan_button_dup_toggled(bool checked);
     void on_scan_button_toggled(bool checked);
     void on_plsmaBtn_toggled(bool checked);
-    void on_plsmaBtn_dup_toggled(bool checked);
     void on_loadAutoTuneButton_clicked();
     void on_loadMBButton_clicked();
     void on_load_autoscan_clicked();
@@ -150,20 +141,25 @@ private slots:
     void on_diameter_button_clicked();
     void on_x1_set_clicked();
     void on_x2_set_clicked();
-    void on_Y1_set_clicked();
-    void on_Y2_set_clicked();
-    void on_gas1_setpoint_button_dup_clicked();
-    void on_gas2_setpoint_button_dup_clicked();
-    void on_gas3_setpoint_button_dup_clicked();
-    void on_gas4_setpoint_button_dup_clicked();
-    void on_actionEngineer_Mode_triggered();
+    void on_y1_set_clicked();
+    void on_y2_set_clicked();
+    // menu actions
     void on_actionOperator_Mode_triggered();
+    void on_actionEngineer_Mode_triggered();
+    void on_actionAbout_triggered();
+    void on_actionConnect_triggered();
+    void on_actionDisconnect_triggered();
+    void on_actionSettings_triggered();
 
 private:
     // Action Button methods
     void serialButtonPreConnectState();
     void showStatusMessage(const QString &message);
-    // Serial Port methods
+    void closeEvent(QCloseEvent *event);
+
+    // update the ui based on login
+    void setUIOperatorMode();
+    void setUIEngineerMode();
 
     void connectMFCRecipeButton(QPushButton* button, const int &mfcNumber);
     // Connection for Recipes buttons
@@ -184,6 +180,7 @@ private:
 
     void AxisStatusToUI();
     void RecipeToUI();
+    void setMFCLabels();
 
     MainLoop *m_pMainLoop;
     Ui::MainWindow* ui;
@@ -195,9 +192,8 @@ private:
     CommandFileReader m_commandFileReader;
 
     Console* m_pMainCTLConsole;
-    //Console* m_pStageCTLConsole;
-    StageWidget* m_pStageWidget;
     Configuration m_config;
+    bool m_engineeringMode;
 
     // main state machine
     QStateMachine m_mainStateMachine;

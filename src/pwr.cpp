@@ -36,6 +36,15 @@ void PWR::setForwardWatts(int value)
     emit forwardWattsChanged();
 }
 
+int PWR::getMaxForwardWatts() const
+{
+    return m_maxWatts;
+}
+void PWR::setMaxForwardWatts(int value)
+{
+    m_maxWatts = value;
+}
+
 int PWR::getReflectedWatts() const
 {
     return m_reflectedWatts;

@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-//Axes SM
+//Axis states
 enum AxisState {
     AXIS_IDLE = 0x10,
     AXIS_START = 0x11,
@@ -13,6 +13,10 @@ enum AxisState {
     AXIS_JOY_ON = 0x15
 };
 
+// constants used for axis commands
+const int XAXIS_COMMAND_NUM = 0;
+const int YAXIS_COMMAND_NUM = 1;
+const int ZAXIS_COMMAND_NUM = 2;
 
 class Axis : public QObject {
     Q_OBJECT
@@ -29,10 +33,11 @@ public:
 
     void setCurrentPosition(const QString position);
     double getPosition() const { return m_currentPosition; }
+    QString getPositionQStr() const { return QString::number(m_currentPosition, 'f', 2); }
 
-    void setMaxPos(const double maxPos) { m_maxPos = maxPos; }
-    void setMaxSpeed(const double maxSpeed) { m_maxSpeed = maxSpeed; }
-    void setHomePos(const double homePos) { m_homePos = homePos; }
+    void saveMaxPos(const double maxPos) { m_maxPos = maxPos; }
+    void saveMaxSpeed(const double maxSpeed) { m_maxSpeed = maxSpeed; }
+    void saveHomePos(const double homePos) { m_homePos = homePos; }
 
     double getMaxPos() const { return m_maxPos; }
     double getMaxSpeed() const { return m_maxSpeed; }

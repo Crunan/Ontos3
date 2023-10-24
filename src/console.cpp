@@ -91,7 +91,6 @@ void Console::keyPressEvent(QKeyEvent *e)
             QPlainTextEdit::keyPressEvent(e);
         emit getData(e->text().toLocal8Bit());
         QString smsg = e->text().toLocal8Bit();
-        Logger::logInfo(smsg + " !!!!!!!!!!!!!!!!!!!!!!!!!!1");
     }
 }
 

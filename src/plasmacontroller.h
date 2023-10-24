@@ -4,7 +4,6 @@
 #include "plasmarecipe.h"
 #include "axescontroller.h"
 #include "commandmap.h"
-#include "configuration.h"
 #include "ledstatus.h"
 #include "plasmahead.h"
 #include "pwr.h"
@@ -85,27 +84,27 @@ public:
     void PollForCollision(); // sets the m_bCollisionDetected flag
 
     // query the controller
+    void getFirmwareVersion();
     void howManyMFCs();
     void getBatchIDLogging();
+    void getMFC4Range();
+    void getMFC3Range();
+    void getMFC2Range();
+    void getMFC1Range();
     void getRecipeMBPosition();
     void getRecipeRFPosition();
     void getRecipeMFC4Flow();
     void getRecipeMFC3Flow();
     void getRecipeMFC2Flow();
-    void getRecipeMFC1Flow();
-    void getMFC4Range();
-    void getMFC3Range();
-    void getMFC2Range();
-    void getMFC1Range();
+    void getRecipeMFC1Flow(); 
     void getMaxRFPowerForward();
     void getAutoMan();
-    void getTemp();
-    void turnOnExecRecipe();
     void turnOffExecRecipe();
+    void turnOnExecRecipe();
     void getPHSlitLength();
     void getPHSlitWidth();
-
-    QList<MFC*> m_mfcs; // Store the MFCs in a list
+    void getPHSafetyGap();
+    void getTemp();
 
 signals:
     void responseReceived(const QString& response);
@@ -113,7 +112,6 @@ signals:
     void mainPortOpened();
     void setRecipeMBtuner(QString MBtunerSP);
     void setRecipeRFpower(QString RFpowerSP);
-    void plasmaHeadTemp(double m_headTemp);
 
     // scan state machine transitions
     void SSM_TransitionStartup();
@@ -163,7 +161,7 @@ public slots:
 
     // light tower
     void handleLightTowerStateChange();
-    bool setLightTower();
+    void setLightTower();
 
     // scan state machine to idle
     void scanningStateMachineToIdle() { emit SSM_TransitionIdle(); }
@@ -177,11 +175,11 @@ private:
     void setupScanStateMachine();
     void setupCollisionStateMachine();
 
+    QList<MFC*> m_mfcs; // Store the MFCs in a list
     LightTower m_lightTower;
     SerialInterface *m_pSerialInterface;
     LEDStatus m_ledStatus;
     bool m_executeRecipe;
-    Configuration m_config;
     CommandMap m_commandMap;
     AxesController m_stageCTL;
     Diameter m_waferDiameter;
@@ -237,14 +235,13 @@ private:
     double m_scanYSpeed;
     double m_scanEndYPosition;
 
-    int m_numMFCs;
     int m_batchLogging;
 
     bool m_collisionDetected;
     bool m_collisionPassed;
-    bool m_bRunRecipe; //Turn plasma on
+    bool m_runRecipe; //Turn plasma on
     bool m_plannedAutoStart;
-    bool m_bPlasmaActive;
+    bool m_plasmaActive;
 };
 
 #endif // PLASMACONTROLLER_H

@@ -2,8 +2,11 @@
 
 int LED::nextIndex = 0;
 
-LED::LED(const QString& name, int index, LEDType type, bool state)
-    : name(name), index(index), type(type), state(state)
+LED::LED(const QString& name, int index, LEDType type, bool state) :
+    name(name),
+    index(index),
+    type(type),
+    state(state)
 {
     if (index == -1) {
         index = nextIndex;

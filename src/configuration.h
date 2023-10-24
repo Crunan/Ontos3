@@ -7,6 +7,19 @@
 #include <QStringList>
 #include <QObject>
 
+const QString CONFIG_DIRECTORY_NAME = "/config";
+const QString CONFIG_DEFAULT_FILENAME = "default.cfg";
+const QString CONFIG_MFC1_LABEL_KEY = "MFC_LABEL_1";
+const QString CONFIG_MFC2_LABEL_KEY = "MFC_LABEL_2";
+const QString CONFIG_MFC3_LABEL_KEY = "MFC_LABEL_3";
+const QString CONFIG_MFC4_LABEL_KEY = "MFC_LABEL_4";
+const QString CONFIG_COM_PORT_KEY = "SERIAL_PORT";
+const QString CONFIG_PASSWORD_KEY = "PW";
+const QString CONFIG_DOOR_STATUS_BIT = "DOOR_STATUS_BIT";
+const QString CONFIG_N2PURGE_STATUS_BIT = "N2_PURGE_STATUS_BIT";
+const QString CONFIG_VAC_STATUS_BIT = "VAC_STATUS_BIT";
+const QString CONFIG_JOY_STATUS_BIT = "JOY_STATUS_BIT";
+
 class Configuration : public QObject
 {
 public:
@@ -17,15 +30,15 @@ public:
     QString getValueForKey(const QString& key) const;
     QStringList getAllKeys() const;
 
+signals:
+    void configFileError();
+
 private:
     void readConfigFile();
 
-    QString execonfigPath;
-    QString execonfigFileName;
-    QMap<QString, QString> configDictionary;
-
-signals:
-    void configFileError();
+    QString m_execonfigPath;
+    QString m_execonfigFileName;
+    QMap<QString, QString> m_configDictionary;
 };
 
 #endif // CONFIGURATION_H

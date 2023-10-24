@@ -3,6 +3,7 @@
 
 #include "filereader.h"
 #include <QObject>
+#include <QStringLiteral>
 
 const QString RECIPE_PWR_KEY = "PWR";
 const QString RECIPE_TUNER_KEY = "TUNER";
