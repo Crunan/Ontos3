@@ -76,4 +76,8 @@ Avoid exposing the system to external moisture, liquids, or high humidity exceed
 {% tab title="Vacuum" %}
 House vacuum: -0.85 \~ -0.85 bars (2 \~ 10 SLPM).
 {% endtab %}
+
+{% tab title="CDA" %}
+Clean Dry Air: Input pressure of 4 Bar, 1/4in OD tubing
+{% endtab %}
 {% endtabs %}
