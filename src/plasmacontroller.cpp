@@ -520,7 +520,7 @@ void PlasmaController::RunCollisionSM()
             m_collisionPassed = true;
             // Go here to scan
             if (m_plannedAutoStart == true) {
-                m_runRecipe = true; //Turn plasma on
+                RunRecipe(true);
                 m_plannedAutoStart = false;
             }
             else {
@@ -791,14 +791,16 @@ void PlasmaController::handleSetPWRMaxWattsCommand(const double maxWatts)
 void PlasmaController::RunRecipe(const bool newRunState) // handles turning the recipe on/off
 {
     if (newRunState) {
-        QString command = "$8701%"; // SET_EXEC_RECIPE  $870p% p=1 Execute Recipe, p=0 RF off, Recipe off
-        sendCommand(command);
+        sendCommand("$8701%"); //SET_EXEC_RECIPE  $870p% p=1 Execute Recipe, p=0 RF off, Recipe off
         readResponse();
+        Logger::logInfo("Execute Recipe : Enabled");
+        emit recipeExecutionStateChanged(true);
     }
     else {
-        QString command = "$8700%"; // SET_EXEC_RECIPE  $870p% p=1 Execute Recipe, p=0 RF off, Recipe off
-        sendCommand(command);
+        sendCommand("$8700%"); //SET_EXEC_RECIPE  $870p% p=1 Execute Recipe, p=0 RF off, Recipe off
         readResponse();
+        Logger::logInfo("Execute Recipe : Disabled");
+        emit recipeExecutionStateChanged(false);
     }
 }
 
@@ -954,7 +956,7 @@ void PlasmaController::parseResponseForCTLStatus(const QString& response)
     QStringList subsystemData = response.mid(6, response.length() - 7).split(";");
 
     // Check if we have enough data to update the subsystems
-    if (subsystemData.size() != 10) {
+    if (subsystemData.size() != 12) {
         // Handle error or return if there is not enough data
         return;
     }
@@ -1002,7 +1004,7 @@ void PlasmaController::setLightTower()
 
     switch(m_lightTower.getState()) {
     case LightTower::LT_ERROR: // Light tower turns red - error commands and dangrous conditions
-        sendCommand("$CB01%"); //  $CB0n% resp[!CB0n#] n = 0,1,2,3 (none, red, amber, green)
+        sendCommand("$CB01%"); //  $C    sendCommand("$8701%"); //SET_EXEC_RECIPE  $870p% p=1 Execute Recipe, p=0 RF off, Recipe off
         readResponse();
         m_lightTower.setState(LightTower::LT_INACTIVE);
         break;
@@ -1110,7 +1112,7 @@ void PlasmaController::CTLStartup()
     getRecipeMFC1Flow();
     getMaxRFPowerForward();
     getAutoMan();
-    turnOffExecRecipe();
+    RunRecipe(false);
     getPHSlitLength();
     getPHSlitWidth();
     getPHSafetyGap();
@@ -1123,20 +1125,6 @@ void PlasmaController::resetCTL()
 {
     sendCommand("$90%");
     readResponse();
-}
-
-void PlasmaController::turnOnExecRecipe() {
-    sendCommand("$8701%"); //SET_EXEC_RECIPE  $870p% p=1 Execute Recipe, p=0 RF off, Recipe off
-    readResponse();
-    Logger::logInfo("Execute Recipe : Enabled");
-    emit recipeExecutionStateChanged(true);
-}
-
-void PlasmaController::turnOffExecRecipe() {
-    sendCommand("$8700%"); //SET_EXEC_RECIPE  $870p% p=1 Execute Recipe, p=0 RF off, Recipe off
-    readResponse();
-    Logger::logInfo("Execute Recipe : Disabled");
-    emit recipeExecutionStateChanged(false);
 }
 
 void PlasmaController::LaserSenseOn()
@@ -1430,7 +1418,7 @@ void PlasmaController::getAutoMan() {
 }
 
 void PlasmaController::getTemp() {
-    sendCommand("$8C%");
+    sendCommand("$8C%"); // GET_TEMP  $8C%: resp[!8Cxx.xx#]; xx.xx = head temp degrees C base 10
     QString response = readResponse();
     if (response.length() > 3) {
         QString StrVar = response.mid(3, 4);

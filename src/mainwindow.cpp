@@ -1276,22 +1276,19 @@ void MainWindow::on_vac_button_toggled(bool checked)
 // plasma button on dashboard
 void MainWindow::on_plsmaBtn_toggled(bool checked)
 {
-    // I'm not sure if b_HasCollision is needed in this system but keeping it hardcoded here until I know
-    bool b_HasCollision = true;
-    if (b_HasCollision && m_mainCTL.getRecipe()->getAutoScanBool() && !m_mainCTL.getPlasmaActive()) {
-        //m_plannedAutoStart = true; //this will make sure we dont accidently start plasma when just clicking RUN SCAN button
-        m_mainCTL.StartScan();
-    }
-    else {
-        m_mainCTL.RunRecipe(true); // turn on recipe execution
-    }
-
-    // start/stop the scan state machine
     if (checked) {
         m_mainCTL.StopScan();
     }
     else {
-        m_mainCTL.StartScan();
+        // I'm not sure if b_HasCollision is needed in this system but keeping it hardcoded here until I know
+        bool b_HasCollision = true;
+        if (b_HasCollision && m_mainCTL.getRecipe()->getAutoScanBool() && !m_mainCTL.getPlasmaActive()) {
+            m_mainCTL.plannedAutoStartOn();//this will make sure we dont accidently start plasma when just clicking RUN SCAN button
+            m_mainCTL.StartScan();
+        }
+        else {
+            m_mainCTL.RunRecipe(true); // turn on recipe execution
+        }
     }
 }
 

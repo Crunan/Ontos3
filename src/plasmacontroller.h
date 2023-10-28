@@ -73,6 +73,7 @@ public:
     void setRFSetpointFromRecipe();
     void setTunerSetpointFromRecipe();
     void handleSetDefaultRecipeCommand();
+    void plannedAutoStartOn() { m_plannedAutoStart = true; }
 
     // accessors
     Tuner& getTuner() { return m_tuner; }
@@ -187,8 +188,6 @@ private:
     void getRecipeMFC1Flow();
     void getMaxRFPowerForward();
     void getAutoMan();
-    void turnOffExecRecipe();
-    void turnOnExecRecipe();
     void getPHSlitLength();
     void getPHSlitWidth();
     void getPHSafetyGap();

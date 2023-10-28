@@ -394,7 +394,7 @@ void AxesController::RunHomeAxesSM()
         emit stageStatusUpdate("Homing X & Y", "Homing Z");
 
         Logger::logInfo("Homing X & Y");
-        Logger::logInfo("Move X Speed: " + m_Xaxis.getMaxSpeedQStr() + " /sec" + "Move Y Speed: " +
+        Logger::logInfo("Move X Speed: " + m_Xaxis.getMaxSpeedQStr() + " /sec " + "Move Y Speed: " +
                         m_Yaxis.getMaxSpeedQStr() + " /sec");
 
         move(XAXIS_COMMAND_NUM, m_Xaxis.getMaxSpeed(), m_Xaxis.getHomePos());
