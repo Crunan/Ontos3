@@ -7,7 +7,6 @@
 #include "serialinterface.h"
 #include "axis.h"
 #include "stage.h"
-#include "ledstatus.h"
 #include "configuration.h"
 
 class QEventLoop;
@@ -42,10 +41,11 @@ public:
     void setAxisStateMachinesIdle();
     bool nextStateReady();
     bool getAxesInitilizedStatus() { return m_axesInitialized; }
+    void RunStageTestSM();
+    bool axisStateMachineActive();
 
     // axis accessors
-    void moveAxisAbsolute(int axisCommandNum, float targetPosition);
-    void setAxisSpeed(int axisCommandNum, float targetSpeed);
+    void move(int axisCommandNum, float speed, float position);
     void stopAllMotors();
     void AxisStartup();
     void resetAxes();
@@ -102,14 +102,17 @@ public:
     void toggleVacOff();
 
     // helper
-    bool isBitSet(int test_int, int bit_pos);
-    bool getDoorStatus() { return m_doorsOpen; }
+    bool getDoorOpen() { return m_doorsOpen; }
     Configuration& getConfig() { return m_config; }
+
+    // stage test
+    void setDetailedLog(bool enabled) { m_detailedStageTestLogEnabled = enabled; }
+    void setTestZ(bool enabled) { m_stageTestZEnabled = enabled; }
 
 signals:
 
     void stageStatusUpdate(QString status1, QString status2);
-    void stageResponseReceived(QString resonse);
+    //void stageResponseReceived(QString resonse);
 
     // init state machine UI updating signals
     void initSMStartup();
@@ -148,6 +151,15 @@ signals:
     void TSSM_TransitionIdle();
     void TSSM_TransitionStartup();
 
+    // stage test state machine transitions
+    void STSM_TransitionIdle();
+    void STSM_TransitionShutdown();
+    void STSM_TransitionStartup();
+    void STSM_TransitionMaxX();
+    void STSM_TransitionMinY();
+    void STSM_TransitionMaxY();
+    void STSM_TransitionMinX();
+
     // scan state machine to idle
     void ScanSM_TransitionIdle();
 
@@ -176,6 +188,9 @@ private:
     void getXMaxSpeed();
     void getYMaxSpeed();
     void getZMaxSpeed();
+    void getXMaxPosition();
+    void getYMaxPosition();
+    void getZMaxPosition();
     void getXp2Base();
     void getYp2Base();
     void getZp2Base();
@@ -191,6 +206,7 @@ private:
     void SetupInitAxesStateMachine();
     void SetupHomeAxesStateMachine();
     void SetupTwoSpotStateMachine();
+    void SetupStageTestStateMachine();
 
     // utility functions
     void setValve2(QString toggle);
@@ -201,19 +217,16 @@ private:
     void setSameStateXYZsame();
     void parseStatus(QString serialResponse);
     QString getLastCommand() { return m_pSerialInterface->getLastCommand(); }
-
     void setLEDstate(QString firstHexStrNibble, QString secondHexStrNibble);
-
     void checkAndSetXDimensions();
     void checkAndSetYDimensions();
-
-    void move(QString axis, QString speed, QString position);
-    void setSpeed(QString axis, QString speed);
-    void setAbsMove(QString axis, QString position);
-
     void checkAndLogAxesStatusChange();
+    void moveAxisAbsolute(int axisCommandNum, float targetPosition);
+    void setAxisSpeed(int axisCommandNum, float targetSpeed);
 
-    LEDStatus m_ledStatus;
+    // stage test helper
+    void stageTestZMax();
+    void stageTestZMin();
 
     // init axes state machine
     QStateMachine m_initStateMachine;
@@ -245,11 +258,29 @@ private:
     QState *m_pTwoSpotShutdownState;
     QState *m_pTwoSpotIdleState;
 
+    // stage test state machine
+    QStateMachine m_stageTestStateMachine;
+    QState *m_pStageTestSuperState;
+    QState *m_pStageTestIdleState;
+    QState *m_pStageTestStartupState;
+    QState *m_pStageTestMaxXState;
+    QState *m_pStageTestMinXState;
+    QState *m_pStageTestMaxYState;
+    QState *m_pStageTestMinYState;
+    QState *m_pStageTestShutdownState;
+
     // two spot variables
     double m_twoSpotXFirstPoint;
     double m_twoSpotXSecondPoint;
     double m_twoSpotYFirstPoint;
     double m_twoSpotYSecondPoint;
+
+    // stage test variables
+    bool m_stageTestZEnabled;
+    bool m_detailedStageTestLogEnabled;
+    int m_stageTestXCount;
+    int m_stageTestYCount;
+    int m_stageTestZCount;
 
     SerialInterface *m_pSerialInterface;
 
@@ -265,8 +296,9 @@ private:
     bool m_joystickOn;
     bool m_joyButtonOn;
     bool m_doorsOpen;
-    bool m_vacOn;
     bool m_N2PurgeOn;
+    bool m_vacOn;
+
     bool m_axesInitialized;
 
     // coordinate transforms

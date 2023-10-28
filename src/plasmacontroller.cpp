@@ -1,13 +1,19 @@
 #include "plasmacontroller.h"
 #include "logger.h"
+#include "Utilities.h"
+
+// file scope
+bool estopActiveLast = false;
+bool plasmaActiveLast = false;
+bool abortLast = false;
+int ledStatusLast = 0;
 
 PlasmaController::PlasmaController(QWidget* parent)
   : QObject(parent),
     m_mfcs({ new MFC(1), new MFC(2), new MFC(3), new MFC(4) }),
     m_lightTower(),
     m_pSerialInterface(new SerialInterface()),
-    m_ledStatus(),
-    m_executeRecipe(0),
+    m_config(),
     m_commandMap(),
     m_stageCTL(),
     m_waferDiameter(),
@@ -15,6 +21,7 @@ PlasmaController::PlasmaController(QWidget* parent)
     m_plasmaHead(),
     m_tuner(),
     m_pwr(),
+    m_abortMessages(),
     m_scanMinXPos(0.0),
     m_scanMaxXPos(0.0),
     m_scanMinYPos(0.0),
@@ -35,18 +42,19 @@ PlasmaController::PlasmaController(QWidget* parent)
     m_collisionPassed(false),
     m_runRecipe(false), //Turn plasma on
     m_plannedAutoStart(false),
-    m_plasmaActive(false)
+    m_ledStatus(0),
+    m_abort(false),
+    m_estopActive(false),
+    m_plasmaActive(false),
+    m_processDoorAbort(false),
+    m_runRecipeOn(false)
 {
     // Add startup data gathering methods.
     for (MFC* mfc: m_mfcs) {
-        connect(mfc, &MFC::defaultRecipeChanged, this, &PlasmaController::handleSetMFCDefaultRecipeCommand);
         connect(mfc, &MFC::recipeFlowChanged, this, &PlasmaController::handleSetMFCRecipeFlowCommand);
-        connect(mfc, &MFC::rangeChanged, this, &PlasmaController::handleSetMFCRangeCommand);
     }
-    connect(&m_tuner, &Tuner::defaultRecipeChanged, this, &PlasmaController::handleSetTunerDefaultRecipeCommand);
     connect(&m_tuner, &Tuner::recipePositionChanged, this, &PlasmaController::handleSetTunerRecipePositionCommand);
     connect(&m_tuner, &Tuner::autoTuneChanged, this, &PlasmaController::handleSetTunerAutoTuneCommand);
-    connect(&m_lightTower, &LightTower::lightTowerStateChanged, this, &PlasmaController::handleLightTowerStateChange);
     connect(&m_pwr, &PWR::recipeWattsChanged, this, &PlasmaController::handleSetPWRRecipeWattsCommand);
     connect(&m_stageCTL, &AxesController::xLimitsChanged, this, &PlasmaController::xLimitsChanged);
     connect(&m_stageCTL, &AxesController::yLimitsChanged, this, &PlasmaController::yLimitsChanged);
@@ -54,6 +62,7 @@ PlasmaController::PlasmaController(QWidget* parent)
     // setup state machines
     setupCollisionStateMachine();
     setupScanStateMachine();
+    setupDoorOpenSM();
 
     // share the serial interface with the axes controller
     m_stageCTL.setSerialInterface(m_pSerialInterface);
@@ -95,7 +104,18 @@ PlasmaController::~PlasmaController()
     delete m_pCPGetZDownState;
     delete m_pCPIdleState;
     delete m_pCPShutdownState;
+
+    // door open state machine
+    delete m_pDODoorOpenedNonProcessState;
+    delete m_pDODoorsClosedState;
+    delete m_pDOWaitInitializedState;
+    delete m_pDOGoToLoadState;
+    delete m_pDOIdleState;
 }
+
+//////////////////////////////////////////////////////////////////////////////////
+// State machine and execution
+//////////////////////////////////////////////////////////////////////////////////
 
 void PlasmaController::setupScanStateMachine()
 {
@@ -121,20 +141,20 @@ void PlasmaController::setupScanStateMachine()
     connect(&m_stageCTL, &AxesController::ScanSM_TransitionIdle, this, &PlasmaController::scanningStateMachineToIdle);
 
     // add transitions to and from the super state and idle and shutdown
-    m_pScanSuperState->addTransition(this, SIGNAL(SSM_TransitionIdle()), m_pScanIdleState);
-    m_pScanSuperState->addTransition(this, SIGNAL(SSM_TransitionShutdown()), m_pScanShutdownState);
-    m_pScanIdleState->addTransition(this, SIGNAL(SSM_TransitionStartup()), m_pScanStartupState);
-    m_pScanShutdownState->addTransition(this, SIGNAL(SSM_TransitionIdle()), m_pScanIdleState);
-    m_pScanShutdownState->addTransition(this, SIGNAL(SSM_TransitionIdle()), m_pScanIdleState);
+    m_pScanSuperState->addTransition(this, &PlasmaController::SSM_TransitionIdle, m_pScanIdleState);
+    m_pScanSuperState->addTransition(this, &PlasmaController::SSM_TransitionShutdown, m_pScanShutdownState);
+    m_pScanIdleState->addTransition(this, &PlasmaController::SSM_TransitionStartup, m_pScanStartupState);
+    m_pScanShutdownState->addTransition(this, &PlasmaController::SSM_TransitionIdle, m_pScanIdleState);
+    m_pScanShutdownState->addTransition(this, &PlasmaController::SSM_TransitionIdle, m_pScanIdleState);
 
     // add the rest of the transitions
-    m_pScanRecycleState->addTransition(this, SIGNAL(SSM_TransitionGoXYSubstate()), m_pGoXYStartSubState);
-    m_pScanColSubState->addTransition(this, SIGNAL(SSM_TransitionParkZSubstate()), m_pParkZSubState);
-    m_pScanStartupState->addTransition(this, SIGNAL(SSM_TransitionParkZSubstate()), m_pParkZSubState);
-    m_pParkZSubState->addTransition(this, SIGNAL(SSM_TransitionGoXYSubstate()), m_pGoXYStartSubState);
-    m_pParkZSubState->addTransition(this, SIGNAL(SSM_TransitionRecycle()), m_pScanRecycleState);
-    m_pGoXYStartSubState ->addTransition(this, SIGNAL(SSM_TransitionGoZPositionSubstate()), m_pGoZScanPositionSubState);
-    m_pGoZScanPositionSubState->addTransition(this, SIGNAL(SSM_TransitionScanColSubstate()), m_pScanColSubState);
+    m_pScanRecycleState->addTransition(this, &PlasmaController::SSM_TransitionGoXYSubstate, m_pGoXYStartSubState);
+    m_pScanColSubState->addTransition(this, &PlasmaController::SSM_TransitionParkZSubstate, m_pParkZSubState);
+    m_pScanStartupState->addTransition(this, &PlasmaController::SSM_TransitionParkZSubstate, m_pParkZSubState);
+    m_pParkZSubState->addTransition(this, &PlasmaController::SSM_TransitionGoXYSubstate, m_pGoXYStartSubState);
+    m_pParkZSubState->addTransition(this, &PlasmaController::SSM_TransitionRecycle, m_pScanRecycleState);
+    m_pGoXYStartSubState ->addTransition(this, &PlasmaController::SSM_TransitionGoZPositionSubstate, m_pGoZScanPositionSubState);
+    m_pGoZScanPositionSubState->addTransition(this, &PlasmaController::SSM_TransitionScanColSubstate, m_pScanColSubState);
 
     // start the state machine
     m_scanStateMachine.start();
@@ -156,64 +176,46 @@ void PlasmaController::setupCollisionStateMachine()
     m_collisionStateMachine.addState(m_pCPGetZDownState);
     m_collisionStateMachine.addState(m_pCPIdleState);
     m_collisionStateMachine.addState(m_pCPShutdownState);
+
     m_collisionStateMachine.setInitialState(m_pCPIdleState);
 
     // add transitions
-    m_pCPIdleState->addTransition(this, SIGNAL(CSM_TransitionStartup()), m_pCPStartupState);
-    m_pCPShutdownState->addTransition(this, SIGNAL(CSM_TransitionShutdown()), m_pCPIdleState);
-    m_pCPStartupState->addTransition(this, SIGNAL(CSM_TransitionGetZUp()), m_pCPgetZUpstate);
-    m_pCPgetZUpstate->addTransition(this, SIGNAL(CSM_TransitionScanY()), m_pCPScanYState);
-    m_pCPScanYState->addTransition(this, SIGNAL(CSM_TransitionGetZDown()), m_pCPGetZDownState);
-    m_pCPGetZDownState ->addTransition(this, SIGNAL(SSM_TransitionGoZPositionSubstate()), m_pCPShutdownState);
+    m_pCPIdleState->addTransition(this, &PlasmaController::CSM_TransitionStartup, m_pCPStartupState);
+    m_pCPShutdownState->addTransition(this, &PlasmaController::CSM_TransitionShutdown, m_pCPIdleState);
+    m_pCPStartupState->addTransition(this, &PlasmaController::CSM_TransitionGetZUp, m_pCPgetZUpstate);
+    m_pCPgetZUpstate->addTransition(this, &PlasmaController::CSM_TransitionScanY, m_pCPScanYState);
+    m_pCPScanYState->addTransition(this, &PlasmaController::CSM_TransitionGetZDown, m_pCPGetZDownState);
+    m_pCPGetZDownState ->addTransition(this, &PlasmaController::SSM_TransitionGoZPositionSubstate, m_pCPShutdownState);
 
     m_collisionStateMachine.start();
 }
 
-
-bool PlasmaController::open(const SettingsDialog& settings)
+void PlasmaController::setupDoorOpenSM()
 {
-    const SettingsDialog::Settings p = settings.settings();
+    m_pDODoorOpenedNonProcessState = new QState();
+    m_pDODoorsClosedState = new QState();
+    m_pDOWaitInitializedState = new QState();
+    m_pDOGoToLoadState = new QState();
+    m_pDOIdleState = new QState();
 
-    m_pSerialInterface->setPortName(p.name);
-    m_pSerialInterface->setBaudRate(p.baudRate);
-    m_pSerialInterface->setDataBits(p.dataBits);
-    m_pSerialInterface->setParity(p.parity);
-    m_pSerialInterface->setStopBits(p.stopBits);
-    m_pSerialInterface->setFlowControl(p.flowControl);
-    if (!m_pSerialInterface->open(QIODevice::ReadWrite)) {
-        // Failed to open the serial port
-        return false;
-    }
+    // add states
+    m_doorOpenStateMachine.addState(m_pDODoorOpenedNonProcessState);
+    m_doorOpenStateMachine.addState(m_pDODoorsClosedState);
+    m_doorOpenStateMachine.addState(m_pDOWaitInitializedState);
+    m_doorOpenStateMachine.addState(m_pDOGoToLoadState);
+    m_doorOpenStateMachine.addState(m_pDOIdleState);
 
-    emit mainPortOpened();
+    m_doorOpenStateMachine.setInitialState(m_pDOIdleState);
 
-    return true;
-}
+    // add transitions
+    m_pDOIdleState->addTransition(this, &PlasmaController::DOSM_TransitionDoorOpenedNonProcess, m_pDODoorOpenedNonProcessState);
+    m_pDOIdleState->addTransition(this, &PlasmaController::DOSM_TransitionClosed, m_pDODoorsClosedState);
+    m_pDODoorOpenedNonProcessState->addTransition(this, &PlasmaController::DOSM_TransitionClosed, m_pDODoorsClosedState);
+    m_pDODoorsClosedState->addTransition(this, &PlasmaController::DOSM_TransitionWaitInitialized, m_pDOWaitInitializedState);
+    m_pDOWaitInitializedState->addTransition(this, &PlasmaController::DOSM_TransitionLoad, m_pDOGoToLoadState);
+    m_pDOGoToLoadState->addTransition(this, &PlasmaController::DOSM_TransitionIdle, m_pDOIdleState);
 
-
-void PlasmaController::close()
-{
-    m_pSerialInterface->close();
-}
-
-
-bool PlasmaController::sendCommand(const QString& command)
-{
-    return m_pSerialInterface->sendCommand(command);
-}
-
-QString PlasmaController::readResponse()
-{
-    return m_pSerialInterface->readResponse();
-}
-
-void PlasmaController::setCommandMap(const QMap<QString, QPair<QString, QString>>& map)
-{
-    m_commandMap.setCommandMap(map);
-}
-QString PlasmaController::findCommandValue(QString command) const
-{
-    return m_commandMap.findCommandValue(command);
+    m_doorOpenStateMachine.start();
 }
 
 void PlasmaController::RunScanAxesSM()
@@ -293,9 +295,6 @@ void PlasmaController::RunScanAxesSM()
             emit SSM_TransitionParkZSubstate(); // scan state machine to park z
             emit SSM_StatusUpdate("Scanning", ""); // update ui
         }
-
-        Logger::logInfo("In Scan Startup State");
-
     }
     else if (m_scanStateMachine.configuration().contains(m_pParkZSubState)) { // in parkz substate
 
@@ -307,16 +306,15 @@ void PlasmaController::RunScanAxesSM()
                 emit SSM_StatusUpdate("Scanning", message); // update ui
             }
             else {
-                 emit SSM_TransitionGoXYSubstate();
-                 QString message = "Parking Z";
-                 Logger::logInfo(message);
-                 emit SSM_StatusUpdate("Scanning", message); // update ui
+                emit SSM_TransitionGoXYSubstate();
+                QString message = "Parking Z";
+                Logger::logInfo(message);
+                emit SSM_StatusUpdate("Scanning", message); // update ui
             }
             // turn off Substrate N2 Purge (assume it's on)
             m_stageCTL.toggleN2PurgeOff();
             // set max Z speed and move to parkZ
-            m_stageCTL.setAxisSpeed(ZAXIS_COMMAND_NUM, m_stageCTL.ZMaxSpeed());
-            m_stageCTL.moveAxisAbsolute(ZAXIS_COMMAND_NUM, m_scanZParkPos);
+            m_stageCTL.move(ZAXIS_COMMAND_NUM, m_stageCTL.ZMaxSpeed(), m_scanZParkPos);
             // log the move
             QString logStr = "Move Z Speed: " + m_stageCTL.getZMaxSpeedQStr() + " /sec ";
             Logger::logInfo(logStr + "to " + QString::number(m_scanZParkPos, 'f', 2));
@@ -330,11 +328,6 @@ void PlasmaController::RunScanAxesSM()
 
             emit SSM_StatusUpdate("Scanning", message); // update ui
 
-            // set max X speed
-            m_stageCTL.setAxisSpeed(XAXIS_COMMAND_NUM, m_stageCTL.XMaxSpeed());
-            // set max Y speed
-            m_stageCTL.setAxisSpeed(YAXIS_COMMAND_NUM, m_stageCTL.YMaxSpeed());
-
             // log it
             QString logStr = "X Speed: " + m_stageCTL.getXAxisMaxSpeedQStr() + " /sec ";
             Logger::logInfo(logStr + "Y Speed: " + m_stageCTL.getYAxisMaxSpeedQStr() + "/sec");
@@ -344,9 +337,9 @@ void PlasmaController::RunScanAxesSM()
             }
 
             // move X to starting position
-            m_stageCTL.moveAxisAbsolute(XAXIS_COMMAND_NUM, m_startXPosition);
+            m_stageCTL.move(XAXIS_COMMAND_NUM, m_stageCTL.XMaxSpeed(), m_startXPosition);
             // move Y to starting position
-            m_stageCTL.moveAxisAbsolute(YAXIS_COMMAND_NUM, m_startYPosition);
+            m_stageCTL.move(YAXIS_COMMAND_NUM, m_stageCTL.YMaxSpeed(), m_startYPosition);
 
             // log it
             logStr = "X to: " + QString::number(m_startXPosition, 'f', 2);
@@ -360,8 +353,7 @@ void PlasmaController::RunScanAxesSM()
                 m_stageCTL.toggleN2PurgeOn();
             }
             // set max Z speed and move to Z scan start
-            m_stageCTL.setAxisSpeed(ZAXIS_COMMAND_NUM, m_stageCTL.ZMaxSpeed());
-            m_stageCTL.moveAxisAbsolute(ZAXIS_COMMAND_NUM, m_scanZScanPos);
+            m_stageCTL.move(ZAXIS_COMMAND_NUM, m_stageCTL.ZMaxSpeed(), m_scanZScanPos);
             // log it
             QString logStr = "Move Z at: " + m_stageCTL.getZMaxSpeedQStr() + " /sec ";
             Logger::logInfo(logStr + "to: " + QString::number(m_scanZScanPos, 'f', 2));
@@ -369,10 +361,9 @@ void PlasmaController::RunScanAxesSM()
         }
     }
     else if (m_scanStateMachine.configuration().contains(m_pScanColSubState)) { // in ScanCol substate
-        if (m_stageCTL.nextStateReady()) {           
+        if (m_stageCTL.nextStateReady()) {
             // set Y scan speed and move to Y scan end position
-            m_stageCTL.setAxisSpeed(YAXIS_COMMAND_NUM, m_scanYSpeed);
-            m_stageCTL.moveAxisAbsolute(YAXIS_COMMAND_NUM, m_scanEndYPosition);
+            m_stageCTL.move(YAXIS_COMMAND_NUM, m_scanYSpeed, m_scanEndYPosition);
             // log it
             QString logStr = "Move Y at " + QString::number(m_scanYSpeed, 'f', 2) + " /sec ";
             Logger::logInfo(logStr + "to: " + QString::number(m_scanEndYPosition, 'f', 2));
@@ -395,33 +386,30 @@ void PlasmaController::RunScanAxesSM()
             }
 
 
-//                'If a cascaded recipe was used then run the next recipe
-//                If CascadingRecipesDialog.CascadeRecipeListBox.Items.Count - 1 > CasRecipeNumber Then
-//                    'This increments in order to keep track of which recipe we are on in the cascade recipe.
-//                    CasRecipeNumber += 1
-//                    'This is to make sure we start the scan automatically
-//                    b_toggleAutoScan = True
-//                    'Now load the recipe
-//                    LoadRecipeValues()
-//                Else
-//                    SMHomeAxes.State = HASM_START 'Go to the Load position everytime you finish scanning
-//                    // Auto off will turn the recipe off and PLASMA.
-//                    if (m_pRecipe->getAutoScanBool()) {
-//                        Logger::logInfo("Plasma turned off (Auto-Off is active)");
-//                        sendCommand("$8700%");
-//                        readResponse();
-//                    }
-
+            //                'If a cascaded recipe was used then run the next recipe
+            //                If CascadingRecipesDialog.CascadeRecipeListBox.Items.Count - 1 > CasRecipeNumber Then
+            //                    'This increments in order to keep track of which recipe we are on in the cascade recipe.
+            //                    CasRecipeNumber += 1
+            //                    'This is to make sure we start the scan automatically
+            //                    b_toggleAutoScan = True
+            //                    'Now load the recipe
+            //                    LoadRecipeValues()
+            //                Else
+            //                    SMHomeAxes.State = HASM_START 'Go to the Load position everytime you finish scanning
+            //                    // Auto off will turn the recipe off and PLASMA.
+            //                    if (m_pRecipe->getAutoScanBool()) {
+            //                        Logger::logInfo("Plasma turned off (Auto-Off is active)");
+            //                        sendCommand("$8700%");
+            //                        readResponse();
+            //                    }
 
             m_stageCTL.StartHome(); // Go to the Load position everytime you finish scanning
-
             // Auto off will turn the recipe off and PLASMA.
             if (m_pRecipe->getAutoScanBool()) {
                 Logger::logInfo("Plasma turned off (Auto-Off is active)");
                 sendCommand("$8700%");
                 readResponse();
             }
-
 
         }
         else { // recycle the scan
@@ -454,8 +442,8 @@ void PlasmaController::RunScanAxesSM()
         m_stageCTL.toggleN2PurgeOff();
 
         // set Z max speed and move to Z park position
-        m_stageCTL.setAxisSpeed(YAXIS_COMMAND_NUM, m_scanYSpeed);
-        m_stageCTL.moveAxisAbsolute(YAXIS_COMMAND_NUM, m_scanEndYPosition);
+        m_stageCTL.move(ZAXIS_COMMAND_NUM, m_stageCTL.ZMaxSpeed(), m_scanZParkPos);
+
         // log it
         QString logStr = "Move Z at " + m_stageCTL.getZMaxSpeedQStr() + " /sec ";
         Logger::logInfo(logStr + "to: " + QString::number(m_scanZParkPos, 'f', 2));
@@ -470,12 +458,11 @@ void PlasmaController::RunScanAxesSM()
     else if (m_scanStateMachine.configuration().contains(m_pScanIdleState)) { // in idle state
 
     }
-
 }
 
 void PlasmaController::RunCollisionSM()
 {
-    if (m_collisionStateMachine.configuration().contains(m_pCPStartupState)) { // in parkz substate
+    if (m_collisionStateMachine.configuration().contains(m_pCPStartupState)) {
 
         LaserSenseOn();
         Logger::logInfo("-------------Collision Pass Start-Up--------------");
@@ -489,12 +476,11 @@ void PlasmaController::RunCollisionSM()
         emit CSM_TransitionGetZUp();
 
     }
-    else if (m_collisionStateMachine.configuration().contains(m_pCPgetZUpstate)) { // in goXY start substate
+    else if (m_collisionStateMachine.configuration().contains(m_pCPgetZUpstate)) {
         if (m_stageCTL.nextStateReady()) {
 
             // set max Z speed and move to Z scan position
-            m_stageCTL.setAxisSpeed(ZAXIS_COMMAND_NUM, m_stageCTL.ZMaxSpeed());
-            m_stageCTL.moveAxisAbsolute(ZAXIS_COMMAND_NUM, m_scanZScanPos);
+            m_stageCTL.move(ZAXIS_COMMAND_NUM, m_stageCTL.ZMaxSpeed(), m_scanZScanPos);
 
             QString LogStr = "Move Z at: " + m_stageCTL.getZMaxSpeedQStr() + "/sec ";
             Logger::logInfo(LogStr + "to: " + QString::number(m_scanZScanPos, 'f', 2));
@@ -502,11 +488,10 @@ void PlasmaController::RunCollisionSM()
             emit CSM_TransitionScanY();
         }
     }
-    else if (m_collisionStateMachine.configuration().contains(m_pCPScanYState)) { // in goZScanPosition substate
-        if (m_stageCTL.nextStateReady()) {            
+    else if (m_collisionStateMachine.configuration().contains(m_pCPScanYState)) {
+        if (m_stageCTL.nextStateReady()) {
             // set Y speed = 10mm/sec and move to Y scan end position
-            m_stageCTL.setAxisSpeed(YAXIS_COMMAND_NUM, 10.0);
-            m_stageCTL.moveAxisAbsolute(YAXIS_COMMAND_NUM, m_scanEndYPosition);
+            m_stageCTL.move(YAXIS_COMMAND_NUM, 10.0, m_scanEndYPosition);
 
             QString LogStr = "Move Y at 10mm/sec ";
             Logger::logInfo(LogStr + "to: " + QString::number(m_scanEndYPosition, 'f', 2));
@@ -514,11 +499,10 @@ void PlasmaController::RunCollisionSM()
             emit CSM_TransitionGetZDown();
         }
     }
-    else if (m_collisionStateMachine.configuration().contains(m_pCPGetZDownState)) { // in ScanCol substate
-        if (m_stageCTL.nextStateReady()) {            
+    else if (m_collisionStateMachine.configuration().contains(m_pCPGetZDownState)) {
+        if (m_stageCTL.nextStateReady()) {
             // set max Z speed and move to parkZ
-            m_stageCTL.setAxisSpeed(ZAXIS_COMMAND_NUM, m_stageCTL.ZMaxSpeed());
-            m_stageCTL.moveAxisAbsolute(ZAXIS_COMMAND_NUM, m_scanZParkPos);
+            m_stageCTL.move(ZAXIS_COMMAND_NUM, m_stageCTL.ZMaxSpeed(), m_scanZParkPos);
 
             QString LogStr = "Move Z Speed: " + m_stageCTL.getZMaxSpeedQStr() + " /sec ";
             Logger::logInfo(LogStr + "to " + QString::number(m_scanZParkPos, 'f', 2));
@@ -526,7 +510,7 @@ void PlasmaController::RunCollisionSM()
             emit CSM_TransitionShutdown();
         }
     }
-    else if (m_collisionStateMachine.configuration().contains(m_pCPShutdownState)) { // in Scan Shutdown state
+    else if (m_collisionStateMachine.configuration().contains(m_pCPShutdownState)) {
 
         if (m_stageCTL.nextStateReady()) {
 
@@ -545,13 +529,113 @@ void PlasmaController::RunCollisionSM()
         }
 
         emit CSM_TransitionIdle();
-
     }
     else if (m_collisionStateMachine.configuration().contains(m_pCPIdleState)) { // in idle state
         // noop
     }
-
 }
+
+void PlasmaController::RunDoorOpenSM()
+{
+    if (m_doorOpenStateMachine.configuration().contains(m_pDODoorOpenedNonProcessState)) {
+        QString abortMessage = "Door opened while stage was moving. Stage position has been lost, close the doors and click OK to initialize the stage and send stage to the Load position.";
+        emit m_abortMessages.showAbortMessageBox(abortMessage);
+        emit DOSM_TransitionClosed();
+    }
+    else if (m_doorOpenStateMachine.configuration().contains(m_pDODoorsClosedState)) {
+        if (!m_stageCTL.getDoorOpen()) {
+            Logger::logInfo("Stage position lost : doors opened");
+            m_processDoorAbort = false;
+            // state machines to idle
+            m_stageCTL.setAxisStateMachinesIdle();
+            // initialize
+            m_stageCTL.StartInit();
+            emit DOSM_TransitionWaitInitialized();
+        }
+    }
+    else if (m_doorOpenStateMachine.configuration().contains(m_pDOWaitInitializedState)) {
+        if (m_stageCTL.getAxesInitilizedStatus()) {
+            emit DOSM_TransitionLoad();
+        }
+    }
+    else if (m_doorOpenStateMachine.configuration().contains(m_pDOGoToLoadState)) {
+        emit m_stageCTL.HSM_TransitionStartup(); // go to load
+        emit DOSM_TransitionIdle();
+    }
+    else if (m_doorOpenStateMachine.configuration().contains(m_pDOIdleState)) { // in idle state
+        if (m_processDoorAbort) {
+            emit DOSM_TransitionClosed();
+        }
+        else if (m_stageCTL.getDoorOpen() && stateMachineActive()) {
+            emit DOSM_TransitionDoorOpenedNonProcess();
+        }
+    }
+}
+
+bool PlasmaController::stateMachineActive()
+{
+    if (!m_stageCTL.axisStateMachineActive() ||
+        m_scanStateMachine.configuration().contains(m_pScanIdleState) ||
+        m_collisionStateMachine.configuration().contains(m_pCPIdleState)) {
+        return false;
+    }
+    else {
+        return true;
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+// Serial Port
+//////////////////////////////////////////////////////////////////////////////////
+
+bool PlasmaController::open(const SettingsDialog& settings)
+{
+    const SettingsDialog::Settings p = settings.settings();
+
+    m_pSerialInterface->setPortName(p.name);
+    m_pSerialInterface->setBaudRate(p.baudRate);
+    m_pSerialInterface->setDataBits(p.dataBits);
+    m_pSerialInterface->setParity(p.parity);
+    m_pSerialInterface->setStopBits(p.stopBits);
+    m_pSerialInterface->setFlowControl(p.flowControl);
+    if (!m_pSerialInterface->open(QIODevice::ReadWrite)) {
+        // Failed to open the serial port
+        return false;
+    }
+
+    emit mainPortOpened();
+
+    return true;
+}
+
+
+void PlasmaController::close()
+{
+    m_pSerialInterface->close();
+}
+
+
+bool PlasmaController::sendCommand(const QString& command)
+{
+    return m_pSerialInterface->sendCommand(command);
+}
+
+QString PlasmaController::readResponse()
+{
+    return m_pSerialInterface->readResponse();
+}
+
+void PlasmaController::setCommandMap(const QMap<QString, QPair<QString, QString>>& map)
+{
+    m_commandMap.setCommandMap(map);
+}
+
+
+QString PlasmaController::findCommandValue(QString command) const
+{
+    return m_commandMap.findCommandValue(command);
+}
+
 
 MFC* PlasmaController::findMFCByNumber(int mfcNumber)
 {
@@ -582,7 +666,7 @@ int PlasmaController::parseResponseForNumberOfMFCs(QString& response)
     QString numMFCsStr = response.mid(1, numMFCIndex - 1);
 
     // Convert the MFC number to an integer
-    int numMFCs = numMFCsStr.toInt();
+    int numMFCs = numMFCsStr.toInt();    void on_actionStart_Stage_Test_toggled(bool arg1);
 
     // Output the extracted data (for demonstration purposes)
     qDebug() << "Number of MFC's:" << numMFCs;
@@ -657,6 +741,12 @@ double PlasmaController::handleGetMFCRecipeFlowCommand(QString& responseStr)
     return mfc->getRecipeFlow();
 }
 
+void PlasmaController::handleSetDefaultRecipeCommand()
+{
+    sendCommand("$44%"); // SET_DEF_RECIPE $44%; resp [!44#]
+    readResponse(); // clear the response buffer
+}
+
 // MFC
 void PlasmaController::handleSetMFCRecipeFlowCommand(const int mfcNumber, const double recipeFlow)
 {
@@ -665,16 +755,6 @@ void PlasmaController::handleSetMFCRecipeFlowCommand(const int mfcNumber, const 
     QString command = "$41" + mfcNum + mfcRecipeFlow + "%";
     sendCommand(command);  // SET_RCP_MFC_FLOW   $410mxxx.yy% 1<=m<=4, xxx.yy = flow rate; resp[!410mxxx.yy#]
     readResponse();
-}
-
-void PlasmaController::handleSetMFCDefaultRecipeCommand(const int mfcNumber, const double recipeFlow)
-{
-
-}
-
-void PlasmaController::handleSetMFCRangeCommand(const int mfcNumber, const double range)
-{
-
 }
 
 // TUNER
@@ -686,46 +766,9 @@ void PlasmaController::handleSetTunerRecipePositionCommand(const int recipePosit
     readResponse();
 }
 
-void PlasmaController::handleSetTunerDefaultRecipeCommand(const double defaultPosition)
-{
-    QString command = "$2A606" + QString::number(defaultPosition) + "%";
-    sendCommand(command);
-    readResponse();
-}
-
 void PlasmaController::handleSetTunerAutoTuneCommand(const bool value)
 {
     QString command = "$860" + QString::number(value) + "%"; // SET_AUTO_MAN 0x86 //$860p% p=1 AutoMode, p=0 ManualMode
-    sendCommand(command);
-    readResponse();
-}
-
-void PlasmaController::handleLightTowerStateChange()
-{
-    LightTower::LightState currentState = m_lightTower.getState();
-
-    switch (currentState) {
-    case LightTower::ERROR:
-        sendCommand("$CB01%"); //$CB0n% resp[!CB0n#] n = 0,1,2,3 (none, red, amber, green)
-        readResponse();
-        break;
-    case LightTower::READY:
-        sendCommand("$CB02%");
-        readResponse();
-        break;
-    case LightTower::ACTIVE:
-        sendCommand("$CB03%");
-        readResponse();
-        break;
-    case LightTower::INACTIVE:
-        //Do nothing
-        break;
-    }
-}
-
-void PlasmaController::handleSetPWRDefaultRecipeCommand(const double defaultWatts)
-{
-    QString command = "$2A605" + QString::number(defaultWatts) + "%";
     sendCommand(command);
     readResponse();
 }
@@ -743,6 +786,20 @@ void PlasmaController::handleSetPWRMaxWattsCommand(const double maxWatts)
     QString command = "$2A705" + QString::number(maxWatts) + "%";
     sendCommand(command);
     readResponse();
+}
+
+void PlasmaController::RunRecipe(const bool newRunState) // handles turning the recipe on/off
+{
+    if (newRunState) {
+        QString command = "$8701%"; // SET_EXEC_RECIPE  $870p% p=1 Execute Recipe, p=0 RF off, Recipe off
+        sendCommand(command);
+        readResponse();
+    }
+    else {
+        QString command = "$8700%"; // SET_EXEC_RECIPE  $870p% p=1 Execute Recipe, p=0 RF off, Recipe off
+        sendCommand(command);
+        readResponse();
+    }
 }
 
 void PlasmaController::getCTLStatusCommand()
@@ -765,9 +822,112 @@ void PlasmaController::yLimitsChanged(double ymin, double ymax)
     m_pRecipe->setYmaxPH(ymax);
 }
 
-void PlasmaController::setLEDStatus(int &bits)
+void PlasmaController::plasmaStatus()
 {
-    m_ledStatus.setStatusBits(bits);
+    bool ok = false;
+    int bit = m_config.getValueForKey(CONFIG_PLASMA_STATUS_BIT).toInt(&ok);
+
+    if (ok) {
+        m_plasmaActive = isBitSet(m_ledStatus, bit);
+
+        if (m_plasmaActive != plasmaActiveLast) {
+            plasmaActiveLast = m_plasmaActive;
+
+            if (m_plasmaActive)
+                Logger::logInfo("Plasma : on");
+            else
+                Logger::logInfo("Plasma : off");
+        }
+    }
+    else {
+        Logger::logCritical("Cannot find config file entry for: " + CONFIG_PLASMA_STATUS_BIT);
+    }
+}
+
+void PlasmaController::estopStatus()
+{
+    bool ok = false;
+    int bit = m_config.getValueForKey(CONFIG_ESTOP_STATUS_BIT).toInt(&ok);
+
+    if (ok) {
+        m_estopActive = isBitSet(m_ledStatus, bit);
+
+        if (m_estopActive != estopActiveLast) {
+            estopActiveLast = m_estopActive;
+
+            if (m_estopActive)
+                Logger::logInfo("Estop : open");
+            else
+                Logger::logInfo("Estop : closed");
+        }
+    }
+    else {
+        Logger::logCritical("Cannot find config file entry for: " + CONFIG_ESTOP_STATUS_BIT);
+    }
+}
+
+void PlasmaController::abortStatus()
+{
+    bool ok = false;
+    int bit = m_config.getValueForKey(CONFIG_ABORT_STATUS_BIT).toInt(&ok);
+
+    if (ok) {
+        m_abort = isBitSet(m_ledStatus, bit);
+
+        if (m_abort != abortLast) {
+            abortLast = m_abort;
+
+            if (m_abort) {
+                Logger::logInfo("Abort : active");
+
+                sendCommand("$8B%"); // GETSET_ABORT_CODE  $8B%; resp [!8Bcccc#] cccc = Base10 Abort Code
+                QString response = readResponse();
+
+                parseAbortCode(response);
+            }
+            else
+                Logger::logInfo("Abort : cleared");
+        }
+    }
+    else {
+        Logger::logCritical("Cannot find config file entry for: " + CONFIG_ABORT_STATUS_BIT);
+    }
+}
+
+void PlasmaController::parseAbortCode(QString code)
+{
+    if (code.length() > 7) {
+        QString abortCodeStr = code.mid(3,4);
+
+        bool ok = false;
+        int abortCodeInt = abortCodeStr.toInt(&ok);
+        if (ok) {
+            if (abortCodeInt > 0) {
+                if (m_abortMessages.containsAbortMessage(abortCodeInt)) {
+                    QString abortMessage = m_abortMessages.getAbortMessage(abortCodeInt);
+                    // log the particular abort code/message
+                    Logger::logCritical(abortMessage);
+                    // the door abort code is treated differently so retain
+                    if (abortCodeInt == AbortCodeMessages::AC_DOORS_OPEN)
+                        m_processDoorAbort = true;
+                    // immediately set the light tower
+                    setLightTower();
+                    // show a message box
+                    emit m_abortMessages.showAbortMessageBox(abortMessage);
+                }
+                else {
+                    QString errorMessage = "Abort occurred, no corresponding abort code found.";
+                    Logger::logCritical(errorMessage);
+                    emit m_abortMessages.showAbortMessageBox(errorMessage);
+                }
+            }
+        }
+        else {
+            QString errorMessage = "Abort occurred, no corresponding abort code found.";
+            Logger::logCritical(errorMessage);
+            emit m_abortMessages.showAbortMessageBox(errorMessage);
+        }
+    }
 }
 
 void PlasmaController::parseResponseForCTLStatus(const QString& response)
@@ -775,10 +935,17 @@ void PlasmaController::parseResponseForCTLStatus(const QString& response)
     // Extract LED status
     QString ledStatusHex = response.mid(3, 4); // Assuming LLRR are at positions 3 to 6
     bool ok;
-    int ledStatus = ledStatusHex.toInt(&ok, 16);
+    m_ledStatus = ledStatusHex.toInt(&ok, 16);
     if (ok) {
-        // TODO: Call setter for LED status with the parsed integer value
-        setLEDStatus(ledStatus);
+        // log it if needed
+        if (m_ledStatus != ledStatusLast) {           
+            Logger::logInfo("Status Bits Change from " + QString::number(ledStatusLast, 2) + " to " + QString::number(m_ledStatus, 2));
+            ledStatusLast = m_ledStatus;
+        }
+        // update
+        plasmaStatus();
+        estopStatus();
+        abortStatus();
     } else {
         // Handle error if the conversion fails
     }
@@ -805,7 +972,7 @@ void PlasmaController::parseResponseForCTLStatus(const QString& response)
     // Extract and update ExecuteRecipe member
     int execRecipeInt = subsystemData[4].toInt();
     bool execRecipe = (execRecipeInt != 0);
-    setExecuteRecipe(execRecipe);
+    setRecipeExecuting(execRecipe);
 
     // Extract and update MFC actual flow values
     for (int i = 1; i <= 4; i++) {
@@ -821,18 +988,41 @@ void PlasmaController::parseResponseForCTLStatus(const QString& response)
 
 void PlasmaController::setLightTower()
 {
-    //    if ( ((GlobalmyStatusBits && 0x80) > 0) || (doorsOpen) ) {
-    //        m_lightTower.setState(ERROR);
-    //    }
-    //    else if ( (!doorsOpen) && (RunRecipeOn) ) {
-    //        m_lightTower.setState(ACTIVE);
-    //    }
-    //    else {
-    //        if (currentState != READY) {
-    //            m_lightTower.setState(READY);
-    //        }
-    //    }
+    if (m_processDoorAbort || m_stageCTL.getDoorOpen()) {
+        m_lightTower.setState(LightTower::LT_ERROR);
+    }
+    else if ( (!m_stageCTL.getDoorOpen()) && (m_runRecipeOn) ) {
+        m_lightTower.setState(LightTower::LT_ACTIVE);
+    }
+    else {
+        if (m_lightTower.getState() != LightTower::LT_READY) {
+            m_lightTower.setState(LightTower::LT_READY);
+        }
+    }
+
+    switch(m_lightTower.getState()) {
+    case LightTower::LT_ERROR: // Light tower turns red - error commands and dangrous conditions
+        sendCommand("$CB01%"); //  $CB0n% resp[!CB0n#] n = 0,1,2,3 (none, red, amber, green)
+        readResponse();
+        m_lightTower.setState(LightTower::LT_INACTIVE);
+        break;
+    case LightTower::LT_READY: // Light tower turns amber - ready to recieve/process commands
+        sendCommand("$CB02%"); //  $CB0n% resp[!CB0n#] n = 0,1,2,3 (none, red, amber, green)
+        readResponse();
+        m_lightTower.setState(LightTower::LT_INACTIVE);
+        break;
+    case LightTower::LT_ACTIVE:
+        sendCommand("$CB03%"); //  $CB0n% resp[!CB0n#] n = 0,1,2,3 (none, red, amber, green)
+        readResponse();
+        m_lightTower.setState(LightTower::LT_INACTIVE);
+        break;
+    case LightTower::LT_INACTIVE:
+        break;
+    default:
+        break;
+    }
 }
+
 
 //////////////////////////////////////////////////////////////////////////////////
 // Recipe
@@ -840,12 +1030,12 @@ void PlasmaController::setLightTower()
 
 bool PlasmaController::getExecuteRecipe() const
 {
-    return m_executeRecipe;
+    return m_runRecipeOn;
 }
 
-void PlasmaController::setExecuteRecipe(bool value)
+void PlasmaController::setRecipeExecuting(bool value)
 {
-    m_executeRecipe = value;
+    m_runRecipeOn = value;
 }
 
 void PlasmaController::setRecipe(QString filePath)
@@ -913,7 +1103,7 @@ void PlasmaController::CTLStartup()
     getMFC2Range();
     getMFC1Range();
     getRecipeMBPosition();
-    getRecipeRFPosition();
+    getRecipeRFPower();
     getRecipeMFC4Flow();
     getRecipeMFC3Flow();
     getRecipeMFC2Flow();
@@ -963,6 +1153,7 @@ void PlasmaController::LaserSenseOff()
     Logger::logInfo("Laser Sense Deactived");
 }
 
+// this replaces the collisionlaser()
 void PlasmaController::PollForCollision()
 {
     if (m_stageCTL.getXAxisError() == 8 || // TODO: replace with symbolic constants
@@ -971,6 +1162,9 @@ void PlasmaController::PollForCollision()
 
         // a collision has been detected
         m_collisionDetected = true;
+        m_collisionPassed = false;
+
+        Logger::logInfo("Laser Sensor Tripped");
     }
 }
 
@@ -982,6 +1176,32 @@ void PlasmaController::getFirmwareVersion()
         QString strVar = response.mid(3, 2);
         Logger::logInfo("CTL Firmware Version: " + strVar);
     }
+}
+
+void PlasmaController::MBLeft()
+{
+    sendCommand("$11000032%"); // $110dxxxx%  d=1,0 xxxx = num steps; resp[!110dxxxx#] when move STARTED
+    readResponse();
+}
+
+void PlasmaController::MBRight()
+{
+    sendCommand("$11010032%"); // $110dxxxx%  d=1,0 xxxx = num steps; resp[!110dxxxx#] when move STARTED
+    readResponse();
+}
+
+void PlasmaController::heaterOn()
+{
+    sendCommand("$CE35.0%"); // $CEtt.t% resp [!CEtt.t#] where tt.t is target temp in 'C. t=0 is off
+    readResponse();
+    Logger::logInfo("Preheat Plasma Recipe ON");
+}
+
+void PlasmaController::heaterOff()
+{
+    sendCommand("$CE00.0%"); // $CEtt.t% resp [!CEtt.t#] where tt.t is target temp in 'C. t=0 is off
+    readResponse();
+    Logger::logInfo("Preheat Plasma Recipe OFF");
 }
 
 void PlasmaController::howManyMFCs()
@@ -1017,8 +1237,6 @@ void PlasmaController::getBatchIDLogging() {
     else
         Logger::logCritical("Could Not retrieve Batch Logging, last requestData sent: " + getLastCommand());
 }
-
-
 
 void PlasmaController::getMFC4Range() {
     sendCommand("$8504%"); //GET_MFC_RANGE $850m% 1<=m<=4; resp[!850xxx.yy#]
@@ -1100,7 +1318,7 @@ void PlasmaController::getRecipeMBPosition() {
         Logger::logCritical("Could Not retrieve MB tuner setpoint, last requestData sent: " + getLastCommand() );
 }
 
-void PlasmaController::getRecipeRFPosition() {
+void PlasmaController::getRecipeRFPower() {
     sendCommand("$2A605%"); //GET RECIPE RF PWR Setpoint (Watts) $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
     QString response = readResponse();
     if (response.length() > 7) {

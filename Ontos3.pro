@@ -12,6 +12,8 @@ CONFIG += c++17
 # DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    src/Utilities.cpp \
+    src/abortcodemessages.cpp \
     src/passworddialog.cpp \
     src/diameter.cpp \
     src/lighttower.cpp \
@@ -24,9 +26,6 @@ SOURCES += \
     src/console.cpp \
     src/filereader.cpp \
     src/grblcontroller.cpp \
-    src/led.cpp \
-    src/ledfactory.cpp \
-    src/ledstatus.cpp \
     src/logger.cpp \
     src/main.cpp \
     src/mainloop.cpp \
@@ -42,6 +41,8 @@ SOURCES += \
 
 
 HEADERS += \
+    src/Utilities.h \
+    src/abortcodemessages.h \
     src/passworddialog.h \
     src/diameter.h \
     src/axescontroller.h \
@@ -53,9 +54,6 @@ HEADERS += \
     src/diameter.h \
     src/filereader.h \
     src/grblcontroller.h \
-    src/led.h \
-    src/ledfactory.h \
-    src/ledstatus.h \
     src/lighttower.h \
     src/logger.h \
     src/mainwindow.h \

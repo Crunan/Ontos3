@@ -26,8 +26,7 @@ PlasmaRecipe::PlasmaRecipe(QObject* parent) :
     m_xMaxPH(0),
     m_yMinPH(0),
     m_yMaxPH(0)
-{
-}
+{}
 
 
 PlasmaRecipe::~PlasmaRecipe() {
@@ -39,15 +38,13 @@ void PlasmaRecipe::setRecipeFromFile()
     QString absoluteFilePath = fileReader.getFilePath();
 
     QFile file(absoluteFilePath);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qDebug() << "Failed to open the file:" << file.errorString();
         return;
     }
 
     QTextStream in(&file);
-    while (!in.atEnd())
-    {
+    while (!in.atEnd()) {
         QString line = in.readLine().trimmed();
 
         QStringList list = line.split(">");
@@ -64,7 +61,6 @@ void PlasmaRecipe::setRecipeFromFile()
             else {
                 qDebug() << "Invalid line format:" << line;
             }
-
         }
         else {
             qDebug() << "Invalid line format:" << line;

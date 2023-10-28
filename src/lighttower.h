@@ -10,10 +10,10 @@ struct LightTower : public QObject {
 public:
     //Light Tower states
     enum LightState {
-        INACTIVE,
-        ERROR,
-        READY,
-        ACTIVE
+        LT_INACTIVE,
+        LT_ERROR,
+        LT_READY,
+        LT_ACTIVE
     };
 
     LightTower();

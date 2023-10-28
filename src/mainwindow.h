@@ -52,6 +52,7 @@ public slots:
     void setInitialUIState();
     void openRecipeWindowMFC();
     void stageStatusUpdate(QString statusNow, QString statusNext);
+    void showAbortMessageBox(QString message);
 
     // Main CTL Serial Port
     void openMainPort();
@@ -150,6 +151,18 @@ private slots:
     void on_actionConnect_triggered();
     void on_actionDisconnect_triggered();
     void on_actionSettings_triggered();
+    void on_MB_Right_Button_clicked();
+    void on_MB_Left_Button_clicked();
+    void on_heater_checkbox_stateChanged(int arg1);
+    void on_actionSet_Default_triggered();
+
+    void on_actionStart_triggered();
+
+    void on_actionStop_triggered();
+
+    void on_actionDetailed_Log_toggled(bool arg1);
+
+    void on_actionTest_Z_toggled(bool arg1);
 
 private:
     // Action Button methods
@@ -172,7 +185,7 @@ private:
     void consoleStageCTLSetup();
 
     void RunStartup();
-    void RunPolling();
+    void RunStatusPolling();
     void GetExeCfg();
     void loadConfigGUI(QStringList value);
     void setupMainStateMachine();

@@ -4,13 +4,10 @@
 #include <QString>
 #include "logger.h"
 #include <QTimer>
+#include "Utilities.h"
 
 const int AUX_INPUT_BUFFER_MAX_SIZE = 90;
 const int SERIAL_RESPONSE_TIMEOUT = 2000; // timeout waiting for control pcb response (milliseconds)
-
-const QString XAXIS_QSTR = "0";
-const QString YAXIS_QSTR = "1";
-const QString ZAXIS_QSTR = "2";
 
 // file scope
 bool joystickOnLast = false;
@@ -24,11 +21,15 @@ double ZposLast = 0.0;
 
 AxesController::AxesController(QObject *parent) :
     QObject(parent),
-    m_ledStatus(),
     m_twoSpotXFirstPoint(0),
     m_twoSpotXSecondPoint(0),
     m_twoSpotYFirstPoint(0),
     m_twoSpotYSecondPoint(0),
+    m_stageTestZEnabled(true),
+    m_detailedStageTestLogEnabled(true),
+    m_stageTestXCount(0),
+    m_stageTestYCount(0),
+    m_stageTestZCount(0),
     m_pSerialInterface(nullptr),
     m_Xaxis(this),
     m_Yaxis(this),
@@ -52,6 +53,7 @@ AxesController::AxesController(QObject *parent) :
     SetupInitAxesStateMachine();
     SetupHomeAxesStateMachine();
     SetupTwoSpotStateMachine();
+    SetupStageTestStateMachine();
 }
 
 AxesController::~AxesController()
@@ -82,6 +84,16 @@ AxesController::~AxesController()
     delete m_pTwoSpotShutdownState;
     delete m_pTwoSpotIdleState;
     delete m_pTwoSpotSuperState;
+
+    // cleanup stage test states
+    delete m_pStageTestIdleState;
+    delete m_pStageTestStartupState;
+    delete m_pStageTestMaxXState;
+    delete m_pStageTestMinXState;
+    delete m_pStageTestMaxYState;
+    delete m_pStageTestMinYState;
+    delete m_pStageTestShutdownState;
+    delete m_pStageTestSuperState;
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -95,15 +107,15 @@ void AxesController::SetupInitAxesStateMachine()
     m_pInitAxesInitializedState = new QState();
 
     // construct transitions
-    m_pInitAxesIdleState->addTransition(this, SIGNAL(ISM_TransitionStartup()), m_pInitAxesStartupState);
-    m_pInitAxesStartupState->addTransition(this, SIGNAL(ISM_TransitionWaitForDone()), m_pInitAxesWaitForDoneState);
-    m_pInitAxesWaitForDoneState->addTransition(this, SIGNAL(ISM_TransitionInitialized()), m_pInitAxesInitializedState);
-    m_pInitAxesInitializedState->addTransition(this, SIGNAL(ISM_TransitionIdle()), m_pInitAxesIdleState);
-    m_pInitAxesWaitForDoneState->addTransition(this, SIGNAL(ISM_TransitionIdle()), m_pInitAxesIdleState);
-    m_pInitAxesStartupState->addTransition(this, SIGNAL(ISM_TransitionIdle()), m_pInitAxesIdleState);
+    m_pInitAxesIdleState->addTransition(this, &AxesController::ISM_TransitionStartup, m_pInitAxesStartupState);
+    m_pInitAxesStartupState->addTransition(this, &AxesController::ISM_TransitionWaitForDone, m_pInitAxesWaitForDoneState);
+    m_pInitAxesWaitForDoneState->addTransition(this, &AxesController::ISM_TransitionInitialized, m_pInitAxesInitializedState);
+    m_pInitAxesInitializedState->addTransition(this, &AxesController::ISM_TransitionIdle, m_pInitAxesIdleState);
+    m_pInitAxesWaitForDoneState->addTransition(this, &AxesController::ISM_TransitionIdle, m_pInitAxesIdleState);
+    m_pInitAxesStartupState->addTransition(this, &AxesController::ISM_TransitionIdle, m_pInitAxesIdleState);
 
     // entry and exit connections
-    connect(m_pInitAxesIdleState, SIGNAL(entered()), this, SLOT(InitIdleOnEntry()));
+    connect(m_pInitAxesIdleState, &QState::entered, this, &AxesController::InitIdleOnEntry);
 
     // add states to the machine
     m_initStateMachine.addState(m_pInitAxesIdleState);
@@ -139,21 +151,21 @@ void AxesController::SetupHomeAxesStateMachine()
     m_homeStateMachine.addState(m_pHomeAxesIdleState);
 
     // add transitions to and from the super state
-    m_pHomeAxisSuperState->addTransition(this, SIGNAL(HSM_TransitionIdle()), m_pHomeAxesIdleState);
-    m_pHomeAxisSuperState->addTransition(this, SIGNAL(HSM_TransitionShutdown()), m_pHomeAxesShutdownState);
-    m_pHomeAxesIdleState->addTransition(this, SIGNAL(HSM_TransitionStartup()), m_pHomeAxisSuperState);
+    m_pHomeAxisSuperState->addTransition(this, &AxesController::HSM_TransitionIdle, m_pHomeAxesIdleState);
+    m_pHomeAxisSuperState->addTransition(this, &AxesController::HSM_TransitionShutdown, m_pHomeAxesShutdownState);
+    m_pHomeAxesIdleState->addTransition(this, &AxesController::HSM_TransitionStartup, m_pHomeAxisSuperState);
 
     // add the rest of the transitions
-    m_pHomeAxesStartupState->addTransition(this, SIGNAL(HSM_TransitionStartupToWaitParkZ()), m_pHomeAxesWaitParkZState);
-    m_pHomeAxesWaitParkZState->addTransition(this, SIGNAL(HSM_TransitionWaitParkZToHomeXY()), m_pHomeAxesHomeXYState);
-    m_pHomeAxesHomeXYState ->addTransition(this, SIGNAL(HSM_TransitionHomeXYToWaitHomeXY()), m_pHomeAxesWaitHomeXYState);
-    m_pHomeAxesWaitHomeXYState->addTransition(this, SIGNAL(HSM_TransitionHomeXYToHomeZ()), m_pHomeAxesHomeZState);
-    m_pHomeAxesHomeZState->addTransition(this, SIGNAL(HSM_TransitionHomeZToWaitHomeZ()), m_pHomeAxesWaitHomeZState);
-    m_pHomeAxesShutdownState->addTransition(this, SIGNAL(HSM_TransitionIdle()), m_pHomeAxesIdleState);
-    m_pHomeAxesIdleState->addTransition(this, SIGNAL(HSM_TransitionShutdown()), m_pHomeAxesShutdownState);
+    m_pHomeAxesStartupState->addTransition(this, &AxesController::HSM_TransitionStartupToWaitParkZ, m_pHomeAxesWaitParkZState);
+    m_pHomeAxesWaitParkZState->addTransition(this, &AxesController::HSM_TransitionWaitParkZToHomeXY, m_pHomeAxesHomeXYState);
+    m_pHomeAxesHomeXYState ->addTransition(this, &AxesController::HSM_TransitionHomeXYToWaitHomeXY, m_pHomeAxesWaitHomeXYState);
+    m_pHomeAxesWaitHomeXYState->addTransition(this, &AxesController::HSM_TransitionHomeXYToHomeZ, m_pHomeAxesHomeZState);
+    m_pHomeAxesHomeZState->addTransition(this, &AxesController::HSM_TransitionHomeZToWaitHomeZ, m_pHomeAxesWaitHomeZState);
+    m_pHomeAxesShutdownState->addTransition(this, &AxesController::HSM_TransitionIdle, m_pHomeAxesIdleState);
+    m_pHomeAxesIdleState->addTransition(this, &AxesController::HSM_TransitionShutdown, m_pHomeAxesShutdownState);
 
     // entry and exit connections
-    connect(m_pHomeAxesIdleState, SIGNAL(entered()), this, SLOT(HomeIdleOnEntry()));
+    connect(m_pHomeAxesIdleState, &QState::entered, this, &AxesController::HomeIdleOnEntry);
 
     // set initial state
     m_homeStateMachine.setInitialState(m_pHomeAxesIdleState);
@@ -182,27 +194,65 @@ void AxesController::SetupTwoSpotStateMachine()
     m_twoSpotStateMachine.addState(m_pTwoSpotIdleState);
 
     // add transitions to and from the super state
-    m_pTwoSpotSuperState->addTransition(this, SIGNAL(TSSM_TransitionIdle()), m_pTwoSpotIdleState);
-    m_pTwoSpotSuperState->addTransition(this, SIGNAL(TSSM_TransitionShutdown()), m_pTwoSpotShutdownState);
-    m_pTwoSpotIdleState->addTransition(this, SIGNAL(TSSM_TransitionStartup()), m_pTwoSpotSuperState);
+    m_pTwoSpotSuperState->addTransition(this, &AxesController::TSSM_TransitionIdle, m_pTwoSpotIdleState);
+    m_pTwoSpotSuperState->addTransition(this, &AxesController::TSSM_TransitionShutdown, m_pTwoSpotShutdownState);
+    m_pTwoSpotIdleState->addTransition(this, &AxesController::TSSM_TransitionStartup, m_pTwoSpotSuperState);
 
     // add the rest of the transitions
-    m_pTwoSpotStartupState->addTransition(this, SIGNAL(TSSM_TransitionGetFirst()), m_pTwoSpotGetFirstState);
-    m_pTwoSpotGetFirstState->addTransition(this, SIGNAL(TSSM_TransitionJoyBtnOff()), m_pTwoSpotWaitJoyBtnOffState);
-    m_pTwoSpotWaitJoyBtnOffState ->addTransition(this, SIGNAL(TSSM_TransitionGetSecond()), m_pTwoSpotGetSecondState);
-    //m_pTwoSpotGetSecondState->addTransition(this, SIGNAL(TSSM_TransitionShutdown()), m_pTwoSpotShutdownState);
-    m_pTwoSpotGetSecondState->addTransition(this, SIGNAL(TSSM_TransitionJoyBtnOff2()), m_pTwoSpotWaitJoyBtnOff2State);
-    m_pTwoSpotWaitJoyBtnOff2State->addTransition(this, SIGNAL(TSSM_TransitionShutdown()), m_pTwoSpotShutdownState);
-    m_pTwoSpotShutdownState->addTransition(this, SIGNAL(TSSM_TransitionIdle()), m_pTwoSpotIdleState);
+    m_pTwoSpotStartupState->addTransition(this, &AxesController::TSSM_TransitionGetFirst, m_pTwoSpotGetFirstState);
+    m_pTwoSpotGetFirstState->addTransition(this, &AxesController::TSSM_TransitionJoyBtnOff, m_pTwoSpotWaitJoyBtnOffState);
+    m_pTwoSpotWaitJoyBtnOffState ->addTransition(this, &AxesController::TSSM_TransitionGetSecond, m_pTwoSpotGetSecondState);
+    m_pTwoSpotGetSecondState->addTransition(this, &AxesController::TSSM_TransitionJoyBtnOff2, m_pTwoSpotWaitJoyBtnOff2State);
+    m_pTwoSpotShutdownState->addTransition(this, &AxesController::TSSM_TransitionIdle, m_pTwoSpotIdleState);
 
     // entry and exit connections
-    connect(m_pTwoSpotIdleState, SIGNAL(entered()), this, SLOT(TwoSpotIdleOnEntry()));
+    connect(m_pTwoSpotIdleState, &QState::entered, this, &AxesController::TwoSpotIdleOnEntry);
 
     // set initial state
     m_twoSpotStateMachine.setInitialState(m_pTwoSpotIdleState);
 
     // start the state machine
     m_twoSpotStateMachine.start();
+}
+
+void AxesController::SetupStageTestStateMachine()
+{
+    // stage test state machine
+    m_pStageTestSuperState = new QState();
+    m_pStageTestStartupState = new QState(m_pStageTestSuperState);
+    m_pStageTestMaxXState = new QState(m_pStageTestSuperState);
+    m_pStageTestMinXState = new QState(m_pStageTestSuperState);
+    m_pStageTestMaxYState = new QState(m_pStageTestSuperState);
+    m_pStageTestMinYState = new QState(m_pStageTestSuperState);
+    m_pStageTestIdleState = new QState();
+    m_pStageTestShutdownState = new QState();
+
+    // set super state machine initial state and add it to the state machine
+    m_pStageTestSuperState->setInitialState(m_pStageTestStartupState);
+    m_stageTestStateMachine.addState(m_pStageTestSuperState);
+
+    // add the rest of the states
+    m_stageTestStateMachine.addState(m_pStageTestShutdownState);
+    m_stageTestStateMachine.addState(m_pStageTestIdleState);
+
+    // add transitions to and from the super state
+    m_pStageTestSuperState->addTransition(this, &AxesController::STSM_TransitionIdle, m_pStageTestIdleState);
+    m_pStageTestSuperState->addTransition(this, &AxesController::STSM_TransitionShutdown, m_pStageTestShutdownState);
+    m_pStageTestIdleState->addTransition(this, &AxesController::STSM_TransitionStartup, m_pStageTestSuperState);
+
+    // add the rest of the transitions
+    m_pStageTestStartupState->addTransition(this, &AxesController::STSM_TransitionMaxX, m_pStageTestMaxXState);
+    m_pStageTestMaxXState->addTransition(this, &AxesController::STSM_TransitionMaxY, m_pStageTestMaxYState);
+    m_pStageTestMaxYState ->addTransition(this, &AxesController::STSM_TransitionMinX, m_pStageTestMinXState);
+    m_pStageTestMinXState->addTransition(this, &AxesController::STSM_TransitionMinY, m_pStageTestMinYState);
+    m_pStageTestMinYState->addTransition(this, &AxesController::STSM_TransitionMaxX, m_pStageTestMaxXState);
+    m_pStageTestShutdownState->addTransition(this, &AxesController::STSM_TransitionShutdown, m_pStageTestIdleState);
+
+    // set initial state
+    m_stageTestStateMachine.setInitialState(m_pStageTestIdleState);
+
+    // start the state machine
+    m_stageTestStateMachine.start();
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -281,7 +331,6 @@ void AxesController::RunInitAxesSM()
         // no op
     }
     else if (m_initStateMachine.configuration().contains(m_pInitAxesInitializedState)) { // in initialized state
-
         // retain the initilized state
         m_axesInitialized = true;
 
@@ -317,8 +366,11 @@ void AxesController::RunHomeAxesSM()
             emit setUIHomeSMStartup();
             emit stageStatusUpdate("Homing Startup - Parking Z", "Homing X & Y");
 
-            move(ZAXIS_QSTR, m_Zaxis.getMaxSpeedQStr(), m_stage.getPinsBuriedPosQStr());
-            Logger::logInfo("Homing Start.  Speed = " + m_Zaxis.getMaxSpeedQStr());
+            move(ZAXIS_COMMAND_NUM, m_Zaxis.getMaxSpeed(), m_stage.getPinsBuriedPos());
+            Logger::logInfo("Homing Start");
+
+            QString logStr = "Move Z at: " + getZMaxSpeedQStr() + " /sec ";
+            Logger::logInfo(logStr + "to: " + QString::number(m_stage.getPinsBuriedPos(), 'f', 2));
 
             // transition to wait_park_z
             emit HSM_TransitionStartupToWaitParkZ();
@@ -341,16 +393,14 @@ void AxesController::RunHomeAxesSM()
         // update the UI
         emit stageStatusUpdate("Homing X & Y", "Homing Z");
 
-        move(XAXIS_QSTR, m_Xaxis.getMaxSpeedQStr(), m_Xaxis.getHomePosQStr());
-        move(YAXIS_QSTR, m_Yaxis.getMaxSpeedQStr(), m_Yaxis.getHomePosQStr());
+        Logger::logInfo("Homing X & Y");
+        Logger::logInfo("Move X Speed: " + m_Xaxis.getMaxSpeedQStr() + " /sec" + "Move Y Speed: " +
+                        m_Yaxis.getMaxSpeedQStr() + " /sec");
 
-        QString sMsg("Homing X & Y."
-                     " X speed = " + m_Xaxis.getMaxSpeedQStr() +
-                     " X pos = " + m_Xaxis.getHomePosQStr() +
-                     " Y speed = " + m_Yaxis.getMaxSpeedQStr() +
-                     " Y pos = " + m_Yaxis.getHomePosQStr());
+        move(XAXIS_COMMAND_NUM, m_Xaxis.getMaxSpeed(), m_Xaxis.getHomePos());
+        move(YAXIS_COMMAND_NUM, m_Yaxis.getMaxSpeed(), m_Yaxis.getHomePos());
 
-        Logger::logInfo(sMsg);
+        Logger::logInfo("X to: " + m_Xaxis.getHomePosQStr() + " Y to: " + m_Yaxis.getHomePosQStr());
 
         // transition to wait home XY
         emit HSM_TransitionHomeXYToWaitHomeXY();
@@ -372,7 +422,9 @@ void AxesController::RunHomeAxesSM()
 
         Logger::logInfo("Homing Z");
 
-        move(ZAXIS_QSTR, m_Zaxis.getMaxSpeedQStr(), m_stage.getPinsBuriedPosQStr());
+        move(ZAXIS_COMMAND_NUM, m_Zaxis.getMaxSpeed(), m_stage.getPinsBuriedPos());
+
+        Logger::logInfo("Z to " + QString::number(m_stage.getPinsBuriedPos(), 'f', 2));
 
         // transition to wait home Z
         emit HSM_TransitionHomeZToWaitHomeZ();
@@ -403,7 +455,7 @@ void AxesController::RunHomeAxesSM()
 
         stopMotors();
 
-        move(ZAXIS_QSTR, m_Zaxis.getMaxSpeedQStr(), m_stage.getPinsBuriedPosQStr());
+        move(ZAXIS_COMMAND_NUM, m_Zaxis.getMaxSpeed(), m_stage.getPinsBuriedPos());
 
         // transition to idle
         emit HSM_TransitionIdle();
@@ -413,7 +465,6 @@ void AxesController::RunHomeAxesSM()
 
     }
     else if (m_homeStateMachine.configuration().contains(m_pHomeAxesIdleState)) { // in idle state
-
         // no op
     }
 }
@@ -507,16 +558,193 @@ void AxesController::RunTwoSpotSM()
 
     }
     else if (m_twoSpotStateMachine.configuration().contains(m_pTwoSpotIdleState)) {
-
         // no op
     }
 }
-
 
 void AxesController::TwoSpotIdleOnEntry()
 {
     // updat the UI
     emit setUITwoSpotSMDone();
+}
+
+void AxesController::RunStageTestSM()
+{
+    if (m_stageTestStateMachine.configuration().contains(m_pStageTestStartupState)) {
+
+        // disable other state machines if they are active
+        emit TSSM_TransitionIdle();
+        emit HSM_TransitionIdle();
+        emit ScanSM_TransitionIdle();
+
+        // reset counters
+        m_stageTestXCount = 0;
+        m_stageTestYCount = 0;
+        m_stageTestZCount = 0;
+
+        // update UI
+        emit STSM_TransitionMaxX();
+
+        Logger::logInfo("Stage Test Started");
+    }
+    else if (m_stageTestStateMachine.configuration().contains(m_pStageTestMaxXState)) {
+
+        if (nextStateReady()) {
+
+            Logger::logInfo("Stage Test - Max X");
+
+            // set in constructor
+            if (m_detailedStageTestLogEnabled)
+                Logger::logInfo("X movements: " + QString::number(m_stageTestXCount));
+
+            // update UI
+            emit stageStatusUpdate("X axis move to: " + m_Xaxis.getMaxPosQStr() + " at speed: " + m_Xaxis.getMaxSpeedQStr(), "");
+
+            // set speed and intiate move
+            move(XAXIS_COMMAND_NUM, m_Xaxis.getMaxSpeed(), m_Xaxis.getMaxPos());
+            m_stageTestXCount++;
+
+            // set in constructor
+            if (m_stageTestZEnabled)
+                stageTestZMax();
+
+            emit STSM_TransitionMaxY();
+        }
+    }
+    else if (m_stageTestStateMachine.configuration().contains(m_pStageTestMaxYState)) {
+
+        if (nextStateReady()) {
+
+            Logger::logInfo("Stage Test - Max Y");
+
+            // set in constructor
+            if (m_detailedStageTestLogEnabled)
+                Logger::logInfo("Y movements: " + QString::number(m_stageTestYCount));
+
+            // update UI
+            emit stageStatusUpdate("Y axis move to: " + m_Yaxis.getMaxPosQStr() + " at speed: " + m_Yaxis.getMaxSpeedQStr(), "");
+
+            // set speed and intiate move
+            move(YAXIS_COMMAND_NUM, m_Yaxis.getMaxSpeed(), m_Yaxis.getMaxPos());
+            m_stageTestYCount++;
+
+            // set in constructor
+            if (m_stageTestZEnabled)
+                stageTestZMin();
+
+            emit STSM_TransitionMinX();
+        }
+    }
+    else if (m_stageTestStateMachine.configuration().contains(m_pStageTestMinXState)) {
+
+        if (nextStateReady()) {
+
+            Logger::logInfo("Stage Test - Min X");
+
+            // set in constructor
+            if (m_detailedStageTestLogEnabled)
+                Logger::logInfo("X movements: " + QString::number(m_stageTestXCount));
+
+            // update UI
+            emit stageStatusUpdate("X axis move to: 0 at speed: " + m_Xaxis.getMaxSpeedQStr(), "");
+
+            // set speed and intiate move
+            move(XAXIS_COMMAND_NUM, m_Xaxis.getMaxSpeed(), 0);
+            m_stageTestXCount++;
+
+            // set in constructor
+            if (m_stageTestZEnabled)
+                stageTestZMax();
+
+            emit STSM_TransitionMinY();
+        }
+    }
+    else if (m_stageTestStateMachine.configuration().contains(m_pStageTestMinYState)) {
+
+        if (nextStateReady()) {
+
+            Logger::logInfo("Stage Test - Min Y");
+
+            // set in constructor
+            if (m_detailedStageTestLogEnabled)
+                Logger::logInfo("Y movements: " + QString::number(m_stageTestYCount));
+
+            // update UI
+            emit stageStatusUpdate("Y axis move to: 0 at speed: " + m_Yaxis.getMaxSpeedQStr(), "");
+
+            // set speed and intiate move
+            move(YAXIS_COMMAND_NUM, m_Yaxis.getMaxSpeed(), 0);
+            m_stageTestYCount++;
+
+            // set in constructor
+            if (m_stageTestZEnabled)
+                stageTestZMin();
+
+            emit STSM_TransitionMaxX();
+        }
+    }
+    else if (m_stageTestStateMachine.configuration().contains(m_pStageTestShutdownState)) {
+
+        Logger::logInfo("Stage Test Shutting Down");
+
+        // update UI
+        emit stageStatusUpdate("", "");
+
+        stopAllMotors();
+
+        emit STSM_TransitionIdle();
+    }
+    else if (m_stageTestStateMachine.configuration().contains(m_pStageTestIdleState)) {
+        // no op
+    }
+}
+
+void AxesController::stageTestZMax()
+{
+    Logger::logInfo("Stage Test - Max Z");
+
+    // set in constructor
+    if (m_detailedStageTestLogEnabled)
+        Logger::logInfo("Z movements: " + QString::number(m_stageTestZCount));
+
+    // update UI
+    emit stageStatusUpdate("Z axis move to: " + m_Zaxis.getMaxPosQStr() + " at speed: " + m_Zaxis.getMaxSpeedQStr(), "");
+
+    // set speed and intiate move
+    move(ZAXIS_COMMAND_NUM, m_Zaxis.getMaxSpeed(), m_Zaxis.getMaxPos());
+
+    m_stageTestZCount++;
+}
+
+void AxesController::stageTestZMin()
+{
+    Logger::logInfo("Stage Test - Min Z");
+
+    // set in constructor
+    if (m_detailedStageTestLogEnabled)
+        Logger::logInfo("Z movements: " + QString::number(m_stageTestZCount));
+
+    // update UI
+    emit stageStatusUpdate("X axis move to: 0 at speed: " + m_Zaxis.getMaxSpeedQStr(), "");
+
+    // set speed and intiate move
+    move(ZAXIS_COMMAND_NUM, m_Zaxis.getMaxSpeed(), 0);
+
+    m_stageTestZCount++;
+}
+
+// returns true if any state machine is active (non idle state)
+bool AxesController::axisStateMachineActive()
+{
+    if (m_initStateMachine.configuration().contains(m_pInitAxesIdleState) ||
+        m_homeStateMachine.configuration().contains(m_pHomeAxesIdleState) ||
+        m_twoSpotStateMachine.configuration().contains(m_pTwoSpotIdleState) ||
+        m_stageTestStateMachine.configuration().contains(m_pStageTestIdleState)) {
+        return false;
+    }
+    else {
+        return true;
+    }
 }
 
 void AxesController::checkAndSetXDimensions()
@@ -547,38 +775,6 @@ void AxesController::checkAndSetYDimensions()
         max = m_twoSpotYSecondPoint;
     }
     emit yLimitsChanged(min, max);
-}
-
-
-void AxesController::move(QString axis, QString speed, QString position)
-{
-    setSpeed(axis, speed);
-    setAbsMove(axis, position);
-}
-
-void AxesController::setSpeed(QString axis, QString speed)
-{
-    QString command;
-    command = "$B40" + axis + speed + "%";
-    sendCommand(command);
-    QString response = readResponse();
-
-    // update UI
-    emit stageResponseReceived(response);
-
-    Logger::logInfo("Move " + axis + " Speed: " + speed + " /sec ");
-}
-void AxesController::setAbsMove(QString axis, QString position)
-{
-    QString command;
-    command = "$B60" + axis + position + "%";
-    sendCommand(command);
-    QString response = readResponse();
-
-    // update UI
-    emit stageResponseReceived(response);
-
-    Logger::logInfo("Move " + axis + " to: " + position);
 }
 
 void AxesController::setSameStateXYZsame()
@@ -628,12 +824,14 @@ void AxesController::sendInitCMD()
     readResponse();
 }
 
-
 void AxesController::AxisStartup()
 {
     getXMaxSpeed();
     getYMaxSpeed();
     getZMaxSpeed();
+    getXMaxPosition();
+    getYMaxPosition();
+    getZMaxPosition();
     getXp2Base();
     getYp2Base();
     getZp2Base();
@@ -671,7 +869,11 @@ void AxesController::setLEDstate(QString firstHexStrNibble, QString secondHexStr
     m_LEDstates = firstHexStrNibble.toInt(&ok, 16); //First byte
     m_LEDstates = m_LEDstates<<8;
     m_LEDstates += secondHexStrNibble.toInt(&ok, 16); //First byte
-    m_ledStatus.setStatusBits(m_LEDstates);
+
+    if (m_LEDstates != LEDStatesLast) {
+        LEDStatesLast = m_LEDstates;
+        Logger::logDebug("Axis CTL LEDstates:" + QString::number(m_LEDstates, 2));
+    }
 }
 
 void AxesController::updateAxisStatus()
@@ -833,17 +1035,12 @@ void AxesController::N2PurgeStatus()
     }
 }
 
-bool AxesController::isBitSet(int test_int, int bit_pos)
+void AxesController::move(int axisCommandNum, float speed, float position)
 {
-    int bitmask{};
+    setAxisSpeed(axisCommandNum, speed);
+    moveAxisAbsolute(axisCommandNum, position);
 
-    bitmask = 1<<bit_pos;
-    if (test_int & bitmask) {
-        return true;
-    }
-    else {
-        return false;
-    }
+    Logger::logDebug("Move " + QString::number(axisCommandNum) + " to: " + QString::number(position, 'f', 2) + " at speed: " + QString::number(speed, 'f', 2));
 }
 
 void AxesController::moveAxisAbsolute(int axisCommandNum, float targetPosition)
@@ -929,6 +1126,58 @@ void AxesController::getZMaxSpeed()
     else
         Logger::logCritical("Could Not get max speed for Z, last requestData: " + getLastCommand());
 }
+
+void AxesController::getXMaxPosition()
+{
+    sendCommand("$DA106%"); // GET_X_MAX_POSITION  X maximum allowed position in MM (float) $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value
+    QString response = readResponse();
+    if (response.length() > 7) {
+        QString StrVar = response.mid(7, (response.length() - 8));
+        bool ok = false;
+        double maxPos = StrVar.toDouble(&ok);
+        if (ok) {
+            m_Xaxis.saveMaxPos(maxPos);
+            Logger::logInfo("X Max Pos: " + StrVar + "");
+        }
+    }
+    else
+        Logger::logCritical("Could Not get max position for X, last requestData: " + getLastCommand());
+}
+
+void AxesController::getYMaxPosition()
+{
+    sendCommand("$DA206%"); // GET_Y_MAX_POSITION Y maximum allowed position in MM (float) $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value
+    QString response = readResponse();
+    if (response.length() > 7) {
+        QString StrVar = response.mid(7, (response.length() - 8));
+        bool ok = false;
+        double maxPos = StrVar.toDouble(&ok);
+        if (ok) {
+            m_Yaxis.saveMaxPos(maxPos);
+            Logger::logInfo("Y Max Pos: " + StrVar + "");
+        }
+    }
+    else
+        Logger::logCritical("Could Not get max position for Y, last requestData: " + getLastCommand());
+}
+
+void AxesController::getZMaxPosition()
+{
+    sendCommand("$DA306%"); // GET_Z_MAX_POSITION  Z maximum allowed position in MM (float) $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value
+    QString response = readResponse();
+    if (response.length() > 7) {
+        QString StrVar = response.mid(7, (response.length() - 8));
+        bool ok = false;
+        double maxPos = StrVar.toDouble(&ok);
+        if (ok) {
+            m_Zaxis.saveMaxPos(maxPos);
+            Logger::logInfo("Z Max Pos: " + StrVar + "");
+        }
+    }
+    else
+        Logger::logCritical("Could Not get max position for Z, last requestData: " + getLastCommand());
+}
+
 void AxesController::getXp2Base()
 {
     sendCommand("$DA510%"); //GET Xp_2Base  $DAxxxx% xxxx = index number =>resp [!DAxxxx;vv..vv#] vv..vv = value
@@ -1097,6 +1346,7 @@ void AxesController::setAxisStateMachinesIdle()
     emit HSM_TransitionIdle(); // home state machine to idle
     emit TSSM_TransitionIdle();// two spot state machine to idle
     emit ScanSM_TransitionIdle(); // scan state machine
+    emit STSM_TransitionIdle(); // stage test
 }
 
 

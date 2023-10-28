@@ -63,6 +63,9 @@ QProgressBar::Chunk
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QTabWidget" name="mainTabWidget">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -1371,6 +1374,9 @@ font: 700 16pt &quot;Ubuntu Mono&quot;;</string>
              <property name="frameShadow">
               <enum>QFrame::Raised</enum>
              </property>
+             <property name="smallDecimalPoint">
+              <bool>false</bool>
+             </property>
              <property name="digitCount">
               <number>3</number>
              </property>
@@ -1514,6 +1520,9 @@ QProgressBar::Chunk
              </property>
              <property name="frameShadow">
               <enum>QFrame::Raised</enum>
+             </property>
+             <property name="smallDecimalPoint">
+              <bool>true</bool>
              </property>
              <property name="digitCount">
               <number>3</number>
@@ -1805,6 +1814,12 @@ background-color: blue;
                </property>
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
+               </property>
+               <property name="tickPosition">
+                <enum>QSlider::NoTicks</enum>
+               </property>
+               <property name="tickInterval">
+                <number>0</number>
                </property>
               </widget>
              </item>
@@ -3190,9 +3205,20 @@ font: 14pt &quot;Ubuntu Bold&quot;;
     <property name="title">
      <string>Service</string>
     </property>
+    <widget class="QMenu" name="menuStage_Test">
+     <property name="title">
+      <string>Stage Test</string>
+     </property>
+     <addaction name="actionStart"/>
+     <addaction name="actionStop"/>
+     <addaction name="actionDetailed_Log"/>
+     <addaction name="actionTest_Z"/>
+    </widget>
     <addaction name="separator"/>
     <addaction name="actionEngineer_Mode"/>
     <addaction name="actionOperator_Mode"/>
+    <addaction name="actionSet_Default"/>
+    <addaction name="menuStage_Test"/>
     <addaction name="actionAbout"/>
    </widget>
    <widget class="QMenu" name="menuSerial">
@@ -3234,6 +3260,43 @@ font: 14pt &quot;Ubuntu Bold&quot;;
   <action name="actionAbout">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionSet_Default">
+   <property name="text">
+    <string>Set Default Recipe</string>
+   </property>
+  </action>
+  <action name="actionStart">
+   <property name="text">
+    <string>Start</string>
+   </property>
+  </action>
+  <action name="actionStop">
+   <property name="text">
+    <string>Stop</string>
+   </property>
+  </action>
+  <action name="actionDetailed_Log">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Detailed Log</string>
+   </property>
+  </action>
+  <action name="actionTest_Z">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Test Z</string>
    </property>
   </action>
  </widget>

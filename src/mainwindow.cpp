@@ -69,6 +69,14 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(&m_mainCTL.getTuner(), &Tuner::actualPositionChanged, this, &MainWindow::MBactualPositionChanged);
     connect(&m_passDialog, &PasswordDialog::userEnteredPassword, this, &MainWindow::userEnteredPassword);
     connect(m_mainCTL.getSerialInterface(), &SerialInterface::serialClosed, this, &MainWindow::closeMainPort);
+    connect(&m_mainCTL.getAbortMessages(), &AbortCodeMessages::showAbortMessageBox, this, &MainWindow::showAbortMessageBox);
+
+    // disable until implemented
+    ui->mainTabWidget->setTabEnabled(1, false);
+    ui->request_terminal->setEnabled(false);
+    ui->batchID_checkBox->setEnabled(false);
+    ui->ctldiagnostics_checkbox->setEnabled(false);
+    ui->mfc_loaded_checkbox->setEnabled(false);
 
     // Make signal/slot connections here
     connectRecipeButtons(); // TODO: remove these and replace with designer click handlers
@@ -268,6 +276,7 @@ void MainWindow::initStateMachineStartup()
     ui->wafer_diameter->setEnabled(false);
     ui->scan_button->setEnabled(false);
     ui->Home_button->setEnabled(false);
+    ui->menuStage_Test->setEnabled(false);
 }
 
 // set ui elements accordingly
@@ -286,6 +295,8 @@ void MainWindow::initStateMachineDone()
         ui->diameter_button->setEnabled(true);
         ui->wafer_diameter->setEnabled(true);
         ui->diameter_button->setEnabled(true);
+        ui->menuStage_Test->setEnabled(true);
+        ui->Joystick_button->setEnabled(true);
     }
 }
 
@@ -437,7 +448,6 @@ void MainWindow::handleMainSerialError(QSerialPort::SerialPortError error)
     }
 }
 
-
 //////////////////////////////////////////////////////////////////////////////////
 // State machine and execution
 //////////////////////////////////////////////////////////////////////////////////
@@ -449,18 +459,18 @@ void MainWindow::setupMainStateMachine()
     m_pMainShutdownState = new QState();
 
     // construct operating transitions
-    m_pMainStartupState->addTransition(this, SIGNAL(MSM_TransitionPolling()), m_pMainPollingState);
-    m_pMainIdleState->addTransition(this, SIGNAL(MSM_TransitionStartup()), m_pMainStartupState);
+    m_pMainStartupState->addTransition(this, &MainWindow::MSM_TransitionPolling, m_pMainPollingState);
+    m_pMainIdleState->addTransition(this, &MainWindow::MSM_TransitionStartup, m_pMainStartupState);
 
     // shutdown transitions
-    m_pMainStartupState->addTransition(this, SIGNAL(MSM_TransitionShutdown()), m_pMainShutdownState);
-    m_pMainPollingState->addTransition(this, SIGNAL(MSM_TransitionShutdown()), m_pMainShutdownState);
-    m_pMainIdleState->addTransition(this, SIGNAL(MSM_TransitionShutdown()), m_pMainShutdownState);
+    m_pMainStartupState->addTransition(this, &MainWindow::MSM_TransitionShutdown, m_pMainShutdownState);
+    m_pMainPollingState->addTransition(this, &MainWindow::MSM_TransitionShutdown, m_pMainShutdownState);
+    m_pMainIdleState->addTransition(this, &MainWindow::MSM_TransitionShutdown, m_pMainShutdownState);
 
     // idle transitions
-    m_pMainStartupState->addTransition(this, SIGNAL(MSM_TransitionIdle()), m_pMainIdleState);
-    m_pMainPollingState->addTransition(this, SIGNAL(MSM_TransitionIdle()), m_pMainIdleState);
-    m_pMainShutdownState->addTransition(this, SIGNAL(MSM_TransitionIdle()), m_pMainIdleState);
+    m_pMainStartupState->addTransition(this, &MainWindow::MSM_TransitionIdle, m_pMainIdleState);
+    m_pMainPollingState->addTransition(this, &MainWindow::MSM_TransitionIdle, m_pMainIdleState);
+    m_pMainShutdownState->addTransition(this, &MainWindow::MSM_TransitionIdle, m_pMainIdleState);
 
     // add states to the machine
     m_mainStateMachine.addState(m_pMainIdleState);
@@ -494,11 +504,12 @@ void MainWindow::runMainStateMachine()
         SM_PollCounter += 1;
         if (SM_PollCounter >= SM_POLL_PERIOD) {
             SM_PollCounter = 0;
-            RunPolling();
+            RunStatusPolling();
             m_mainCTL.setLightTower();
-            // HandleDoorAbort() TODO: Need to implement // run the Door Abort state machine
+            m_mainCTL.RunDoorOpenSM();
             m_mainCTL.getAxesController().RunInitAxesSM();
             m_mainCTL.getAxesController().RunTwoSpotSM();
+            m_mainCTL.getAxesController().RunStageTestSM();
             m_mainCTL.getAxesController().RunHomeAxesSM();
             m_mainCTL.RunScanAxesSM();
             m_mainCTL.RunCollisionSM();
@@ -511,8 +522,7 @@ void MainWindow::runMainStateMachine()
     }
 }
 
-
-void MainWindow::RunPolling()
+void MainWindow::RunStatusPolling()
 {
     m_mainCTL.getCTLStatusCommand();
     m_mainCTL.getAxesController().getAxisStatus();
@@ -548,6 +558,11 @@ void MainWindow::SSM_StatusUpdate(QString status, QString next)
 {
     ui->axisstatus->setText(status);
     ui->axisstatus_2->setText(next);
+}
+
+void MainWindow::showAbortMessageBox(QString message)
+{
+    QMessageBox::critical(this, "ABORT CONDITION", message);
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -694,9 +709,11 @@ void MainWindow::openRecipe()
         // set recipe path and file
         m_mainCTL.setRecipe(filePath);
 
+        Logger::logInfo("Recipe opened: " + filePath);
+
     } else {
         // User canceled the file dialog
-        qDebug() << "File selection canceled.";
+        Logger::logDebug("File selection canceled.");
     }
 }
 
@@ -775,15 +792,16 @@ void MainWindow::saveRecipe() {
             }
 
             file.close();
-            qDebug() << "Recipe saved to file: " << filePath;
+
+            Logger::logInfo("Recipe saved to file: " + filePath);
        } else {
-            qDebug() << "Failed to open file for writing: " << file.errorString();
+            Logger::logInfo("Failed to open file for writing: " + file.errorString());
        }
     }
 }
 
 
-// update the recipe progress bar and value
+// update the recipe progress bar and values
 void MainWindow::updateRecipeFlow(const int mfcNumber, const double recipeFlow)
 {
     // This uses the parameters passed in the signal
@@ -795,10 +813,10 @@ void MainWindow::updateRecipeFlow(const int mfcNumber, const double recipeFlow)
        ui->gas1_sliderBar->setValue(int(percentage));
 
        // set dashboard and plasma tab recipe edit box
-       ui->mfc1_recipe->setText(QString::number(recipeFlow));
+       ui->mfc1_recipe->setText(QString::number(recipeFlow, 'f', 2));
 
        // set the dashboard and plasma tab edit box below the progress bar
-       ui->gas1_recipe_SLPM->setText(QString::number(percentage));
+       ui->gas1_recipe_SLPM->setText(QString::number(recipeFlow, 'f', 2));
     }
     else if (mfcNumber == 2) {
        // set vertical progress bar
@@ -808,10 +826,10 @@ void MainWindow::updateRecipeFlow(const int mfcNumber, const double recipeFlow)
        ui->gas2_sliderBar->setValue(int(percentage));
 
        // set dashboard and plasma tab recipe edit box
-       ui->mfc2_recipe->setText(QString::number(recipeFlow));
+       ui->mfc2_recipe->setText(QString::number(recipeFlow, 'f', 2));
 
        // set the dashboard and plasma tab edit box below the progress bar
-       ui->gas2_recipe_SLPM->setText(QString::number(percentage));
+       ui->gas2_recipe_SLPM->setText(QString::number(recipeFlow, 'f', 2));
     }
     else if (mfcNumber == 3) {
        // set vertical progress bar
@@ -821,10 +839,10 @@ void MainWindow::updateRecipeFlow(const int mfcNumber, const double recipeFlow)
        ui->gas3_sliderBar->setValue(int(percentage));
 
        // set dashboard and plasma tab recipe edit box
-       ui->mfc3_recipe->setText(QString::number(recipeFlow));
+       ui->mfc3_recipe->setText(QString::number(recipeFlow, 'f', 2));
 
        // set the dashboard and plasma tab edit box below the progress bar
-       ui->gas3_recipe_SLPM->setText(QString::number(percentage));
+       ui->gas3_recipe_SLPM->setText(QString::number(recipeFlow, 'f', 2));
     }
     else if (mfcNumber == 4) {
        // set vertical progress bar
@@ -834,10 +852,10 @@ void MainWindow::updateRecipeFlow(const int mfcNumber, const double recipeFlow)
        ui->gas4_sliderBar->setValue(int(percentage));
 
        // set dashboard and plasma tab recipe edit box
-       ui->mfc4_recipe->setText(QString::number(recipeFlow));
+       ui->mfc4_recipe->setText(QString::number(recipeFlow, 'f', 2));
 
        // set the dashboard and plasma tab edit box below the progress bar
-       ui->gas4_recipe_SLPM->setText(QString::number(percentage));
+       ui->gas4_recipe_SLPM->setText(QString::number(recipeFlow, 'f', 2));
     }
 }
 
@@ -1112,7 +1130,7 @@ void MainWindow::on_removeCascadeRecipeButton_clicked()
 
 }
 
-// clear cascade recipe button
+// clear cascade recipe buttonui->menuStage_Test->setEnabled(false);
 void MainWindow::on_clear_cascade_recipe_button_clicked()
 {
 
@@ -1199,7 +1217,7 @@ void MainWindow::on_Joystick_button_toggled(bool checked)
         m_mainCTL.getAxesController().toggleJoystickOn();
     }
     else {
-        m_mainCTL.getAxesController().toggleJoystickOff();
+        m_mainCTL.getAxesController().toggleJoystickOff();ui->menuStage_Test->setEnabled(false);
     }
 }
 
@@ -1258,16 +1276,17 @@ void MainWindow::on_vac_button_toggled(bool checked)
 // plasma button on dashboard
 void MainWindow::on_plsmaBtn_toggled(bool checked)
 {
-//    If b_HasCollision = True And b_autoScanActive And Not CTL.isPlasmaActive() Then
-//                            b_PlannedAutoStart = True 'this will make sure we dont accidently start plasma when just clicking RUN SCAN button
-//            If SMScan.State = SCSM_IDLE Then
-//                                                                                                                                SMScan.ExternalNewState = SCSM_START_UP
-//              SMScan.b_ExternalStateChange = True  'Start Collision test while auto scan is ON
-//            End If
-//            Else
-//                b_ToggleRunRecipe = True
-//            End If
+    // I'm not sure if b_HasCollision is needed in this system but keeping it hardcoded here until I know
+    bool b_HasCollision = true;
+    if (b_HasCollision && m_mainCTL.getRecipe()->getAutoScanBool() && !m_mainCTL.getPlasmaActive()) {
+        //m_plannedAutoStart = true; //this will make sure we dont accidently start plasma when just clicking RUN SCAN button
+        m_mainCTL.StartScan();
+    }
+    else {
+        m_mainCTL.RunRecipe(true); // turn on recipe execution
+    }
 
+    // start/stop the scan state machine
     if (checked) {
         m_mainCTL.StopScan();
     }
@@ -1479,6 +1498,29 @@ void MainWindow::on_y2_set_clicked()
 
 }
 
+// right arrow button
+void MainWindow::on_MB_Right_Button_clicked()
+{
+    m_mainCTL.MBRight();
+}
+
+// left arrow button
+void MainWindow::on_MB_Left_Button_clicked()
+{
+    m_mainCTL.MBLeft();
+}
+
+// heater on tool settings tab
+void MainWindow::on_heater_checkbox_stateChanged(int arg1)
+{
+    if (arg1 == Qt::Checked) {
+        m_mainCTL.heaterOn();
+    }
+    else {
+        m_mainCTL.heaterOff();
+    }
+}
+
 // Engineer choice from service menu
 void MainWindow::on_actionEngineer_Mode_triggered()
 {
@@ -1516,13 +1558,11 @@ void MainWindow::setUIEngineerMode()
     ui->loadMBButton->setEnabled(true);
     ui->loadAutoTuneButton->setEnabled(true);
     ui->loadSpeedButton->setEnabled(true);
-    ui->diameter_button->setEnabled(true);
-    ui->twospot_button->setEnabled(true);
-    ui->wafer_diameter->setEnabled(true);
     ui->n2_purge_button->setEnabled(true);
     ui->plsmaBtn->setEnabled(true);
     ui->MB_Right_Button->setEnabled(true);
     ui->MB_Left_Button->setEnabled(true);
+    ui->actionConnect->setEnabled(true);
     // if initialized enable
     if (m_mainCTL.getAxesController().getAxesInitilizedStatus()) {
         ui->Joystick_button->setEnabled(true);
@@ -1530,6 +1570,10 @@ void MainWindow::setUIEngineerMode()
         ui->scan_button->setEnabled(true);
         ui->Home_button->setEnabled(true);
         ui->Stagepins_button->setEnabled(true);
+        ui->menuStage_Test->setEnabled(true);
+        ui->diameter_button->setEnabled(true);
+        ui->twospot_button->setEnabled(true);
+        ui->wafer_diameter->setEnabled(true);
     }
 }
 void MainWindow::setUIOperatorMode()
@@ -1563,6 +1607,8 @@ void MainWindow::setUIOperatorMode()
     ui->plsmaBtn->setEnabled(false);
     ui->MB_Right_Button->setEnabled(false);
     ui->MB_Left_Button->setEnabled(false);
+    ui->menuStage_Test->setEnabled(false);
+    ui->actionConnect->setEnabled(false);
     // put in not initilized UI state
     if (!m_mainCTL.getAxesController().getAxesInitilizedStatus()) {
         ui->Joystick_button->setEnabled(false);
@@ -1571,6 +1617,12 @@ void MainWindow::setUIOperatorMode()
         ui->Home_button->setEnabled(false);
         ui->Stagepins_button->setEnabled(false);
     }
+}
+
+// Set Default form service menu
+void MainWindow::on_actionSet_Default_triggered()
+{
+    m_mainCTL.handleSetDefaultRecipeCommand();
 }
 
 // About choice from service menu
@@ -1624,5 +1676,27 @@ void MainWindow::on_actionSettings_triggered()
     m_pSettings->show();
 }
 
+// start stage test
+void MainWindow::on_actionStart_triggered()
+{
+    emit m_mainCTL.getAxesController().STSM_TransitionStartup();
+}
 
+// stop stage test
+void MainWindow::on_actionStop_triggered()
+{
+    emit m_mainCTL.getAxesController().STSM_TransitionShutdown();
+}
+
+// detailed log enable/disable
+void MainWindow::on_actionDetailed_Log_toggled(bool arg1)
+{
+    m_mainCTL.getAxesController().setDetailedLog(arg1);
+}
+
+// test z enable/disable
+void MainWindow::on_actionTest_Z_toggled(bool arg1)
+{
+    m_mainCTL.getAxesController().setTestZ(arg1);
+}
 

@@ -4,7 +4,6 @@
 #include "plasmarecipe.h"
 #include "axescontroller.h"
 #include "commandmap.h"
-#include "ledstatus.h"
 #include "plasmahead.h"
 #include "pwr.h"
 #include "tuner.h"
@@ -12,6 +11,7 @@
 #include "settingsdialog.h"
 #include "lighttower.h"
 #include "diameter.h"
+#include "abortcodemessages.h"
 
 
 #include <QObject>
@@ -41,6 +41,9 @@ public:
     // Poll Commands
     void getCTLStatusCommand();
     void parseResponseForCTLStatus(const QString &response);
+    void plasmaStatus();
+    void estopStatus();
+    void abortStatus();
 
     // CTL Status
     void setLEDStatus(int& bits);
@@ -56,17 +59,20 @@ public:
     // state machines
     void RunScanAxesSM();
     void RunCollisionSM();
+    void RunDoorOpenSM();
     void StartScan() { emit SSM_TransitionStartup(); }
     void StopScan() { emit SSM_TransitionShutdown(); }
+    bool stateMachineActive();
 
     // Recipe
     void setRecipe(QString filePath);
     bool getExecuteRecipe() const;
-    void setExecuteRecipe(bool value);
+    void setRecipeExecuting(bool value);
     void processRecipeKeys();
     void setMFCsFlowFromRecipe();
     void setRFSetpointFromRecipe();
     void setTunerSetpointFromRecipe();
+    void handleSetDefaultRecipeCommand();
 
     // accessors
     Tuner& getTuner() { return m_tuner; }
@@ -77,34 +83,23 @@ public:
     PlasmaRecipe *getRecipe() { return m_pRecipe; }
     Diameter& getDiameter() { return m_waferDiameter; }
     AxesController& getAxesController() { return this->m_stageCTL; }
+    bool getAbort() { return m_abort; }
+    bool getPlasmaActive() { return m_plasmaActive; }
+    bool getEstopActive() { return m_estopActive; }
+    AbortCodeMessages& getAbortMessages() { return m_abortMessages; }
 
     // laser access
     void LaserSenseOn();
     void LaserSenseOff();
     void PollForCollision(); // sets the m_bCollisionDetected flag
 
-    // query the controller
-    void getFirmwareVersion();
-    void howManyMFCs();
-    void getBatchIDLogging();
-    void getMFC4Range();
-    void getMFC3Range();
-    void getMFC2Range();
-    void getMFC1Range();
-    void getRecipeMBPosition();
-    void getRecipeRFPosition();
-    void getRecipeMFC4Flow();
-    void getRecipeMFC3Flow();
-    void getRecipeMFC2Flow();
-    void getRecipeMFC1Flow(); 
-    void getMaxRFPowerForward();
-    void getAutoMan();
-    void turnOffExecRecipe();
-    void turnOnExecRecipe();
-    void getPHSlitLength();
-    void getPHSlitWidth();
-    void getPHSafetyGap();
-    void getTemp();
+    // matchbox
+    void MBLeft();
+    void MBRight();
+
+    // plasma head
+    void heaterOn();
+    void heaterOff();
 
 signals:
     void responseReceived(const QString& response);
@@ -137,6 +132,13 @@ signals:
     // collision state machine status
     void CSM_StatusUpdate(QString status, QString next);
 
+    // door open state machine
+    void DOSM_TransitionDoorOpenedNonProcess();
+    void DOSM_TransitionClosed();
+    void DOSM_TransitionWaitInitialized();
+    void DOSM_TransitionLoad();
+    void DOSM_TransitionIdle();
+
     void recipeExecutionStateChanged(bool state);
 
     void scanBoxChanged();
@@ -146,21 +148,19 @@ public slots:
     int parseResponseForNumberOfMFCs(QString& responseStr);
     double handleGetMFCRecipeFlowCommand(QString& responseStr);
     void handleSetMFCRecipeFlowCommand(const int mfcNumber, const double recipeFlow);
-    void handleSetMFCDefaultRecipeCommand(const int mfcNumber, const double recipeFlow);
-    void handleSetMFCRangeCommand(const int mfcNumber, const double range);
 
     // Tuner
-    void handleSetTunerDefaultRecipeCommand(const double defaultPosition);
     void handleSetTunerRecipePositionCommand(const int recipePosition);
     void handleSetTunerAutoTuneCommand(const bool value);
 
     // PWR
-    void handleSetPWRDefaultRecipeCommand(const double defaultWatts);
     void handleSetPWRRecipeWattsCommand(const int recipeWatts);
     void handleSetPWRMaxWattsCommand(const double maxWatts);
 
+    // execution
+    void RunRecipe(const bool newRunState); // handles turning the recipe on/off
+
     // light tower
-    void handleLightTowerStateChange();
     void setLightTower();
 
     // scan state machine to idle
@@ -171,15 +171,41 @@ public slots:
     void yLimitsChanged(double ymin, double ymax);
 
 private:
+    // query the controller
+    void getFirmwareVersion();
+    void howManyMFCs();
+    void getBatchIDLogging();
+    void getMFC4Range();
+    void getMFC3Range();
+    void getMFC2Range();
+    void getMFC1Range();
+    void getRecipeMBPosition();
+    void getRecipeRFPower();
+    void getRecipeMFC4Flow();
+    void getRecipeMFC3Flow();
+    void getRecipeMFC2Flow();
+    void getRecipeMFC1Flow();
+    void getMaxRFPowerForward();
+    void getAutoMan();
+    void turnOffExecRecipe();
+    void turnOnExecRecipe();
+    void getPHSlitLength();
+    void getPHSlitWidth();
+    void getPHSafetyGap();
+    void getTemp();
+
     QString getLastCommand() { return m_pSerialInterface->getLastCommand(); }
     void setupScanStateMachine();
     void setupCollisionStateMachine();
+    void setupDoorOpenSM();
+    void parseAbortCode(QString code);
 
     QList<MFC*> m_mfcs; // Store the MFCs in a list
     LightTower m_lightTower;
     SerialInterface *m_pSerialInterface;
-    LEDStatus m_ledStatus;
-    bool m_executeRecipe;
+
+    Configuration m_config;
+
     CommandMap m_commandMap;
     AxesController m_stageCTL;
     Diameter m_waferDiameter;
@@ -218,6 +244,16 @@ private:
     QState *m_pLaserDeactivateState;
     QState *m_pLaserIdleState;
 
+    // door abort state machine
+    QStateMachine m_doorOpenStateMachine;
+    QState *m_pDODoorOpenedNonProcessState;
+    QState *m_pDODoorsClosedState;
+    QState *m_pDOWaitInitializedState;
+    QState *m_pDOGoToLoadState;
+    QState *m_pDOIdleState;
+
+    AbortCodeMessages m_abortMessages;
+
     // base coordinates
     double m_scanMinXPos;
     double m_scanMaxXPos;
@@ -234,14 +270,19 @@ private:
     double m_startYPosition;
     double m_scanYSpeed;
     double m_scanEndYPosition;
-
     int m_batchLogging;
+    // from status bits
+    int m_ledStatus;
+    bool m_abort;
+    bool m_estopActive;
+    bool m_plasmaActive;
+    bool m_processDoorAbort;
 
+    bool m_runRecipeOn;
     bool m_collisionDetected;
     bool m_collisionPassed;
     bool m_runRecipe; //Turn plasma on
     bool m_plannedAutoStart;
-    bool m_plasmaActive;
 };
 
 #endif // PLASMACONTROLLER_H

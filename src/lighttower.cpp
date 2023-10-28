@@ -1,7 +1,7 @@
 #include "lighttower.h"
 
 LightTower::LightTower()
-    : currentState(INACTIVE)
+    : currentState(LT_INACTIVE)
 {
 }
 
