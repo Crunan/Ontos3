@@ -6,7 +6,6 @@ const int AUX_INPUT_BUFFER_MAX_SIZE = 90;
 const int SERIAL_RESPONSE_TIMEOUT = 5000; // timeout waiting for response (milliseconds)
 const int SERIAL_WRITE_TIMEOUT = 1000; // timeout waiting for control pcb response (milliseconds)
 
-
 SerialInterface::SerialInterface() :
     m_lastSerialCommand(""),
     m_serialPort(),
@@ -25,7 +24,17 @@ SerialInterface::~SerialInterface()
 
 bool SerialInterface::open(QIODeviceBase::OpenMode openMode)
 {
-    return m_serialPort.open(openMode);
+    bool portOpen = m_serialPort.open(openMode);
+    if (portOpen) {
+        emit serialOpen();
+    }
+    return portOpen;
+}
+
+void SerialInterface::close()
+{
+    emit serialClosed();
+    m_serialPort.close();
 }
 
 
@@ -94,7 +103,7 @@ QString SerialInterface::readResponse()
                 }
                 m_serialPort.waitForReadyRead(100);
                 responseVal = ReadChar();
-                //qApp->processEvents(); // allow the timer event to be serivced if the board is not present
+                qApp->processEvents(); // allow the timer event to be serivced if the board is not present
             }
 
             serialResponse += char(responseVal);

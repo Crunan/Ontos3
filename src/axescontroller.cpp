@@ -41,8 +41,8 @@ AxesController::AxesController(QObject *parent) :
     m_joystickOn(false),
     m_joyButtonOn(false),
     m_doorsOpen(false),
-    m_vacOn(false),
     m_N2PurgeOn(false),
+    m_vacOn(false),
     m_axesInitialized(false),
     m_Xp2Base(0.0),
     m_Yp2Base(0.0),
@@ -165,7 +165,7 @@ void AxesController::SetupHomeAxesStateMachine()
     m_pHomeAxesIdleState->addTransition(this, &AxesController::HSM_TransitionShutdown, m_pHomeAxesShutdownState);
 
     // entry and exit connections
-    connect(m_pHomeAxesIdleState, &QState::entered, this, &AxesController::HomeIdleOnEntry);
+    //connect(m_pHomeAxesIdleState, &QState::entered, this, &AxesController::HomeIdleOnEntry);
 
     // set initial state
     m_homeStateMachine.setInitialState(m_pHomeAxesIdleState);
@@ -246,7 +246,7 @@ void AxesController::SetupStageTestStateMachine()
     m_pStageTestMaxYState ->addTransition(this, &AxesController::STSM_TransitionMinX, m_pStageTestMinXState);
     m_pStageTestMinXState->addTransition(this, &AxesController::STSM_TransitionMinY, m_pStageTestMinYState);
     m_pStageTestMinYState->addTransition(this, &AxesController::STSM_TransitionMaxX, m_pStageTestMaxXState);
-    m_pStageTestShutdownState->addTransition(this, &AxesController::STSM_TransitionShutdown, m_pStageTestIdleState);
+    m_pStageTestShutdownState->addTransition(this, &AxesController::STSM_TransitionIdle, m_pStageTestIdleState);
 
     // set initial state
     m_stageTestStateMachine.setInitialState(m_pStageTestIdleState);
@@ -469,11 +469,11 @@ void AxesController::RunHomeAxesSM()
     }
 }
 
-void AxesController::HomeIdleOnEntry()
+/*void AxesController::HomeIdleOnEntry()
 {
     // updat the ui
     emit setUIHomeSMDone();
-}
+}*/
 
 void AxesController::RunTwoSpotSM()
 {
@@ -725,7 +725,7 @@ void AxesController::stageTestZMin()
         Logger::logInfo("Z movements: " + QString::number(m_stageTestZCount));
 
     // update UI
-    emit stageStatusUpdate("X axis move to: 0 at speed: " + m_Zaxis.getMaxSpeedQStr(), "");
+    emit stageStatusUpdate("Z axis move to: 0 at speed: " + m_Zaxis.getMaxSpeedQStr(), "");
 
     // set speed and intiate move
     move(ZAXIS_COMMAND_NUM, m_Zaxis.getMaxSpeed(), 0);
@@ -736,9 +736,9 @@ void AxesController::stageTestZMin()
 // returns true if any state machine is active (non idle state)
 bool AxesController::axisStateMachineActive()
 {
-    if (m_initStateMachine.configuration().contains(m_pInitAxesIdleState) ||
-        m_homeStateMachine.configuration().contains(m_pHomeAxesIdleState) ||
-        m_twoSpotStateMachine.configuration().contains(m_pTwoSpotIdleState) ||
+    if (m_initStateMachine.configuration().contains(m_pInitAxesIdleState) &&
+        m_homeStateMachine.configuration().contains(m_pHomeAxesIdleState) &&
+        m_twoSpotStateMachine.configuration().contains(m_pTwoSpotIdleState) &&
         m_stageTestStateMachine.configuration().contains(m_pStageTestIdleState)) {
         return false;
     }

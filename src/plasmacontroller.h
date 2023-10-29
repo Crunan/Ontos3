@@ -93,6 +93,8 @@ public:
     void LaserSenseOn();
     void LaserSenseOff();
     void PollForCollision(); // sets the m_bCollisionDetected flag
+    void hasCollision(bool val) { m_hasCollision = val; }
+    bool getCollision() { return m_hasCollision; }
 
     // matchbox
     void MBLeft();
@@ -105,7 +107,7 @@ public:
 signals:
     void responseReceived(const QString& response);
     void executeRecipeChanged();
-    void mainPortOpened();
+    //void mainPortOpened();
     void setRecipeMBtuner(QString MBtunerSP);
     void setRecipeRFpower(QString RFpowerSP);
 
@@ -280,6 +282,7 @@ private:
     bool m_runRecipeOn;
     bool m_collisionDetected;
     bool m_collisionPassed;
+    bool m_hasCollision;
     bool m_runRecipe; //Turn plasma on
     bool m_plannedAutoStart;
 };

@@ -21,7 +21,7 @@ public:
     QString getPortErrorString() { return m_serialPort.errorString(); }
 
     bool open(QIODeviceBase::OpenMode openMode);
-    void close() { m_serialPort.close(); }
+    void close();
     bool isOpen() { return m_serialPort.isOpen(); }
     QString errorString() { return m_serialPort.errorString(); }
     bool sendCommand(QString command);
@@ -30,6 +30,7 @@ public:
 
 signals:
     void serialClosed();
+    void serialOpen();
 
 private slots:
     void serialWatchdogTimerElapsed();

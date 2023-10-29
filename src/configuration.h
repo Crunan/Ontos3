@@ -7,7 +7,7 @@
 #include <QStringList>
 #include <QObject>
 
-const QString CONFIG_DIRECTORY_NAME = "/config";
+const QString CONFIG_DIRECTORY_NAME = "/opt/OTT_PLUS/config";
 const QString CONFIG_DEFAULT_FILENAME = "default.cfg";
 const QString CONFIG_MFC1_LABEL_KEY = "MFC_LABEL_1";
 const QString CONFIG_MFC2_LABEL_KEY = "MFC_LABEL_2";

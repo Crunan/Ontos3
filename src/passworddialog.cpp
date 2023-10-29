@@ -14,6 +14,17 @@ PasswordDialog::~PasswordDialog()
     delete ui;
 }
 
+QString PasswordDialog::getUserEnteredPassword()
+{
+    return m_userEnteredPassword;
+}
+
+void PasswordDialog::clearPassword()
+{
+    m_userEnteredPassword = "";
+    ui->lineEdit->clear();
+}
+
 void PasswordDialog::on_buttonBox_accepted()
 {
     m_userEnteredPassword = ui->lineEdit->text();

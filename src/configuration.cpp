@@ -9,8 +9,8 @@ Configuration::Configuration(QObject *parent) : QObject(parent)
     // Get the build directory path
     QString buildDir = QCoreApplication::applicationDirPath();
 
-    // Set the execonfigPath to the "config" folder in the build directory
-    m_execonfigPath = buildDir + CONFIG_DIRECTORY_NAME;
+    // Set the execonfigPath to the "config" folder
+    m_execonfigPath = CONFIG_DIRECTORY_NAME;
 
     // Set the execonfigFileName to the desired file name
     m_execonfigFileName = CONFIG_DEFAULT_FILENAME;

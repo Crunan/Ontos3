@@ -10,6 +10,7 @@ int SM_PollCounter = 0;
 const int SM_POLL_PERIOD = 5;
 std::chrono::milliseconds CTLResetTimeOut = 0ms;
 
+const QString RECIPE_DIRECTORY = "/opt/OTT_PLUS/Recipes";
 
 MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     QMainWindow(parent),
@@ -20,7 +21,6 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     m_pSettings(new SettingsDialog),
     m_mainCTL(),
     m_commandFileReader(),
-    m_pMainCTLConsole(),
     m_config(),
     m_engineeringMode(false)
 {
@@ -43,7 +43,6 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(&m_mainCTL.getAxesController(), &AxesController::n2StateChanged, this, &MainWindow::n2StateChanged);
     connect(&m_mainCTL.getAxesController(), &AxesController::vacStateChanged, this, &MainWindow::vacStateChanged);
     // ui updates from plasma controller and sub objects
-    connect(&m_mainCTL, &PlasmaController::recipeExecutionStateChanged, this, &MainWindow::recipeExecutionStateChanged);
     connect(&m_mainCTL, &PlasmaController::SSM_StatusUpdate, this, &MainWindow::SSM_StatusUpdate);
     connect(&m_mainCTL, &PlasmaController::SSM_Started, this, &MainWindow::SSM_Started);
     connect(&m_mainCTL, &PlasmaController::SSM_Done, this, &MainWindow::SSM_Done);
@@ -51,6 +50,10 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(&m_mainCTL, &PlasmaController::scanBoxChanged, this, &MainWindow::scanBoxChanged);
     connect(&m_mainCTL.getTuner(), &Tuner::recipePositionChanged, this, &MainWindow::setRecipeMBtuner);
     connect(&m_mainCTL.getPlasmaHead(), &PlasmaHead::headTemperatureChanged, this, &MainWindow::headTemperatureChanged);
+    connect(&m_passDialog, &PasswordDialog::userEnteredPassword, this, &MainWindow::userEnteredPassword);
+    connect(m_mainCTL.getSerialInterface(), &SerialInterface::serialClosed, this, &MainWindow::serialDisconnected);
+    connect(m_mainCTL.getSerialInterface(), &SerialInterface::serialOpen, this, &MainWindow::serialConnected);
+    connect(&m_mainCTL.getAbortMessages(), &AbortCodeMessages::showAbortMessageBox, this, &MainWindow::showAbortMessageBox);
     // main state machine from main loop
     connect(m_pMainLoop, &MainLoop::runMainStateMachine, this, &MainWindow::runMainStateMachine);
     // ui updates from recipe
@@ -67,9 +70,6 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(&m_mainCTL.getPower(), &PWR::reflectedWattsChanged, this, &MainWindow::reflectedWattsChanged);
     connect(&m_mainCTL.getTuner(), &Tuner::autoTuneChanged, this, &MainWindow::autoTuneChanged);
     connect(&m_mainCTL.getTuner(), &Tuner::actualPositionChanged, this, &MainWindow::MBactualPositionChanged);
-    connect(&m_passDialog, &PasswordDialog::userEnteredPassword, this, &MainWindow::userEnteredPassword);
-    connect(m_mainCTL.getSerialInterface(), &SerialInterface::serialClosed, this, &MainWindow::closeMainPort);
-    connect(&m_mainCTL.getAbortMessages(), &AbortCodeMessages::showAbortMessageBox, this, &MainWindow::showAbortMessageBox);
 
     // disable until implemented
     ui->mainTabWidget->setTabEnabled(1, false);
@@ -140,22 +140,6 @@ void MainWindow::setInitialUIState()
 //////////////////////////////////////////////////////////////////////////////////
 // Startup/ Setup
 //////////////////////////////////////////////////////////////////////////////////
-void MainWindow::consoleMainCTLSetup()
-{
-    // Step 1: Create an instance of the console class
-    m_pMainCTLConsole = new Console(ui->mainTabWidget);
-
-    // Step 2: Add the console instance to a new tab
-    int tabIndex = ui->mainTabWidget->addTab(m_pMainCTLConsole, "Main CTL Terminal");
-
-    // Step 3: Set the Qt theme icon for the tab
-    QIcon icon = QIcon::fromTheme("utilities-system");
-    ui->mainTabWidget->setTabIcon(tabIndex, icon);
-
-    // Step 4: connect signals/slot
-    connect(m_pMainCTLConsole, &Console::getData, this, &MainWindow::writeMainPort);
-}
-
 
 void MainWindow::connectRecipeButtons()
 {
@@ -209,8 +193,6 @@ void MainWindow::connectMFCRecipeButton(QPushButton* button, const int& mfcNumbe
 
 void MainWindow::RunStartup()
 {
-    //GetExeCfg();
-    //loadConfigGUI(Values); // TODO
     m_mainCTL.CTLStartup();
     m_mainCTL.getAxesController().AxisStartup();
 }
@@ -232,7 +214,6 @@ void MainWindow::loadConfigGUI(QStringList value)
 // set ui elements accordingly
 void MainWindow::homeStateMachineStartup()
 {
-    // put the button in the checked state and change text
     ui->Home_button->setText("STOP");
 
     // disable other stage movement buttons
@@ -247,9 +228,8 @@ void MainWindow::homeStateMachineStartup()
 // set ui elements accordingly
 void MainWindow::homeStateMachineDone()
 {
-    // put the button in the unchecked state and change text
-    ui->Home_button->setText("LOAD");
     ui->Home_button->setChecked(false);
+    ui->Home_button->setText("LOAD");
 
     ui->scan_button->setEnabled(true);
     ui->init_button->setEnabled(true);
@@ -267,7 +247,7 @@ void MainWindow::homeStateMachineDone()
 // set ui elements accordingly
 void MainWindow::initStateMachineStartup()
 {
-    // disaable the init buttons again
+    // disaable the init buttons
     ui->init_button->setEnabled(false);
 
     // disable the other state movement buttons
@@ -302,7 +282,6 @@ void MainWindow::initStateMachineDone()
 
 void MainWindow::twoSpotStateMachineStartup()
 {
-    // put the button in the checked state and change text
     ui->twospot_button->setText("STOP");
 
     // disable the other stage movement buttons
@@ -314,9 +293,8 @@ void MainWindow::twoSpotStateMachineStartup()
 
 void MainWindow::twoSpotStateMachineDone()
 {
-    // put the button in the unchecked state and change text
-    ui->twospot_button->setText("TWO SPOT");
     ui->twospot_button->setChecked(false);
+    ui->twospot_button->setText("TWO SPOT");
 
     scanBoxChanged();
 
@@ -331,7 +309,6 @@ void MainWindow::twoSpotStateMachineDone()
 
 void MainWindow::SSM_Started()
 {
-    // put the button in the checked state and change text
     ui->scan_button->setText("STOP");
 
     // disable other stage movement buttons
@@ -345,15 +322,14 @@ void MainWindow::SSM_Started()
 
 void MainWindow::SSM_Done()
 {
-    ui->scan_button->setText("SCAN");
     ui->scan_button->setChecked(false);
+    ui->scan_button->setText("SCAN");
 
     // update status
-    QString status = "Scanning Completed";
-    ui->axisstatus->setText(status);
+    ui->axisstatus->setText("Scanning Completed");
     ui->axisstatus_2->setText("");
 
-    // after init enable
+    // reenable
     ui->init_button->setEnabled(true);
     ui->Home_button->setEnabled(true);
     ui->scan_button->setEnabled(true);
@@ -376,18 +352,8 @@ void MainWindow::scanBoxChanged()
 void MainWindow::closeMainPort()
 {
     if (m_mainCTL.isOpen()) {
-        // stop the main state machine
-        emit MSM_TransitionShutdown();
         m_mainCTL.close();
     }
-
-    // Update Status bar
-    showStatusMessage("Disconnected");
-
-    // enable the connect menu option
-    ui->actionConnect->setEnabled(true);
-    // disable the disconnect menu option
-    ui->actionDisconnect->setEnabled(false);
 }
 
 void MainWindow::openMainPort()
@@ -400,52 +366,50 @@ void MainWindow::openMainPort()
 
     SettingsDialog::Settings p = m_pSettings->settings();
 
-    if (m_mainCTL.open(*m_pSettings)) {
+    if (!m_mainCTL.open(*m_pSettings)) {
 
-        // disable the connect menu option
-        ui->actionConnect->setEnabled(false);
-        // enable the disconnect menu option
-        ui->actionDisconnect->setEnabled(true);
-
-        m_mainCTL.getAxesController().resetAxes();
-        m_mainCTL.resetCTL();
-        CTLResetTimeOut = 2500ms / m_pMainLoop->getTimerInterval();
-
-        // Give status on connect
-        showStatusMessage(tr("Connected to %1 : %2, %3, %4, %5, %6")
-                              .arg(p.name).arg(p.stringBaudRate).arg(p.stringDataBits)
-                              .arg(p.stringParity).arg(p.stringStopBits).arg(p.stringFlowControl));
-
-        // start the main state machine
-        emit MSM_TransitionStartup();
-
-    } else {
         QMessageBox::critical(this, "Error:  ", m_mainCTL.getPortErrorString());
-
         showStatusMessage("Open error:  " + m_mainCTL.getPortErrorString());
     }
 }
 
-
-void MainWindow::writeMainPort(const QByteArray &data)
+void MainWindow::serialDisconnected()
 {
-    if (!m_mainCTL.sendCommand(data))
-        qDebug() << "Command not sent to main CTL";
+    // Update Status bar
+    showStatusMessage("Disconnected");
+
+    disableControlButtons();
+
+    // stop the main state machine
+    emit MSM_TransitionShutdown();
+
 }
 
-QString MainWindow::readMainPort()
+void MainWindow::serialConnected()
 {
-    return m_mainCTL.readResponse();
-}
+    m_mainCTL.getAxesController().resetAxes();
+    m_mainCTL.resetCTL();
+    CTLResetTimeOut = 2500ms / m_pMainLoop->getTimerInterval();
+    // start the main state machine
+    emit MSM_TransitionStartup();
 
-
-void MainWindow::handleMainSerialError(QSerialPort::SerialPortError error)
-{
-    if (error == QSerialPort::ResourceError) {
-        QMessageBox::critical(this, tr("Critical Error"), m_mainCTL.getPortErrorString());
-        Logger::logCritical(m_mainCTL.getPortErrorString());
-        closeMainPort();
+    // allow user to init only
+    ui->init_button->setEnabled(true);
+    if (m_engineeringMode) {
+        ui->n2_purge_button->setEnabled(true);
+        ui->plsmaBtn->setEnabled(true);
     }
+
+    // clear any remaing status statements
+    ui->axisstatus->clear();
+    ui->axisstatus_2->clear();
+
+    SettingsDialog::Settings p = m_pSettings->settings();
+
+    // Give status on connect
+    showStatusMessage(tr("Connected to %1 : %2, %3, %4, %5, %6")
+                          .arg(p.name).arg(p.stringBaudRate).arg(p.stringDataBits)
+                          .arg(p.stringParity).arg(p.stringStopBits).arg(p.stringFlowControl));
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -499,8 +463,6 @@ void MainWindow::runMainStateMachine()
         }
     }
     else if (m_mainStateMachine.configuration().contains(m_pMainPollingState)) { // in Polling state
-        // RunCheckInput(); // TODO: Need to implement
-
         SM_PollCounter += 1;
         if (SM_PollCounter >= SM_POLL_PERIOD) {
             SM_PollCounter = 0;
@@ -519,6 +481,9 @@ void MainWindow::runMainStateMachine()
     else if (m_mainStateMachine.configuration().contains(m_pMainIdleState)) { // in Idle state
     }
     else if (m_mainStateMachine.configuration().contains(m_pMainShutdownState)) { // in Shutdown state
+        Logger::logInfo("Main State Machine Shut Down");
+
+        emit MSM_TransitionIdle();
     }
 }
 
@@ -542,16 +507,6 @@ void MainWindow::CSM_StatusUpdate(QString status, QString next)
 {
     ui->axisstatus->setText(status);
     ui->axisstatus_2->setText(next);
-}
-
-void MainWindow::recipeExecutionStateChanged(bool state)
-{
-    if (state == true) {
-        ui->plsmaBtn->setText("PLASMA OFF");
-    }
-    else {
-        ui->plsmaBtn->setText("START PLASMA");
-    }
 }
 
 void MainWindow::SSM_StatusUpdate(QString status, QString next)
@@ -687,9 +642,7 @@ void MainWindow::openRecipe()
     QFileDialog dialog;
     dialog.setFileMode(QFileDialog::ExistingFile);
 
-    // Get the current directory
-    QString currentDirectory = QCoreApplication::applicationDirPath();
-    QString initialDirectory = currentDirectory + "/recipes/";
+    QString initialDirectory = RECIPE_DIRECTORY;
 
     // Set the initial directory
     dialog.setDirectory(initialDirectory);
@@ -719,7 +672,7 @@ void MainWindow::openRecipe()
 
 void MainWindow::saveRecipe() {
     // Create the directory path
-    QString directoryPath = QCoreApplication::applicationDirPath() + "/Recipes";
+    QString directoryPath = RECIPE_DIRECTORY;
 
     // Create the directory if it doesn't exist
     QDir directory;
@@ -799,7 +752,6 @@ void MainWindow::saveRecipe() {
        }
     }
 }
-
 
 // update the recipe progress bar and values
 void MainWindow::updateRecipeFlow(const int mfcNumber, const double recipeFlow)
@@ -1015,6 +967,10 @@ void MainWindow::actualFlowChanged(const int mfcNumber, const double actualFlow)
 void MainWindow::userEnteredPassword()
 {
     QString enteredPassword = m_passDialog.getUserEnteredPassword();
+
+    // clear the password
+    m_passDialog.clearPassword();
+
     QString password = m_config.getValueForKey(CONFIG_PASSWORD_KEY);
 
     if (enteredPassword == password) {
@@ -1150,8 +1106,6 @@ void MainWindow::openCascadeRecipe()
 void MainWindow::on_init_button_clicked()
 {
     m_mainCTL.getAxesController().StartInit();
-
-    // note buttons get enabled and disabled in the start/stop handler
 }
 
 // home button on dash
@@ -1161,6 +1115,7 @@ void MainWindow::on_Home_button_toggled(bool checked)
        m_mainCTL.getAxesController().StartHome();
     }
     else {
+       ui->Home_button->setChecked(false);
        m_mainCTL.getAxesController().StopHome();
     }
 }
@@ -1172,6 +1127,7 @@ void MainWindow::on_twospot_button_toggled(bool checked)
         m_mainCTL.getAxesController().StartTwoSpot();
     }
     else {
+        ui->twospot_button->setChecked(false);
         m_mainCTL.getAxesController().StopTwoSpot();
     }
 }
@@ -1183,6 +1139,7 @@ void MainWindow::on_scan_button_toggled(bool checked)
         m_mainCTL.StartScan();
     }
     else {
+        ui->scan_button->setChecked(false);
         m_mainCTL.StopScan();
     }
 }
@@ -1276,13 +1233,15 @@ void MainWindow::on_vac_button_toggled(bool checked)
 // plasma button on dashboard
 void MainWindow::on_plsmaBtn_toggled(bool checked)
 {
-    if (checked) {
+    if (!checked) {
         m_mainCTL.StopScan();
+        ui->plsmaBtn->setText("START PLASMA");
     }
     else {
-        // I'm not sure if b_HasCollision is needed in this system but keeping it hardcoded here until I know
-        bool b_HasCollision = true;
-        if (b_HasCollision && m_mainCTL.getRecipe()->getAutoScanBool() && !m_mainCTL.getPlasmaActive()) {
+        ui->plsmaBtn->setText("PLASMA OFF");
+        // hard coded until the checkbox is in place
+        m_mainCTL.hasCollision(true);
+        if (m_mainCTL.getCollision() && m_mainCTL.getRecipe()->getAutoScanBool() && !m_mainCTL.getPlasmaActive()) {
             m_mainCTL.plannedAutoStartOn();//this will make sure we dont accidently start plasma when just clicking RUN SCAN button
             m_mainCTL.StartScan();
         }
@@ -1477,7 +1436,6 @@ void MainWindow::on_y1_set_clicked()
     }
 }
 
-
 void MainWindow::on_y2_set_clicked()
 {
     bool ok;
@@ -1492,7 +1450,6 @@ void MainWindow::on_y2_set_clicked()
         // Handle accordingly
         return;
     }
-
 }
 
 // right arrow button
@@ -1531,6 +1488,25 @@ void MainWindow::on_actionOperator_Mode_triggered()
     setUIOperatorMode();
 }
 
+void MainWindow::disableControlButtons()
+{
+    ui->Joystick_button->setEnabled(false);
+    ui->vac_button->setEnabled(false);
+    ui->scan_button->setEnabled(false);
+    ui->Home_button->setEnabled(false);
+    ui->Stagepins_button->setEnabled(false);
+    ui->menuStage_Test->setEnabled(false);
+    ui->diameter_button->setEnabled(false);
+    ui->twospot_button->setEnabled(false);
+    ui->wafer_diameter->setEnabled(false);
+    ui->n2_purge_button->setEnabled(false);
+    ui->plsmaBtn->setEnabled(false);
+    ui->MB_Right_Button->setEnabled(false);
+    ui->MB_Left_Button->setEnabled(false);
+    ui->menuStage_Test->setEnabled(false);
+    ui->init_button->setEnabled(false);
+}
+
 void MainWindow::setUIEngineerMode()
 {
     QString sTitle = this->windowTitle();
@@ -1560,6 +1536,7 @@ void MainWindow::setUIEngineerMode()
     ui->MB_Right_Button->setEnabled(true);
     ui->MB_Left_Button->setEnabled(true);
     ui->actionConnect->setEnabled(true);
+    ui->actionDisconnect->setEnabled(true);
     // if initialized enable
     if (m_mainCTL.getAxesController().getAxesInitilizedStatus()) {
         ui->Joystick_button->setEnabled(true);
@@ -1606,6 +1583,7 @@ void MainWindow::setUIOperatorMode()
     ui->MB_Left_Button->setEnabled(false);
     ui->menuStage_Test->setEnabled(false);
     ui->actionConnect->setEnabled(false);
+    ui->actionDisconnect->setEnabled(false);
     // put in not initilized UI state
     if (!m_mainCTL.getAxesController().getAxesInitilizedStatus()) {
         ui->Joystick_button->setEnabled(false);
@@ -1640,11 +1618,6 @@ void MainWindow::on_actionConnect_triggered()
         m_mainCTL.getAxesController().resetAxes();
         m_mainCTL.resetCTL();
         CTLResetTimeOut = 2500ms / m_pMainLoop->getTimerInterval();
-
-        // disable the connect menu option
-        ui->actionConnect->setEnabled(false);
-        // enable the disconnect menu option
-        ui->actionDisconnect->setEnabled(true);
 
         // Give status on connect
         showStatusMessage(tr("Connected to %1 : %2, %3, %4, %5, %6")

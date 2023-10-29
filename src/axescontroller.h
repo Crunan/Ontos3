@@ -175,7 +175,7 @@ private slots:
     // state machine on entry handlers
     void InitIdleOnEntry();
     void TwoSpotIdleOnEntry();
-    void HomeIdleOnEntry();
+    //void HomeIdleOnEntry();
 
 private:
     // status bit parsers

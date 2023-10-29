@@ -5,6 +5,8 @@
 #include <QHash>
 #include <QObject>
 
+const QString LOG_DIRECTORY = "/opt/OTT_PLUS/logs/";
+
 QFile* Logger::logFile = Q_NULLPTR;
 bool Logger::isInit = false;
 QHash<QtMsgType, QString> Logger::contextNames = {
@@ -24,13 +26,13 @@ void Logger::init()
 
     //Create log file
     logFile = new QFile;
-    logFile->setFileName("ontos3.log");
+    logFile->setFileName(LOG_DIRECTORY + "ontos3.log");
     logFile->open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
 
-//#ifndef QT_DEBUG
+#ifndef QT_DEBUG
     //Redirect logs to messageOutput
     qInstallMessageHandler(Logger::messageOutput);
-//#endif
+#endif
 
 
     //Clear file contents

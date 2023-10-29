@@ -38,16 +38,17 @@ PlasmaController::PlasmaController(QWidget* parent)
     m_scanYSpeed(0.0),
     m_scanEndYPosition(0.0),
     m_batchLogging(0),
-    m_collisionDetected(false),
-    m_collisionPassed(false),
-    m_runRecipe(false), //Turn plasma on
-    m_plannedAutoStart(false),
     m_ledStatus(0),
     m_abort(false),
     m_estopActive(false),
     m_plasmaActive(false),
     m_processDoorAbort(false),
-    m_runRecipeOn(false)
+    m_runRecipeOn(false),
+    m_collisionDetected(false),
+    m_collisionPassed(false),
+    m_hasCollision(false),
+    m_runRecipe(false), //Turn plasma on  
+    m_plannedAutoStart(false)
 {
     // Add startup data gathering methods.
     for (MFC* mfc: m_mfcs) {
@@ -181,11 +182,11 @@ void PlasmaController::setupCollisionStateMachine()
 
     // add transitions
     m_pCPIdleState->addTransition(this, &PlasmaController::CSM_TransitionStartup, m_pCPStartupState);
-    m_pCPShutdownState->addTransition(this, &PlasmaController::CSM_TransitionShutdown, m_pCPIdleState);
+    m_pCPShutdownState->addTransition(this, &PlasmaController::CSM_TransitionIdle, m_pCPIdleState);
     m_pCPStartupState->addTransition(this, &PlasmaController::CSM_TransitionGetZUp, m_pCPgetZUpstate);
     m_pCPgetZUpstate->addTransition(this, &PlasmaController::CSM_TransitionScanY, m_pCPScanYState);
     m_pCPScanYState->addTransition(this, &PlasmaController::CSM_TransitionGetZDown, m_pCPGetZDownState);
-    m_pCPGetZDownState ->addTransition(this, &PlasmaController::SSM_TransitionGoZPositionSubstate, m_pCPShutdownState);
+    m_pCPGetZDownState ->addTransition(this, &PlasmaController::CSM_TransitionShutdown, m_pCPShutdownState);
 
     m_collisionStateMachine.start();
 }
@@ -209,6 +210,9 @@ void PlasmaController::setupDoorOpenSM()
 
     // add transitions
     m_pDOIdleState->addTransition(this, &PlasmaController::DOSM_TransitionDoorOpenedNonProcess, m_pDODoorOpenedNonProcessState);
+    m_pDOWaitInitializedState->addTransition(this, &PlasmaController::DOSM_TransitionDoorOpenedNonProcess, m_pDODoorOpenedNonProcessState);
+    m_pDOGoToLoadState->addTransition(this, &PlasmaController::DOSM_TransitionDoorOpenedNonProcess, m_pDODoorOpenedNonProcessState);
+    m_pDODoorsClosedState->addTransition(this, &PlasmaController::DOSM_TransitionDoorOpenedNonProcess, m_pDODoorOpenedNonProcessState);
     m_pDOIdleState->addTransition(this, &PlasmaController::DOSM_TransitionClosed, m_pDODoorsClosedState);
     m_pDODoorOpenedNonProcessState->addTransition(this, &PlasmaController::DOSM_TransitionClosed, m_pDODoorsClosedState);
     m_pDODoorsClosedState->addTransition(this, &PlasmaController::DOSM_TransitionWaitInitialized, m_pDOWaitInitializedState);
@@ -287,7 +291,7 @@ void PlasmaController::RunScanAxesSM()
         Logger::logInfo("FirstX: " + QString::number(m_startXPosition, 'f', 2) + " StartY: " + QString::number(m_startYPosition, 'f', 2) + " EndY: " + QString::number(m_scanEndYPosition, 'f', 2));
         Logger::logInfo("Scan Speed: " + QString::number(m_scanYSpeed, 'f', 2) + " Cycles: " + QString::number(m_numCycles));
 
-        if (m_collisionDetected == true && m_collisionPassed != true) { // if we have a laser, we need to perform collision test, once completed we can move into regualar scanning
+        if (m_hasCollision && !m_collisionPassed) { // if we have a laser, we need to perform collision test, once completed we can move into regualar scanning
             emit SSM_TransitionIdle(); // scan state machine to idle
             emit CSM_TransitionStartup(); // collision state machine to startup
         }
@@ -519,16 +523,16 @@ void PlasmaController::RunCollisionSM()
             LaserSenseOff();
             m_collisionPassed = true;
             // Go here to scan
-            if (m_plannedAutoStart == true) {
+            if (m_plannedAutoStart) {
                 RunRecipe(true);
                 m_plannedAutoStart = false;
             }
             else {
                 emit SSM_TransitionStartup();
             }
-        }
 
-        emit CSM_TransitionIdle();
+            emit CSM_TransitionIdle();
+        }  
     }
     else if (m_collisionStateMachine.configuration().contains(m_pCPIdleState)) { // in idle state
         // noop
@@ -537,6 +541,14 @@ void PlasmaController::RunCollisionSM()
 
 void PlasmaController::RunDoorOpenSM()
 {
+    // look for door open conditions
+    if (m_processDoorAbort) {
+        emit DOSM_TransitionClosed();
+    }
+    else if (m_stageCTL.getDoorOpen() && stateMachineActive()) {
+        emit DOSM_TransitionDoorOpenedNonProcess();
+    }
+
     if (m_doorOpenStateMachine.configuration().contains(m_pDODoorOpenedNonProcessState)) {
         QString abortMessage = "Door opened while stage was moving. Stage position has been lost, close the doors and click OK to initialize the stage and send stage to the Load position.";
         emit m_abortMessages.showAbortMessageBox(abortMessage);
@@ -563,21 +575,16 @@ void PlasmaController::RunDoorOpenSM()
         emit DOSM_TransitionIdle();
     }
     else if (m_doorOpenStateMachine.configuration().contains(m_pDOIdleState)) { // in idle state
-        if (m_processDoorAbort) {
-            emit DOSM_TransitionClosed();
-        }
-        else if (m_stageCTL.getDoorOpen() && stateMachineActive()) {
-            emit DOSM_TransitionDoorOpenedNonProcess();
-        }
+
     }
 }
 
 bool PlasmaController::stateMachineActive()
 {
-    if (!m_stageCTL.axisStateMachineActive() ||
-        m_scanStateMachine.configuration().contains(m_pScanIdleState) ||
+    if (!m_stageCTL.axisStateMachineActive() &&
+        m_scanStateMachine.configuration().contains(m_pScanIdleState) &&
         m_collisionStateMachine.configuration().contains(m_pCPIdleState)) {
-        return false;
+            return false;
     }
     else {
         return true;
@@ -603,7 +610,7 @@ bool PlasmaController::open(const SettingsDialog& settings)
         return false;
     }
 
-    emit mainPortOpened();
+    //emit mainPortOpened();
 
     return true;
 }

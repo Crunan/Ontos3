@@ -1,6 +1,6 @@
 QT += core gui widgets serialport statemachine
 
-VERSION = 01.00.00
+VERSION = 01.00.02
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
 greaterThan(QT_MAJOR_VERSION, 4)
@@ -23,7 +23,6 @@ SOURCES += \
     src/commandfilereader.cpp \
     src/commandmap.cpp \
     src/configuration.cpp \
-    src/console.cpp \
     src/filereader.cpp \
     src/grblcontroller.cpp \
     src/logger.cpp \
@@ -50,7 +49,6 @@ HEADERS += \
     src/commandfilereader.h \
     src/commandmap.h \
     src/configuration.h \
-    src/console.h \
     src/diameter.h \
     src/filereader.h \
     src/grblcontroller.h \

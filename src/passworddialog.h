@@ -15,7 +15,8 @@ public:
     explicit PasswordDialog(QWidget *parent = nullptr);
     ~PasswordDialog();
 
-    QString getUserEnteredPassword() { return m_userEnteredPassword; }
+    QString getUserEnteredPassword();
+    void clearPassword();
 
 signals:
     void userEnteredPassword();

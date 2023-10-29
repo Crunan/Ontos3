@@ -1,9 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#pragma once
+// redundant #pragma once
 
-#include "console.h"
 #include "grblcontroller.h"
 #include "mainloop.h"
 #include "commandfilereader.h"
@@ -54,12 +53,9 @@ public slots:
     void stageStatusUpdate(QString statusNow, QString statusNext);
     void showAbortMessageBox(QString message);
 
-    // Main CTL Serial Port
+    // Serial Port
     void openMainPort();
     void closeMainPort();
-    void writeMainPort(const QByteArray &data);
-    QString readMainPort();
-    void handleMainSerialError(QSerialPort::SerialPortError error);
 
     // state machine ui updating slots
     void homeStateMachineStartup();
@@ -107,7 +103,7 @@ public slots:
     void SSM_Started();
     void SSM_Done();
     void SSM_StatusUpdate(QString status, QString next);
-    void recipeExecutionStateChanged(bool state);
+    //void recipeExecutionStateChanged(bool state);
     void scanBoxChanged();
     void userEnteredPassword();
 
@@ -165,14 +161,19 @@ private slots:
     void on_actionTest_Z_toggled(bool arg1);
 
 private:
+
     // Action Button methods
-    void serialButtonPreConnectState();
     void showStatusMessage(const QString &message);
+    // hit x in top right
     void closeEvent(QCloseEvent *event);
+    // serial port signals sent from serialInterface
+    void serialDisconnected();
+    void serialConnected();
 
     // update the ui based on login
     void setUIOperatorMode();
     void setUIEngineerMode();
+    void disableControlButtons();
 
     void connectMFCRecipeButton(QPushButton* button, const int &mfcNumber);
     // Connection for Recipes buttons
@@ -182,8 +183,8 @@ private:
     void connectCascadeRecipeButtons();
 
     void consoleMainCTLSetup();
-    void consoleStageCTLSetup();
 
+    // helpers
     void RunStartup();
     void RunStatusPolling();
     void GetExeCfg();
@@ -204,7 +205,6 @@ private:
 
     CommandFileReader m_commandFileReader;
 
-    Console* m_pMainCTLConsole;
     Configuration m_config;
     bool m_engineeringMode;
 
