@@ -15,5 +15,6 @@
         <file>../images/save.png</file>
         <file>../images/OTT Icon Image.png</file>
         <file>../images/OTT Icon Image Tiny.png</file>
+        <file>../images/collision-icon.jpg</file>
     </qresource>
 </RCC>

@@ -71,7 +71,7 @@ public:
     double getZPinsBuriedPos() { return m_stage.getPinsBuriedPos(); }
     double getZPosition() const { return m_Zaxis.getPosition(); }
     int getZAxisError() const { return m_Zaxis.getError(); }
-    QString getZMaxSpeedQStr() const { return m_Zaxis.getMaxSpeedQStr(); } // TODO: delete me
+    QString getZMaxSpeedQStr() const { return m_Zaxis.getMaxSpeedQStr(); }
     double ZMaxSpeed() const { return m_Zaxis.getMaxSpeed(); }
 
     // translate coordinates from base coordinates to PH coordinates

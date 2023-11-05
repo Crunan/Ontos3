@@ -31,6 +31,7 @@ public:
 signals:
     void serialClosed();
     void serialOpen();
+    void readTimeoutError(QString lastCommand);
 
 private slots:
     void serialWatchdogTimerElapsed();

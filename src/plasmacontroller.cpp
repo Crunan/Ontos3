@@ -1,6 +1,6 @@
 #include "plasmacontroller.h"
 #include "logger.h"
-#include "Utilities.h"
+#include "UtilitiesAndConstants.h"
 
 // file scope
 bool estopActiveLast = false;
@@ -754,6 +754,20 @@ void PlasmaController::handleSetDefaultRecipeCommand()
     readResponse(); // clear the response buffer
 }
 
+void PlasmaController::batchIDLoggingOn(bool state)
+{
+    if (state) {
+        sendCommand("$28011;1%"); // $28xxx;vv..vv%, xxxx = any length index number, vv..vv = value; =>resp [!28xxxx;vv..vv#]
+        readResponse();
+        Logger::logInfo("Batch ID logging toggled ON");
+    }
+    else {
+        sendCommand("$28011;0%"); // $28xxx;vv..vv%, xxxx = any length index number, vv..vv = value; =>resp [!28xxxx;vv..vv#]
+        readResponse();
+        Logger::logInfo("Batch ID logging toggled OFF");
+    }
+}
+
 // MFC
 void PlasmaController::handleSetMFCRecipeFlowCommand(const int mfcNumber, const double recipeFlow)
 {
@@ -1032,11 +1046,9 @@ void PlasmaController::setLightTower()
     }
 }
 
-
 //////////////////////////////////////////////////////////////////////////////////
 // Recipe
 //////////////////////////////////////////////////////////////////////////////////
-
 bool PlasmaController::getExecuteRecipe() const
 {
     return m_runRecipeOn;
@@ -1124,8 +1136,6 @@ void PlasmaController::CTLStartup()
     getPHSlitWidth();
     getPHSafetyGap();
     getTemp();
-
-//    setCTLStateMachinesIdle();
 }
 
 void PlasmaController::resetCTL()
@@ -1185,18 +1195,18 @@ void PlasmaController::MBRight()
     readResponse();
 }
 
-void PlasmaController::heaterOn()
+void PlasmaController::heaterOn(bool state)
 {
-    sendCommand("$CE35.0%"); // $CEtt.t% resp [!CEtt.t#] where tt.t is target temp in 'C. t=0 is off
-    readResponse();
-    Logger::logInfo("Preheat Plasma Recipe ON");
-}
-
-void PlasmaController::heaterOff()
-{
-    sendCommand("$CE00.0%"); // $CEtt.t% resp [!CEtt.t#] where tt.t is target temp in 'C. t=0 is off
-    readResponse();
-    Logger::logInfo("Preheat Plasma Recipe OFF");
+    if (state) {
+        sendCommand("$CE35.0%"); // $CEtt.t% resp [!CEtt.t#] where tt.t is target temp in 'C. t=0 is off
+        readResponse();
+        Logger::logInfo("Preheat Plasma Recipe ON");
+    }
+    else {
+        sendCommand("$CE00.0%"); // $CEtt.t% resp [!CEtt.t#] where tt.t is target temp in 'C. t=0 is off
+        readResponse();
+        Logger::logInfo("Preheat Plasma Recipe OFF");
+    }
 }
 
 void PlasmaController::howManyMFCs()
@@ -1489,37 +1499,3 @@ void PlasmaController::getPHSafetyGap()
     else
         Logger::logCritical("Could Not get Plasma head safety gap, last requestData: " + getLastCommand());
 }
-
-
-//void MainWindow::UpdateStatus() {
-//    didStatusBitsChange();
-//    StatusBitsWas = StatusBits;
-
-//    (StatusBits & 0x0100) > 0 ? ui->actionGAS_1->setChecked(true) : ui->actionGAS_1->setChecked(false);
-//    (StatusBits & 0x0200) > 0 ? ui->actionGAS_2->setChecked(true) : ui->actionGAS_2->setChecked(false);
-//    (StatusBits & 0x0400) > 0 ? ui->actionGAS_3->setChecked(true) : ui->actionGAS_3->setChecked(false);
-//    (StatusBits & 0x0800) > 0 ? ui->actionGAS_4->setChecked(true) : ui->actionGAS_4->setChecked(false);
-
-//    (StatusBits & 0x1000) > 0 ? ui->actionV5->setChecked(true) : ui->actionV5->setChecked(false);
-//    (StatusBits & 0x2000) > 0 ? ui->actionV6->setChecked(true) : ui->actionV6->setChecked(false);
-//    (StatusBits & 0x4000) > 0 ? ui->actionV7->setChecked(true) : ui->actionV7->setChecked(false);
-//    (StatusBits & 0x8000) > 0 ? ui->actionRF_ENABLED->setChecked(true) : ui->actionRF_ENABLED->setChecked(false);
-
-//    (StatusBits & 0x0001) > 0 ? ui->actionPLASMA_ON->setChecked(true) : ui->actionPLASMA_ON->setChecked(false);
-//    (StatusBits & 0x0002) > 0 ? ui->actionTUNING->setChecked(true) : ui->actionTUNING->setChecked(false);
-//    (StatusBits & 0x0004) > 0 ? ui->actionAUTO_MODE->setChecked(true) : ui->actionAUTO_MODE->setChecked(false);
-//    (StatusBits & 0x0008) > 0 ? ui->actionEXECUTE_RECIPE->setChecked(true) : ui->actionEXECUTE_RECIPE->setChecked(false);
-
-//    (StatusBits & 0x0010) > 0 ? ui->actionESTOP_ON->setChecked(true) : ui->actionESTOP_ON->setChecked(false);
-//    (StatusBits & 0x0020) > 0 ? ui->actionDO_CMD->setChecked(true) : ui->actionDO_CMD->setChecked(false);
-//    (StatusBits & 0x0040) > 0 ? ui->actionHE_SIG->setChecked(true) : ui->actionHE_SIG->setChecked(false);
-//    (StatusBits & 0x0080) > 0 ? ui->actionPROCESS_ABORT->setChecked(true) : ui->actionPROCESS_ABORT->setChecked(false);
-
-//    if (ui->actionEXECUTE_RECIPE->isChecked()) {
-//        RunRecipeOn = true;
-//    }
-//    else {
-//        RunRecipeOn= false;
-//    }
-
-//}

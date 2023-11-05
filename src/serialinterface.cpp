@@ -44,6 +44,7 @@ void SerialInterface::serialWatchdogTimerElapsed()
     m_pSerialWatchdogTimer->stop();
     m_serialPort.close(); // somethings obviously wrong so close the serial port
     emit serialClosed();
+    emit readTimeoutError(m_lastSerialCommand);
 }
 
 bool SerialInterface::sendCommand(QString command)

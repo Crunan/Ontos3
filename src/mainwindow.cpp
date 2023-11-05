@@ -5,12 +5,11 @@
 #include <QFileDialog>
 #include <QTextStream>
 #include <QDebug>
+#include "UtilitiesAndConstants.h"
 
 int SM_PollCounter = 0;
 const int SM_POLL_PERIOD = 5;
 std::chrono::milliseconds CTLResetTimeOut = 0ms;
-
-const QString RECIPE_DIRECTORY = "/opt/OTT_PLUS/Recipes";
 
 MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     QMainWindow(parent),
@@ -20,6 +19,7 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     m_passDialog(this),
     m_pSettings(new SettingsDialog),
     m_mainCTL(),
+    m_persistentSettings(),
     m_commandFileReader(),
     m_config(),
     m_engineeringMode(false)
@@ -53,6 +53,7 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(&m_passDialog, &PasswordDialog::userEnteredPassword, this, &MainWindow::userEnteredPassword);
     connect(m_mainCTL.getSerialInterface(), &SerialInterface::serialClosed, this, &MainWindow::serialDisconnected);
     connect(m_mainCTL.getSerialInterface(), &SerialInterface::serialOpen, this, &MainWindow::serialConnected);
+    connect(m_mainCTL.getSerialInterface(), &SerialInterface::readTimeoutError, this, &MainWindow::readTimeoutError);
     connect(&m_mainCTL.getAbortMessages(), &AbortCodeMessages::showAbortMessageBox, this, &MainWindow::showAbortMessageBox);
     // main state machine from main loop
     connect(m_pMainLoop, &MainLoop::runMainStateMachine, this, &MainWindow::runMainStateMachine);
@@ -72,14 +73,11 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(&m_mainCTL.getTuner(), &Tuner::actualPositionChanged, this, &MainWindow::MBactualPositionChanged);
 
     // disable until implemented
-    ui->mainTabWidget->setTabEnabled(1, false);
+    //ui->mainTabWidget->setTabEnabled(1, false);
     ui->request_terminal->setEnabled(false);
-    ui->batchID_checkBox->setEnabled(false);
-    ui->ctldiagnostics_checkbox->setEnabled(false);
-    ui->mfc_loaded_checkbox->setEnabled(false);
 
     // Make signal/slot connections here
-    connectRecipeButtons(); // TODO: remove these and replace with designer click handlers
+    connectRecipeButtons();
 
     // MFC slots
     connectMFCFlowBars();
@@ -91,7 +89,10 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     ui->statusBar->addWidget(m_pStatus);
 
     // setup wafer diamter combo box
-    ui->wafer_diameter->addItems(m_mainCTL.getDiameter().getWaferDiameterTextList());;
+    ui->wafer_diameter->addItems(m_mainCTL.getDiameter().getWaferDiameterTextList());
+
+    // read persistent settings and update UI
+    readSettings();
 
     // give things a little time to settle before opening the serial port
     QTimer::singleShot(50, this, &MainWindow::openMainPort);
@@ -119,6 +120,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     if (m_mainCTL.isOpen()) {
         m_mainCTL.close();
     }
+    Logger::logInfo("Shutting Down -------------------");
     Logger::clean();
     MainWindow::close();
 }
@@ -135,11 +137,26 @@ void MainWindow::showEvent(QShowEvent *)
 void MainWindow::setInitialUIState()
 {
     setUIOperatorMode();
+    // show/hide button and text box
+    batchIDEnabled();
 }
 
 //////////////////////////////////////////////////////////////////////////////////
 // Startup/ Setup
 //////////////////////////////////////////////////////////////////////////////////
+
+void MainWindow::readSettings()
+{
+    // read the persistent settings
+    bool batchID = m_persistentSettings.value(BATCHID_ENABLED_SETTING, false).toBool();
+    bool collisionSystem = m_persistentSettings.value(COLLISION_SYSTEM_ENABLED_SETTING, false).toBool();
+    bool heaterEnabled = m_persistentSettings.value(HEATER_ENABLED_SETTING, false).toBool();
+
+    // update the UI
+    ui->batchID_checkBox->setChecked(batchID);
+    ui->collision_system_checkbox->setChecked(collisionSystem);
+    ui->heater_checkbox->setChecked(heaterEnabled);
+}
 
 void MainWindow::connectRecipeButtons()
 {
@@ -238,7 +255,6 @@ void MainWindow::homeStateMachineDone()
 
     if (m_engineeringMode) {
         // enable other stage movement buttons
-        ui->init_button->setEnabled(true);
         ui->twospot_button->setEnabled(true);
         ui->diameter_button->setEnabled(true);
     }
@@ -373,6 +389,12 @@ void MainWindow::openMainPort()
     }
 }
 
+void MainWindow::readTimeoutError(QString lastCommand)
+{
+    QMessageBox::critical(this, "Error: ", "Read timeout on command " + lastCommand + " Exit");
+    QApplication::exit(0);
+}
+
 void MainWindow::serialDisconnected()
 {
     // Update Status bar
@@ -389,6 +411,12 @@ void MainWindow::serialConnected()
 {
     m_mainCTL.getAxesController().resetAxes();
     m_mainCTL.resetCTL();
+
+    // this handles the edge case where the board is not present
+    // but the serial port is successuflly opened.  The above
+    // serial commands will fail and close the port so stop here.
+    if (!m_mainCTL.isOpen()) return;
+
     CTLResetTimeOut = 2500ms / m_pMainLoop->getTimerInterval();
     // start the main state machine
     emit MSM_TransitionStartup();
@@ -1086,7 +1114,7 @@ void MainWindow::on_removeCascadeRecipeButton_clicked()
 
 }
 
-// clear cascade recipe buttonui->menuStage_Test->setEnabled(false);
+// clear cascade recipe button
 void MainWindow::on_clear_cascade_recipe_button_clicked()
 {
 
@@ -1464,17 +1492,6 @@ void MainWindow::on_MB_Left_Button_clicked()
     m_mainCTL.MBLeft();
 }
 
-// heater on tool settings tab
-void MainWindow::on_heater_checkbox_stateChanged(int arg1)
-{
-    if (arg1 == Qt::Checked) {
-        m_mainCTL.heaterOn();
-    }
-    else {
-        m_mainCTL.heaterOff();
-    }
-}
-
 // Engineer choice from service menu
 void MainWindow::on_actionEngineer_Mode_triggered()
 {
@@ -1505,6 +1522,8 @@ void MainWindow::disableControlButtons()
     ui->MB_Left_Button->setEnabled(false);
     ui->menuStage_Test->setEnabled(false);
     ui->init_button->setEnabled(false);
+    ui->batchIDButton->setEnabled(false);
+    ui->batchIDedit->setEnabled(false);
 }
 
 void MainWindow::setUIEngineerMode()
@@ -1531,12 +1550,19 @@ void MainWindow::setUIEngineerMode()
     ui->loadMBButton->setEnabled(true);
     ui->loadAutoTuneButton->setEnabled(true);
     ui->loadSpeedButton->setEnabled(true);
-    ui->n2_purge_button->setEnabled(true);
-    ui->plsmaBtn->setEnabled(true);
-    ui->MB_Right_Button->setEnabled(true);
-    ui->MB_Left_Button->setEnabled(true);
+    // only enable these if we have a connection
+    if (m_mainCTL.isOpen()) {
+        ui->n2_purge_button->setEnabled(true);
+        ui->plsmaBtn->setEnabled(true);
+        ui->MB_Right_Button->setEnabled(true);
+        ui->MB_Left_Button->setEnabled(true);
+    }
     ui->actionConnect->setEnabled(true);
     ui->actionDisconnect->setEnabled(true);
+    ui->batchIDButton->setEnabled(true);
+    ui->batchIDedit->setEnabled(true);
+    // tool settings tab
+    ui->mainTabWidget->setTabEnabled(2, true);
     // if initialized enable
     if (m_mainCTL.getAxesController().getAxesInitilizedStatus()) {
         ui->Joystick_button->setEnabled(true);
@@ -1584,6 +1610,10 @@ void MainWindow::setUIOperatorMode()
     ui->menuStage_Test->setEnabled(false);
     ui->actionConnect->setEnabled(false);
     ui->actionDisconnect->setEnabled(false);
+    ui->batchIDButton->setEnabled(true);
+    ui->batchIDedit->setEnabled(true);
+    // tool settings tab
+    ui->mainTabWidget->setTabEnabled(2, false);
     // put in not initilized UI state
     if (!m_mainCTL.getAxesController().getAxesInitilizedStatus()) {
         ui->Joystick_button->setEnabled(false);
@@ -1613,21 +1643,12 @@ void MainWindow::on_actionConnect_triggered()
 {
     SettingsDialog::Settings p = m_pSettings->settings();
 
-    if (m_mainCTL.open(*m_pSettings)) {
+    showStatusMessage(tr("Connecting to %1 : %2, %3, %4, %5, %6")
+                          .arg(p.name).arg(p.stringBaudRate).arg(p.stringDataBits)
+                          .arg(p.stringParity).arg(p.stringStopBits).arg(p.stringFlowControl));
 
-        m_mainCTL.getAxesController().resetAxes();
-        m_mainCTL.resetCTL();
-        CTLResetTimeOut = 2500ms / m_pMainLoop->getTimerInterval();
+    if (!m_mainCTL.open(*m_pSettings)) {
 
-        // Give status on connect
-        showStatusMessage(tr("Connected to %1 : %2, %3, %4, %5, %6")
-                              .arg(p.name).arg(p.stringBaudRate).arg(p.stringDataBits)
-                              .arg(p.stringParity).arg(p.stringStopBits).arg(p.stringFlowControl));
-
-        // start the main state machine
-        emit MSM_TransitionStartup();
-
-    } else {
         QMessageBox::critical(this, "Error", m_mainCTL.getPortErrorString());
 
         showStatusMessage("Open error" + m_mainCTL.getPortErrorString());
@@ -1668,5 +1689,67 @@ void MainWindow::on_actionDetailed_Log_toggled(bool arg1)
 void MainWindow::on_actionTest_Z_toggled(bool arg1)
 {
     m_mainCTL.getAxesController().setTestZ(arg1);
+}
+
+// batch ID system enabled
+void MainWindow::on_batchID_checkBox_clicked(bool checked)
+{
+    m_mainCTL.batchIDLoggingOn(checked);
+
+    // save the setting
+    m_persistentSettings.setValue(BATCHID_ENABLED_SETTING, checked);
+
+    batchIDEnabled();
+}
+
+void MainWindow::batchIDEnabled()
+{
+    if (ui->batchID_checkBox->isChecked()) {
+        // show button and text box
+        ui->batchIDButton->setEnabled(true);
+        ui->batchIDedit->setEnabled(true);
+    }
+    else {
+        // hide button and text box
+        ui->batchIDButton->setEnabled(false);
+        ui->batchIDedit->setEnabled(false);
+    }
+}
+
+// crash avoidance system enabled/disabled
+void MainWindow::on_collision_system_checkbox_clicked(bool checked)
+{
+    m_mainCTL.hasCollision(checked);
+
+    // save the setting
+    m_persistentSettings.setValue(COLLISION_SYSTEM_ENABLED_SETTING, checked);
+}
+
+// heater on tool settings tab
+void MainWindow::on_heater_checkbox_clicked(bool checked)
+{
+    m_mainCTL.heaterOn(checked);
+
+    // save the setting
+    m_persistentSettings.setValue(HEATER_ENABLED_SETTING, checked);
+}
+
+
+void MainWindow::on_batchIDButton_clicked()
+{
+    bool ok;
+    QString input = QInputDialog::getText(nullptr, "Batch ID #", "Enter the Batch ID #", QLineEdit::Normal, "", &ok);
+
+    if (ok) {
+        QString input = ui->batchIDedit->toPlainText();
+        if (input == "" || input.length() > 45) {
+            return;
+        }
+        else {
+            Logger::logInfo("----------------------------BATCH ID # ---------------------------------");
+            Logger::logInfo("Logging Batch ID #: " + input);
+            ui->batchIDedit->setText(input);
+        }
+    }
 }
 

@@ -4,7 +4,7 @@
 #include <QString>
 #include "logger.h"
 #include <QTimer>
-#include "Utilities.h"
+#include "UtilitiesAndConstants.h"
 
 const int AUX_INPUT_BUFFER_MAX_SIZE = 90;
 const int SERIAL_RESPONSE_TIMEOUT = 2000; // timeout waiting for control pcb response (milliseconds)
@@ -468,12 +468,6 @@ void AxesController::RunHomeAxesSM()
         // no op
     }
 }
-
-/*void AxesController::HomeIdleOnEntry()
-{
-    // updat the ui
-    emit setUIHomeSMDone();
-}*/
 
 void AxesController::RunTwoSpotSM()
 {

@@ -113,227 +113,44 @@ QProgressBar::Chunk
       <property name="geometry">
        <rect>
         <x>940</x>
-        <y>30</y>
-        <width>401</width>
-        <height>781</height>
+        <y>26</y>
+        <width>416</width>
+        <height>831</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="recipeLayout">
        <property name="sizeConstraint">
         <enum>QLayout::SetDefaultConstraint</enum>
        </property>
-       <item row="5" column="1" colspan="2">
-        <layout class="QGridLayout" name="gridLayout_17">
-         <property name="sizeConstraint">
-          <enum>QLayout::SetDefaultConstraint</enum>
-         </property>
-         <item row="2" column="0" colspan="2">
-          <widget class="QLabel" name="label_87">
-           <property name="styleSheet">
-            <string notr="true">
-font: 700 14pt &quot;Ubuntu Mono&quot;;</string>
-           </property>
-           <property name="text">
-            <string>MB Tuner:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QTextEdit" name="RF_recipe_watts">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>15</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>15</height>
-            </size>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">font: 18px;
-color: rgb(52, 101, 164);</string>
-           </property>
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QPushButton" name="loadMBButton">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton {
+       <item row="3" column="0" colspan="3">
+        <widget class="QPushButton" name="loadRecipeButton">
+         <property name="styleSheet">
+          <string notr="true">QPushButton {
+color: white;
 background-color: rgb(119, 136, 153);
 font: 14pt &quot;Ubuntu Bold&quot;;
 }
 QPushButton:disabled {
 color:gray;
-}</string>
-           </property>
-           <property name="text">
-            <string>TUNER</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
-          <widget class="QPushButton" name="autotune_recipe">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>20</height>
-            </size>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton {
-font: 16pt &quot;Ubuntu Bold&quot;;
-	color: rgb(220, 0, 20);
-}</string>
-           </property>
-           <property name="text">
-            <string>OFF</string>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>32</width>
-             <height>32</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QPushButton" name="loadRFButton">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton {
-background-color: rgb(119, 136, 153);
-font: 16pt &quot;Ubuntu Bold&quot;;
 }
-QPushButton:disabled {
-color:gray;
-}</string>
-           </property>
-           <property name="text">
-            <string>RF</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0" colspan="2">
-          <widget class="QLabel" name="label_49">
-           <property name="styleSheet">
-            <string notr="true">
-font: 700 14pt &quot;Ubuntu Mono&quot;;</string>
-           </property>
-           <property name="text">
-            <string>RF Power:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QTextEdit" name="mb_recipe">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>15</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>15</height>
-            </size>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">font: 18px;
-color: rgb(52, 101, 164);</string>
-           </property>
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
-          <widget class="QPushButton" name="loadAutoTuneButton">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton {
-background-color: rgb(119, 136, 153);
-font: 10pt &quot;Ubuntu Bold&quot;;
-}
-QPushButton:disabled {
-color:gray;
-}</string>
-           </property>
-           <property name="text">
-            <string>AUTO TUNE</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="1" column="0" colspan="3">
-        <widget class="QTextEdit" name="name_recipe">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>35</height>
-          </size>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">font: 16px;</string>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-         <property name="markdown">
-          <string/>
-         </property>
-         <property name="html">
-          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Century Gothic'; font-size:16px; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0" colspan="3">
-        <widget class="QLabel" name="label_103">
-         <property name="styleSheet">
-          <string notr="true">font: 18px;</string>
+</string>
          </property>
          <property name="text">
-          <string>Plasma Recipe Settings</string>
+          <string>LOAD RECIPE</string>
+         </property>
+         <property name="icon">
+          <iconset theme="document-open">
+           <normaloff>.</normaloff>.</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>32</width>
+           <height>32</height>
+          </size>
          </property>
         </widget>
        </item>
-       <item row="7" column="0" colspan="3">
+       <item row="8" column="0" colspan="3">
         <widget class="QPushButton" name="save_recipe_button">
          <property name="minimumSize">
           <size>
@@ -364,45 +181,7 @@ font: 14pt &quot;Ubuntu Bold&quot;;
          </property>
         </widget>
        </item>
-       <item row="0" column="0" colspan="3">
-        <widget class="QLabel" name="label_31">
-         <property name="styleSheet">
-          <string notr="true">font: 16px;</string>
-         </property>
-         <property name="text">
-          <string>Recipe Name:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0" colspan="3">
-        <widget class="QPushButton" name="loadRecipeButton">
-         <property name="styleSheet">
-          <string notr="true">QPushButton {
-color: white;
-background-color: rgb(119, 136, 153);
-font: 14pt &quot;Ubuntu Bold&quot;;
-}
-QPushButton:disabled {
-color:gray;
-}
-</string>
-         </property>
-         <property name="text">
-          <string>LOAD RECIPE</string>
-         </property>
-         <property name="icon">
-          <iconset theme="document-open">
-           <normaloff>.</normaloff>.</iconset>
-         </property>
-         <property name="iconSize">
-          <size>
-           <width>32</width>
-           <height>32</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="0">
+       <item row="6" column="0">
         <layout class="QGridLayout" name="gridLayout_21">
          <item row="0" column="0" colspan="2">
           <widget class="QLabel" name="label_32">
@@ -605,7 +384,52 @@ color:gray;
          </item>
         </layout>
        </item>
-       <item row="6" column="0" colspan="3">
+       <item row="1" column="0" colspan="3">
+        <widget class="QLabel" name="label_31">
+         <property name="styleSheet">
+          <string notr="true">font: 16px;</string>
+         </property>
+         <property name="text">
+          <string>Recipe Name:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="3">
+        <widget class="QTextEdit" name="name_recipe">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>35</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">font: 16px;</string>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+         <property name="markdown">
+          <string/>
+         </property>
+         <property name="html">
+          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Century Gothic'; font-size:16px; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0" colspan="3">
         <layout class="QGridLayout" name="gridLayout_20">
          <item row="10" column="4">
           <widget class="QLabel" name="label_88">
@@ -1331,6 +1155,216 @@ font: 700 16pt &quot;Ubuntu Mono&quot;;</string>
           </widget>
          </item>
         </layout>
+       </item>
+       <item row="6" column="1" colspan="2">
+        <layout class="QGridLayout" name="gridLayout_17">
+         <property name="sizeConstraint">
+          <enum>QLayout::SetDefaultConstraint</enum>
+         </property>
+         <item row="2" column="0" colspan="2">
+          <widget class="QLabel" name="label_87">
+           <property name="styleSheet">
+            <string notr="true">
+font: 700 14pt &quot;Ubuntu Mono&quot;;</string>
+           </property>
+           <property name="text">
+            <string>MB Tuner:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QTextEdit" name="RF_recipe_watts">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>15</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>15</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">font: 18px;
+color: rgb(52, 101, 164);</string>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QPushButton" name="loadMBButton">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton {
+background-color: rgb(119, 136, 153);
+font: 14pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
+}</string>
+           </property>
+           <property name="text">
+            <string>TUNER</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <widget class="QPushButton" name="autotune_recipe">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton {
+font: 16pt &quot;Ubuntu Bold&quot;;
+	color: rgb(220, 0, 20);
+}</string>
+           </property>
+           <property name="text">
+            <string>OFF</string>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QPushButton" name="loadRFButton">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton {
+background-color: rgb(119, 136, 153);
+font: 16pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
+}</string>
+           </property>
+           <property name="text">
+            <string>RF</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0" colspan="2">
+          <widget class="QLabel" name="label_49">
+           <property name="styleSheet">
+            <string notr="true">
+font: 700 14pt &quot;Ubuntu Mono&quot;;</string>
+           </property>
+           <property name="text">
+            <string>RF Power:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QTextEdit" name="mb_recipe">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>15</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>15</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">font: 18px;
+color: rgb(52, 101, 164);</string>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QPushButton" name="loadAutoTuneButton">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton {
+background-color: rgb(119, 136, 153);
+font: 10pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
+}</string>
+           </property>
+           <property name="text">
+            <string>AUTO TUNE</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="5" column="0" colspan="3">
+        <widget class="QLabel" name="label_103">
+         <property name="styleSheet">
+          <string notr="true">font: 18px;</string>
+         </property>
+         <property name="text">
+          <string>Plasma Recipe Settings</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QPushButton" name="batchIDButton">
+         <property name="styleSheet">
+          <string notr="true">QPushButton {
+color: white;
+background-color: rgb(119, 136, 153);
+font: 14pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
+}
+</string>
+         </property>
+         <property name="text">
+          <string>Batch ID</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QTextEdit" name="batchIDedit">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>15</height>
+          </size>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -3107,13 +3141,30 @@ font: 14pt &quot;Ubuntu Bold&quot;;
         </rect>
        </property>
        <layout class="QGridLayout" name="gridLayout_4">
-        <item row="1" column="0">
+        <item row="2" column="0">
+         <widget class="QCheckBox" name="collision_system_checkbox">
+          <property name="text">
+           <string>Crash Avoidance System Enabled</string>
+          </property>
+          <property name="icon">
+           <iconset resource="ONTOS3.qrc">
+            <normaloff>:/images/collision-icon.jpg</normaloff>:/images/collision-icon.jpg</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>32</width>
+            <height>32</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
          <widget class="QCheckBox" name="heater_checkbox">
           <property name="layoutDirection">
            <enum>Qt::LeftToRight</enum>
           </property>
           <property name="text">
-           <string>Heater Enabled</string>
+           <string>Preheat Plasma Head</string>
           </property>
           <property name="icon">
            <iconset theme="weather-clear">
@@ -3127,42 +3178,11 @@ font: 14pt &quot;Ubuntu Bold&quot;;
           </property>
          </widget>
         </item>
-        <item row="3" column="0">
-         <widget class="QCheckBox" name="ctldiagnostics_checkbox">
-          <property name="text">
-           <string>CTL Diagnostics Enabled</string>
-          </property>
-          <property name="icon">
-           <iconset theme="emblem-system">
-            <normaloff>.</normaloff>.</iconset>
-          </property>
-          <property name="iconSize">
-           <size>
-            <width>32</width>
-            <height>32</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="0">
-         <widget class="QCheckBox" name="mfc_loaded_checkbox">
-          <property name="text">
-           <string>Loaded Recipes Value Enabled</string>
-          </property>
-          <property name="icon">
-           <iconset theme="help-about">
-            <normaloff>.</normaloff>.</iconset>
-          </property>
-          <property name="iconSize">
-           <size>
-            <width>32</width>
-            <height>32</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
+        <item row="1" column="0">
          <widget class="QCheckBox" name="batchID_checkBox">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
           <property name="text">
            <string>Batch ID Enabled</string>
           </property>
@@ -3178,8 +3198,11 @@ font: 14pt &quot;Ubuntu Bold&quot;;
           </property>
          </widget>
         </item>
-        <item row="0" column="0">
+        <item row="3" column="0">
          <widget class="QCheckBox" name="request_terminal">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>Request/Response Terminal</string>
           </property>

@@ -9,6 +9,12 @@
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
 
+    // these allow us to use the QSettings from multiple places in the app
+    // using the default constructor
+    QCoreApplication::setOrganizationName("OntosPlasma");
+    QCoreApplication::setOrganizationDomain("OntosPlasma.com");
+    QCoreApplication::setApplicationName("Ontos3");
+
     // Create our main loop
     // Contains our Event loop and Timer
     MainLoop *mainLoop = new MainLoop(); // cleaned up in MainWindow destructor

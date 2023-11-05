@@ -34,7 +34,7 @@ public:
     QString getPortErrorString();
     bool isOpen();
 
-    // Commands Map functions.  TODO: remove
+    // Commands Map functions.  Currently not used but may be used when implementing gerber files
     void setCommandMap(const QMap<QString, QPair<QString, QString>>& map);
     QString findCommandValue(QString command) const;
 
@@ -74,6 +74,7 @@ public:
     void setTunerSetpointFromRecipe();
     void handleSetDefaultRecipeCommand();
     void plannedAutoStartOn() { m_plannedAutoStart = true; }
+    void batchIDLoggingOn(bool state);
 
     // accessors
     Tuner& getTuner() { return m_tuner; }
@@ -101,13 +102,11 @@ public:
     void MBRight();
 
     // plasma head
-    void heaterOn();
-    void heaterOff();
+    void heaterOn(bool state);
 
 signals:
     void responseReceived(const QString& response);
     void executeRecipeChanged();
-    //void mainPortOpened();
     void setRecipeMBtuner(QString MBtunerSP);
     void setRecipeRFpower(QString RFpowerSP);
 

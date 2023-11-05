@@ -5,7 +5,7 @@
 #include <QDebug>
 #include <QRegularExpression>
 #include "logger.h"
-
+#include "UtilitiesAndConstants.h"
 
 
 PlasmaRecipe::PlasmaRecipe(QObject* parent) :
@@ -334,10 +334,5 @@ void PlasmaRecipe::executeCurrentRecipe() {
     }
 }
 
-bool PlasmaRecipe::isRecipeComplete()
-{
-    //if (Stage.scan.isFinished())
-        //return true;
-}
 
 

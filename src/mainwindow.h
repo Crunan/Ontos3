@@ -20,6 +20,7 @@
 #include <QInputDialog>
 #include <QLineEdit>
 #include "passworddialog.h"
+#include <QSettings>
 
 using namespace std::literals;
 
@@ -56,6 +57,7 @@ public slots:
     // Serial Port
     void openMainPort();
     void closeMainPort();
+    void readTimeoutError(QString lastCommand);
 
     // state machine ui updating slots
     void homeStateMachineStartup();
@@ -149,19 +151,17 @@ private slots:
     void on_actionSettings_triggered();
     void on_MB_Right_Button_clicked();
     void on_MB_Left_Button_clicked();
-    void on_heater_checkbox_stateChanged(int arg1);
     void on_actionSet_Default_triggered();
-
     void on_actionStart_triggered();
-
     void on_actionStop_triggered();
-
     void on_actionDetailed_Log_toggled(bool arg1);
-
     void on_actionTest_Z_toggled(bool arg1);
+    void on_batchID_checkBox_clicked(bool checked);
+    void on_collision_system_checkbox_clicked(bool checked);
+    void on_heater_checkbox_clicked(bool checked);
+    void on_batchIDButton_clicked();
 
 private:
-
     // Action Button methods
     void showStatusMessage(const QString &message);
     // hit x in top right
@@ -183,6 +183,10 @@ private:
     void connectCascadeRecipeButtons();
 
     void consoleMainCTLSetup();
+    void batchIDEnabled();
+
+    // persistent settings
+    void readSettings();
 
     // helpers
     void RunStartup();
@@ -202,6 +206,7 @@ private:
     PasswordDialog m_passDialog;
     SettingsDialog* m_pSettings;
     PlasmaController m_mainCTL;
+    QSettings m_persistentSettings;
 
     CommandFileReader m_commandFileReader;
 

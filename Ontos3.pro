@@ -12,7 +12,7 @@ CONFIG += c++17
 # DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    src/Utilities.cpp \
+    src/UtilitiesAndConstants.cpp \
     src/abortcodemessages.cpp \
     src/passworddialog.cpp \
     src/diameter.cpp \
@@ -40,7 +40,7 @@ SOURCES += \
 
 
 HEADERS += \
-    src/Utilities.h \
+    src/UtilitiesAndConstants.h \
     src/abortcodemessages.h \
     src/passworddialog.h \
     src/diameter.h \
