@@ -3,7 +3,7 @@
 #include <QApplication>
 
 const int AUX_INPUT_BUFFER_MAX_SIZE = 90;
-const int SERIAL_RESPONSE_TIMEOUT = 5000; // timeout waiting for response (milliseconds)
+const int SERIAL_RESPONSE_TIMEOUT = 3000; // timeout waiting for response (milliseconds)
 const int SERIAL_WRITE_TIMEOUT = 1000; // timeout waiting for control pcb response (milliseconds)
 
 SerialInterface::SerialInterface() :

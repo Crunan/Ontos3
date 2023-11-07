@@ -1,6 +1,6 @@
 QT += core gui widgets serialport statemachine
 
-VERSION = 01.00.03
+VERSION = 01.00.04
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
 greaterThan(QT_MAJOR_VERSION, 4)

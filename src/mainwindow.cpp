@@ -391,8 +391,12 @@ void MainWindow::openMainPort()
 
 void MainWindow::readTimeoutError(QString lastCommand)
 {
-    QMessageBox::critical(this, "Error: ", "Read timeout on command " + lastCommand + " Exit");
-    QApplication::exit(0);
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, "Error: ", "Read timeout on command " + lastCommand + ". Exit?",
+                                  QMessageBox::Yes|QMessageBox::No);
+    if (reply == QMessageBox::Yes) {
+        QApplication::quit();
+    }
 }
 
 void MainWindow::serialDisconnected()
@@ -919,7 +923,7 @@ void MainWindow::forwardWattsChanged()
 
     // dashboard
     ui->RF_Actual_LCD->display(watts);
-    ui->RF_bar->setValue(watts);
+    if (watts > 5) ui->RF_bar->setValue(watts);
 }
 
 void MainWindow::reflectedWattsChanged()
@@ -928,7 +932,7 @@ void MainWindow::reflectedWattsChanged()
 
     // dashboard
     ui->RefRF_Actual_LCD->display(watts);
-    ui->RefRF_bar->setValue(watts);
+    if (watts > 5) ui->RefRF_bar->setValue(watts);
 }
 
 void MainWindow::MBactualPositionChanged(const double actualPosition)
@@ -1263,12 +1267,12 @@ void MainWindow::on_plsmaBtn_toggled(bool checked)
 {
     if (!checked) {
         m_mainCTL.StopScan();
+        m_mainCTL.RunRecipe(false); // turn off recipe execution
         ui->plsmaBtn->setText("START PLASMA");
     }
     else {
         ui->plsmaBtn->setText("PLASMA OFF");
-        // hard coded until the checkbox is in place
-        m_mainCTL.hasCollision(true);
+
         if (m_mainCTL.getCollision() && m_mainCTL.getRecipe()->getAutoScanBool() && !m_mainCTL.getPlasmaActive()) {
             m_mainCTL.plannedAutoStartOn();//this will make sure we dont accidently start plasma when just clicking RUN SCAN button
             m_mainCTL.StartScan();

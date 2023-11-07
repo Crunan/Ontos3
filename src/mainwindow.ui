@@ -1457,6 +1457,9 @@ color:gray;
              <stylestrategy>PreferDefault</stylestrategy>
             </font>
            </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
            <property name="maximum">
             <number>200</number>
            </property>
@@ -1886,8 +1889,15 @@ background-color: blue;
                  <height>0</height>
                 </size>
                </property>
+               <property name="styleSheet">
+                <string notr="true">QProgressBar::chunk {
+    margin: 4.5px;
+    border-bottom-right-radius: 20px;
+    border-bottom-left-radius: 20px;
+}</string>
+               </property>
                <property name="maximum">
-                <number>20</number>
+                <number>100</number>
                </property>
                <property name="value">
                 <number>0</number>
@@ -2061,8 +2071,15 @@ font: 16pt &quot;Arial Bold&quot;;
                  <height>0</height>
                 </size>
                </property>
+               <property name="styleSheet">
+                <string notr="true">QProgressBar::chunk {
+    margin: 4.5px;
+    border-bottom-right-radius: 20px;
+    border-bottom-left-radius: 20px;
+}</string>
+               </property>
                <property name="maximum">
-                <number>20</number>
+                <number>100</number>
                </property>
                <property name="value">
                 <number>0</number>
@@ -2224,8 +2241,15 @@ font: 16pt &quot;Arial Bold&quot;;
                  <height>0</height>
                 </size>
                </property>
+               <property name="styleSheet">
+                <string notr="true">QProgressBar::chunk {
+    margin: 4.5px;
+    border-bottom-right-radius: 20px;
+    border-bottom-left-radius: 20px;
+}</string>
+               </property>
                <property name="maximum">
-                <number>30</number>
+                <number>100</number>
                </property>
                <property name="value">
                 <number>0</number>
@@ -2399,8 +2423,15 @@ font: 16pt &quot;Arial Bold&quot;;
                  <height>0</height>
                 </size>
                </property>
+               <property name="styleSheet">
+                <string notr="true">QProgressBar::chunk {
+    margin: 4.5px;
+    border-bottom-right-radius: 20px;
+    border-bottom-left-radius: 20px;
+}</string>
+               </property>
                <property name="maximum">
-                <number>30</number>
+                <number>100</number>
                </property>
                <property name="value">
                 <number>0</number>

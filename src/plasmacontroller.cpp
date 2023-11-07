@@ -1001,7 +1001,7 @@ void PlasmaController::parseResponseForCTLStatus(const QString& response)
     for (int i = 1; i <= 4; i++) {
         MFC* mfc = findMFCByNumber(i);
         double mfcFlow = subsystemData[4 + i].toDouble();
-        mfc->setActualFlow(mfcFlow);
+        if (mfcFlow > 5) mfc->setActualFlow(mfcFlow); // progress bars don't look right when value is less than 5
     }
 
     // Extract and update plasmahead temperature
