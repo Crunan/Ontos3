@@ -17,6 +17,7 @@ SOURCES += \
     src/passworddialog.cpp \
     src/diameter.cpp \
     src/lighttower.cpp \
+    src/runguard.cpp \
     src/serialinterface.cpp \
     src/axescontroller.cpp \
     src/axis.cpp \
@@ -61,6 +62,7 @@ HEADERS += \
     src/plasmahead.h \
     src/pwr.h \
     src/plasmarecipe.h \
+    src/runguard.h \
     src/tuner.h \
     src/settingsdialog.h \
     src/serialinterface.h \
