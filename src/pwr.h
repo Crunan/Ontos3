@@ -11,7 +11,8 @@ public:
 
     int getRecipeWatts() const;
     QString getRecipeWattsQStr() const;
-    void setRecipeWatts(int value);
+    void setRecipeWatts(int value); // sends value to the controller
+    void updateRecipeWatts(double value); // updates the displayed recipe value only
 
     int getForwardWatts() const;
     void setForwardWatts(int value);
@@ -26,7 +27,8 @@ public:
     void setDefaultRecipe(int value);
 
 signals:
-    void recipeWattsChanged(int watts);
+    void updateUIRecipeWatts(int watts); // updates the ui recipe value
+    void recipeWattsChanged(int watts); // updates the controller recipe value
     void forwardWattsChanged();
     void reflectedWattsChanged();
     void defaultRecipeChanged();
@@ -37,7 +39,6 @@ private:
     int m_reflectedWatts;
     int m_defaultRecipe;
     int m_maxWatts;
-
 };
 
 #endif // PWR_H

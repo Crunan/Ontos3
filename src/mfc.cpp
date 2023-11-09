@@ -29,10 +29,17 @@ double MFC::getRecipeFlow() const
     return m_recipeFlow;
 }
 
+
 void MFC::setRecipeFlow(double value)
 {
     m_recipeFlow = value;
-    emit recipeFlowChanged(m_mfcNumber, m_recipeFlow);
+    emit recipeFlowChanged(m_mfcNumber, m_recipeFlow); // update the controller
+}
+
+void MFC::updateRecipeFlow(double value)
+{
+    m_recipeFlow = value;
+    emit updateUIRecipeFlow(m_mfcNumber, m_recipeFlow); // updates the UI recipe flow
 }
 
 double MFC::getActualFlow() const
@@ -42,8 +49,10 @@ double MFC::getActualFlow() const
 
 void MFC::setActualFlow(double value)
 {
-    m_actualFlow = value;
-    emit actualFlowChanged(m_mfcNumber, m_actualFlow);
+    if (m_actualFlow != value) {
+        m_actualFlow = value;
+        emit updateUIActualFlow(m_mfcNumber, m_actualFlow); // updates the UI actual flow
+    }
 }
 
 double MFC::getRange() const

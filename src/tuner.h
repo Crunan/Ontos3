@@ -16,6 +16,7 @@ public:
     int getRecipePosition() const;
     QString getRecipePositionQStr() const;
     void setRecipePosition(int setpoint);
+    void updateRecipePosition(int setpoint);
 
     double getDefaultRecipe() const;
     void setDefaultRecipe(double setpoint);
@@ -23,12 +24,15 @@ public:
     bool getAutoTune() const;
     void setAutoTune(bool state);
     void toggleAutoTune();
+    void updateAutoTune(bool state);
 
 signals:
     void recipePositionChanged(const int recipePosition);
+    void updateUIRecipePosition(const int m_recipePosition);
     void actualPositionChanged(const int actualPosition);
     void defaultRecipeChanged(const double defaultRecipe);
     void autoTuneChanged(const bool autoTune);
+    void updateUIAutoTune(const bool m_autoTune);
 
 private:
     int m_actualPosition;

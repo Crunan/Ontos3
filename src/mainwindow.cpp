@@ -49,6 +49,7 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(&m_mainCTL, &PlasmaController::CSM_StatusUpdate, this, &MainWindow::CSM_StatusUpdate);
     connect(&m_mainCTL, &PlasmaController::scanBoxChanged, this, &MainWindow::scanBoxChanged);
     connect(&m_mainCTL.getTuner(), &Tuner::recipePositionChanged, this, &MainWindow::setRecipeMBtuner);
+    connect(&m_mainCTL.getTuner(), &Tuner::updateUIRecipePosition, this, &MainWindow::setRecipeMBtuner);
     connect(&m_mainCTL.getPlasmaHead(), &PlasmaHead::headTemperatureChanged, this, &MainWindow::headTemperatureChanged);
     connect(&m_passDialog, &PasswordDialog::userEnteredPassword, this, &MainWindow::userEnteredPassword);
     connect(m_mainCTL.getSerialInterface(), &SerialInterface::serialClosed, this, &MainWindow::serialDisconnected);
@@ -67,9 +68,11 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(m_mainCTL.getRecipe(), &PlasmaRecipe::yLimitsChanged, this, &MainWindow::yLimitsChanged);
     connect(m_mainCTL.getRecipe(), &PlasmaRecipe::cyclesChanged, this, &MainWindow::cyclesChanged);
     connect(&m_mainCTL.getPower(), &PWR::recipeWattsChanged, this, &MainWindow::recipeWattsChanged);
+    connect(&m_mainCTL.getPower(), &PWR::updateUIRecipeWatts, this, &MainWindow::recipeWattsChanged);
     connect(&m_mainCTL.getPower(), &PWR::forwardWattsChanged, this, &MainWindow::forwardWattsChanged);
     connect(&m_mainCTL.getPower(), &PWR::reflectedWattsChanged, this, &MainWindow::reflectedWattsChanged);
     connect(&m_mainCTL.getTuner(), &Tuner::autoTuneChanged, this, &MainWindow::autoTuneChanged);
+    connect(&m_mainCTL.getTuner(), &Tuner::updateUIAutoTune, this, &MainWindow::autoTuneChanged);
     connect(&m_mainCTL.getTuner(), &Tuner::actualPositionChanged, this, &MainWindow::MBactualPositionChanged);
 
     // disable until implemented
@@ -173,7 +176,8 @@ void MainWindow::connectMFCFlowBars()
     // to the GUI updateFlowbars function.
     for (int i = 0; i < m_mainCTL.getMFCs().size(); ++i) {
         connect(m_mainCTL.getMFCs()[i], &MFC::recipeFlowChanged, this, &MainWindow::updateRecipeFlow);
-        connect(m_mainCTL.getMFCs()[i], &MFC::actualFlowChanged, this, &MainWindow::actualFlowChanged);
+        connect(m_mainCTL.getMFCs()[i], &MFC::updateUIRecipeFlow, this, &MainWindow::updateRecipeFlow);
+        connect(m_mainCTL.getMFCs()[i], &MFC::updateUIActualFlow, this, &MainWindow::actualFlowChanged);
     }
 }
 
@@ -924,6 +928,7 @@ void MainWindow::forwardWattsChanged()
     // dashboard
     ui->RF_Actual_LCD->display(watts);
     if (watts > 5) ui->RF_bar->setValue(watts);
+    else ui->RF_bar->setValue(0);
 }
 
 void MainWindow::reflectedWattsChanged()
@@ -933,6 +938,7 @@ void MainWindow::reflectedWattsChanged()
     // dashboard
     ui->RefRF_Actual_LCD->display(watts);
     if (watts > 5) ui->RefRF_bar->setValue(watts);
+    else ui->RefRF_bar->setValue(0);
 }
 
 void MainWindow::MBactualPositionChanged(const double actualPosition)
@@ -959,7 +965,12 @@ void MainWindow::actualFlowChanged(const int mfcNumber, const double actualFlow)
        double range = m_mainCTL.findMFCByNumber(1)->getRange();
        int percentage = 0;
        if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
-       ui->gas1ProgressBar->setValue(int(percentage));
+
+       // update the progress bar
+       if (percentage > 5) {// progress bars don't look right when value is less than 5
+           ui->gas1ProgressBar->setValue(int(percentage));
+       } else
+           ui->gas1ProgressBar->setValue(0);
 
        // set the dashboard and plasma tab edit box below the progress bar
        ui->gas1_actual_SLPM->setText(QString::number(percentage));
@@ -969,7 +980,12 @@ void MainWindow::actualFlowChanged(const int mfcNumber, const double actualFlow)
        double range = m_mainCTL.findMFCByNumber(2)->getRange();
        int percentage = 0;
        if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
-       ui->gas2ProgressBar->setValue(int(percentage));
+
+       // update the progress bar
+       if (percentage > 5) {// progress bars don't look right when value is less than 5
+           ui->gas2ProgressBar->setValue(int(percentage));
+       } else
+           ui->gas2ProgressBar->setValue(0);
 
        // set the dashboard and plasma tab edit box below the progress bar
        ui->gas2_actual_SLPM->setText(QString::number(percentage));
@@ -979,7 +995,12 @@ void MainWindow::actualFlowChanged(const int mfcNumber, const double actualFlow)
        double range = m_mainCTL.findMFCByNumber(3)->getRange();
        int percentage = 0;
        if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
-       ui->gas3ProgressBar->setValue(int(percentage));
+
+       // update the progress bar
+       if (percentage > 5) {// progress bars don't look right when value is less than 5
+           ui->gas3ProgressBar->setValue(int(percentage));
+       } else
+           ui->gas3ProgressBar->setValue(0);
 
        // set the dashboard and plasma tab edit box below the progress bar
        ui->gas3_actual_SLPM->setText(QString::number(percentage));
@@ -989,7 +1010,12 @@ void MainWindow::actualFlowChanged(const int mfcNumber, const double actualFlow)
        double range = m_mainCTL.findMFCByNumber(4)->getRange();
        int percentage = 0;
        if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
-       ui->gas4ProgressBar->setValue(int(percentage));
+
+       // update the progress bar
+       if (percentage > 5) {// progress bars don't look right when value is less than 5
+           ui->gas4ProgressBar->setValue(int(percentage));
+       } else
+           ui->gas4ProgressBar->setValue(0);
 
        // set the dashboard and plasma tab edit box below the progress bar
        ui->gas4_actual_SLPM->setText(QString::number(percentage));
@@ -1756,4 +1782,5 @@ void MainWindow::on_batchIDButton_clicked()
         }
     }
 }
+
 

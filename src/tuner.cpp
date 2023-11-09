@@ -15,8 +15,10 @@ int Tuner::getActualPosition() const
 
 void Tuner::setActualPosition(int position)
 {
-    m_actualPosition = position;
-    emit actualPositionChanged(m_actualPosition);
+    if (m_actualPosition != position) {
+        m_actualPosition = position;
+        emit actualPositionChanged(m_actualPosition);
+    }
 }
 
 int Tuner::getRecipePosition() const
@@ -33,6 +35,12 @@ void Tuner::setRecipePosition(int setpoint)
 {
     m_recipePosition = setpoint;
     emit recipePositionChanged(m_recipePosition);
+}
+
+void Tuner::updateRecipePosition(int setpoint)
+{
+    m_recipePosition = setpoint;
+    emit updateUIRecipePosition(m_recipePosition);
 }
 
 double Tuner::getDefaultRecipe() const
@@ -55,6 +63,12 @@ void Tuner::setAutoTune(bool state)
 {
     m_autoTune = state;
     emit autoTuneChanged(m_autoTune);
+}
+
+void Tuner::updateAutoTune(bool state)
+{
+    m_autoTune = state;
+    emit updateUIAutoTune(m_autoTune);
 }
 
 void Tuner::toggleAutoTune()

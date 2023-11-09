@@ -157,7 +157,6 @@ public slots:
 
     // PWR
     void handleSetPWRRecipeWattsCommand(const int recipeWatts);
-    void handleSetPWRMaxWattsCommand(const double maxWatts);
 
     // execution
     void RunRecipe(const bool newRunState); // handles turning the recipe on/off

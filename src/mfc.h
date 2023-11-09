@@ -16,10 +16,11 @@ public:
 
     QString getRecipeFlowQStr() const;
     double getRecipeFlow() const;
-    void setRecipeFlow(double value);
+    void setRecipeFlow(double value); // sends value to the controller
+    void updateRecipeFlow(double value); // updates the displayed recipe value only
 
     double getActualFlow() const;
-    void setActualFlow(double value);
+    void setActualFlow(double value); // updates the displayed actual value
 
     double getRange() const;
     void setRange(double value);
@@ -28,8 +29,9 @@ public:
     void setDefaultRecipe(double value);
 
 signals:
-    void recipeFlowChanged(const int mfcNumber, double recipeFlow);
-    void actualFlowChanged(const int mfcNumber, double actualFlow);
+    void updateUIRecipeFlow(const int mfcNumber, double recipeFlow); // updates the ui recipe value
+    void recipeFlowChanged(const int mfcNumber, double recipeFlow);// updates the controller recipe value
+    void updateUIActualFlow(const int mfcNumber, double actualFlow);// updates the ui actual value
     void rangeChanged(const int mfcNumber, double range);
     void defaultRecipeChanged(const int mfcNumber, double recipeFlow);
 

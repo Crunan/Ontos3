@@ -772,7 +772,7 @@ void PlasmaController::batchIDLoggingOn(bool state)
 void PlasmaController::handleSetMFCRecipeFlowCommand(const int mfcNumber, const double recipeFlow)
 {
     QString mfcNum = "0" + QString::number(mfcNumber);
-    QString mfcRecipeFlow = QStringLiteral("%1").arg(recipeFlow, 6, 'f', 2, QChar('0')); // number, 6=total field length, 'f'=dont use scientific notation, 2=number of decimal places, padding char
+    QString mfcRecipeFlow = QStringLiteral("%1").arg(recipeFlow, 5, 'f', 2, QChar('0')); // number, 6=total field length, 'f'=dont use scientific notation, 2=number of decimal places, padding char
     QString command = "$41" + mfcNum + mfcRecipeFlow + "%";
     sendCommand(command);  // SET_RCP_MFC_FLOW   $410mxxx.yy% 1<=m<=4, xxx.yy = flow rate; resp[!410mxxx.yy#]
     readResponse();
@@ -798,13 +798,6 @@ void PlasmaController::handleSetPWRRecipeWattsCommand(const int recipeWatts)
 {
     QString number = QString("%1").arg(recipeWatts, 4, 10, QChar('0')); // number, field width, base, fill char
     QString command = "$42" + number + "%"; // SET_RCP_RF_WATTS  $42xxxx% xxxx = Watts; resp[!42xxxx#]
-    sendCommand(command);
-    readResponse();
-}
-
-void PlasmaController::handleSetPWRMaxWattsCommand(const double maxWatts)
-{
-    QString command = "$2A705" + QString::number(maxWatts) + "%";
     sendCommand(command);
     readResponse();
 }
@@ -1001,7 +994,8 @@ void PlasmaController::parseResponseForCTLStatus(const QString& response)
     for (int i = 1; i <= 4; i++) {
         MFC* mfc = findMFCByNumber(i);
         double mfcFlow = subsystemData[4 + i].toDouble();
-        if (mfcFlow > 5) mfc->setActualFlow(mfcFlow); // progress bars don't look right when value is less than 5
+        mfc->setActualFlow(mfcFlow);
+        //qDebug() << "!!!!!!!!!!!!!!!!!!Actual Flow" << mfcFlow;
     }
 
     // Extract and update plasmahead temperature
@@ -1315,7 +1309,7 @@ void PlasmaController::getRecipeMBPosition() {
         bool ok = false;
         double loadedSP = StrVar.toDouble(&ok);
         if (ok) {
-            m_tuner.setRecipePosition(loadedSP);
+            m_tuner.updateRecipePosition(loadedSP);
             Logger::logInfo("Loaded MB Setpoint: " + StrVar + " %");
         }
     }
@@ -1331,7 +1325,7 @@ void PlasmaController::getRecipeRFPower() {
         bool ok = false;
         double rfLoadedSP = StrVar.toDouble(&ok);
         if (ok) {
-            m_pwr.setRecipeWatts(rfLoadedSP);
+            m_pwr.updateRecipeWatts(rfLoadedSP);
             Logger::logInfo("Loaded RF Setpoint: " + StrVar);
         }
     }
@@ -1347,7 +1341,7 @@ void PlasmaController::getRecipeMFC4Flow() {
         bool ok = false;
         double mfcRecipeFlow = StrVar.toDouble(&ok);
         if (ok) {
-            m_mfcs[3]->setRecipeFlow(mfcRecipeFlow);
+            m_mfcs[3]->updateRecipeFlow(mfcRecipeFlow);
             Logger::logInfo("Loaded MFC 4 Flow Rate: " + StrVar);
         }
     }
@@ -1363,7 +1357,7 @@ void PlasmaController::getRecipeMFC3Flow() {
         bool ok = false;
         double mfcRecipeFlow = StrVar.toDouble(&ok);
         if (ok) {
-            m_mfcs[2]->setRecipeFlow(mfcRecipeFlow);
+            m_mfcs[2]->updateRecipeFlow(mfcRecipeFlow);
             Logger::logInfo("Loaded MFC 3 Flow Rate: " + StrVar);
         }
     }
@@ -1379,7 +1373,7 @@ void PlasmaController::getRecipeMFC2Flow() {
         bool ok = false;
         double mfcRecipeFlow = StrVar.toDouble(&ok);
         if (ok) {
-            m_mfcs[1]->setRecipeFlow(mfcRecipeFlow);
+            m_mfcs[1]->updateRecipeFlow(mfcRecipeFlow);
             Logger::logInfo("Loaded MFC 2 Flow Rate: " + StrVar);
         }
     }
@@ -1394,7 +1388,7 @@ void PlasmaController::getRecipeMFC1Flow() {
         bool ok = false;
         double mfcRecipeFlow = StrVar.toDouble(&ok);
         if (ok) {
-            m_mfcs[0]->setRecipeFlow(mfcRecipeFlow);
+            m_mfcs[0]->updateRecipeFlow(mfcRecipeFlow);
             Logger::logInfo("Loaded MFC 1 Flow Rate: " + StrVar);
         }
     }
@@ -1426,7 +1420,7 @@ void PlasmaController::getAutoMan() {
         bool ok = false;
         int autoTune = StrVar.toInt(&ok);
         if (ok) {
-            m_tuner.setAutoTune(autoTune);
+            m_tuner.updateAutoTune(autoTune);
             Logger::logInfo("Loaded Tuner Auto Setting: " + StrVar);
         }
     }
