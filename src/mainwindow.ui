@@ -1894,6 +1894,8 @@ background-color: blue;
     margin: 4.5px;
     border-bottom-right-radius: 20px;
     border-bottom-left-radius: 20px;
+	border-top-right-radius: 20px;
+    border-top-left-radius: 20px;
 }</string>
                </property>
                <property name="maximum">
@@ -2076,6 +2078,8 @@ font: 16pt &quot;Arial Bold&quot;;
     margin: 4.5px;
     border-bottom-right-radius: 20px;
     border-bottom-left-radius: 20px;
+	border-top-right-radius: 20px;
+    border-top-left-radius: 20px;
 }</string>
                </property>
                <property name="maximum">
@@ -2246,6 +2250,8 @@ font: 16pt &quot;Arial Bold&quot;;
     margin: 4.5px;
     border-bottom-right-radius: 20px;
     border-bottom-left-radius: 20px;
+	border-top-right-radius: 20px;
+    border-top-left-radius: 20px;
 }</string>
                </property>
                <property name="maximum">
@@ -2428,6 +2434,8 @@ font: 16pt &quot;Arial Bold&quot;;
     margin: 4.5px;
     border-bottom-right-radius: 20px;
     border-bottom-left-radius: 20px;
+	border-top-right-radius: 20px;
+    border-top-left-radius: 20px;
 }</string>
                </property>
                <property name="maximum">

@@ -15,8 +15,8 @@ public:
 
     int getRecipePosition() const;
     QString getRecipePositionQStr() const;
-    void setRecipePosition(int setpoint);
-    void updateRecipePosition(int setpoint);
+    void setRecipePosition(int setpoint);// sends value to the controller
+    void updateRecipePosition(int setpoint);// updates the ui recipe value
 
     double getDefaultRecipe() const;
     void setDefaultRecipe(double setpoint);
@@ -27,8 +27,8 @@ public:
     void updateAutoTune(bool state);
 
 signals:
-    void recipePositionChanged(const int recipePosition);
-    void updateUIRecipePosition(const int m_recipePosition);
+    void recipePositionChanged(const int recipePosition);// sends value to the controller
+    void updateUIRecipePosition(const int m_recipePosition);// updates the ui recipe value
     void actualPositionChanged(const int actualPosition);
     void defaultRecipeChanged(const double defaultRecipe);
     void autoTuneChanged(const bool autoTune);

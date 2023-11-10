@@ -76,7 +76,6 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(&m_mainCTL.getTuner(), &Tuner::actualPositionChanged, this, &MainWindow::MBactualPositionChanged);
 
     // disable until implemented
-    //ui->mainTabWidget->setTabEnabled(1, false);
     ui->request_terminal->setEnabled(false);
 
     // Make signal/slot connections here
@@ -973,7 +972,7 @@ void MainWindow::actualFlowChanged(const int mfcNumber, const double actualFlow)
            ui->gas1ProgressBar->setValue(0);
 
        // set the dashboard and plasma tab edit box below the progress bar
-       ui->gas1_actual_SLPM->setText(QString::number(percentage));
+       ui->gas1_actual_SLPM->setText(QString::number(actualFlow));
     }
     else if (mfcNumber == 2) {
        // set vertical progress bar
@@ -988,7 +987,7 @@ void MainWindow::actualFlowChanged(const int mfcNumber, const double actualFlow)
            ui->gas2ProgressBar->setValue(0);
 
        // set the dashboard and plasma tab edit box below the progress bar
-       ui->gas2_actual_SLPM->setText(QString::number(percentage));
+       ui->gas2_actual_SLPM->setText(QString::number(actualFlow));
     }
     else if (mfcNumber == 3) {
        // set vertical progress bar
@@ -1003,7 +1002,7 @@ void MainWindow::actualFlowChanged(const int mfcNumber, const double actualFlow)
            ui->gas3ProgressBar->setValue(0);
 
        // set the dashboard and plasma tab edit box below the progress bar
-       ui->gas3_actual_SLPM->setText(QString::number(percentage));
+       ui->gas3_actual_SLPM->setText(QString::number(actualFlow));
     }
     else if (mfcNumber == 4) {
        // set vertical progress bar
@@ -1018,7 +1017,7 @@ void MainWindow::actualFlowChanged(const int mfcNumber, const double actualFlow)
            ui->gas4ProgressBar->setValue(0);
 
        // set the dashboard and plasma tab edit box below the progress bar
-       ui->gas4_actual_SLPM->setText(QString::number(percentage));
+       ui->gas4_actual_SLPM->setText(QString::number(actualFlow));
     }
 }
 
@@ -1782,5 +1781,4 @@ void MainWindow::on_batchIDButton_clicked()
         }
     }
 }
-
 
