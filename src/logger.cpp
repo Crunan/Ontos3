@@ -83,27 +83,3 @@ void Logger::logFatal() {
     qFatal("Fatal Log!");
 }
 
-//void Logger::logAxesStatus() {
-//    QString LogStr{};
-//    LogStr = "LED: " + axisStatus[0] + axisStatus[1];
-//    LogStr += " XSt: " + axisStatus[2];
-//    LogStr += " XPos: " + axisStatus[3];
-//    LogStr += " YSt: " + axisStatus[5];
-//    LogStr += " YPos: " + axisStatus[6];
-//    LogStr += " ZSt: " + axisStatus[8];
-//    LogStr += " ZPos: " + axisStatus[9];
-//    logInfo(LogStr);
-//}
-//void MainWindow::logStageScanInfo() {
-//    if (ScanSM.getCurrentCycle() == 1) {
-//        logInfo("-------------Scan Start-Up--------------"); }
-//    else
-//    {
-//        logInfo("-------------Scan Recycle Start-Up--------------");
-//        logInfo("This Cycle: " + ScanSM.getCurrentCycleString()); }
-
-//    logInfo("Display MIN:(" + ScanSM.getminXString() + " , " + ScanSM.getminYString() + ") MAX:(" + ScanSM.getmaxXString() + " , " + ScanSM.getmaxYString()  + ")");
-//    logInfo("Num Rows: " + ScanSM.getNumRowsString() + " Row Sweep: " + ScanSM.getScanSweepString());
-//    logInfo("FirstX: " + ScanSM.getStartingXPositionString() + " StartY: " + ScanSM.getStartingYPositionString() + " EndY: " + ScanSM.getEndingYPositionString());
-//    logInfo("Scan Speed: " + ScanSM.getScanSpeedString() + " Cycles: " + ScanSM.getScanCyclesString());
-//}

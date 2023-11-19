@@ -39,6 +39,7 @@ private slots:
 private:
     int ReadChar();
 
+    bool m_done;
     QString m_lastSerialCommand;
     QSerialPort m_serialPort;
     bool m_serialWatchdogTriggered;

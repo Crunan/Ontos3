@@ -19,6 +19,7 @@ public:
 
     int getMaxForwardWatts() const;
     void setMaxForwardWatts(int value);
+    QString getMaxForwardWattsQStr() const;
 
     int getReflectedWatts() const;
     void setReflectedWatts(int value);

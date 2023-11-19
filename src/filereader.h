@@ -20,8 +20,8 @@ public:
     void setFileName(QString fileName);
 
 private:
-    QString filePath_;
-    QString fileName_;
+    QString m_filePath;
+    QString m_fileName;
 };
 
 #endif // FILEREADER_H

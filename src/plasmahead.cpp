@@ -29,6 +29,11 @@ double PlasmaHead::getSlitLength() const
     return m_slitLength;
 }
 
+QString PlasmaHead::getSlitLengthQStr() const
+{
+    return QString::number(m_slitLength, 'f', 2);
+}
+
 void PlasmaHead::setSlitWidth(double slitWidth)
 {
     m_slitWidth = slitWidth;

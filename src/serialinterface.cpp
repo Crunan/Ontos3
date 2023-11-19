@@ -9,7 +9,8 @@ const int SERIAL_WRITE_TIMEOUT = 1000; // timeout waiting for control pcb respon
 SerialInterface::SerialInterface() :
     m_lastSerialCommand(""),
     m_serialPort(),
-    m_serialWatchdogTriggered(false)
+    m_serialWatchdogTriggered(false),
+    m_done(false)
 {
     // serial watchdog timer
     m_pSerialWatchdogTimer = new QTimer(this);
@@ -18,6 +19,7 @@ SerialInterface::SerialInterface() :
 
 SerialInterface::~SerialInterface()
 {
+    m_done = true;
     m_serialPort.close();
     delete m_pSerialWatchdogTimer;
 }
@@ -89,7 +91,7 @@ QString SerialInterface::readResponse()
         // wait up to 100ms for data to be ready
         m_serialPort.waitForReadyRead(250);
 
-        while (responseVal != QChar('#').toLatin1()) {
+        while (responseVal != QChar('#').toLatin1() && !m_done) {
 
             responseVal = ReadChar();
 

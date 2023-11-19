@@ -75,6 +75,7 @@ public slots:
     void reflectedWattsChanged();
     void MBactualPositionChanged(const double actualPosition);
     void headTemperatureChanged();
+    void plasmaStateChanged(bool plasmaActive);
 
     // mfc
     void connectMFCFlowBars();
@@ -160,7 +161,6 @@ private slots:
     void on_collision_system_checkbox_clicked(bool checked);
     void on_heater_checkbox_clicked(bool checked);
     void on_batchIDButton_clicked();
-
 private:
     // Action Button methods
     void showStatusMessage(const QString &message);

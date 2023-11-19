@@ -60,6 +60,11 @@ double MFC::getRange() const
     return m_range;
 }
 
+QString MFC::getRangeQString() const
+{
+    return QString::number(m_range, 'f', 2);
+}
+
 void MFC::setRange(double value)
 {
     m_range = value;

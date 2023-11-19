@@ -20,69 +20,57 @@ public:
 
     void addRecipeToCascade(const QString& recipeName);
     void removeRecipeFromCascade(const QString& recipeName);
+    int getNumCascadeRecipes() { return m_cascadeRecipeList.length(); }
+    void clearCascadeRecipes();
     void executeCurrentRecipe();
 
-    void setThicknessFromRecipe();
-    void setGapFromRecipe();
-    void setOverlapFromRecipe();
-    void setSpeedFromRecipe();
-    void setAutoScanFromRecipe();
-    void setXaxisLimitsFromRecipe();
-    void setYaxisLimitsFromRecipe();
-    void setPurgeFromRecipe();
-    void setHeaterFromRecipe();
-    void setCyclesFromRecipe();
-
-    void setAutoScanFlag(bool toggle);
-    bool getAutoScanFlag() const { return m_autoScanFlag; }
-
     void setAutoScan(bool toggle);
-    bool getAutoScanBool() const { return m_autoScan; }
-    QString getAutoScanQStr() const { return QString::number(m_autoScan);  }
+    bool getAutoScanBool() const;
+    QString getAutoScanQStr() const;
 
     void setPurge(bool toggle);
-    bool getPurge() const { return m_N2PurgeRecipe; }
-    QString getPurgeQStr() const { return QString::number(m_N2PurgeRecipe); }
+    bool getPurge() const;
+    QString getPurgeQStr() const;
 
     void setHeater(bool heater);
-    bool getHeater() const { return m_heater; }
-    QString getHeaterQStr() const { return QString::number(m_heater);; }
+    bool getHeater() const;
+    QString getHeaterQStr() const;
 
     void setCycles(int cycles);
-    QString getCyclesQStr() const { return QString::number(m_cycles); }
-    int getCyclesInt() const { return m_cycles; }
+    QString getCyclesQStr() const;
+    int getCyclesInt() const;
 
     void setSpeed(double speed);
-    double getSpeed() { return m_speed; }
-    QString getSpeedQStr() const { return QString::number(m_speed, 'f', 2); }
+    double getSpeed() const;
+    QString getSpeedQStr() const;
 
     void setOverlap(double overlap);
-    double getOverlap() { return m_overlap; }
-    QString getOverlapQStr() const { return QString::number(m_overlap, 'f', 2); }
+    double getOverlap() const;
+    QString getOverlapQStr() const;
 
     void setGap(double gap);
-    double getGap() { return m_gap; }
-    QString getGapQStr() const { return QString::number(m_gap, 'f', 2); }
+    double getGap() const;
+    QString getGapQStr() const;
 
     void setThickness(double thickness);
-    double getThickness() { return m_thickness; }
-    QString getThicknessQStr() const { return QString::number(m_thickness, 'f', 2); }
+    double getThickness() const;
+    QString getThicknessQStr() const;
 
     void setXminPH(double xmin);
-    double getXminPH() { return m_xMinPH; }
-    QString getXminPHQStr() const { return QString::number(m_xMinPH, 'f', 2); }
+    double getXminPH() const;
+    QString getXminPHQStr() const;
 
     void setXmaxPH(double xmax);
-    double getXmaxPH() { return m_xMaxPH; }
-    QString getXmaxPHQStr() const { return QString::number(m_xMaxPH, 'f', 2); }
+    double getXmaxPH() const;
+    QString getXmaxPHQStr() const;
 
     void setYminPH(double ymin);
-    double getYminPH() { return m_yMinPH; }
-    QString getYminPHQStr() const { return QString::number(m_yMinPH, 'f', 2); }
+    double getYminPH() const;
+    QString getYminPHQStr() const;
 
     void setYmaxPH(double ymax);
-    double getYmaxPH() { return m_yMaxPH; }
-    QString getYmaxPHQStr() const { return QString::number(m_yMaxPH, 'f', 2); }
+    double getYmaxPH() const;
+    QString getYmaxPHQStr() const;
 
     FileReader fileReader;
 
@@ -97,24 +85,11 @@ signals:
     void cyclesChanged();
 
 private:
+    void initializeMap();
+
     QMap<QString, QVariant> m_recipeMap;
     QList<QString> m_cascadeRecipeList;
     int m_currentRecipeIndex;
-
-    bool m_autoScanFlag;
-    bool m_autoScan;
-    bool m_N2PurgeRecipe;
-    bool m_heater;
-    int m_cycles;
-    double m_speed;
-    double m_overlap;
-    double m_gap;
-    double m_thickness;
-    // PH coordinates
-    double m_xMinPH;
-    double m_xMaxPH;
-    double m_yMinPH;
-    double m_yMaxPH;
 };
 
 #endif // PLASMARECIPE_H

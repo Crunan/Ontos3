@@ -23,6 +23,7 @@ public:
     void setActualFlow(double value); // updates the displayed actual value
 
     double getRange() const;
+    QString getRangeQString() const;
     void setRange(double value);
 
     double getDefaultRecipe() const;

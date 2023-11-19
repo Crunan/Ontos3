@@ -13,6 +13,7 @@ public:
     double getSafetyGap() const;
     double getSlitLength() const;
     void setSlitlength(double slitLength);
+    QString getSlitLengthQStr() const;
     double getSlitWidth() const;
     void setSlitWidth(double slitWidth);
     double getTemperature() const;

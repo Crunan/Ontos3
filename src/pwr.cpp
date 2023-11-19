@@ -53,6 +53,11 @@ void PWR::setMaxForwardWatts(int value)
     m_maxWatts = value;
 }
 
+QString PWR::getMaxForwardWattsQStr() const
+{
+    return QString::number(m_maxWatts);
+}
+
 int PWR::getReflectedWatts() const
 {
     return m_reflectedWatts;

@@ -12,25 +12,36 @@ PlasmaRecipe::PlasmaRecipe(QObject* parent) :
     QObject(parent),
     m_recipeMap(),
     m_cascadeRecipeList(),
-    m_currentRecipeIndex(0),
-    m_autoScanFlag(false),
-    m_autoScan(false),
-    m_N2PurgeRecipe(false),
-    m_heater(false),
-    m_cycles(0),
-    m_speed(0),
-    m_overlap(0),
-    m_gap(0),
-    m_thickness(0),
-    m_xMinPH(0),
-    m_xMaxPH(0),
-    m_yMinPH(0),
-    m_yMaxPH(0)
-{}
+    m_currentRecipeIndex(0)
+{
+    initializeMap();
+}
 
 
 PlasmaRecipe::~PlasmaRecipe() {
     // Cleanup any resources here
+}
+
+void PlasmaRecipe::initializeMap()
+{
+    m_recipeMap.insert(RECIPE_MFC1_KEY, 0);
+    m_recipeMap.insert(RECIPE_MFC2_KEY, 0);
+    m_recipeMap.insert(RECIPE_MFC3_KEY, 0);
+    m_recipeMap.insert(RECIPE_MFC4_KEY, 0);
+    m_recipeMap.insert(RECIPE_PWR_KEY, 0);
+    m_recipeMap.insert(RECIPE_TUNER_KEY, 0);
+    m_recipeMap.insert(RECIPE_THICKNESS_KEY, 1.0);
+    m_recipeMap.insert(RECIPE_GAP_KEY, 1.0);
+    m_recipeMap.insert(RECIPE_OVERLAP_KEY, 0);
+    m_recipeMap.insert(RECIPE_SPEED_KEY, 1.0);
+    m_recipeMap.insert(RECIPE_CYCLES_KEY, 1);
+    m_recipeMap.insert(RECIPE_XMIN_KEY, 0);
+    m_recipeMap.insert(RECIPE_XMAX_KEY, 0);
+    m_recipeMap.insert(RECIPE_YMIN_KEY, 0);
+    m_recipeMap.insert(RECIPE_YMAX_KEY, 0);
+    m_recipeMap.insert(RECIPE_PURGE_KEY, false);
+    m_recipeMap.insert(RECIPE_AUTOSCAN_KEY, false);
+    m_recipeMap.insert(RECIPE_HEATER_KEY, false);
 }
 
 void PlasmaRecipe::setRecipeFromFile()
@@ -52,11 +63,23 @@ void PlasmaRecipe::setRecipeFromFile()
         if (list.length() == 2) { // found a recipe entry
 
             QString name = list.at(0); // get the key
-            QString setpoint = list.at(1); // get the setpoint
+            QString value = list.at(1); // get the value
 
             if (name.at(0) == '<') { // format check
                 name = name.remove(0, 1); // remove the "<"
-                m_recipeMap[name] = setpoint;
+                if (name == RECIPE_THICKNESS_KEY) setThickness(value.toDouble());
+                else if (name == RECIPE_GAP_KEY) setGap(value.toDouble());
+                else if (name == RECIPE_OVERLAP_KEY) setOverlap(value.toDouble());
+                else if (name == RECIPE_SPEED_KEY) setSpeed(value.toDouble());
+                else if (name == RECIPE_CYCLES_KEY) setCycles(value.toInt());
+                else if (name == RECIPE_XMIN_KEY) setXminPH(value.toDouble());
+                else if (name == RECIPE_XMAX_KEY) setXmaxPH(value.toDouble());
+                else if (name == RECIPE_YMIN_KEY) setYminPH(value.toDouble());
+                else if (name == RECIPE_YMAX_KEY) setYmaxPH(value.toDouble());
+                else if (name == RECIPE_PURGE_KEY) setPurge(QVariant(value).toBool());
+                else if (name == RECIPE_AUTOSCAN_KEY) setAutoScan(QVariant(value).toBool());
+                else if (name == RECIPE_HEATER_KEY) setHeater(QVariant(value).toBool());
+                else m_recipeMap[name] = value;
             }
             else {
                 qDebug() << "Invalid line format:" << line;
@@ -70,234 +93,183 @@ void PlasmaRecipe::setRecipeFromFile()
     file.close();
 }
 
-void PlasmaRecipe::processRecipeKeys()
-{
-    setThicknessFromRecipe();
-    setGapFromRecipe();
-    setOverlapFromRecipe();
-    setSpeedFromRecipe();
-    setAutoScanFromRecipe();
-    setXaxisLimitsFromRecipe();
-    setYaxisLimitsFromRecipe();
-    setPurgeFromRecipe();
-    setHeaterFromRecipe();
-    setCyclesFromRecipe();
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-// set from file
-//////////////////////////////////////////////////////////////////////////////////
-void PlasmaRecipe::setThicknessFromRecipe()
-{
-    if (m_recipeMap.contains(RECIPE_THICKNESS_KEY)) {
-        m_thickness = m_recipeMap[RECIPE_THICKNESS_KEY].toDouble();
-        emit thicknessChanged();
-    }
-    else {
-        // Handle the case when "THICKNESS" key is not found in the recipe map
-        Logger::logWarning(RECIPE_THICKNESS_KEY + " setpoint not found in recipe map.");
-    }
-}
-void PlasmaRecipe::setGapFromRecipe()
-{
-    if (m_recipeMap.contains(RECIPE_GAP_KEY)) {
-        m_gap = m_recipeMap[RECIPE_GAP_KEY].toDouble();
-        emit gapChanged();
-    }
-    else {
-        // Handle the case when "GAP" key is not found in the recipe map
-        Logger::logWarning(RECIPE_GAP_KEY + " setpoint not found in recipe map.");
-    }
-
-}
-void PlasmaRecipe::setOverlapFromRecipe()
-{
-    if (m_recipeMap.contains(RECIPE_OVERLAP_KEY)) {
-        m_overlap = m_recipeMap[RECIPE_OVERLAP_KEY].toDouble();
-        emit overlapChanged();
-    }
-    else {
-        // Handle the case when "OVERLAP" key is not found in the recipe map
-        Logger::logWarning(RECIPE_OVERLAP_KEY + " setpoint not found in recipe map.");
-    }
-
-}
-
-void PlasmaRecipe::setSpeedFromRecipe()
-{
-    if (m_recipeMap.contains(RECIPE_SPEED_KEY)) {
-        m_speed = m_recipeMap[RECIPE_SPEED_KEY].toDouble();
-        emit speedChanged();
-    }
-    else {
-        // Handle the case when "SPEED" key is not found in the recipe map
-        Logger::logWarning(RECIPE_SPEED_KEY + " setpoint not found in recipe map.");
-    }
-
-}
-void PlasmaRecipe::setAutoScanFromRecipe()
-{
-    if (m_recipeMap.contains(RECIPE_AUTOSCAN_KEY)) {
-        m_autoScan = m_recipeMap[RECIPE_AUTOSCAN_KEY].toBool();
-        emit autoScanChanged();
-    }
-    else {
-        // Handle the case when "AUTOSCAN" key is not found in the recipe map
-        Logger::logWarning(RECIPE_AUTOSCAN_KEY + " setpoint not found in recipe map.");
-    }
-
-}
-void PlasmaRecipe::setXaxisLimitsFromRecipe()
-{
-    if (m_recipeMap.contains(RECIPE_XMIN_KEY)) {
-        m_xMinPH = m_recipeMap[RECIPE_XMIN_KEY].toDouble();
-    }
-    else {
-        // Handle the case when "XMIN" key is not found in the recipe map
-        Logger::logWarning(RECIPE_XMIN_KEY + " setpoint not found in recipe map.");
-    }
-    if (m_recipeMap.contains(RECIPE_XMAX_KEY)) {
-        m_xMaxPH = m_recipeMap[RECIPE_XMAX_KEY].toDouble();
-    }
-    else {
-        // Handle the case when "XMAX" key is not found in the recipe map
-        Logger::logWarning(RECIPE_XMAX_KEY + " setpoint not found in recipe map.");
-    }
-
-    emit xLimitsChanged();
-
-}
-void PlasmaRecipe::setYaxisLimitsFromRecipe()
-{
-    if (m_recipeMap.contains(RECIPE_YMIN_KEY)) {
-        m_yMinPH = m_recipeMap[RECIPE_YMIN_KEY].toDouble();
-    }
-    else {
-        // Handle the case when "YMIN" key is not found in the recipe map
-        Logger::logWarning(RECIPE_YMIN_KEY + " setpoint not found in recipe map.");
-    }
-    if (m_recipeMap.contains(RECIPE_YMAX_KEY)) {
-        m_yMaxPH = m_recipeMap[RECIPE_YMAX_KEY].toDouble();
-    }
-    else {
-        // Handle the case when "THICKNESS" key is not found in the recipe map
-        Logger::logWarning(RECIPE_YMAX_KEY + " setpoint not found in recipe map.");
-    }
-
-    emit yLimitsChanged();
-}
-
-void PlasmaRecipe::setPurgeFromRecipe()
-{
-    if (m_recipeMap.contains(RECIPE_PURGE_KEY)) {
-        m_N2PurgeRecipe = m_recipeMap[RECIPE_PURGE_KEY].toBool();
-    }
-    else {
-        // Handle the case when "PURGE" key is not found in the recipe map
-        Logger::logWarning(RECIPE_PURGE_KEY + " setpoint not found in recipe map.");
-    }
-
-}
-void PlasmaRecipe::setHeaterFromRecipe()
-{
-    if (m_recipeMap.contains(RECIPE_HEATER_KEY)) {
-        m_heater = m_recipeMap[RECIPE_HEATER_KEY].toBool();
-    }
-    else {
-        // Handle the case when "HEATER" key is not found in the recipe map
-        Logger::logWarning(RECIPE_HEATER_KEY + " setpoint not found in recipe map.");
-    }
-}
-
-void PlasmaRecipe::setCyclesFromRecipe()
-{
-    if (m_recipeMap.contains(RECIPE_CYCLES_KEY)) {
-        m_cycles = m_recipeMap[RECIPE_CYCLES_KEY].toInt();
-        emit cyclesChanged();
-    }
-    else {
-        // Handle the case when "CYCLES" key is not found in the recipe map
-        Logger::logWarning(RECIPE_CYCLES_KEY + " setpoint not found in recipe map.");
-    }
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-// set externally
-//////////////////////////////////////////////////////////////////////////////////
-void PlasmaRecipe::setAutoScanFlag(bool toggle)
-{
-    m_autoScanFlag = toggle;
-}
-
-
 void PlasmaRecipe::setAutoScan(bool toggle)
 {
-    m_autoScan = toggle;
+    m_recipeMap[RECIPE_AUTOSCAN_KEY] = toggle;
     emit autoScanChanged();
+}
+
+bool PlasmaRecipe::getAutoScanBool() const
+{
+    return m_recipeMap[RECIPE_AUTOSCAN_KEY].toBool();
+}
+QString PlasmaRecipe::getAutoScanQStr() const
+{
+    return QString::number(m_recipeMap[RECIPE_AUTOSCAN_KEY].toBool());
 }
 
 void PlasmaRecipe::setPurge(bool toggle)
 {
-    m_N2PurgeRecipe = toggle;
+    m_recipeMap[RECIPE_PURGE_KEY] = toggle;
+}
+
+bool PlasmaRecipe::getPurge() const
+{
+    return m_recipeMap[RECIPE_PURGE_KEY].toBool();
+}
+QString PlasmaRecipe::getPurgeQStr() const
+{
+    return QString::number(m_recipeMap[RECIPE_PURGE_KEY].toBool());
 }
 
 void PlasmaRecipe::setHeater(bool heater)
 {
-    m_heater = heater;
+    m_recipeMap[RECIPE_HEATER_KEY] = heater;
+}
+
+bool PlasmaRecipe::getHeater() const
+{
+    return m_recipeMap[RECIPE_HEATER_KEY].toBool();
+}
+QString PlasmaRecipe::getHeaterQStr() const
+{
+    return QString::number(m_recipeMap[RECIPE_HEATER_KEY].toBool());
 }
 
 void PlasmaRecipe::setCycles(int cycles)
 {
-    m_cycles = cycles;
+    m_recipeMap[RECIPE_CYCLES_KEY] = cycles;
     emit cyclesChanged();
+}
+
+QString PlasmaRecipe::getCyclesQStr() const
+{
+    return QString::number(m_recipeMap[RECIPE_CYCLES_KEY].toInt());
+}
+int PlasmaRecipe::getCyclesInt() const
+{
+    return m_recipeMap[RECIPE_CYCLES_KEY].toInt();
 }
 
 void PlasmaRecipe::setSpeed(double speed)
 {
-    m_speed = speed;
+    m_recipeMap[RECIPE_SPEED_KEY] = speed;
     emit speedChanged();
+}
+
+double PlasmaRecipe::getSpeed() const
+{
+    return m_recipeMap[RECIPE_SPEED_KEY].toDouble();
+}
+QString PlasmaRecipe::getSpeedQStr() const
+{
+    return QString::number(m_recipeMap[RECIPE_SPEED_KEY].toDouble(), 'f', 2);
 }
 
 void PlasmaRecipe::setOverlap(double overlap)
 {
-    m_overlap = overlap;
+    m_recipeMap[RECIPE_OVERLAP_KEY] = overlap;
     emit overlapChanged();
+}
+
+double PlasmaRecipe::getOverlap() const
+{
+    return m_recipeMap[RECIPE_OVERLAP_KEY].toDouble();
+}
+QString PlasmaRecipe::getOverlapQStr() const
+{
+    return QString::number(m_recipeMap[RECIPE_OVERLAP_KEY].toDouble(), 'f', 2);
 }
 
 void PlasmaRecipe::setGap(double gap)
 {
-    m_gap = gap;
+    m_recipeMap[RECIPE_GAP_KEY] = gap;
     emit gapChanged();
+}
+
+double PlasmaRecipe::getGap() const
+{
+    return m_recipeMap[RECIPE_GAP_KEY].toDouble();
+}
+QString PlasmaRecipe::getGapQStr() const
+{
+    return QString::number(m_recipeMap[RECIPE_GAP_KEY].toDouble(), 'f', 2);
 }
 
 void PlasmaRecipe::setThickness(double thickness)
 {
-    m_thickness = thickness;
+    m_recipeMap[RECIPE_THICKNESS_KEY] = thickness;
     emit thicknessChanged();
+}
+
+double PlasmaRecipe::getThickness() const
+{
+    return m_recipeMap[RECIPE_THICKNESS_KEY].toDouble();
+}
+
+QString PlasmaRecipe::getThicknessQStr() const
+{
+    return QString::number(m_recipeMap[RECIPE_THICKNESS_KEY].toDouble(), 'f', 2);
 }
 
 void PlasmaRecipe::setXminPH(double xmin)
 {
-    m_xMinPH = xmin;
+    m_recipeMap[RECIPE_XMIN_KEY] = xmin;
     emit xLimitsChanged();
+}
+
+double PlasmaRecipe::getXminPH() const
+{
+    return m_recipeMap[RECIPE_XMIN_KEY].toDouble();
+}
+QString PlasmaRecipe::getXminPHQStr() const
+{
+    return QString::number(m_recipeMap[RECIPE_XMIN_KEY].toDouble(), 'f', 2);
 }
 
 void PlasmaRecipe::setXmaxPH(double xmax)
 {
-    m_xMaxPH = xmax;
+    m_recipeMap[RECIPE_XMAX_KEY] = xmax;
     emit xLimitsChanged();
+}
+
+double PlasmaRecipe::getXmaxPH() const
+{
+    return m_recipeMap[RECIPE_XMAX_KEY].toDouble();
+}
+QString PlasmaRecipe::getXmaxPHQStr() const
+{
+    return QString::number(m_recipeMap[RECIPE_XMAX_KEY].toDouble(), 'f', 2);
 }
 
 void PlasmaRecipe::setYminPH(double ymin)
 {
-    m_yMinPH = ymin;
+    m_recipeMap[RECIPE_YMIN_KEY] = ymin;
     emit yLimitsChanged();
+}
+
+double PlasmaRecipe::getYminPH() const
+{
+    return m_recipeMap[RECIPE_YMIN_KEY].toDouble();
+}
+QString PlasmaRecipe::getYminPHQStr() const
+{
+    return QString::number(m_recipeMap[RECIPE_YMIN_KEY].toDouble(), 'f', 2);
 }
 
 void PlasmaRecipe::setYmaxPH(double ymax)
 {
-    m_yMaxPH = ymax;
+    m_recipeMap[RECIPE_YMAX_KEY] = ymax;
     emit yLimitsChanged();
+}
+
+double PlasmaRecipe::getYmaxPH() const
+{
+    return m_recipeMap[RECIPE_YMAX_KEY].toDouble();
+}
+QString PlasmaRecipe::getYmaxPHQStr() const
+{
+    return QString::number(m_recipeMap[RECIPE_YMAX_KEY].toDouble(), 'f', 2);
 }
 
 
@@ -310,15 +282,24 @@ QList<QString> PlasmaRecipe::getCascadeRecipeList()
 {
     return m_cascadeRecipeList;
 }
-void PlasmaRecipe::addRecipeToCascade(const QString& recipeName) {
+void PlasmaRecipe::addRecipeToCascade(const QString& recipeName)
+{
     m_cascadeRecipeList.append(recipeName);
 }
 
-void PlasmaRecipe::removeRecipeFromCascade(const QString& recipeName) {
+void PlasmaRecipe::removeRecipeFromCascade(const QString& recipeName)
+{
     m_cascadeRecipeList.removeOne(recipeName);
 }
 
-void PlasmaRecipe::executeCurrentRecipe() {
+void PlasmaRecipe::clearCascadeRecipes()
+{
+    m_cascadeRecipeList.clear();
+    m_currentRecipeIndex = 0;
+}
+
+void PlasmaRecipe::executeCurrentRecipe()
+{
     if (m_currentRecipeIndex >= 0 && m_currentRecipeIndex < m_cascadeRecipeList.size()) {
         const QString& recipeName = m_cascadeRecipeList.at(m_currentRecipeIndex);
         // Load and execute the recipe with the given recipeName

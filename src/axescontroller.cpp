@@ -115,7 +115,7 @@ void AxesController::SetupInitAxesStateMachine()
     m_pInitAxesStartupState->addTransition(this, &AxesController::ISM_TransitionIdle, m_pInitAxesIdleState);
 
     // entry and exit connections
-    connect(m_pInitAxesIdleState, &QState::entered, this, &AxesController::InitIdleOnEntry);
+    //connect(m_pInitAxesIdleState, &QState::entered, this, &AxesController::InitIdleOnEntry);
 
     // add states to the machine
     m_initStateMachine.addState(m_pInitAxesIdleState);
@@ -206,7 +206,7 @@ void AxesController::SetupTwoSpotStateMachine()
     m_pTwoSpotShutdownState->addTransition(this, &AxesController::TSSM_TransitionIdle, m_pTwoSpotIdleState);
 
     // entry and exit connections
-    connect(m_pTwoSpotIdleState, &QState::entered, this, &AxesController::TwoSpotIdleOnEntry);
+    //connect(m_pTwoSpotIdleState, &QState::entered, this, &AxesController::TwoSpotIdleOnEntry);
 
     // set initial state
     m_twoSpotStateMachine.setInitialState(m_pTwoSpotIdleState);
@@ -345,12 +345,12 @@ void AxesController::RunInitAxesSM()
         emit ISM_TransitionIdle();
     }
 }
-
+/*
 void AxesController::InitIdleOnEntry()
 {
     //  update the UI
     //emit setUIInitSMDone();
-}
+}*/
 
 void AxesController::RunHomeAxesSM()
 {
@@ -463,6 +463,9 @@ void AxesController::RunHomeAxesSM()
         // update UI
         emit stageStatusUpdate("", "");
 
+        // tell the front end we are done
+        emit setUIHomeSMDone();
+
     }
     else if (m_homeStateMachine.configuration().contains(m_pHomeAxesIdleState)) { // in idle state
         // no op
@@ -476,7 +479,6 @@ void AxesController::RunTwoSpotSM()
         toggleJoystickOn();
 
         // disable other state machines if they are active
-        emit TSSM_TransitionIdle();
         emit HSM_TransitionIdle();
         emit ScanSM_TransitionIdle();
 
@@ -550,17 +552,21 @@ void AxesController::RunTwoSpotSM()
         // update UI
         emit stageStatusUpdate("", "");
 
+        // tell the front end we are done
+        emit setUITwoSpotSMDone();
+
     }
     else if (m_twoSpotStateMachine.configuration().contains(m_pTwoSpotIdleState)) {
         // no op
     }
 }
 
+/*
 void AxesController::TwoSpotIdleOnEntry()
 {
     // updat the UI
-    emit setUITwoSpotSMDone();
-}
+    //emit setUITwoSpotSMDone();
+}*/
 
 void AxesController::RunStageTestSM()
 {
@@ -925,7 +931,7 @@ void AxesController::checkAndLogAxesStatusChange()
 
             // log the new position
             Logger::logInfo(QString("Stage Xpos: %1 Ypos: %2 Zpos: %3").
-                            arg(m_Xaxis.getPositionQStr()).arg(m_Yaxis.getPositionQStr()).arg(m_Zaxis.getPositionQStr()));
+                            arg(m_Xaxis.getPositionQStr(), m_Yaxis.getPositionQStr(), m_Zaxis.getPositionQStr()));
 
         }
     }
@@ -1347,7 +1353,7 @@ void AxesController::setAxisStateMachinesIdle()
 void AxesController::resetAxes()
 {
     sendCommand("$A9%");
-    QString response = readResponse();
+    readResponse();
 }
 
 void AxesController::togglePinsOn()
@@ -1356,7 +1362,7 @@ void AxesController::togglePinsOn()
     QString pin_pos = QString::number(m_stage.getPinsExposedPos());
     StrCmd = "$B602" +  pin_pos + "%";
     sendCommand(StrCmd);
-    QString response = readResponse();
+    readResponse();
     Logger::logInfo("Stage Pins : enabled");
     emit pinsStateChanged(true);
 }
@@ -1366,7 +1372,7 @@ void AxesController::togglePinsOff()
     QString pin_pos = QString::number(m_stage.getPinsBuriedPos());
     StrCmd = "$B602" +  pin_pos + "%";
     sendCommand(StrCmd);
-    QString response = readResponse();
+    readResponse();
     Logger::logInfo("Stage Pins : disabled");
     emit pinsStateChanged(false);
 }

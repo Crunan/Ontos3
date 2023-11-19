@@ -1,6 +1,7 @@
 #include "plasmacontroller.h"
 #include "logger.h"
 #include "UtilitiesAndConstants.h"
+#include "QApplication"
 
 // file scope
 bool estopActiveLast = false;
@@ -262,6 +263,7 @@ void PlasmaController::RunScanAxesSM()
         // get the scan row info
         m_scanRowXWidth = m_plasmaHead.getSlitLength() - m_pRecipe->getOverlap();
         double xLengthRemaining = m_scanMaxXPos - m_scanMinXPos;
+        m_numXRows = 0;
         while (xLengthRemaining >= 0) {
             m_numXRows += 1;
             xLengthRemaining = xLengthRemaining - m_scanRowXWidth;
@@ -390,6 +392,7 @@ void PlasmaController::RunScanAxesSM()
             }
 
 
+            //if (m_pRecipe->getNumCascadeRecipes() > 1)
             //                'If a cascaded recipe was used then run the next recipe
             //                If CascadingRecipesDialog.CascadeRecipeListBox.Items.Count - 1 > CasRecipeNumber Then
             //                    'This increments in order to keep track of which recipe we are on in the cascade recipe.
@@ -826,6 +829,15 @@ void PlasmaController::getCTLStatusCommand()
     parseResponseForCTLStatus(response);
 }
 
+void PlasmaController::handleAutoScan()
+{
+    if (m_plasmaActive && m_pRecipe->getAutoScanBool()) {
+        if (m_stageCTL.getXAxisState() >= AXIS_IDLE && m_stageCTL.getYAxisState() >= AXIS_IDLE  && m_stageCTL.getZAxisState() >= AXIS_IDLE ) {
+            StartScan();
+        }
+    }
+}
+
 void PlasmaController::xLimitsChanged(double xmin, double xmax)
 {
     m_pRecipe->setXminPH(xmin);
@@ -853,6 +865,8 @@ void PlasmaController::plasmaStatus()
                 Logger::logInfo("Plasma : on");
             else
                 Logger::logInfo("Plasma : off");
+
+            emit plasmaStateChanged(m_plasmaActive);
         }
     }
     else {
@@ -954,16 +968,14 @@ void PlasmaController::parseResponseForCTLStatus(const QString& response)
     m_ledStatus = ledStatusHex.toInt(&ok, 16);
     if (ok) {
         // log it if needed
-        if (m_ledStatus != ledStatusLast) {           
+        /*if (m_ledStatus != ledStatusLast) {
             Logger::logInfo("Status Bits Change from " + QString::number(ledStatusLast, 2) + " to " + QString::number(m_ledStatus, 2));
             ledStatusLast = m_ledStatus;
-        }
+        }*/
         // update
         plasmaStatus();
         estopStatus();
         abortStatus();
-    } else {
-        // Handle error if the conversion fails
     }
 
     // Split the response string into subsystem data
@@ -995,7 +1007,6 @@ void PlasmaController::parseResponseForCTLStatus(const QString& response)
         MFC* mfc = findMFCByNumber(i);
         double mfcFlow = subsystemData[4 + i].toDouble();
         mfc->setActualFlow(mfcFlow);
-        //qDebug() << "!!!!!!!!!!!!!!!!!!Actual Flow" << mfcFlow;
     }
 
     // Extract and update plasmahead temperature
@@ -1057,7 +1068,6 @@ void PlasmaController::setRecipe(QString filePath)
 {
     m_pRecipe->fileReader.setFilePath(filePath);
     m_pRecipe->setRecipeFromFile();
-    m_pRecipe->processRecipeKeys(); // process the keys that keep values in memory only
     // process the keys that have CTL board interaction
     setMFCsFlowFromRecipe();
     setRFSetpointFromRecipe();
@@ -1074,7 +1084,7 @@ void PlasmaController::setMFCsFlowFromRecipe()
         QString mfcKey = RECIPE_MFC_KEY + QString::number(i + 1);
 
         if (m_pRecipe->getRecipeMap().contains(mfcKey)) {
-            double flow = m_pRecipe->getRecipeMap()[mfcKey].toDouble();
+            double flow = m_pRecipe->getRecipeMap().value(mfcKey).toDouble();
             mfc->setRecipeFlow(flow);
         }
         else  {
@@ -1087,7 +1097,7 @@ void PlasmaController::setMFCsFlowFromRecipe()
 void PlasmaController::setRFSetpointFromRecipe()
 {
     if (m_pRecipe->getRecipeMap().contains(RECIPE_PWR_KEY)) {
-        int watts = m_pRecipe->getRecipeMap()[RECIPE_PWR_KEY].toInt();
+        int watts = m_pRecipe->getRecipeMap().value(RECIPE_PWR_KEY).toInt();
         m_pwr.setRecipeWatts(watts);
     }
     else {
@@ -1099,7 +1109,7 @@ void PlasmaController::setRFSetpointFromRecipe()
 void PlasmaController::setTunerSetpointFromRecipe()
 {
     if (m_pRecipe->getRecipeMap().contains(RECIPE_TUNER_KEY)) {
-        double position = m_pRecipe->getRecipeMap()[RECIPE_TUNER_KEY].toDouble();
+        double position = m_pRecipe->getRecipeMap().value(RECIPE_TUNER_KEY).toDouble();
         m_tuner.setRecipePosition(position);
     }
     else {
@@ -1404,7 +1414,7 @@ void PlasmaController::getMaxRFPowerForward()
         QString StrVar = response.mid(7, -1); // return all characters from position 7 to the end
         StrVar = StrVar.removeLast(); // remove the last char
         bool ok = false;
-        int maxRF = StrVar.toInt();
+        int maxRF = StrVar.toInt(&ok);
         if (ok) {
             m_pwr.setMaxForwardWatts(maxRF);
             Logger::logInfo("Loaded max RF Power Forward");

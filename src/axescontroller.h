@@ -88,7 +88,9 @@ public:
 
     double getYs2PHval() { return m_Ys2PH; }
     double getXPH2Base() { return m_Xp2Base; }
+    QString getXPH2BaseQStr() { return QString::number(m_Xp2Base, 'f', 2); }
     double getYPH2Base() { return m_Yp2Base; }
+    QString getYPH2BaseQStr() { return QString::number(m_Yp2Base, 'f', 2); }
     double getZp2BaseDbl() { return m_Zp2Base; }
 
     // command wrappers
@@ -173,8 +175,8 @@ signals:
 
 private slots:
     // state machine on entry handlers
-    void InitIdleOnEntry();
-    void TwoSpotIdleOnEntry();
+    //void InitIdleOnEntry();
+    //void TwoSpotIdleOnEntry();
     //void HomeIdleOnEntry();
 
 private:

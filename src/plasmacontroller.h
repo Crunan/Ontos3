@@ -40,6 +40,7 @@ public:
 
     // Poll Commands
     void getCTLStatusCommand();
+    void handleAutoScan();
     void parseResponseForCTLStatus(const QString &response);
     void plasmaStatus();
     void estopStatus();
@@ -75,6 +76,7 @@ public:
     void handleSetDefaultRecipeCommand();
     void plannedAutoStartOn() { m_plannedAutoStart = true; }
     void batchIDLoggingOn(bool state);
+    void clearCascadeRecipes() { m_pRecipe->clearCascadeRecipes(); }
 
     // accessors
     Tuner& getTuner() { return m_tuner; }
@@ -106,7 +108,8 @@ public:
 
 signals:
     void responseReceived(const QString& response);
-    void executeRecipeChanged();
+    void plasmaStateChanged(bool plasmaActive);
+    //void executeRecipeChanged();
     void setRecipeMBtuner(QString MBtunerSP);
     void setRecipeRFpower(QString RFpowerSP);
 
