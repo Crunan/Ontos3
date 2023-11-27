@@ -93,7 +93,7 @@ QProgressBar::Chunk
      <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <property name="iconSize">
      <size>
@@ -2980,7 +2980,7 @@ color:gray;
        <rect>
         <x>60</x>
         <y>40</y>
-        <width>591</width>
+        <width>991</width>
         <height>501</height>
        </rect>
       </property>
@@ -3006,7 +3006,11 @@ color:gray;
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Remove Selected</string>
+           <string>Remove</string>
+          </property>
+          <property name="icon">
+           <iconset theme="list-remove">
+            <normaloff>.</normaloff>.</iconset>
           </property>
          </widget>
         </item>
@@ -3021,6 +3025,10 @@ color:gray;
           <property name="text">
            <string>Add</string>
           </property>
+          <property name="icon">
+           <iconset theme="list-add">
+            <normaloff>.</normaloff>.</iconset>
+          </property>
          </widget>
         </item>
         <item row="2" column="0">
@@ -3033,6 +3041,10 @@ color:gray;
           </property>
           <property name="text">
            <string>Clear All</string>
+          </property>
+          <property name="icon">
+           <iconset theme="task-past-due">
+            <normaloff>.</normaloff>.</iconset>
           </property>
          </widget>
         </item>
@@ -3146,6 +3158,42 @@ font: 14pt &quot;Ubuntu Bold&quot;;
        <property name="icon">
         <iconset theme="media-floppy">
          <normaloff>.</normaloff>.</iconset>
+       </property>
+      </widget>
+      <widget class="QListWidget" name="listRecipes">
+       <property name="geometry">
+        <rect>
+         <x>580</x>
+         <y>140</y>
+         <width>371</width>
+         <height>231</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label">
+       <property name="geometry">
+        <rect>
+         <x>590</x>
+         <y>120</y>
+         <width>161</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Recipe List Directory</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_2">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>120</y>
+         <width>201</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Current Cascade Recipe</string>
        </property>
       </widget>
      </widget>

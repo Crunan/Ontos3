@@ -98,6 +98,10 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     // read persistent settings and update UI
     readSettings();
 
+    // Setup Recipe List for Cascade Recipes
+    populateRecipeListWidgetFromDirectory(ui->listRecipes);
+
+
     // give things a little time to settle before opening the serial port
     QTimer::singleShot(50, this, &MainWindow::openMainPort);
 }
@@ -1087,17 +1091,36 @@ void MainWindow::plasmaStateChanged(bool plasmaActive)
 // cascade recipe
 //////////////////////////////////////////////////////////////////////////////////
 
+// populate a QListWidget with recipe names from the recipe directory
+void MainWindow::populateRecipeListWidgetFromDirectory(QListWidget* listWidget) {
+    // Create the directory path
+    QString directoryPath = RECIPE_DIRECTORY;
+
+    listWidget->clear(); // Clear the list widget before populating it
+
+    QDir directory(directoryPath);
+
+    if (!directory.exists()) {
+        // Handle the case where the directory doesn't exist
+        qDebug() << "Directory does not exist: " << directoryPath;
+        return;
+    }
+
+    QFileInfoList fileInfoList = directory.entryInfoList(QDir::Files | QDir::NoDotAndDotDot);
+
+    foreach (const QFileInfo& fileInfo, fileInfoList) {
+        // Add each file name to the list widget
+        QListWidgetItem* item = new QListWidgetItem(fileInfo.fileName());
+        listWidget->addItem(item);
+    }
+}
+
+
 //save cascade recipe button
 void MainWindow::on_saveAsCascadeRecipeButton_clicked()
 {
     // Create the directory path
-    QString directoryPath = QCoreApplication::applicationDirPath() + "/Cascade Recipes";
-
-    // Create the directory if it doesn't exist
-    QDir directory;
-    if (!directory.exists(directoryPath)) {
-       directory.mkpath(directoryPath);
-    }
+    QString directoryPath = CASCADE_RECIPE_DIRECTORY;
 
     // Open the file dialog for saving
     QString selectedFileName = QFileDialog::getSaveFileName(this, "Save Cascade Recipe List", directoryPath, "Text Files (*.txt)");
@@ -1107,13 +1130,26 @@ void MainWindow::on_saveAsCascadeRecipeButton_clicked()
 
        // Open the file for writing
        QFile file(filePath);
+       QFileInfo fileInfo(file);
+       QString fileName = fileInfo.fileName();
        if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
             QTextStream out(&file);
 
-            // Write each recipe name to the file
-            for (const QString& recipeName : m_mainCTL.getRecipe()->getCascadeRecipeList()) {
+            int itemCount = ui->listCascadeRecipes->count();
+            // Assuming 'out' is a QTextStream associated with the file you are writing to
+
+            for (int i = 0; i < itemCount; i++) {
+                QListWidgetItem* item = ui->listCascadeRecipes->item(i);
+                QString recipeName = item->text();
                 out << recipeName << "\n";
             }
+
+            // update the cascade Recipee Field
+            ui->cascade_recipe_name->setText(fileName);
+
+
+            // Display a success message box
+            QMessageBox::information(this, "Success", "Cascade recipe '" + fileName + "' saved successfully!");
 
             file.close();
             qDebug() << "Cascade recipe list saved to file: " << filePath;
@@ -1127,43 +1163,67 @@ void MainWindow::on_saveAsCascadeRecipeButton_clicked()
 // load cascade recipe button
 void MainWindow::on_loadCascadeRecipeButton_clicked()
 {
-
-}
-
-// add cascade recipe button
-void MainWindow::on_addCascadeRecipeButton_clicked()
-{
     // Create a file dialog
     QFileDialog dialog;
+
     dialog.setFileMode(QFileDialog::ExistingFile);
 
-    // Get the current directory
-    QString currentDirectory = QCoreApplication::applicationDirPath();
-    QString initialDirectory = currentDirectory + "/recipes/";
+    QString initialDirectory = CASCADE_RECIPE_DIRECTORY;
 
     // Set the initial directory
     dialog.setDirectory(initialDirectory);
     // Set the window title and filter for specific file types
-    dialog.setWindowTitle("Add Recipe File to Cascade Recipe");
-    dialog.setNameFilter("Recipe Files (*.rcp)");
+    dialog.setWindowTitle("Open Cascade Recipe File");
+    //dialog.setNameFilter("Cascade Recipe Files (*.crcp)");
 
     // Execute the file dialog
     if (dialog.exec()) {
        // Get the selected file path
        QString filePath = dialog.selectedFiles().first();
 
-       // Extract the file name from the file path
-       QFileInfo fileInfo(filePath);
+       // Read the content of the file
+       QFile file(filePath);
+       QFileInfo fileInfo(file);
        QString fileName = fileInfo.fileName();
+       if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QTextStream in(&file);
 
-       // Set plasma Recipe path to Cascade Recipe
-       m_mainCTL.getRecipe()->addRecipeToCascade(fileName);
+            // Clear existing items in the list widget
+            ui->listCascadeRecipes->clear();
 
-       // Update the UI with the recipes
-       ui->listCascadeRecipes->addItem(fileName);
+            // Read each line from the file and add it to the list widget
+            while (!in.atEnd()) {
+                QString line = in.readLine();
+                QListWidgetItem *item = new QListWidgetItem(line);
+                ui->listCascadeRecipes->addItem(item);
+            }
+
+            // update the cascade Recipee Field
+            ui->cascade_recipe_name->setText(fileName);
+
+            // Close the file
+            file.close();
+
+            Logger::logInfo("Cascade Recipe opened: " + filePath);
+       } else {
+            Logger::logCritical("Failed to open file for reading: " + file.errorString());
+       }
     } else {
        // User canceled the file dialog
-       qDebug() << "File selection canceled.";
+       Logger::logDebug("File selection canceled.");
+    }
+}
+
+// add cascade recipe button
+void MainWindow::on_addCascadeRecipeButton_clicked()
+{
+    // Get the selected item from the source list
+    QListWidgetItem* selectedItem = ui->listRecipes->currentItem();
+
+    if (selectedItem) {
+       // Add the item to the destination list
+       ui->listCascadeRecipes->addItem(selectedItem->text());
+       ui->cascade_recipe_name->setText("*modified*");
     }
 
 }
@@ -1171,35 +1231,15 @@ void MainWindow::on_addCascadeRecipeButton_clicked()
 // remove cascade recipe button
 void MainWindow::on_removeCascadeRecipeButton_clicked()
 {
-    // Get the selected item in the list widget
-    QListWidgetItem* selectedItem = ui->listCascadeRecipes->currentItem();
-    if (selectedItem) {
-       // Get the text of the selected item
-       QString recipeFileName = selectedItem->text();
-
-       // Remove the item from the list widget
-       ui->listCascadeRecipes->takeItem(ui->listCascadeRecipes->row(selectedItem));
-
-       // Remove the item from the cascade recipe list
-       m_mainCTL.getRecipe()->removeRecipeFromCascade(recipeFileName);
-    }
-
+    ui->cascade_recipe_name->setText("*modified*");
+    qDeleteAll(ui->listCascadeRecipes->selectedItems());
 }
 
 // clear cascade recipe button
 void MainWindow::on_clear_cascade_recipe_button_clicked()
 {
-    // clear cascades from the recipe
+    ui->cascade_recipe_name->setText("*modified*");
     ui->listCascadeRecipes->clear();
-
-    // clear cascades from the recipe object
-    m_mainCTL.clearCascadeRecipes();
-}
-
-// open cascade recipe button
-void MainWindow::openCascadeRecipe()
-{
-    //  plasmaRecipe.currentRecipeIndex_;
 }
 
 //////////////////////////////////////////////////////////////////////////////////

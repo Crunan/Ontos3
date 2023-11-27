@@ -34,6 +34,7 @@ const QString RECIPE_PURGE_KEY = "PURGE";
 const QString RECIPE_AUTOSCAN_KEY = "AUTOSCAN";
 const QString RECIPE_HEATER_KEY = "HEATER";
 const QString RECIPE_DIRECTORY = "/opt/OTT_PLUS/Recipes";
+const QString CASCADE_RECIPE_DIRECTORY = "/opt/OTT_PLUS/Cascade Recipes";
 
 
 #endif // UTILITIESANDCONSTANTS_H
