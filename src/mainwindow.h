@@ -13,6 +13,7 @@
 #include "axescontroller.h"
 #include <chrono>
 
+#include <QListWidget>
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QLabel>
@@ -86,7 +87,6 @@ public slots:
     void AutoTuneCheckbox_stateChanged(int value);
     void openRecipe();
     void saveRecipe();
-    void openCascadeRecipe();
     void setRecipeMBtuner(double MBtunerSP);
     void thicknessChanged();
     void gapChanged();
@@ -181,6 +181,9 @@ private:
 
     // Connection for Cascade Recipes buttons
     void connectCascadeRecipeButtons();
+
+    // Function for loading recipes into Qlist
+    void populateRecipeListWidgetFromDirectory(QListWidget* listWidget);
 
     void consoleMainCTLSetup();
     void batchIDEnabled();
