@@ -1147,13 +1147,11 @@ void MainWindow::on_saveAsCascadeRecipeButton_clicked()
             // update the cascade Recipee Field
             ui->cascade_recipe_name->setText(fileName);
 
-
-            // Display a success message box
-            QMessageBox::information(this, "Success", "Cascade recipe '" + fileName + "' saved successfully!");
-
             file.close();
             qDebug() << "Cascade recipe list saved to file: " << filePath;
        } else {
+            // Display a success message box
+            QMessageBox::information(this, "Error", "Cascade recipe '" + fileName + "' was unable to be saved successfully!");
             qDebug() << "Failed to open file for writing: " << file.errorString();
        }
     }
