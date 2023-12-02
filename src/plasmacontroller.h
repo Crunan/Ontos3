@@ -109,7 +109,6 @@ public:
 signals:
     void responseReceived(const QString& response);
     void plasmaStateChanged(bool plasmaActive);
-    //void executeRecipeChanged();
     void setRecipeMBtuner(QString MBtunerSP);
     void setRecipeRFpower(QString RFpowerSP);
 

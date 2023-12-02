@@ -1092,17 +1092,16 @@ void MainWindow::plasmaStateChanged(bool plasmaActive)
 //////////////////////////////////////////////////////////////////////////////////
 
 // populate a QListWidget with recipe names from the recipe directory
-void MainWindow::populateRecipeListWidgetFromDirectory(QListWidget* listWidget) {
-    // Create the directory path
-    QString directoryPath = RECIPE_DIRECTORY;
-
+void MainWindow::populateRecipeListWidgetFromDirectory(QListWidget* listWidget)
+{
     listWidget->clear(); // Clear the list widget before populating it
 
-    QDir directory(directoryPath);
+    QDir directory(RECIPE_DIRECTORY);
 
     if (!directory.exists()) {
         // Handle the case where the directory doesn't exist
-        qDebug() << "Directory does not exist: " << directoryPath;
+        QMessageBox::information(this, "Error", "Directory: " + RECIPE_DIRECTORY + " does not exist");
+        qDebug() << "Directory does not exist: " << RECIPE_DIRECTORY;
         return;
     }
 
@@ -1115,15 +1114,11 @@ void MainWindow::populateRecipeListWidgetFromDirectory(QListWidget* listWidget) 
     }
 }
 
-
 //save cascade recipe button
 void MainWindow::on_saveAsCascadeRecipeButton_clicked()
 {
-    // Create the directory path
-    QString directoryPath = CASCADE_RECIPE_DIRECTORY;
-
     // Open the file dialog for saving
-    QString selectedFileName = QFileDialog::getSaveFileName(this, "Save Cascade Recipe List", directoryPath, "Text Files (*.txt)");
+    QString selectedFileName = QFileDialog::getSaveFileName(this, "Save Cascade Recipe List", CASCADE_RECIPE_DIRECTORY, "Cascade Recipe Files (*.crcp)");
     if (!selectedFileName.isEmpty()) {
        // Create the file path
        QString filePath = selectedFileName;
@@ -1131,12 +1126,19 @@ void MainWindow::on_saveAsCascadeRecipeButton_clicked()
        // Open the file for writing
        QFile file(filePath);
        QFileInfo fileInfo(file);
-       QString fileName = fileInfo.fileName();
+
+       // get the filename without the extension
+       QString fileName = fileInfo.completeBaseName();
+
+       // determine if we need to add the file extension
+       if (fileInfo.completeSuffix() != "crcp") {
+           file.setFileName(filePath + ".crcp");
+       }
+
        if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
             QTextStream out(&file);
 
             int itemCount = ui->listCascadeRecipes->count();
-            // Assuming 'out' is a QTextStream associated with the file you are writing to
 
             for (int i = 0; i < itemCount; i++) {
                 QListWidgetItem* item = ui->listCascadeRecipes->item(i);
@@ -1144,7 +1146,7 @@ void MainWindow::on_saveAsCascadeRecipeButton_clicked()
                 out << recipeName << "\n";
             }
 
-            // update the cascade Recipee Field
+            // update the cascade Recipe Field
             ui->cascade_recipe_name->setText(fileName);
 
             file.close();
@@ -1166,13 +1168,11 @@ void MainWindow::on_loadCascadeRecipeButton_clicked()
 
     dialog.setFileMode(QFileDialog::ExistingFile);
 
-    QString initialDirectory = CASCADE_RECIPE_DIRECTORY;
-
     // Set the initial directory
-    dialog.setDirectory(initialDirectory);
+    dialog.setDirectory(CASCADE_RECIPE_DIRECTORY);
     // Set the window title and filter for specific file types
     dialog.setWindowTitle("Open Cascade Recipe File");
-    //dialog.setNameFilter("Cascade Recipe Files (*.crcp)");
+    dialog.setNameFilter("Cascade Recipe Files (*.crcp)");
 
     // Execute the file dialog
     if (dialog.exec()) {
@@ -1182,18 +1182,27 @@ void MainWindow::on_loadCascadeRecipeButton_clicked()
        // Read the content of the file
        QFile file(filePath);
        QFileInfo fileInfo(file);
-       QString fileName = fileInfo.fileName();
+
+       // get the filename without the extension
+       QString fileName = fileInfo.completeBaseName();
+
        if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
             QTextStream in(&file);
 
             // Clear existing items in the list widget
             ui->listCascadeRecipes->clear();
 
+            // clear existing items in the backend list
+            m_mainCTL.getRecipe()->clearCascadeRecipes();
+
             // Read each line from the file and add it to the list widget
             while (!in.atEnd()) {
                 QString line = in.readLine();
                 QListWidgetItem *item = new QListWidgetItem(line);
                 ui->listCascadeRecipes->addItem(item);
+
+                // add recipe to backend list
+                m_mainCTL.getRecipe()->addRecipeToCascade(item->text());
             }
 
             // update the cascade Recipee Field
@@ -1222,6 +1231,9 @@ void MainWindow::on_addCascadeRecipeButton_clicked()
        // Add the item to the destination list
        ui->listCascadeRecipes->addItem(selectedItem->text());
        ui->cascade_recipe_name->setText("*modified*");
+
+       // add recipe to backend list
+       m_mainCTL.getRecipe()->addRecipeToCascade(selectedItem->text());
     }
 
 }
@@ -1229,6 +1241,26 @@ void MainWindow::on_addCascadeRecipeButton_clicked()
 // remove cascade recipe button
 void MainWindow::on_removeCascadeRecipeButton_clicked()
 {
+    /*
+    QList<QListWidgetItem *> items = ui->listCascadeRecipes->selectedItems();
+    QString pretest = items.at(0)->text();
+    QString test = ui->listCascadeRecipes->currentItem()->text();
+    int currentRow = ui->listCascadeRecipes->currentRow();
+    QListWidgetItem *item = ui->listCascadeRecipes->item(currentRow);
+    QString postTest = item->text();
+
+    // this guards against an inadvertent change to selectionMode
+    if (items.length() > 1) {
+        QMessageBox::information(this, "Error", "Please choose a single filename");
+    }
+    else {
+
+    }*/
+
+    QString test = ui->listCascadeRecipes->currentItem()->text();
+    // remove single recipe from backend list
+    m_mainCTL.getRecipe()->removeRecipeFromCascade(test);
+
     ui->cascade_recipe_name->setText("*modified*");
     qDeleteAll(ui->listCascadeRecipes->selectedItems());
 }
@@ -1238,6 +1270,9 @@ void MainWindow::on_clear_cascade_recipe_button_clicked()
 {
     ui->cascade_recipe_name->setText("*modified*");
     ui->listCascadeRecipes->clear();
+
+    // clear the backend list
+    m_mainCTL.getRecipe()->clearCascadeRecipes();
 }
 
 //////////////////////////////////////////////////////////////////////////////////
