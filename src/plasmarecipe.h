@@ -21,8 +21,10 @@ public:
     void addRecipeToCascade(const QString& recipeName);
     void removeRecipeFromCascade(const QString& recipeName);
     int getNumCascadeRecipes() { return m_cascadeRecipeList.length(); }
+    void resetCascadeIndex() { m_currentRecipeIndex = 0; }
+    void incrementCascadeIndex() { m_currentRecipeIndex++; }
+    int getCurentCascadeIndex() { return m_currentRecipeIndex; }
     void clearCascadeRecipes();
-    void executeCurrentRecipe();
 
     void setAutoScan(bool toggle);
     bool getAutoScanBool() const;

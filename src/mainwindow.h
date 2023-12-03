@@ -87,6 +87,7 @@ public slots:
     void AutoTuneCheckbox_stateChanged(int value);
     void openRecipe();
     void saveRecipe();
+    void installRecipe(QString sRecipeFileAndPath);
     void setRecipeMBtuner(double MBtunerSP);
     void thicknessChanged();
     void gapChanged();
@@ -96,6 +97,7 @@ public slots:
     void xLimitsChanged();
     void yLimitsChanged();
     void cyclesChanged();
+    void loadCascadeRecipe();
 
     // callbacks
     void pinsStateChanged(bool state);
@@ -161,6 +163,8 @@ private slots:
     void on_collision_system_checkbox_clicked(bool checked);
     void on_heater_checkbox_clicked(bool checked);
     void on_batchIDButton_clicked();
+    void on_refresh_cascade_recipe_button_clicked();
+
 private:
     // Action Button methods
     void showStatusMessage(const QString &message);

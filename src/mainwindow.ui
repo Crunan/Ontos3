@@ -2997,23 +2997,6 @@ color:gray;
         </rect>
        </property>
        <layout class="QGridLayout" name="gridLayout_10">
-        <item row="1" column="0">
-         <widget class="QPushButton" name="removeCascadeRecipeButton">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Remove</string>
-          </property>
-          <property name="icon">
-           <iconset theme="list-remove">
-            <normaloff>.</normaloff>.</iconset>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="0">
          <widget class="QPushButton" name="addCascadeRecipeButton">
           <property name="sizePolicy">
@@ -3045,6 +3028,40 @@ color:gray;
           <property name="icon">
            <iconset theme="task-past-due">
             <normaloff>.</normaloff>.</iconset>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="removeCascadeRecipeButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Remove</string>
+          </property>
+          <property name="icon">
+           <iconset theme="list-remove">
+            <normaloff>.</normaloff>.</iconset>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QPushButton" name="refresh_cascade_recipe_button">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Refresh</string>
+          </property>
+          <property name="icon">
+           <iconset resource="ONTOS3.qrc">
+            <normaloff>:/images/refresh.png</normaloff>:/images/refresh.png</iconset>
           </property>
          </widget>
         </item>

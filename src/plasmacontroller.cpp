@@ -390,34 +390,34 @@ void PlasmaController::RunScanAxesSM()
             if (m_collisionPassed == true) {
                 m_collisionPassed = false; // reset the collision flag
             }
+            
+            bool done = true; // controls going to load and auto off
+            
+            if (m_pRecipe->getNumCascadeRecipes() > 1) { // there are cascade recipes in the list so we must be running multiple recipes
 
+                // increment the index tracker
+                m_pRecipe->incrementCascadeIndex();
 
-            //if (m_pRecipe->getNumCascadeRecipes() > 1)
-            //                'If a cascaded recipe was used then run the next recipe
-            //                If CascadingRecipesDialog.CascadeRecipeListBox.Items.Count - 1 > CasRecipeNumber Then
-            //                    'This increments in order to keep track of which recipe we are on in the cascade recipe.
-            //                    CasRecipeNumber += 1
-            //                    'This is to make sure we start the scan automatically
-            //                    b_toggleAutoScan = True
-            //                    'Now load the recipe
-            //                    LoadRecipeValues()
-            //                Else
-            //                    SMHomeAxes.State = HASM_START 'Go to the Load position everytime you finish scanning
-            //                    // Auto off will turn the recipe off and PLASMA.
-            //                    if (m_pRecipe->getAutoScanBool()) {
-            //                        Logger::logInfo("Plasma turned off (Auto-Off is active)");
-            //                        sendCommand("$8700%");
-            //                        readResponse();
-            //                    }
+                int currentCascadeIndex = m_pRecipe->getCurentCascadeIndex();
+                int numCascadeRecipes = m_pRecipe->getNumCascadeRecipes();
 
-            m_stageCTL.StartHome(); // Go to the Load position everytime you finish scanning
-            // Auto off will turn the recipe off and PLASMA.
-            if (m_pRecipe->getAutoScanBool()) {
-                Logger::logInfo("Plasma turned off (Auto-Off is active)");
-                sendCommand("$8700%");
-                readResponse();
+                if (currentCascadeIndex < numCascadeRecipes) {
+                    // prevents going to load since we are running another recipe
+                    done = false;
+                }
+
+                emit loadCascadeRecipe(); // loads the next recipe as specified by the cascade index
             }
-
+            
+            if (done) { // we are running a single recipe or we have run all cascade recipes so we are done
+                m_stageCTL.StartHome(); // Go to the Load position everytime you finish scanning
+                // Auto off will turn the recipe off and PLASMA.
+                if (m_pRecipe->getAutoScanBool()) {
+                    Logger::logInfo("Plasma turned off (Auto-Off is active)");
+                    sendCommand("$8700%");
+                    readResponse();
+                }
+            }
         }
         else { // recycle the scan
             m_currentCycle += 1;

@@ -144,6 +144,7 @@ signals:
     void DOSM_TransitionIdle();
 
     void recipeExecutionStateChanged(bool state);
+    void loadCascadeRecipe();
 
     void scanBoxChanged();
 

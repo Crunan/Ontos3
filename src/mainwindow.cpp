@@ -57,7 +57,8 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(m_mainCTL.getSerialInterface(), &SerialInterface::serialOpen, this, &MainWindow::serialConnected);
     connect(m_mainCTL.getSerialInterface(), &SerialInterface::readTimeoutError, this, &MainWindow::readTimeoutError);
     connect(&m_mainCTL.getAbortMessages(), &AbortCodeMessages::showAbortMessageBox, this, &MainWindow::showAbortMessageBox);
-
+    // run the next cascade recipe
+    connect(&m_mainCTL, &PlasmaController::loadCascadeRecipe, this, &MainWindow::loadCascadeRecipe);
     // main state machine from main loop
     connect(m_pMainLoop, &MainLoop::runMainStateMachine, this, &MainWindow::runMainStateMachine);
     // ui updates from recipe
@@ -715,30 +716,37 @@ void MainWindow::openRecipe()
         // Get the selected file path
         QString filePath = dialog.selectedFiles().first();
 
-        // set the filename
-        QFileInfo fi(filePath);
-        ui->name_recipe->setText(fi.baseName());
-
-        // set recipe path and file
-        m_mainCTL.setRecipe(filePath);
-
-        // enable the plasma button now that a recipe is loaded
-        ui->plsmaBtn->setEnabled(true);
+        // set appropriate fields to use the recipe
+        installRecipe(filePath);
 
         // clear cascade recipe since it's now assumed the user does not want to run
         // cascade recipes
         ui->cascade_recipe_name->clear();
+        ui->listCascadeRecipes->clear();
         m_mainCTL.clearCascadeRecipes();
-
-        Logger::logInfo("Recipe opened: " + filePath);
-
     } else {
         // User canceled the file dialog
         Logger::logDebug("File selection canceled.");
     }
 }
 
-void MainWindow::saveRecipe() {
+void MainWindow::installRecipe(QString sRecipeFileAndPath)
+{
+    // set the filename
+    QFileInfo fi(sRecipeFileAndPath);
+    ui->name_recipe->setText(fi.baseName());
+
+    // set recipe path and file
+    m_mainCTL.setRecipe(sRecipeFileAndPath);
+
+    // enable the plasma button now that a recipe is loaded
+    ui->plsmaBtn->setEnabled(true);
+
+    Logger::logInfo("Recipe opened: " + sRecipeFileAndPath);
+}
+
+void MainWindow::saveRecipe()
+{
     // Create the directory path
     QString directoryPath = RECIPE_DIRECTORY;
 
@@ -1195,6 +1203,8 @@ void MainWindow::on_loadCascadeRecipeButton_clicked()
             // clear existing items in the backend list
             m_mainCTL.getRecipe()->clearCascadeRecipes();
 
+            bool firstRecipe = true;
+
             // Read each line from the file and add it to the list widget
             while (!in.atEnd()) {
                 QString line = in.readLine();
@@ -1203,9 +1213,20 @@ void MainWindow::on_loadCascadeRecipeButton_clicked()
 
                 // add recipe to backend list
                 m_mainCTL.getRecipe()->addRecipeToCascade(item->text());
+
+                // the first recipe in the list get's installed into the system
+                if (firstRecipe) {
+                    installRecipe(RECIPE_DIRECTORY + "/" + line);
+                    firstRecipe = false;
+                    
+                    // set the cascade recipe index to 1
+                    m_mainCTL.getRecipe()->resetCascadeIndex();
+                }
+
+
             }
 
-            // update the cascade Recipee Field
+            // update the cascade Recipe Field
             ui->cascade_recipe_name->setText(fileName);
 
             // Close the file
@@ -1235,28 +1256,11 @@ void MainWindow::on_addCascadeRecipeButton_clicked()
        // add recipe to backend list
        m_mainCTL.getRecipe()->addRecipeToCascade(selectedItem->text());
     }
-
 }
 
 // remove cascade recipe button
 void MainWindow::on_removeCascadeRecipeButton_clicked()
 {
-    /*
-    QList<QListWidgetItem *> items = ui->listCascadeRecipes->selectedItems();
-    QString pretest = items.at(0)->text();
-    QString test = ui->listCascadeRecipes->currentItem()->text();
-    int currentRow = ui->listCascadeRecipes->currentRow();
-    QListWidgetItem *item = ui->listCascadeRecipes->item(currentRow);
-    QString postTest = item->text();
-
-    // this guards against an inadvertent change to selectionMode
-    if (items.length() > 1) {
-        QMessageBox::information(this, "Error", "Please choose a single filename");
-    }
-    else {
-
-    }*/
-
     QString test = ui->listCascadeRecipes->currentItem()->text();
     // remove single recipe from backend list
     m_mainCTL.getRecipe()->removeRecipeFromCascade(test);
@@ -1268,11 +1272,38 @@ void MainWindow::on_removeCascadeRecipeButton_clicked()
 // clear cascade recipe button
 void MainWindow::on_clear_cascade_recipe_button_clicked()
 {
-    ui->cascade_recipe_name->setText("*modified*");
     ui->listCascadeRecipes->clear();
 
     // clear the backend list
     m_mainCTL.getRecipe()->clearCascadeRecipes();
+}
+
+void MainWindow::on_refresh_cascade_recipe_button_clicked()
+{
+    // Setup Recipe List for Cascade Recipes
+    populateRecipeListWidgetFromDirectory(ui->listRecipes);
+}
+
+// slot to load the next cascade recipe.
+// signal sent from plasmacontroller
+void MainWindow::loadCascadeRecipe()
+{
+    int currentCascadeIndex = m_mainCTL.getRecipe()->getCurentCascadeIndex();
+    int numCascadeRecipes = m_mainCTL.getRecipe()->getNumCascadeRecipes();
+
+    if (currentCascadeIndex < numCascadeRecipes) { // load next recipe in the list
+       QString recipeName = m_mainCTL.getRecipe()->getCascadeRecipeList().at(currentCascadeIndex);
+
+       installRecipe(RECIPE_DIRECTORY + "/" + recipeName);
+    }
+    else { // we are done so install the first recipe in case user wants to run again
+       QString recipeName = m_mainCTL.getRecipe()->getCascadeRecipeList().at(0);
+
+       installRecipe(RECIPE_DIRECTORY + "/" + recipeName);
+
+       // and reset our index in case the user wants to run the list again
+       m_mainCTL.getRecipe()->resetCascadeIndex();
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -1516,7 +1547,7 @@ void MainWindow::on_load_cycles_clicked()
 
 // open recipe button
 void MainWindow::on_loadRecipeButton_clicked()
-{   
+{
     openRecipe();
 }
 

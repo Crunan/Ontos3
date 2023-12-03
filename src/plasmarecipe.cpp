@@ -267,11 +267,11 @@ double PlasmaRecipe::getYmaxPH() const
 {
     return m_recipeMap[RECIPE_YMAX_KEY].toDouble();
 }
+
 QString PlasmaRecipe::getYmaxPHQStr() const
 {
     return QString::number(m_recipeMap[RECIPE_YMAX_KEY].toDouble(), 'f', 2);
 }
-
 
 QMap<QString, QVariant> PlasmaRecipe::getRecipeMap()
 {
@@ -298,22 +298,6 @@ void PlasmaRecipe::clearCascadeRecipes()
     m_currentRecipeIndex = 0;
 }
 
-void PlasmaRecipe::executeCurrentRecipe()
-{
-    if (m_currentRecipeIndex >= 0 && m_currentRecipeIndex < m_cascadeRecipeList.size()) {
-        const QString& recipeName = m_cascadeRecipeList.at(m_currentRecipeIndex);
-        // Load and execute the recipe with the given recipeName
-        fileReader.setFilePath(recipeName);
-        setRecipeFromFile();
-        // Once the recipe execution is complete, move to the next recipe
-        ++m_currentRecipeIndex;
-        executeCurrentRecipe();
-    } else {
-        // All recipes in the cascade have been executed
-        // Perform any final actions or cleanup
-        m_currentRecipeIndex = 0;
-    }
-}
 
 
 
