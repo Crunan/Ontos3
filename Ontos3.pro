@@ -1,6 +1,6 @@
 QT += core gui widgets serialport statemachine
 
-VERSION = 01.00.06
+VERSION = 01.00.07
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
 greaterThan(QT_MAJOR_VERSION, 4)
@@ -17,7 +17,6 @@ SOURCES += \
     src/passworddialog.cpp \
     src/diameter.cpp \
     src/lighttower.cpp \
-    src/runguard.cpp \
     src/serialinterface.cpp \
     src/axescontroller.cpp \
     src/axis.cpp \
@@ -62,7 +61,6 @@ HEADERS += \
     src/plasmahead.h \
     src/pwr.h \
     src/plasmarecipe.h \
-    src/runguard.h \
     src/tuner.h \
     src/settingsdialog.h \
     src/serialinterface.h \
