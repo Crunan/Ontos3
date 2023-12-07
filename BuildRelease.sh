@@ -15,8 +15,8 @@ fi
 
 cd build
 
-#qmake ..
+qmake ..
 
-#make -j$(nproc)
+make -j$(nproc)
 
 ~/linuxdeploy-x86_64.AppImage --appdir=AppDir --executable=./Ontos3 --desktop-file=../Ontos3.desktop --icon-file=../images/OTTIconImage.png --output appimage --plugin qt
