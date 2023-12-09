@@ -3009,8 +3009,8 @@ color:gray;
            <string>Add</string>
           </property>
           <property name="icon">
-           <iconset theme="list-add">
-            <normaloff>.</normaloff>.</iconset>
+           <iconset>
+            <normaloff>:/images/Plus.png</normaloff>:/images/Plus.png</iconset>
           </property>
          </widget>
         </item>
@@ -3026,8 +3026,8 @@ color:gray;
            <string>Clear All</string>
           </property>
           <property name="icon">
-           <iconset theme="task-past-due">
-            <normaloff>.</normaloff>.</iconset>
+           <iconset>
+            <normaloff>:/images/clipboard.png</normaloff>:/images/clipboard.png</iconset>
           </property>
          </widget>
         </item>
@@ -3043,8 +3043,8 @@ color:gray;
            <string>Remove</string>
           </property>
           <property name="icon">
-           <iconset theme="list-remove">
-            <normaloff>.</normaloff>.</iconset>
+           <iconset>
+            <normaloff>:/images/minus.png</normaloff>:/images/minus.png</iconset>
           </property>
          </widget>
         </item>
@@ -3060,7 +3060,7 @@ color:gray;
            <string>Refresh</string>
           </property>
           <property name="icon">
-           <iconset resource="ONTOS3.qrc">
+           <iconset>
             <normaloff>:/images/refresh.png</normaloff>:/images/refresh.png</iconset>
           </property>
          </widget>
@@ -3251,7 +3251,7 @@ font: 14pt &quot;Ubuntu Bold&quot;;
            <string>Crash Avoidance System Enabled</string>
           </property>
           <property name="icon">
-           <iconset resource="ONTOS3.qrc">
+           <iconset>
             <normaloff>:/images/collision-icon.jpg</normaloff>:/images/collision-icon.jpg</iconset>
           </property>
           <property name="iconSize">

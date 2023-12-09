@@ -383,9 +383,6 @@ void PlasmaController::RunScanAxesSM()
             // Assume N2 is on, turn it off
             m_stageCTL.toggleN2PurgeOff();
 
-            emit SSM_TransitionIdle();
-            emit SSM_Done();
-
             // Reset the collision flag if using a collision system
             if (m_collisionPassed == true) {
                 m_collisionPassed = false; // reset the collision flag
@@ -395,21 +392,41 @@ void PlasmaController::RunScanAxesSM()
             
             if (m_pRecipe->getNumCascadeRecipes() > 1) { // there are cascade recipes in the list so we must be running multiple recipes
 
-                // increment the index tracker
-                m_pRecipe->incrementCascadeIndex();
+                // don't load the next recipe until the stage is out of the way
+                if (m_stageCTL.getZPosition() <= m_scanZParkPos) {
 
-                int currentCascadeIndex = m_pRecipe->getCurentCascadeIndex();
-                int numCascadeRecipes = m_pRecipe->getNumCascadeRecipes();
+                    emit SSM_TransitionIdle();
+                    emit SSM_Done();
 
-                if (currentCascadeIndex < numCascadeRecipes) {
-                    // prevents going to load since we are running another recipe
-                    done = false;
-                }
+                    // increment the index tracker
+                    m_pRecipe->incrementCascadeIndex();
 
-                emit loadCascadeRecipe(); // loads the next recipe as specified by the cascade index
+                    int currentCascadeIndex = m_pRecipe->getCurentCascadeIndex();
+                    int numCascadeRecipes = m_pRecipe->getNumCascadeRecipes();
+
+                    if (currentCascadeIndex < numCascadeRecipes) {
+                        // prevents going to load since we are running another recipe
+                        done = false;
+                    }
+
+                    if (done) { // we are running a single recipe or we have run all cascade recipes so we are done
+                        m_stageCTL.StartHome(); // Go to the Load position everytime you finish scanning
+                        // Auto off will turn the recipe off and PLASMA.
+                        if (m_pRecipe->getAutoScanBool()) {
+                            Logger::logInfo("Plasma turned off (Auto-Off is active)");
+                            sendCommand("$8700%");
+                            readResponse();
+                        }
+                    }
+
+                    emit loadCascadeRecipe(); // loads the next recipe as specified by the cascade index
+                } 
             }
-            
-            if (done) { // we are running a single recipe or we have run all cascade recipes so we are done
+            else {
+
+                emit SSM_TransitionIdle();
+                emit SSM_Done();
+
                 m_stageCTL.StartHome(); // Go to the Load position everytime you finish scanning
                 // Auto off will turn the recipe off and PLASMA.
                 if (m_pRecipe->getAutoScanBool()) {
