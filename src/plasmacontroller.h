@@ -3,7 +3,6 @@
 
 #include "plasmarecipe.h"
 #include "axescontroller.h"
-#include "commandmap.h"
 #include "plasmahead.h"
 #include "pwr.h"
 #include "tuner.h"
@@ -33,10 +32,6 @@ public:
     QString readResponse();
     QString getPortErrorString();
     bool isOpen();
-
-    // Commands Map functions.  Currently not used but may be used when implementing gerber files
-    void setCommandMap(const QMap<QString, QPair<QString, QString>>& map);
-    QString findCommandValue(QString command) const;
 
     // Poll Commands
     void getCTLStatusCommand();
@@ -208,7 +203,6 @@ private:
 
     Configuration m_config;
 
-    CommandMap m_commandMap;
     AxesController m_stageCTL;
     Diameter m_waferDiameter;
     PlasmaRecipe *m_pRecipe;

@@ -15,7 +15,6 @@ PlasmaController::PlasmaController(QWidget* parent)
     m_lightTower(),
     m_pSerialInterface(new SerialInterface()),
     m_config(),
-    m_commandMap(),
     m_stageCTL(),
     m_waferDiameter(),
     m_pRecipe(new PlasmaRecipe()),
@@ -652,17 +651,6 @@ QString PlasmaController::readResponse()
     return m_pSerialInterface->readResponse();
 }
 
-void PlasmaController::setCommandMap(const QMap<QString, QPair<QString, QString>>& map)
-{
-    m_commandMap.setCommandMap(map);
-}
-
-
-QString PlasmaController::findCommandValue(QString command) const
-{
-    return m_commandMap.findCommandValue(command);
-}
-
 
 MFC* PlasmaController::findMFCByNumber(int mfcNumber)
 {
@@ -1083,7 +1071,7 @@ void PlasmaController::setRecipeExecuting(bool value)
 
 void PlasmaController::setRecipe(QString filePath)
 {
-    m_pRecipe->fileReader.setFilePath(filePath);
+    m_pRecipe->fileMetaData.setFilePath(filePath);
     m_pRecipe->setRecipeFromFile();
     // process the keys that have CTL board interaction
     setMFCsFlowFromRecipe();

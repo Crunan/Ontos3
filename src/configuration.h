@@ -1,12 +1,15 @@
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
+#include "filedescriptor.h"
+
 #include <QCoreApplication>
 #include <QString>
 #include <QMap>
 #include <QStringList>
 #include <QObject>
 
+// TODO: Allow ConfigManager to manage the constants for directorys
 const QString CONFIG_DIRECTORY_NAME = "/opt/OTT_PLUS/config";
 const QString CONFIG_DEFAULT_FILENAME = "default.cfg";
 const QString CONFIG_MFC1_LABEL_KEY = "MFC_LABEL_1";
@@ -28,10 +31,14 @@ const QString CONFIG_ABORT_STATUS_BIT = "ABORT_STATUS_BIT";
 class Configuration : public QObject
 {
 public:
-    Configuration(QObject *parent = nullptr);
+    Configuration(QObject* Parent = nullptr);
 
+    void readConfigFile();
     QString getExeConfigPath() const;
     QString getExeConfigFileName() const;
+    void setExeConfigPath(const QString& path);
+    void setExeConfigFileName(const QString& fileName);
+
     QString getValueForKey(const QString& key) const;
     QStringList getAllKeys() const;
 
@@ -39,10 +46,7 @@ signals:
     void configFileError();
 
 private:
-    void readConfigFile();
-
-    QString m_execonfigPath;
-    QString m_execonfigFileName;
+    FileDescriptor configFile;
     QMap<QString, QString> m_configDictionary;
 };
 

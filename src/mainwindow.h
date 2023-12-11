@@ -3,9 +3,12 @@
 
 // redundant #pragma once
 
+#include "formatcascaderecipe.h"
+#include "filemanager.h"
+#include "cascaderecipelist.h"
+#include "directorymanager.h"
 #include "grblcontroller.h"
 #include "mainloop.h"
-#include "commandfilereader.h"
 #include "settingsdialog.h"
 #include "logger.h"
 #include "plasmacontroller.h"
@@ -13,6 +16,7 @@
 #include "axescontroller.h"
 #include <chrono>
 
+#include <QFileInfoList>
 #include <QListWidget>
 #include <QMainWindow>
 #include <QMessageBox>
@@ -54,6 +58,9 @@ public slots:
     void openRecipeWindowMFC();
     void stageStatusUpdate(QString statusNow, QString statusNext);
     void showAbortMessageBox(QString message);
+
+    // For filling the recipe UI with recipes
+    void fillWindowWithRecipes(QListWidget* window, const QFileInfoList& fileInfoList);
 
     // Serial Port
     void openMainPort();
@@ -164,6 +171,9 @@ private slots:
     void on_heater_checkbox_clicked(bool checked);
     void on_batchIDButton_clicked();
     void on_refresh_cascade_recipe_button_clicked();
+    void on_cascadeDirectoryUp_clicked();
+    void on_cascadeDirectoryDown_clicked();
+    void on_loadCascadeRecipeButton_2_clicked();
 
 private:
     // Action Button methods
@@ -187,7 +197,8 @@ private:
     void connectCascadeRecipeButtons();
 
     // Function for loading recipes into Qlist
-    void populateRecipeListWidgetFromDirectory(QListWidget* listWidget);
+    void fillRecipeWindow(QListWidget* listWidget);
+    void fillCascadeRecipeWindow(QListWidget* listWidget);
 
     void consoleMainCTLSetup();
     void batchIDEnabled();
@@ -214,8 +225,6 @@ private:
     SettingsDialog* m_pSettings;
     PlasmaController m_mainCTL;
     QSettings m_persistentSettings;
-
-    CommandFileReader m_commandFileReader;
 
     Configuration m_config;
     bool m_engineeringMode;

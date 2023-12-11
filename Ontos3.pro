@@ -1,6 +1,6 @@
 QT += core gui widgets serialport statemachine
 
-VERSION = 01.00.08
+VERSION = 01.00.06
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
 greaterThan(QT_MAJOR_VERSION, 4)
@@ -14,16 +14,20 @@ CONFIG += c++17
 SOURCES += \
     src/UtilitiesAndConstants.cpp \
     src/abortcodemessages.cpp \
+    src/cascaderecipelist.cpp \
+    src/directorymanager.cpp \
+    src/filedescriptor.cpp \
+    src/filemanager.cpp \
+    src/filereader.cpp \
+    src/filewriter.cpp \
+    src/formatcascaderecipe.cpp \
     src/passworddialog.cpp \
     src/diameter.cpp \
     src/lighttower.cpp \
     src/serialinterface.cpp \
     src/axescontroller.cpp \
     src/axis.cpp \
-    src/commandfilereader.cpp \
-    src/commandmap.cpp \
     src/configuration.cpp \
-    src/filereader.cpp \
     src/grblcontroller.cpp \
     src/logger.cpp \
     src/main.cpp \
@@ -42,15 +46,19 @@ SOURCES += \
 HEADERS += \
     src/UtilitiesAndConstants.h \
     src/abortcodemessages.h \
+    src/cascaderecipelist.h \
+    src/directorymanager.h \
+    src/filedescriptor.h \
+    src/filemanager.h \
+    src/filereader.h \
+    src/filewriter.h \
+    src/formatcascaderecipe.h \
     src/passworddialog.h \
     src/diameter.h \
     src/axescontroller.h \
     src/axis.h \
-    src/commandfilereader.h \
-    src/commandmap.h \
     src/configuration.h \
     src/diameter.h \
-    src/filereader.h \
     src/grblcontroller.h \
     src/lighttower.h \
     src/logger.h \

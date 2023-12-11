@@ -1,27 +1,21 @@
 #include "filereader.h"
 
+#include <QTextStream>
+#include <QDebug>
+#include <QFile>
 
-FileReader::FileReader()
-    : m_filePath(""), m_fileName("")
-{
-}
+QString FileReader::read(const QString filePath) {
+    QFile file(filePath);
 
-QString FileReader::getFilePath() const
-{
-    return m_filePath;
-}
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qDebug() << "Error opening file: " << file.errorString();
+        return QString();
+    }
 
-void FileReader::setFilePath(QString path)
-{
-    m_filePath = path;
-}
+    QTextStream in(&file);
+    QString fileContents = in.readAll();
 
-QString FileReader::getFileName() const
-{
-    return m_fileName;
-}
+    file.close();
 
-void FileReader::setFileName(QString fileName)
-{
-    m_fileName = fileName;
+    return fileContents;
 }

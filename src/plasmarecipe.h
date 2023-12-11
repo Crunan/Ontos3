@@ -1,8 +1,12 @@
 #ifndef PLASMARECIPE_H
 #define PLASMARECIPE_H
 
-#include "filereader.h"
+#include "filedescriptor.h"
 #include <QObject>
+#include <QCoreApplication>
+#include <QFile>
+#include <QTextStream>
+#include <QRegularExpression>
 #include <QStringLiteral>
 
 class PlasmaRecipe : public QObject {
@@ -25,6 +29,7 @@ public:
     void incrementCascadeIndex() { m_currentRecipeIndex++; }
     int getCurentCascadeIndex() { return m_currentRecipeIndex; }
     void clearCascadeRecipes();
+    void executeCurrentRecipe();
 
     void setAutoScan(bool toggle);
     bool getAutoScanBool() const;
@@ -74,7 +79,7 @@ public:
     double getYmaxPH() const;
     QString getYmaxPHQStr() const;
 
-    FileReader fileReader;
+    FileDescriptor fileMetaData;
 
 signals:
     void thicknessChanged();

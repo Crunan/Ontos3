@@ -10,19 +10,19 @@ Configuration::Configuration(QObject *parent) : QObject(parent)
     QString buildDir = QCoreApplication::applicationDirPath();
 
     // Set the execonfigPath to the "config" folder
-    m_execonfigPath = CONFIG_DIRECTORY_NAME;
+    setExeConfigPath(CONFIG_DIRECTORY_NAME);
 
     // Set the execonfigFileName to the desired file name
-    m_execonfigFileName = CONFIG_DEFAULT_FILENAME;
+    setExeConfigFileName(CONFIG_DEFAULT_FILENAME);
 
     // Read the configuration file and populate the dictionary
     readConfigFile();
 }
-
+// TODO: Once FileReader is implemented, refactor here!
 void Configuration::readConfigFile()
 {
     // Open the configuration file for reading
-    QString filePath = m_execonfigPath + "/" + m_execonfigFileName;
+    QString filePath = getExeConfigPath() + "/" + getExeConfigFileName();
     QFile configFile(filePath);
     if (!configFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
         // Handle the error if the file cannot be opened
@@ -65,10 +65,20 @@ QStringList Configuration::getAllKeys() const
 
 QString Configuration::getExeConfigPath() const
 {
-    return m_execonfigPath;
+    return configFile.getFilePath();
 }
 
 QString Configuration::getExeConfigFileName() const
 {
-    return m_execonfigFileName;
+    return configFile.getFileName();
+}
+
+void Configuration::setExeConfigPath(const QString& path)
+{
+    configFile.setFilePath(path);
+}
+
+void Configuration::setExeConfigFileName(const QString& fileName)
+{
+    configFile.setFileName(fileName);
 }

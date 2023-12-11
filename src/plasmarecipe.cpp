@@ -3,7 +3,6 @@
 #include <QTextStream>
 #include <QDir>
 #include <QDebug>
-#include <QRegularExpression>
 #include "logger.h"
 #include "UtilitiesAndConstants.h"
 
@@ -11,6 +10,7 @@
 PlasmaRecipe::PlasmaRecipe(QObject* parent) :
     QObject(parent),
     m_recipeMap(),
+    // TODO: Use either dependency injection or composition for cascade.
     m_cascadeRecipeList(),
     m_currentRecipeIndex(0)
 {
@@ -46,7 +46,7 @@ void PlasmaRecipe::initializeMap()
 
 void PlasmaRecipe::setRecipeFromFile()
 {
-    QString absoluteFilePath = fileReader.getFilePath();
+    QString absoluteFilePath = fileMetaData.getFilePath();
 
     QFile file(absoluteFilePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
