@@ -2,9 +2,9 @@
 
 #include "cascaderecipelist.h"
 
-QList<QString> CascadeRecipeList::cascadeRecipe;  // Don't forget to define the static member
+QStringList CascadeRecipeList::cascadeRecipe;  // Don't forget to define the static member
 
-void CascadeRecipeList::setCascadeRecipe(const QList<QString> &recipeList) {
+void CascadeRecipeList::setCascadeRecipe(const QStringList& recipeList) {
     cascadeRecipe = recipeList;
 }
 
@@ -16,7 +16,7 @@ void CascadeRecipeList::removeRecipe(const QString& recipeName) {
     cascadeRecipe.removeOne(recipeName);
 }
 
-QList<QString>& CascadeRecipeList::getCascadeList() {
+QStringList& CascadeRecipeList::getCascadeList() {
     return cascadeRecipe;
 }
 QString CascadeRecipeList::getRecipeNames() {
