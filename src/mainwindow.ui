@@ -1368,6 +1368,12 @@ color:gray;
        </item>
        <item row="3" column="1">
         <widget class="QPushButton" name="loadCascadeRecipeButton_3">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="styleSheet">
           <string notr="true">QPushButton {
 color: white;
@@ -3241,10 +3247,10 @@ font: 14pt &quot;Ubuntu Bold&quot;;
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Clear</string>
+        <string>Refresh</string>
        </property>
        <property name="icon">
-        <iconset theme="task-past-due">
+        <iconset theme="view-refresh">
          <normaloff>.</normaloff>.</iconset>
        </property>
       </widget>

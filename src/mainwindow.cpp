@@ -1,4 +1,4 @@
-﻿#include "mainwindow.h"
+#include "mainwindow.h"
 #include "ui_mainwindow.h"
 
 #include <QApplication>
@@ -1181,26 +1181,32 @@ void MainWindow::on_cascadeDirectoryDown_clicked()
 
 void MainWindow::on_loadCascadeRecipeButton_2_clicked()
 {
+    const QString selectedCascadeRecipe = ui->CascadeDirectory->currentItem()->text();
     // Enable the edit loaded recipe section
     ui->EditCascadeBox->setEnabled(true);
 
-    // get the name of the selected file to be loaded.
-    const QString selectedCascadeRecipeFile = DirectoryManager::CascadeRecipeDirectory \
-                                              + ui->CascadeDirectory->currentItem()->text();
+    // Clear the Cascade Recipe Window
+    ui->LoadedCascadeRecipes->clear();
+
+    // Set the name on the loaded cascade window
+    ui->cascade_recipe_name->setText(selectedCascadeRecipe);
+
+    // set the path of the directory and recipe name.
+    const QString CascadeRecipeFilePath = DirectoryManager::CascadeRecipeDirectory \
+                                              + selectedCascadeRecipe;
 
     // Read the selected file, which will be one single string.
-    QString unformattedRecipes = FileReader::read(selectedCascadeRecipeFile);
+    QString unformattedRecipes = FileReader::read(CascadeRecipeFilePath);
 
-    // Put the string into a QList.
-    QList<QString> formattedRecipes  = FormatCascadeRecipe::Format(unformattedRecipes);
+    // Format the String.
+    QStringList formattedRecipes  = FormatCascadeRecipe::Format(unformattedRecipes);
 
-    // Set the formatted Qlist to the CascadeRecipe.
+    // Set the formatted recipe to the CascadeRecipe.
     CascadeRecipeList::setCascadeRecipe(formattedRecipes);
 
     // Use the recipe list to iterate through and add each to the Loaded
     // Cascade Widget.
-    QList<QString> recipes = CascadeRecipeList::getCascadeList();
-    for (const QString recipe : recipes) {
+    for (const QString& recipe : CascadeRecipeList::getCascadeList()) {
         ui->LoadedCascadeRecipes->addItem(recipe);
     }
 
