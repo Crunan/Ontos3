@@ -6,7 +6,7 @@
 class FormatCascadeRecipe
 {
 public:
-    static QList<QString> Format(QString& recipes);
+    static QStringList Format(QString& recipes);
 };
 
 #endif // FORMATCASCADERECIPE_H
