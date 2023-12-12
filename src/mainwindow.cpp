@@ -1126,13 +1126,16 @@ void MainWindow::fillCascadeRecipeWindow(QListWidget* listWidget) {
 //save cascade recipe button
 void MainWindow::on_saveAsCascadeRecipeButton_clicked()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, \
-                                                    "Save Cascade Recipe List", \
-                                                    DirectoryManager::CascadeRecipeDirectory, \
-                                                    "Text Files (*.txt)");
-    if (!fileName.isEmpty()) {
-        FileWriter::write(CascadeRecipeList::getRecipeNames(), DirectoryManager::CascadeRecipeDirectory + fileName);
+    const QString selectedCascadeRecipe = ui->CascadeDirectory->currentItem()->text();
+    QStringList cascadeRecipe;
+
+    for (int i = 0; i < ui->LoadedCascadeRecipes->count(); ++i) {
+        QListWidgetItem* item = ui->LoadedCascadeRecipes->item(i);
+        cascadeRecipe << item->text();
     }
+
+    CascadeRecipeList::setCascadeRecipe(cascadeRecipe);
+    FileWriter::write(CascadeRecipeList::getRecipeNames(), DirectoryManager::CascadeRecipeDirectory + selectedCascadeRecipe);
 }
 
 // load cascade recipe button
@@ -1148,12 +1151,15 @@ void MainWindow::on_addCascadeRecipeButton_clicked()
     ui->LoadedCascadeRecipes->addItem(currentRow);
 }
 
-// remove cascade recipe button
+// Remove the selected recipe from the casdade recipe window
 void MainWindow::on_removeCascadeRecipeButton_clicked()
 {
-    ui->LoadedCascadeRecipes->removeItemWidget(ui->LoadedCascadeRecipes->currentItem());
+    auto selectedRow = ui->LoadedCascadeRecipes->currentRow();
+    if (selectedRow >= 0) {
+        QListWidgetItem* itemToRemove = ui->LoadedCascadeRecipes->takeItem(selectedRow);
+        delete itemToRemove;  // This deletes the item that was removed from the QListWidget
+    }
 }
-
 
 // clear cascade recipe button
 void MainWindow::on_clear_cascade_recipe_button_clicked()
@@ -1210,13 +1216,7 @@ void MainWindow::on_loadCascadeRecipeButton_2_clicked()
         ui->LoadedCascadeRecipes->addItem(recipe);
     }
 
-    // Load button sends a LoadCasdadeRecipeSignal()
-    // TODO: connected slot takes current row and puts the name in the loaded input
-    // TODO: connected slot loaded area becomes enabled.
-    // TODO: loaded file is read and the recipes are put into box
 }
-
-
 
 void MainWindow::on_refresh_cascade_recipe_button_clicked()
 {
