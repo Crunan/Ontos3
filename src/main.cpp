@@ -4,10 +4,15 @@
 #include "logger.h"
 
 #include "ui_mainwindow.h"
+#include <qtsingleapplication.h>
 
 
 int main(int argc, char *argv[]) {
-    QApplication a(argc, argv);
+    //QApplication a(argc, argv);
+    QtSingleApplication app("OntosPlasma", argc, argv);
+
+    if (app.isRunning())
+        return 0;
 
     // these allow us to use the QSettings from multiple places in the app
     // using the default constructor
@@ -28,10 +33,10 @@ int main(int argc, char *argv[]) {
     // Create our main window
     // Contains our GUI
     MainWindow window(mainLoop);
+    app.setActivationWindow(&window);
     window.show();
 
-    //end program
-    bool state = a.exec();
+    bool state = app.exec();
     return state;
 }
 

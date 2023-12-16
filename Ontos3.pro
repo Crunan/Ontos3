@@ -1,11 +1,15 @@
 QT += core gui widgets serialport statemachine
 
-VERSION = 01.00.08
+VERSION = 01.00.09
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
 greaterThan(QT_MAJOR_VERSION, 4)
 
 CONFIG += c++17
+
+DEFINES += PATH=\\\"$$PWD\\\"
+
+include(qtsingleapplication/src/qtsingleapplication.pri)
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
