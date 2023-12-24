@@ -71,7 +71,7 @@ bool SerialInterface::sendCommand(QString command)
         // record command for logging purposes
         m_lastSerialCommand = command;
 
-        Logger::logDebug("AxesController::sendCommand: " + command);
+        Logger::logDebug("sendCommand: " + command);
 
         return true;
     }
@@ -100,7 +100,7 @@ QString SerialInterface::readResponse()
                 // check the watchdog timer
                 if (m_serialWatchdogTriggered) {
                     m_pSerialWatchdogTimer->stop();
-                    Logger::logDebug("AxesController::readResponse() watchdog triggered....bailing");
+                    Logger::logDebug("readResponse() watchdog triggered....bailing");
                     Logger::logInfo("Comms error: " + m_lastSerialCommand);
                     return 0; // get out if timed out
                 }
