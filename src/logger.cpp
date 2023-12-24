@@ -27,7 +27,7 @@ void Logger::init()
     
     //Create log file
     logFile = new QFile;
-    logFile->setFileName(LOG_DIRECTORY + "Log" + fileTimestamp + ".log");
+    logFile->setFileName(QString(LOG_DIRECTORY) + "Log" + fileTimestamp + ".log");
     logFile->open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
 
 #ifndef QT_DEBUG

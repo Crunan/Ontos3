@@ -1,11 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-// redundant #pragma once
-
 #include "grblcontroller.h"
 #include "mainloop.h"
-#include "commandfilereader.h"
 #include "settingsdialog.h"
 #include "logger.h"
 #include "plasmacontroller.h"
@@ -54,6 +51,7 @@ public slots:
     void openRecipeWindowMFC();
     void stageStatusUpdate(QString statusNow, QString statusNext);
     void showAbortMessageBox(QString message);
+    void batchIDLoggingIsActive();
 
     // Serial Port
     void openMainPort();
@@ -108,7 +106,6 @@ public slots:
     void SSM_Started();
     void SSM_Done();
     void SSM_StatusUpdate(QString status, QString next);
-    //void recipeExecutionStateChanged(bool state);
     void scanBoxChanged();
     void userEnteredPassword();
 
@@ -164,6 +161,7 @@ private slots:
     void on_heater_checkbox_clicked(bool checked);
     void on_batchIDButton_clicked();
     void on_refresh_cascade_recipe_button_clicked();
+    void on_horizontalSlider_sliderReleased();
 
 private:
     // Action Button methods
@@ -195,6 +193,9 @@ private:
     // persistent settings
     void readSettings();
 
+    // determine if there is a 3 axis board attached
+    void has3Axis();
+
     // helpers
     void RunStartup();
     void RunStatusPolling();
@@ -202,6 +203,7 @@ private:
     void loadConfigGUI(QStringList value);
     void setupMainStateMachine();
     void UpdateStatus();
+    void showStageControls(bool show);
 
     void AxisStatusToUI();
     void RecipeToUI();
@@ -215,7 +217,7 @@ private:
     PlasmaController m_mainCTL;
     QSettings m_persistentSettings;
 
-    CommandFileReader m_commandFileReader;
+    bool m_has3AxisBoard;
 
     Configuration m_config;
     bool m_engineeringMode;

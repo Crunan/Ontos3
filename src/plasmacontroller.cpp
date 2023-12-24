@@ -11,11 +11,10 @@ int ledStatusLast = 0;
 
 PlasmaController::PlasmaController(QWidget* parent)
   : QObject(parent),
-    m_mfcs({ new MFC(1), new MFC(2), new MFC(3), new MFC(4) }),
+    m_mfcs({ new MFC(1), new MFC(2), new MFC(3), new MFC(4), new MFC(5), new MFC(6) }),
     m_lightTower(),
     m_pSerialInterface(new SerialInterface()),
     m_config(),
-    m_commandMap(),
     m_stageCTL(),
     m_waferDiameter(),
     m_pRecipe(new PlasmaRecipe()),
@@ -38,7 +37,6 @@ PlasmaController::PlasmaController(QWidget* parent)
     m_startYPosition(0.0),
     m_scanYSpeed(0.0),
     m_scanEndYPosition(0.0),
-    m_batchLogging(0),
     m_ledStatus(0),
     m_abort(false),
     m_estopActive(false),
@@ -630,8 +628,6 @@ bool PlasmaController::open(const SettingsDialog& settings)
         return false;
     }
 
-    //emit mainPortOpened();
-
     return true;
 }
 
@@ -651,18 +647,6 @@ QString PlasmaController::readResponse()
 {
     return m_pSerialInterface->readResponse();
 }
-
-void PlasmaController::setCommandMap(const QMap<QString, QPair<QString, QString>>& map)
-{
-    m_commandMap.setCommandMap(map);
-}
-
-
-QString PlasmaController::findCommandValue(QString command) const
-{
-    return m_commandMap.findCommandValue(command);
-}
-
 
 MFC* PlasmaController::findMFCByNumber(int mfcNumber)
 {
@@ -693,7 +677,7 @@ int PlasmaController::parseResponseForNumberOfMFCs(QString& response)
     QString numMFCsStr = response.mid(1, numMFCIndex - 1);
 
     // Convert the MFC number to an integer
-    int numMFCs = numMFCsStr.toInt();    void on_actionStart_Stage_Test_toggled(bool arg1);
+    int numMFCs = numMFCsStr.toInt();
 
     // Output the extracted data (for demonstration purposes)
     qDebug() << "Number of MFC's:" << numMFCs;
@@ -725,6 +709,39 @@ void PlasmaController::runDiameter()
 
     // trigger a ui update
     emit scanBoxChanged();
+}
+
+void PlasmaController::setLEDLightIntensity(int percent)
+{
+    //$C9pp.p% resp[!C9pp.p#] Percent power to Illumination
+    QString LEDCommand = "$C9" + QString::number(percent) + ".0%";
+    sendCommand(LEDCommand);
+    readResponse();
+}
+
+bool PlasmaController::has3Axis()
+{
+    bool returnVal = true;
+    sendCommand("$22000D%");
+    QString response = readResponse();
+    //response = "$22000D0%";
+    if (response.length() > 8) {
+        QString StrVar = response.mid(7, 1);
+        returnVal = QVariant(StrVar).toBool();
+    }
+    return returnVal;
+}
+
+void PlasmaController::handshakeOn(bool on)
+{
+    if (on) {
+        sendCommand("$1E01%");
+        readResponse();
+    }
+    else {
+        sendCommand("$1E00%");
+        readResponse();
+    }
 }
 
 QString PlasmaController::getPortErrorString()
@@ -887,7 +904,7 @@ void PlasmaController::plasmaStatus()
         }
     }
     else {
-        Logger::logCritical("Cannot find config file entry for: " + CONFIG_PLASMA_STATUS_BIT);
+        Logger::logCritical("Cannot find config file entry for: " + QString(CONFIG_PLASMA_STATUS_BIT));
     }
 }
 
@@ -909,7 +926,7 @@ void PlasmaController::estopStatus()
         }
     }
     else {
-        Logger::logCritical("Cannot find config file entry for: " + CONFIG_ESTOP_STATUS_BIT);
+        Logger::logCritical("Cannot find config file entry for: " + QString(CONFIG_ESTOP_STATUS_BIT));
     }
 }
 
@@ -937,7 +954,7 @@ void PlasmaController::abortStatus()
         }
     }
     else {
-        Logger::logCritical("Cannot find config file entry for: " + CONFIG_ABORT_STATUS_BIT);
+        Logger::logCritical("Cannot find config file entry for: " + QString(CONFIG_ABORT_STATUS_BIT));
     }
 }
 
@@ -984,11 +1001,6 @@ void PlasmaController::parseResponseForCTLStatus(const QString& response)
     bool ok;
     m_ledStatus = ledStatusHex.toInt(&ok, 16);
     if (ok) {
-        // log it if needed
-        /*if (m_ledStatus != ledStatusLast) {
-            Logger::logInfo("Status Bits Change from " + QString::number(ledStatusLast, 2) + " to " + QString::number(m_ledStatus, 2));
-            ledStatusLast = m_ledStatus;
-        }*/
         // update
         plasmaStatus();
         estopStatus();
@@ -1119,7 +1131,7 @@ void PlasmaController::setRFSetpointFromRecipe()
     }
     else {
         // Handle the case when "PWR" key is not found in the recipe map
-        Logger::logWarning(RECIPE_PWR_KEY + " setpoint not found in recipe map.");
+        Logger::logWarning(QString(RECIPE_PWR_KEY) + " setpoint not found in recipe map.");
     }
 }
 
@@ -1131,32 +1143,33 @@ void PlasmaController::setTunerSetpointFromRecipe()
     }
     else {
         // Handle the case when "TUNER" key is not found in the recipe map
-        Logger::logWarning(RECIPE_TUNER_KEY + " setpoint not found in recipe map.");
+        Logger::logWarning(QString(RECIPE_TUNER_KEY) + " setpoint not found in recipe map.");
     }
 }
 
-void PlasmaController::CTLStartup()
+void PlasmaController::CTLStartup(bool has3AxisBoard)
 {
     getFirmwareVersion();
     howManyMFCs();
-    getBatchIDLogging();
-    getMFC4Range();
-    getMFC3Range();
-    getMFC2Range();
+    getBatchIDLoggingActive();
     getMFC1Range();
+    getMFC2Range();
+    getMFC3Range();
+    getMFC4Range();
+    getMFC5Range();
+    getMFC6Range();
+    getMFCRecipeFlow();
     getRecipeMBPosition();
-    getRecipeRFPower();
-    getRecipeMFC4Flow();
-    getRecipeMFC3Flow();
-    getRecipeMFC2Flow();
-    getRecipeMFC1Flow();
+    getRecipeRFPower();   
     getMaxRFPowerForward();
     getAutoMan();
     RunRecipe(false);
-    getPHSlitLength();
-    getPHSlitWidth();
-    getPHSafetyGap();
     getTemp();
+    if (has3AxisBoard) { // these commands go to the three axis board so suppress them if no board attached
+        getPHSlitLength();
+        getPHSlitWidth();
+        getPHSafetyGap();
+    }
 }
 
 void PlasmaController::resetCTL()
@@ -1232,14 +1245,14 @@ void PlasmaController::heaterOn(bool state)
 
 void PlasmaController::howManyMFCs()
 {
-    sendCommand("$2A002%");
+    sendCommand("$220009%");
     QString response = readResponse();
-    if (response.length() > 7) {
-        QString StrVar = response.mid(7,1); //GET Number of MFCs (1-4) $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
+    if (response.length() > 8) {
+        QString StrVar = response.mid(8,1);
         bool ok = false;
         int numMFCs = StrVar.toInt(&ok);
         if (ok) {
-            // resize the MFC qlist
+            // resize (shrink) the MFC qlist if needed
             m_mfcs.resize(numMFCs);
             Logger::logInfo("Number of MFC's: " + StrVar + "");
         }
@@ -1248,75 +1261,30 @@ void PlasmaController::howManyMFCs()
         Logger::logCritical("Could Not set # of MFCs, last requestData: " + getLastCommand());
 }
 
-void PlasmaController::getBatchIDLogging() {
-    sendCommand("$2A011%"); //GET BatchIDLogging $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
+void PlasmaController::getBatchIDLoggingActive() {
+    sendCommand("$220011%");
     QString response = readResponse();
-    if (response.length() > 7) {
-        QString StrVar = response.mid(7, 1);
+    if (response.length() > 8) {
+        QString StrVar = response.mid(8, 1);
         bool ok = false;
         int batchLogging = StrVar.toInt(&ok);
         if (ok) {
-            m_batchLogging = batchLogging;
-            Logger::logInfo("Batch Logging On/Off: " + StrVar);
+            bool batchIDLoggingActive = QVariant(batchLogging).toBool();
+            if (batchIDLoggingActive) {
+                emit batchIDLoggingIsActive();
+            }
+            Logger::logInfo("Batch Logging active");
         }
     }
     else
         Logger::logCritical("Could Not retrieve Batch Logging, last requestData sent: " + getLastCommand());
 }
 
-void PlasmaController::getMFC4Range() {
-    sendCommand("$8504%"); //GET_MFC_RANGE $850m% 1<=m<=4; resp[!850xxx.yy#]
-    QString response = readResponse();
-    if (response.length() > 6) {
-        QString StrVar = response.mid(5, (response.length() - 6));
-        bool ok = false;
-        double mfcRange = StrVar.toDouble(&ok);
-        if (ok) {
-            m_mfcs[3]->setRange(mfcRange);
-            Logger::logInfo("Loaded MFC 4 Range: " + StrVar);
-        }
-    }
-    else
-        Logger::logCritical("Could Not retrieve MFC 4 range, last requestData sent: " + getLastCommand() );
-}
-
-void PlasmaController::getMFC3Range() {
-    sendCommand("$8503%"); //GET_MFC_RANGE $850m% 1<=m<=4; resp[!850xxx.yy#]
-    QString response = readResponse();
-    if (response.length() > 6) {
-        QString StrVar = response.mid(5, (response.length() - 6));
-        bool ok = false;
-        double mfcRange = StrVar.toDouble(&ok);
-        if (ok) {
-            m_mfcs[2]->setRange(mfcRange);
-            Logger::logInfo("Loaded MFC 3 Range: " + StrVar);
-        }
-    }
-    else
-        Logger::logCritical("Could Not retrieve MFC 3 range, last requestData sent: " + getLastCommand() );
-}
-
-void PlasmaController::getMFC2Range() {
-    sendCommand("$8502%"); //GET_MFC_RANGE $850m% 1<=m<=4; resp[!850xxx.yy#]
-    QString response = readResponse();
-    if (response.length() > 6) {
-        QString StrVar = response.mid(5, (response.length() - 6));
-        bool ok = false;
-        double mfcRange = StrVar.toDouble(&ok);
-        if (ok) {
-            m_mfcs[1]->setRange(mfcRange);
-            Logger::logInfo("Loaded MFC 2 Range: " + StrVar);
-        }
-    }
-    else
-        Logger::logCritical("Could Not retrieve MFC 2 range, last requestData sent: " + getLastCommand() );
-}
-
 void PlasmaController::getMFC1Range() {
-    sendCommand("$8501%"); //GET_MFC_RANGE $850m% 1<=m<=4; resp[!850xxx.yy#]
+    sendCommand("$22002D%");
     QString response = readResponse();
-    if (response.length() > 6) {
-        QString StrVar = response.mid(5, (response.length() - 6));
+    if (response.length() > 8) {
+        QString StrVar = response.mid(7, (response.length() - 8));
         bool ok = false;
         double mfcRange = StrVar.toDouble(&ok);
         if (ok) {
@@ -1328,10 +1296,90 @@ void PlasmaController::getMFC1Range() {
         Logger::logCritical("Could Not retrieve MFC 1 range, last requestData sent: " + getLastCommand() );
 }
 
-void PlasmaController::getRecipeMBPosition() {
-    sendCommand("$2A606%"); //GET RECIPE MB Start Position () $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
+void PlasmaController::getMFC2Range() {
+    sendCommand("$22002E%");
     QString response = readResponse();
-    if (response.length() > 7) {
+    if (response.length() > 8) {
+        QString StrVar = response.mid(7, (response.length() - 8));
+        bool ok = false;
+        double mfcRange = StrVar.toDouble(&ok);
+        if (ok) {
+            m_mfcs[1]->setRange(mfcRange);
+            Logger::logInfo("Loaded MFC 2 Range: " + StrVar);
+        }
+    }
+    else
+        Logger::logCritical("Could Not retrieve MFC 2 range, last requestData sent: " + getLastCommand() );
+}
+
+void PlasmaController::getMFC3Range() {
+    sendCommand("$22002F%");
+    QString response = readResponse();
+    if (response.length() > 8) {
+        QString StrVar = response.mid(7, (response.length() - 8));
+        bool ok = false;
+        double mfcRange = StrVar.toDouble(&ok);
+        if (ok) {
+            m_mfcs[2]->setRange(mfcRange);
+            Logger::logInfo("Loaded MFC 3 Range: " + StrVar);
+        }
+    }
+    else
+        Logger::logCritical("Could Not retrieve MFC 3 range, last requestData sent: " + getLastCommand() );
+}
+
+void PlasmaController::getMFC4Range() {
+    sendCommand("$220030%");
+    QString response = readResponse();
+    if (response.length() > 8) {
+        QString StrVar = response.mid(7, (response.length() - 8));
+        bool ok = false;
+        double mfcRange = StrVar.toDouble(&ok);
+        if (ok) {
+            m_mfcs[3]->setRange(mfcRange);
+            Logger::logInfo("Loaded MFC 4 Range: " + StrVar);
+        }
+    }
+    else
+        Logger::logCritical("Could Not retrieve MFC 4 range, last requestData sent: " + getLastCommand() );
+}
+
+void PlasmaController::getMFC5Range() {
+    sendCommand("$220031%");
+    QString response = readResponse();
+    if (response.length() > 8) {
+        QString StrVar = response.mid(7, (response.length() - 8));
+        bool ok = false;
+        double mfcRange = StrVar.toDouble(&ok);
+        if (ok) {
+            m_mfcs[4]->setRange(mfcRange);
+            Logger::logInfo("Loaded MFC 5 Range: " + StrVar);
+        }
+    }
+    else
+        Logger::logCritical("Could Not retrieve MFC 5 range, last requestData sent: " + getLastCommand() );
+}
+
+void PlasmaController::getMFC6Range() {
+    sendCommand("$220032%");
+    QString response = readResponse();
+    if (response.length() > 8) {
+        QString StrVar = response.mid(7, (response.length() - 8));
+        bool ok = false;
+        double mfcRange = StrVar.toDouble(&ok);
+        if (ok) {
+            m_mfcs[5]->setRange(mfcRange);
+            Logger::logInfo("Loaded MFC 6 Range: " + StrVar);
+        }
+    }
+    else
+        Logger::logCritical("Could Not retrieve MFC 6 range, last requestData sent: " + getLastCommand() );
+}
+
+void PlasmaController::getRecipeMBPosition() {
+    sendCommand("$22003D%");
+    QString response = readResponse();
+    if (response.length() > 8) {
         QString StrVar = response.mid(7, 7);
         bool ok = false;
         double loadedSP = StrVar.toDouble(&ok);
@@ -1345,10 +1393,11 @@ void PlasmaController::getRecipeMBPosition() {
 }
 
 void PlasmaController::getRecipeRFPower() {
-    sendCommand("$2A605%"); //GET RECIPE RF PWR Setpoint (Watts) $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
+    sendCommand("$22003C%");
     QString response = readResponse();
     if (response.length() > 7) {
-        QString StrVar = response.mid(7, 4);
+        QString StrVar = response.mid(7, -1); // return all characters from position 7 to the end
+        StrVar = StrVar.removeLast(); // remove the last char
         bool ok = false;
         double rfLoadedSP = StrVar.toDouble(&ok);
         if (ok) {
@@ -1360,72 +1409,36 @@ void PlasmaController::getRecipeRFPower() {
         Logger::logCritical("Could Not retrieve RF setpoint, last requestData sent: " + getLastCommand());
 }
 
-void PlasmaController::getRecipeMFC4Flow() {
-    sendCommand("$2A604%"); //GET RECIPE MFC4 Flow (SLPM) $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
-    QString response = readResponse();
-    if (response.length() > 7) {
-        QString StrVar = response.mid(7, (response.length() - 8));
-        bool ok = false;
-        double mfcRecipeFlow = StrVar.toDouble(&ok);
-        if (ok) {
-            m_mfcs[3]->updateRecipeFlow(mfcRecipeFlow);
-            Logger::logInfo("Loaded MFC 4 Flow Rate: " + StrVar);
-        }
+void PlasmaController::getMFCRecipeFlow()
+{
+    QString response;
+    // The absolute Recipe addresses of 1-6
+    QStringList mfc  = (QStringList() << "$220036%" << "$220037%" << "$220038%" << "$220039%" << "$22003A%" << "$22003B%");
+    for (int i = 0; i < mfc.length(); i++) {
+        sendCommand(mfc.at(i));
+        response = readResponse();
+        extractMFCFlowFromResponse(i, response);
     }
-    else
-        Logger::logCritical("Could Not retrieve MFC 4 setpoint, last requestData sent: " + getLastCommand());
 }
 
-void PlasmaController::getRecipeMFC3Flow() {
-    sendCommand("$2A603%"); //GET RECIPE MFC3 Flow (SLPM) $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
-    QString response = readResponse();
-    if (response.length() > 7) {
-        QString StrVar = response.mid(7, (response.length() - 8));
+void PlasmaController::extractMFCFlowFromResponse(int mfcNum, QString response)
+{
+    if (response.length() > 8) {
+        QString parsedResponse = response.mid(7, response.length() - 9);
         bool ok = false;
-        double mfcRecipeFlow = StrVar.toDouble(&ok);
+        double mfcRecipeFlow = parsedResponse.toDouble(&ok);
         if (ok) {
-            m_mfcs[2]->updateRecipeFlow(mfcRecipeFlow);
-            Logger::logInfo("Loaded MFC 3 Flow Rate: " + StrVar);
+            m_mfcs.at(mfcNum)->updateRecipeFlow(mfcRecipeFlow);
+        }
+        else {
+            Logger::logInfo("Unable to get MFC Range: check MFC connections");
         }
     }
-    else
-        Logger::logCritical("Could Not retrieve MFC 3 setpoint, last requestData sent: " + getLastCommand() );
-}
-
-void PlasmaController::getRecipeMFC2Flow() {
-    sendCommand("$2A602%"); //GET RECIPE MFC2 Flow (SLPM) $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
-    QString response = readResponse();
-    if (response.length() > 7) {
-        QString StrVar = response.mid(7, (response.length() - 8));
-        bool ok = false;
-        double mfcRecipeFlow = StrVar.toDouble(&ok);
-        if (ok) {
-            m_mfcs[1]->updateRecipeFlow(mfcRecipeFlow);
-            Logger::logInfo("Loaded MFC 2 Flow Rate: " + StrVar);
-        }
-    }
-    else
-        Logger::logCritical("Could Not retrieve MFC 2 setpoint, last requestData sent: " + getLastCommand() );
-}
-void PlasmaController::getRecipeMFC1Flow() {
-    sendCommand("$2A601%"); //GET RECIPE MFC1 Flow (SLPM) $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
-    QString response = readResponse();
-    if (response.length() > 7) {
-        QString StrVar = response.mid(7, (response.length() - 8));
-        bool ok = false;
-        double mfcRecipeFlow = StrVar.toDouble(&ok);
-        if (ok) {
-            m_mfcs[0]->updateRecipeFlow(mfcRecipeFlow);
-            Logger::logInfo("Loaded MFC 1 Flow Rate: " + StrVar);
-        }
-    }
-    else
-        Logger::logCritical("Could Not retrieve MFC 1 setpoint, last requestData sent: " + getLastCommand() );
 }
 
 void PlasmaController::getMaxRFPowerForward()
 {
-    sendCommand("$2A705%");  //Get Max RF power forward  $2Axxx% xxxx = any length index number =>resp [!2Axxx;vv..vv#] vv..vv = value
+    sendCommand("$220017%");
     QString response = readResponse();
     if (response.length() > 7) {
         QString StrVar = response.mid(7, -1); // return all characters from position 7 to the end

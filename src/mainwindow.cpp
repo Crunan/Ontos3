@@ -20,7 +20,6 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     m_pSettings(new SettingsDialog),
     m_mainCTL(),
     m_persistentSettings(),
-    m_commandFileReader(),
     m_config(),
     m_engineeringMode(false)
 {
@@ -49,6 +48,7 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(&m_mainCTL, &PlasmaController::CSM_StatusUpdate, this, &MainWindow::CSM_StatusUpdate);
     connect(&m_mainCTL, &PlasmaController::scanBoxChanged, this, &MainWindow::scanBoxChanged);
     connect(&m_mainCTL, &PlasmaController::plasmaStateChanged, this, &MainWindow::plasmaStateChanged);
+    connect(&m_mainCTL, &PlasmaController::batchIDLoggingIsActive, this, &MainWindow::batchIDLoggingIsActive);
     connect(&m_mainCTL.getTuner(), &Tuner::recipePositionChanged, this, &MainWindow::setRecipeMBtuner);
     connect(&m_mainCTL.getTuner(), &Tuner::updateUIRecipePosition, this, &MainWindow::setRecipeMBtuner);
     connect(&m_mainCTL.getPlasmaHead(), &PlasmaHead::headTemperatureChanged, this, &MainWindow::headTemperatureChanged);
@@ -96,12 +96,8 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     // setup wafer diamter combo box
     ui->wafer_diameter->addItems(m_mainCTL.getDiameter().getWaferDiameterTextList());
 
-    // read persistent settings and update UI
-    readSettings();
-
     // Setup Recipe List for Cascade Recipes
     populateRecipeListWidgetFromDirectory(ui->listRecipes);
-
 
     // give things a little time to settle before opening the serial port
     QTimer::singleShot(50, this, &MainWindow::openMainPort);
@@ -118,6 +114,7 @@ MainWindow::~MainWindow() {
     delete m_pMainShutdownState;
     delete m_pMainLoop;
 }
+
 // show status message at the bottom on MainWindow
 void MainWindow::showStatusMessage(const QString &message)
 {
@@ -133,7 +130,6 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     Logger::clean();
 
     m_pMainLoop->stop();
-    //MainWindow::close();  // I think this makes the application hang during shutdown sometimes.  It's redundant I believe
 }
 
 // style sheets take a bit to load when starting up.
@@ -142,6 +138,9 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 // delay to handle that
 void MainWindow::showEvent(QShowEvent *)
 {
+    // hide stage controls
+    showStageControls(false);
+
     QTimer::singleShot(50, this, &MainWindow::setInitialUIState);
 }
 
@@ -162,6 +161,18 @@ void MainWindow::setInitialUIState()
     ui->y2_recipe->setText(m_mainCTL.getRecipe()->getYmaxPHQStr());
 }
 
+void MainWindow::showStageControls(bool show)
+{
+    if (show) {
+        ui->stageControlsWidget->show();
+        ui->stageStatusWidget->show();
+    }
+    else {
+        ui->stageControlsWidget->hide();
+        ui->stageStatusWidget->hide();
+    }
+}
+
 //////////////////////////////////////////////////////////////////////////////////
 // Startup/ Setup
 //////////////////////////////////////////////////////////////////////////////////
@@ -173,8 +184,12 @@ void MainWindow::readSettings()
     bool collisionSystem = m_persistentSettings.value(COLLISION_SYSTEM_ENABLED_SETTING, false).toBool();
     bool heaterEnabled = m_persistentSettings.value(HEATER_ENABLED_SETTING, false).toBool();
 
-    // update the UI
-    ui->batchID_checkBox->setChecked(batchID);
+    // update the UI components
+    if (batchID) {
+        m_mainCTL.batchIDLoggingOn(true);
+        batchIDLoggingIsActive();
+    }
+
     ui->collision_system_checkbox->setChecked(collisionSystem);
     ui->heater_checkbox->setChecked(heaterEnabled);
 }
@@ -205,6 +220,8 @@ void MainWindow::setMFCLabels()
     QString MFC2_label = m_config.getValueForKey(CONFIG_MFC2_LABEL_KEY);
     QString MFC3_label = m_config.getValueForKey(CONFIG_MFC3_LABEL_KEY);
     QString MFC4_label = m_config.getValueForKey(CONFIG_MFC4_LABEL_KEY);
+    QString MFC5_label = m_config.getValueForKey(CONFIG_MFC5_LABEL_KEY);
+    QString MFC6_label = m_config.getValueForKey(CONFIG_MFC6_LABEL_KEY);
 
     // MFC1
     if (MFC1_label != QString()) {
@@ -222,18 +239,20 @@ void MainWindow::setMFCLabels()
     if (MFC4_label != QString()) {
         ui->gas4_label->setText(MFC4_label);
     }
+    // MFC5
+    if (MFC5_label != QString()) {
+        ui->gas5_label->setText(MFC5_label);
+    }
+    // MFC6
+    if (MFC6_label != QString()) {
+        ui->gas6_label->setText(MFC6_label);
+    }
 }
 
 void MainWindow::connectMFCRecipeButton(QPushButton* button, const int& mfcNumber)
 {
     button->setProperty("MFCNumber", mfcNumber);  // Store the MFC index in the button's property
     connect(button, &QPushButton::clicked, this, &MainWindow::openRecipeWindowMFC);
-}
-
-void MainWindow::RunStartup()
-{
-    m_mainCTL.CTLStartup();
-    m_mainCTL.getAxesController().AxisStartup();
 }
 
 
@@ -243,8 +262,15 @@ void MainWindow::loadConfigGUI(QStringList value)
     ui->gas2_label->setText(value[1]);
     ui->gas3_label->setText(value[2]);
     ui->gas4_label->setText(value[3]);
+    ui->gas5_label->setText(value[4]);
+    ui->gas6_label->setText(value[5]);
 }
 
+// determine if there is a 3 axis board attached
+void MainWindow::has3Axis()
+{
+    m_has3AxisBoard = m_mainCTL.has3Axis();
+}
 
 //////////////////////////////////////////////////////////////////////////////////
 // State machine slots
@@ -430,12 +456,19 @@ void MainWindow::serialDisconnected()
 
     // stop the main state machine
     emit MSM_TransitionShutdown();
-
 }
 
 void MainWindow::serialConnected()
 {
-    m_mainCTL.getAxesController().resetAxes();
+    // determine if there is a 3 axis board in the system as soon as possible
+    has3Axis();
+
+    // show stage controls if 3 axis board is connected
+    showStageControls(m_has3AxisBoard);
+
+    if (m_has3AxisBoard) {
+        m_mainCTL.getAxesController().resetAxes(); // reset axes controller if one is connected
+    }
     m_mainCTL.resetCTL();
 
     // this handles the edge case where the board is not present
@@ -495,6 +528,9 @@ void MainWindow::setupMainStateMachine()
     m_mainStateMachine.addState(m_pMainPollingState);
     m_mainStateMachine.addState(m_pMainShutdownState);
 
+    // entry and exit connections
+    //connect(m_pMainStartupState, &QState::entered, this, &MainWindow::StartupOnEntry());
+
     // set initial state to idle
     m_mainStateMachine.setInitialState(m_pMainIdleState);
 
@@ -519,17 +555,23 @@ void MainWindow::runMainStateMachine()
         SM_PollCounter += 1;
         if (SM_PollCounter >= SM_POLL_PERIOD) {
             SM_PollCounter = 0;
-            RunStatusPolling();
-            m_mainCTL.handleAutoScan();
-            m_mainCTL.setLightTower();
-            m_mainCTL.RunDoorOpenSM();
-            m_mainCTL.getAxesController().RunInitAxesSM();
-            m_mainCTL.getAxesController().RunTwoSpotSM();
-            m_mainCTL.getAxesController().RunStageTestSM();
-            m_mainCTL.getAxesController().RunHomeAxesSM();
-            m_mainCTL.RunScanAxesSM();
-            m_mainCTL.RunCollisionSM();
-            m_mainCTL.PollForCollision();
+
+            m_mainCTL.getCTLStatusCommand();
+
+            if (m_has3AxisBoard) { // only do the below if a 3axis board is connected
+                m_mainCTL.handleAutoScan();
+                m_mainCTL.setLightTower();
+                m_mainCTL.RunDoorOpenSM();
+                m_mainCTL.getAxesController().RunInitAxesSM();
+                m_mainCTL.getAxesController().RunTwoSpotSM();
+                m_mainCTL.getAxesController().RunStageTestSM();
+                m_mainCTL.getAxesController().RunHomeAxesSM();
+                m_mainCTL.RunScanAxesSM();
+                m_mainCTL.RunCollisionSM();
+                m_mainCTL.PollForCollision();
+                m_mainCTL.getAxesController().getAxisStatus();
+                AxisStatusToUI();
+            }
         }
     }
     else if (m_mainStateMachine.configuration().contains(m_pMainIdleState)) { // in Idle state
@@ -541,11 +583,34 @@ void MainWindow::runMainStateMachine()
     }
 }
 
-void MainWindow::RunStatusPolling()
+void MainWindow::RunStartup()
 {
-    m_mainCTL.getCTLStatusCommand();
-    m_mainCTL.getAxesController().getAxisStatus();
-    AxisStatusToUI();
+    // read persistent settings and update UI
+    // do this here since the settings could trigger
+    // a command to be sent so we need the know the
+    // serial port is ready to go
+    readSettings();
+
+    m_mainCTL.CTLStartup(m_has3AxisBoard);
+
+    if (m_has3AxisBoard) {
+        m_mainCTL.getAxesController().AxisStartup();
+    }
+
+    // handshake
+    bool ok = false;
+    int handshake = m_config.getValueForKey(HANDSHAKE).toInt(&ok);
+    if (ok) {
+        if (handshake == 1) {
+            m_mainCTL.handshakeOn(true);
+        }
+        else {
+            m_mainCTL.handshakeOn(false);
+        }
+    }
+    else {
+        Logger::logCritical("Cannot find config file entry for: " + QString(HANDSHAKE));
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -786,6 +851,10 @@ void MainWindow::saveRecipe()
                     value = m_mainCTL.getMFCs()[2]->getRecipeFlowQStr();
                 else if (key == RECIPE_MFC4_KEY)
                     value = m_mainCTL.getMFCs()[3]->getRecipeFlowQStr();
+                else if (key == RECIPE_MFC5_KEY)
+                    value = m_mainCTL.getMFCs()[4]->getRecipeFlowQStr();
+                else if (key == RECIPE_MFC6_KEY)
+                    value = m_mainCTL.getMFCs()[5]->getRecipeFlowQStr();
                 else if (key == RECIPE_PWR_KEY)
                     value = m_mainCTL.getPower().getRecipeWattsQStr();
                 else if (key == RECIPE_TUNER_KEY)
@@ -887,6 +956,32 @@ void MainWindow::updateRecipeFlow(const int mfcNumber, const double recipeFlow)
 
        // set the dashboard and plasma tab edit box below the progress bar
        ui->gas4_recipe_SLPM->setText(QString::number(recipeFlow, 'f', 2));
+    }
+    else if (mfcNumber == 5) {
+       // set vertical progress bar
+       double range = m_mainCTL.findMFCByNumber(5)->getRange();
+       int percentage = 0;
+       if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
+       ui->gas5_sliderBar->setValue(int(percentage));
+
+       // set dashboard and plasma tab recipe edit box
+       ui->mfc5_recipe->setText(QString::number(recipeFlow, 'f', 2));
+
+       // set the dashboard and plasma tab edit box below the progress bar
+       ui->gas5_recipe_SLPM->setText(QString::number(recipeFlow, 'f', 2));
+    }
+    else if (mfcNumber == 6) {
+       // set vertical progress bar
+       double range = m_mainCTL.findMFCByNumber(6)->getRange();
+       int percentage = 0;
+       if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
+       ui->gas6_sliderBar->setValue(int(percentage));
+
+       // set dashboard and plasma tab recipe edit box
+       ui->mfc6_recipe->setText(QString::number(recipeFlow, 'f', 2));
+
+       // set the dashboard and plasma tab edit box below the progress bar
+       ui->gas6_recipe_SLPM->setText(QString::number(recipeFlow, 'f', 2));
     }
 }
 
@@ -1063,6 +1158,36 @@ void MainWindow::actualFlowChanged(const int mfcNumber, const double actualFlow)
        // set the dashboard and plasma tab edit box below the progress bar
        ui->gas4_actual_SLPM->setText(QString::number(actualFlow));
     }
+    else if (mfcNumber == 5) {
+       // set vertical progress bar
+       double range = m_mainCTL.findMFCByNumber(5)->getRange();
+       int percentage = 0;
+       if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
+
+       // update the progress bar
+       if (percentage > 5) {// progress bars don't look right when value is less than 5
+           ui->gas5ProgressBar->setValue(int(percentage));
+       } else
+           ui->gas5ProgressBar->setValue(0);
+
+       // set the dashboard and plasma tab edit box below the progress bar
+       ui->gas5_actual_SLPM->setText(QString::number(actualFlow));
+    }
+    else if (mfcNumber == 6) {
+       // set vertical progress bar
+       double range = m_mainCTL.findMFCByNumber(6)->getRange();
+       int percentage = 0;
+       if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
+
+       // update the progress bar
+       if (percentage > 5) {// progress bars don't look right when value is less than 5
+           ui->gas6ProgressBar->setValue(int(percentage));
+       } else
+           ui->gas6ProgressBar->setValue(0);
+
+       // set the dashboard and plasma tab edit box below the progress bar
+       ui->gas6_actual_SLPM->setText(QString::number(actualFlow));
+    }
 }
 
 void MainWindow::userEnteredPassword()
@@ -1108,7 +1233,7 @@ void MainWindow::populateRecipeListWidgetFromDirectory(QListWidget* listWidget)
 
     if (!directory.exists()) {
         // Handle the case where the directory doesn't exist
-        QMessageBox::information(this, "Error", "Directory: " + RECIPE_DIRECTORY + " does not exist");
+        QMessageBox::information(this, "Error", "Directory: " + QString(RECIPE_DIRECTORY) + " does not exist");
         qDebug() << "Directory does not exist: " << RECIPE_DIRECTORY;
         return;
     }
@@ -1216,14 +1341,12 @@ void MainWindow::on_loadCascadeRecipeButton_clicked()
 
                 // the first recipe in the list get's installed into the system
                 if (firstRecipe) {
-                    installRecipe(RECIPE_DIRECTORY + "/" + line);
+                    installRecipe(QString(RECIPE_DIRECTORY) + "/" + line);
                     firstRecipe = false;
                     
                     // set the cascade recipe index to 1
                     m_mainCTL.getRecipe()->resetCascadeIndex();
                 }
-
-
             }
 
             // update the cascade Recipe Field
@@ -1294,12 +1417,12 @@ void MainWindow::loadCascadeRecipe()
     if (currentCascadeIndex < numCascadeRecipes) { // load next recipe in the list
        QString recipeName = m_mainCTL.getRecipe()->getCascadeRecipeList().at(currentCascadeIndex);
 
-       installRecipe(RECIPE_DIRECTORY + "/" + recipeName);
+       installRecipe(QString(RECIPE_DIRECTORY) + "/" + recipeName);
     }
     else { // we are done so install the first recipe in case user wants to run again
        QString recipeName = m_mainCTL.getRecipe()->getCascadeRecipeList().at(0);
 
-       installRecipe(RECIPE_DIRECTORY + "/" + recipeName);
+       installRecipe(QString(RECIPE_DIRECTORY) + "/" + recipeName);
 
        // and reset our index in case the user wants to run the list again
        m_mainCTL.getRecipe()->resetCascadeIndex();
@@ -1386,7 +1509,6 @@ void MainWindow::on_Joystick_button_toggled(bool checked)
     }
 }
 
-
 // diameter button on dashboard
 void MainWindow::on_diameter_button_clicked()
 {
@@ -1425,7 +1547,6 @@ void MainWindow::on_wafer_diameter_currentIndexChanged(int index)
         ui->wafer_diameter->setCurrentIndex(comboboxCurrentIndex);
     }
 }
-
 
 // vacuum button on dashboard
 void MainWindow::on_vac_button_toggled(bool checked)
@@ -1529,7 +1650,6 @@ void MainWindow::on_loadSpeedButton_clicked()
     }
 }
 
-
 // cycles button on dashboard
 void MainWindow::on_load_cycles_clicked()
 {
@@ -1543,7 +1663,6 @@ void MainWindow::on_load_cycles_clicked()
         }
     }
 }
-
 
 // open recipe button
 void MainWindow::on_loadRecipeButton_clicked()
@@ -1605,7 +1724,6 @@ void MainWindow::on_loadAutoTuneButton_clicked()
     }
 }
 
-
 void MainWindow::on_load_autoscan_clicked()
 {
     QStringList items;
@@ -1657,7 +1775,6 @@ void MainWindow::on_x2_set_clicked()
         }
     }
 }
-
 
 void MainWindow::on_y1_set_clicked()
 {
@@ -1904,6 +2021,17 @@ void MainWindow::on_actionTest_Z_toggled(bool arg1)
     m_mainCTL.getAxesController().setTestZ(arg1);
 }
 
+// slot from PlasmaController
+void MainWindow::batchIDLoggingIsActive()
+{
+    ui->batchID_checkBox->setChecked(true);
+
+    // save the setting
+    m_persistentSettings.setValue(BATCHID_ENABLED_SETTING, true);
+
+    batchIDEnabled();
+}
+
 // batch ID system enabled
 void MainWindow::on_batchID_checkBox_clicked(bool checked)
 {
@@ -1965,4 +2093,9 @@ void MainWindow::on_batchIDButton_clicked()
     }
 }
 
+void MainWindow::on_horizontalSlider_sliderReleased()
+{
+    int position = ui->horizontalSlider->value();
+    m_mainCTL.setLEDLightIntensity(position);
+}
 

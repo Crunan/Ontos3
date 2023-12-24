@@ -24,8 +24,6 @@ SOURCES += \
     src/serialinterface.cpp \
     src/axescontroller.cpp \
     src/axis.cpp \
-    src/commandfilereader.cpp \
-    src/commandmap.cpp \
     src/configuration.cpp \
     src/filereader.cpp \
     src/grblcontroller.cpp \
@@ -50,8 +48,6 @@ HEADERS += \
     src/diameter.h \
     src/axescontroller.h \
     src/axis.h \
-    src/commandfilereader.h \
-    src/commandmap.h \
     src/configuration.h \
     src/diameter.h \
     src/filereader.h \

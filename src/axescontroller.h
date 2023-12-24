@@ -114,7 +114,6 @@ public:
 signals:
 
     void stageStatusUpdate(QString status1, QString status2);
-    //void stageResponseReceived(QString resonse);
 
     // init state machine UI updating signals
     void initSMStartup();
@@ -173,12 +172,6 @@ signals:
     void xLimitsChanged(double xmin, double xmax);
     void yLimitsChanged(double ymin, double ymax);
 
-private slots:
-    // state machine on entry handlers
-    //void InitIdleOnEntry();
-    //void TwoSpotIdleOnEntry();
-    //void HomeIdleOnEntry();
-
 private:
     // status bit parsers
     void doorsStatus();
@@ -187,6 +180,7 @@ private:
     void N2PurgeStatus();
 
     // command wrappers.
+    void getFirmwareVersion();
     void getXMaxSpeed();
     void getYMaxSpeed();
     void getZMaxSpeed();

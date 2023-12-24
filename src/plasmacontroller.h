@@ -3,7 +3,6 @@
 
 #include "plasmarecipe.h"
 #include "axescontroller.h"
-#include "commandmap.h"
 #include "plasmahead.h"
 #include "pwr.h"
 #include "tuner.h"
@@ -34,10 +33,6 @@ public:
     QString getPortErrorString();
     bool isOpen();
 
-    // Commands Map functions.  Currently not used but may be used when implementing gerber files
-    void setCommandMap(const QMap<QString, QPair<QString, QString>>& map);
-    QString findCommandValue(QString command) const;
-
     // Poll Commands
     void getCTLStatusCommand();
     void handleAutoScan();
@@ -52,9 +47,12 @@ public:
     MFC* findMFCByNumber(int mfcNumber);
     int numberOfMFCs();
     void runDiameter();
+    void setLEDLightIntensity(int percent);
+    bool has3Axis();
+    void handshakeOn(bool on);
 
     // startup and reset
-    void CTLStartup();
+    void CTLStartup(bool has3AxisBoard);
     void resetCTL();
 
     // state machines
@@ -111,6 +109,7 @@ signals:
     void plasmaStateChanged(bool plasmaActive);
     void setRecipeMBtuner(QString MBtunerSP);
     void setRecipeRFpower(QString RFpowerSP);
+    void batchIDLoggingIsActive();
 
     // scan state machine transitions
     void SSM_TransitionStartup();
@@ -178,17 +177,17 @@ private:
     // query the controller
     void getFirmwareVersion();
     void howManyMFCs();
-    void getBatchIDLogging();
-    void getMFC4Range();
-    void getMFC3Range();
-    void getMFC2Range();
+    void getBatchIDLoggingActive();
     void getMFC1Range();
+    void getMFC2Range();
+    void getMFC3Range();
+    void getMFC4Range();
+    void getMFC5Range();
+    void getMFC6Range();
     void getRecipeMBPosition();
     void getRecipeRFPower();
-    void getRecipeMFC4Flow();
-    void getRecipeMFC3Flow();
-    void getRecipeMFC2Flow();
-    void getRecipeMFC1Flow();
+    void getMFCRecipeFlow();
+    void extractMFCFlowFromResponse(int mfcNum, QString response);
     void getMaxRFPowerForward();
     void getAutoMan();
     void getPHSlitLength();
@@ -207,8 +206,6 @@ private:
     SerialInterface *m_pSerialInterface;
 
     Configuration m_config;
-
-    CommandMap m_commandMap;
     AxesController m_stageCTL;
     Diameter m_waferDiameter;
     PlasmaRecipe *m_pRecipe;
@@ -272,7 +269,6 @@ private:
     double m_startYPosition;
     double m_scanYSpeed;
     double m_scanEndYPosition;
-    int m_batchLogging;
     // from status bits
     int m_ledStatus;
     bool m_abort;

@@ -18,30 +18,15 @@ public:
         AC_NO_GAS_2     = 4,
         AC_NO_GAS_3     = 5,
         AC_NO_GAS_4     = 6,
-        AC_BAD_HELIUM   = 7,
-        AC_ESTOP        = 8,
-        AC_DOORS_OPEN   = 9,
-        AC_PWR_FWD_LOW  = 10,
-        AC_OVER_TEMP    = 11,
-        AC_NO_CDA       = 12,
+        AC_NO_GAS_5     = 7,
+        AC_NO_GAS_6     = 8,
+        AC_BAD_HELIUM   = 9,
+        AC_ESTOP        = 10,
+        AC_DOORS_OPEN   = 11,
+        AC_PWR_FWD_LOW  = 12,
+        AC_OVER_TEMP    = 13,
+        AC_NO_CDA       = 14,
     };
-
-// rev 13?  No idea....
-//    Public Enum AbortCode
-//        AC_OK = &H0
-//              AC_NO_N2 = &H1
-//              AC_NO_HEARTBEAT = &H2
-//              AC_NO_GAS_1 = &H3
-//              AC_NO_GAS_2 = &H4
-//              AC_NO_GAS_3 = &H5
-//              AC_NO_GAS_4 = &H6
-//              AC_BAD_HELIUM = &H7
-//              AC_ESTOP = &H8
-//              AC_DOORS_OPEN = &H9
-//              AC_PWR_FWD_LOW = &HA
-//              AC_OVER_TEMP = &HB
-//              AC_NO_CDA = &HC
-//              End Enum
 
     explicit AbortCodeMessages(QObject *parent = nullptr);
 

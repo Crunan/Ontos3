@@ -345,12 +345,6 @@ void AxesController::RunInitAxesSM()
         emit ISM_TransitionIdle();
     }
 }
-/*
-void AxesController::InitIdleOnEntry()
-{
-    //  update the UI
-    //emit setUIInitSMDone();
-}*/
 
 void AxesController::RunHomeAxesSM()
 {
@@ -560,13 +554,6 @@ void AxesController::RunTwoSpotSM()
         // no op
     }
 }
-
-/*
-void AxesController::TwoSpotIdleOnEntry()
-{
-    // updat the UI
-    //emit setUITwoSpotSMDone();
-}*/
 
 void AxesController::RunStageTestSM()
 {
@@ -826,12 +813,13 @@ void AxesController::sendInitCMD()
 
 void AxesController::AxisStartup()
 {
-    getXMaxSpeed();
-    getYMaxSpeed();
-    getZMaxSpeed();
+    getFirmwareVersion();
     getXMaxPosition();
     getYMaxPosition();
     getZMaxPosition();
+    getXMaxSpeed();
+    getYMaxSpeed();
+    getZMaxSpeed();
     getXp2Base();
     getYp2Base();
     getZp2Base();
@@ -932,7 +920,6 @@ void AxesController::checkAndLogAxesStatusChange()
             // log the new position
             Logger::logInfo(QString("Stage Xpos: %1 Ypos: %2 Zpos: %3").
                             arg(m_Xaxis.getPositionQStr(), m_Yaxis.getPositionQStr(), m_Zaxis.getPositionQStr()));
-
         }
     }
     else {
@@ -959,7 +946,7 @@ void AxesController::doorsStatus()
         }
     }
     else {
-        Logger::logCritical("Cannot find config file entry for: " + CONFIG_DOOR_STATUS_BIT);
+        Logger::logCritical("Cannot find config file entry for: " + QString(CONFIG_DOOR_STATUS_BIT));
     }
 }
 
@@ -983,7 +970,7 @@ void AxesController::joyBtnStatus()
         }
     }
     else {
-        Logger::logCritical("Cannot find config file entry for: " + CONFIG_JOY_STATUS_BIT);
+        Logger::logCritical("Cannot find config file entry for: " + QString(CONFIG_JOY_STATUS_BIT));
     }
 }
 
@@ -1007,7 +994,7 @@ void AxesController::vacStatus()
         }
     }
     else {
-        Logger::logCritical("Cannot find config file entry for: " + CONFIG_VAC_STATUS_BIT);
+        Logger::logCritical("Cannot find config file entry for: " + QString(CONFIG_VAC_STATUS_BIT));
     }
 }
 
@@ -1017,7 +1004,9 @@ void AxesController::N2PurgeStatus()
     int bit = m_config.getValueForKey(CONFIG_N2PURGE_STATUS_BIT).toInt(&ok);
 
     if (ok) {
-        m_N2PurgeOn = isBitSet(m_LEDstates, bit);
+        m_N2PurgeOn = isBitSet(m_LEDstates, bit);    getXMaxPosition();
+        getYMaxPosition();
+        getZMaxPosition();
 
         if (m_N2PurgeOn != N2OnLast) {
             N2OnLast = m_N2PurgeOn;
@@ -1026,12 +1015,14 @@ void AxesController::N2PurgeStatus()
                 Logger::logInfo("N2 Purge : enabled");
             else
                 Logger::logInfo("N2 Purge : disabled");
-
+            getXMaxPosition();
+            getYMaxPosition();
+            getZMaxPosition();
             emit n2StateChanged(m_N2PurgeOn);
         }
     }
     else {
-        Logger::logCritical("Cannot find config file entry for: " + CONFIG_N2PURGE_STATUS_BIT);
+        Logger::logCritical("Cannot find config file entry for: " + QString(CONFIG_N2PURGE_STATUS_BIT));
     }
 }
 
@@ -1075,6 +1066,16 @@ void AxesController::stopAllMotors()
 {
     sendCommand("$B3%"); // stop any motors in motion
     readResponse();
+}
+
+void AxesController::getFirmwareVersion()
+{
+    sendCommand("$A1%"); //GET FW VERSION $A1% resp[!A1xx#]; xx = hard coded FW rev in Hex
+    QString response = readResponse();
+    if (response.length() > 3) {
+        QString strVar = response.mid(3, 2);
+        Logger::logInfo("AUX Firmware Version: " + strVar);
+    }
 }
 
 void AxesController::getXMaxSpeed()

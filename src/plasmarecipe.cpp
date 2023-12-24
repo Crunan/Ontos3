@@ -28,6 +28,8 @@ void PlasmaRecipe::initializeMap()
     m_recipeMap.insert(RECIPE_MFC2_KEY, 0);
     m_recipeMap.insert(RECIPE_MFC3_KEY, 0);
     m_recipeMap.insert(RECIPE_MFC4_KEY, 0);
+    m_recipeMap.insert(RECIPE_MFC5_KEY, 0);
+    m_recipeMap.insert(RECIPE_MFC6_KEY, 0);
     m_recipeMap.insert(RECIPE_PWR_KEY, 0);
     m_recipeMap.insert(RECIPE_TUNER_KEY, 0);
     m_recipeMap.insert(RECIPE_THICKNESS_KEY, 1.0);

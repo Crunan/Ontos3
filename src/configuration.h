@@ -7,23 +7,26 @@
 #include <QStringList>
 #include <QObject>
 
-const QString CONFIG_DIRECTORY_NAME = "/opt/OTT_PLUS/config";
-const QString CONFIG_DEFAULT_FILENAME = "default.cfg";
-const QString CONFIG_MFC1_LABEL_KEY = "MFC_LABEL_1";
-const QString CONFIG_MFC2_LABEL_KEY = "MFC_LABEL_2";
-const QString CONFIG_MFC3_LABEL_KEY = "MFC_LABEL_3";
-const QString CONFIG_MFC4_LABEL_KEY = "MFC_LABEL_4";
-const QString CONFIG_COM_PORT_KEY = "SERIAL_PORT";
-const QString CONFIG_PASSWORD_KEY = "PW";
+static const char CONFIG_DIRECTORY_NAME[] = "/opt/OTT_PLUS/config";
+static const char CONFIG_DEFAULT_FILENAME[] = "default.cfg";
+static const char CONFIG_MFC1_LABEL_KEY[] = "MFC_LABEL_1";
+static const char CONFIG_MFC2_LABEL_KEY[] = "MFC_LABEL_2";
+static const char CONFIG_MFC3_LABEL_KEY[] = "MFC_LABEL_3";
+static const char CONFIG_MFC4_LABEL_KEY[] = "MFC_LABEL_4";
+static const char CONFIG_MFC5_LABEL_KEY[] = "MFC_LABEL_5";
+static const char CONFIG_MFC6_LABEL_KEY[] = "MFC_LABEL_6";
+static const char CONFIG_COM_PORT_KEY[] = "SERIAL_PORT";
+static const char CONFIG_PASSWORD_KEY[] = "PW";
+static const char HANDSHAKE[] = "HANDSHAKE";
 // axis CTL
-const QString CONFIG_DOOR_STATUS_BIT = "DOOR_STATUS_BIT";
-const QString CONFIG_N2PURGE_STATUS_BIT = "N2_PURGE_STATUS_BIT";
-const QString CONFIG_VAC_STATUS_BIT = "VAC_STATUS_BIT";
-const QString CONFIG_JOY_STATUS_BIT = "JOY_STATUS_BIT";
+static const char CONFIG_DOOR_STATUS_BIT[] = "DOOR_STATUS_BIT";
+static const char CONFIG_N2PURGE_STATUS_BIT[] = "N2_PURGE_STATUS_BIT";
+static const char CONFIG_VAC_STATUS_BIT[] = "VAC_STATUS_BIT";
+static const char CONFIG_JOY_STATUS_BIT[] = "JOY_STATUS_BIT";
 // OTT CTL
-const QString CONFIG_PLASMA_STATUS_BIT = "PLASMA_STATUS_BIT";
-const QString CONFIG_ESTOP_STATUS_BIT = "ESTOP_STATUS_BIT";
-const QString CONFIG_ABORT_STATUS_BIT = "ABORT_STATUS_BIT";
+static const char CONFIG_PLASMA_STATUS_BIT[] = "PLASMA_STATUS_BIT";
+static const char CONFIG_ESTOP_STATUS_BIT[] = "ESTOP_STATUS_BIT";
+static const char CONFIG_ABORT_STATUS_BIT[] = "ABORT_STATUS_BIT";
 
 class Configuration : public QObject
 {
