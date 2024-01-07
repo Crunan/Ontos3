@@ -562,13 +562,6 @@ void AxesController::RunTwoSpotSM()
     }
 }
 
-/*
-void AxesController::TwoSpotIdleOnEntry()
-{
-    // updat the UI
-    //emit setUITwoSpotSMDone();
-}*/
-
 void AxesController::RunStageTestSM()
 {
     if (m_stageTestStateMachine.configuration().contains(m_pStageTestStartupState)) {
@@ -885,8 +878,6 @@ void AxesController::updateAxisStatus()
             m_joyButtonOn = true;
         else
             m_joyButtonOn = false;
-
-        qDebug() << "!!!!!!!!!!!!!!!!!!" << m_axisStatus;
 
         //handle LED status
         setLEDstate(m_axisStatus[0], m_axisStatus[1]);
