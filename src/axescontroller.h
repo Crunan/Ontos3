@@ -114,6 +114,7 @@ public:
 signals:
 
     void stageStatusUpdate(QString status1, QString status2);
+    void updateUIAxisStatus();
 
     // init state machine UI updating signals
     void initSMStartup();
