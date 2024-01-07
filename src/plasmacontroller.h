@@ -50,7 +50,6 @@ public:
     void setLEDStatus(int& bits);
 
     MFC* findMFCByNumber(int mfcNumber);
-    int numberOfMFCs();
     void runDiameter();
 
     // startup and reset
@@ -150,7 +149,6 @@ signals:
 
 public slots:
     // MFCs
-    int parseResponseForNumberOfMFCs(QString& responseStr);
     double handleGetMFCRecipeFlowCommand(QString& responseStr);
     void handleSetMFCRecipeFlowCommand(const int mfcNumber, const double recipeFlow);
 

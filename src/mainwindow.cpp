@@ -42,6 +42,7 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(&m_mainCTL.getAxesController(), &AxesController::joystickStateChanged, this, &MainWindow::joystickStateChanged);
     connect(&m_mainCTL.getAxesController(), &AxesController::n2StateChanged, this, &MainWindow::n2StateChanged);
     connect(&m_mainCTL.getAxesController(), &AxesController::vacStateChanged, this, &MainWindow::vacStateChanged);
+    connect(&m_mainCTL.getAxesController(), &AxesController::updateUIAxisStatus, this, &MainWindow::AxisStatusToUI);
     // ui updates from plasma controller and sub objects
     connect(&m_mainCTL, &PlasmaController::SSM_StatusUpdate, this, &MainWindow::SSM_StatusUpdate);
     connect(&m_mainCTL, &PlasmaController::SSM_Started, this, &MainWindow::SSM_Started);
@@ -622,9 +623,6 @@ void MainWindow::stageStatusUpdate(QString statusNow, QString statusNext)
     ui->axisstatus_2->setText(statusNext);
 }
 
-// Mike: this works fine but should be refactored at some point
-// This should probably come from a signal emitted from AxesController
-// instead of polling.  Look at AxesController::checkAndLogAxesStatusChange()
 void MainWindow::AxisStatusToUI()
 {
     // XAxis

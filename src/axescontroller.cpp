@@ -18,6 +18,7 @@ int LEDStatesLast = 0;
 double XposLast = 0.0;
 double YposLast = 0.0;
 double ZposLast = 0.0;
+bool axesInitializedLast = true;
 
 AxesController::AxesController(QObject *parent) :
     QObject(parent),
@@ -885,6 +886,8 @@ void AxesController::updateAxisStatus()
         else
             m_joyButtonOn = false;
 
+        qDebug() << "!!!!!!!!!!!!!!!!!!" << m_axisStatus;
+
         //handle LED status
         setLEDstate(m_axisStatus[0], m_axisStatus[1]);
 
@@ -916,27 +919,64 @@ void AxesController::updateAxisStatus()
 // currently logging positional changes only
 void AxesController::checkAndLogAxesStatusChange()
 {
-    // if position is considered valid
-    if (getXAxisState() >= AXIS_IDLE && getYAxisState() >= AXIS_IDLE && getZAxisState() >= AXIS_IDLE) {
 
-        // if any axis position has changed
-        if (m_Xaxis.getPosition() != XposLast ||
-            m_Yaxis.getPosition() != YposLast ||
-            m_Zaxis.getPosition() != ZposLast) {
+    bool axisPositionChanged = false;
+    bool axisInitStateChanged = false;
+    bool XaxisInitialized = false;
+    bool YaxisInitialized = false;
+    bool ZaxisInitialized = false;
 
-            // update positions
+    // Look for Xaxis state or position change
+    if (getXAxisState() >= AXIS_IDLE) {
+        XaxisInitialized = true;
+        if (m_Xaxis.getPosition() != XposLast) {
             XposLast = m_Xaxis.getPosition();
-            YposLast = m_Yaxis.getPosition();
-            ZposLast = m_Zaxis.getPosition();
-
-            // log the new position
-            Logger::logInfo(QString("Stage Xpos: %1 Ypos: %2 Zpos: %3").
-                            arg(m_Xaxis.getPositionQStr(), m_Yaxis.getPositionQStr(), m_Zaxis.getPositionQStr()));
-
+            axisPositionChanged = true;
         }
     }
     else {
-        m_axesInitialized = false;  // if not in a valid state we are uninitialized
+        XaxisInitialized = false;
+    }
+    // Look for Yaxis state or position change
+    if (getYAxisState() >= AXIS_IDLE) {
+        YaxisInitialized = true;
+        if (m_Yaxis.getPosition() != YposLast) {
+            YposLast = m_Yaxis.getPosition();
+            axisPositionChanged = true;
+        }
+    }
+    else {
+        XaxisInitialized = false;
+    }
+    // Look for Zaxis state or position change
+    if (getZAxisState() >= AXIS_IDLE) {
+        ZaxisInitialized = true;
+        if (m_Zaxis.getPosition() != ZposLast) {
+            ZposLast = m_Zaxis.getPosition();
+            axisPositionChanged = true;
+        }
+    }
+    else {
+        ZaxisInitialized = false;
+    }
+    // If any axis is uninitialized then unset the flag
+    if (!XaxisInitialized || !YaxisInitialized || !ZaxisInitialized) {
+        m_axesInitialized = false;
+    }
+    // look for an axes initialized change
+    if (m_axesInitialized != axesInitializedLast) {
+        axesInitializedLast = m_axesInitialized;
+        axisInitStateChanged = true;
+    }
+    // Look for an axis position change
+    if (axisPositionChanged) {
+        // log the new position
+        Logger::logInfo(QString("Stage Xpos: %1 Ypos: %2 Zpos: %3").
+                        arg(m_Xaxis.getPositionQStr(), m_Yaxis.getPositionQStr(), m_Zaxis.getPositionQStr()));
+    }
+    // trigger a ui update
+    if (axisPositionChanged || axisInitStateChanged) {
+        emit updateUIAxisStatus();
     }
 }
 

@@ -674,33 +674,6 @@ MFC* PlasmaController::findMFCByNumber(int mfcNumber)
     return nullptr;
 }
 
-int PlasmaController::numberOfMFCs()
-{
-    QString command = "$30%";
-    sendCommand(command);
-    QString response = readResponse();
-    int numMFCs = parseResponseForNumberOfMFCs(response);
-
-    return numMFCs;
-}
-
-int PlasmaController::parseResponseForNumberOfMFCs(QString& response)
-{
-    // _ $30%; resp[!300m#], m = number of MFCs
-    int numMFCIndex = 5;
-
-    // Extract the number of MFCs substring
-    QString numMFCsStr = response.mid(1, numMFCIndex - 1);
-
-    // Convert the MFC number to an integer
-    int numMFCs = numMFCsStr.toInt();    void on_actionStart_Stage_Test_toggled(bool arg1);
-
-    // Output the extracted data (for demonstration purposes)
-    qDebug() << "Number of MFC's:" << numMFCs;
-
-    return numMFCs;
-}
-
 void PlasmaController::runDiameter()
 {
     double radius =  m_waferDiameter.getCurrentWaferDiameterSelection() / 2.0;

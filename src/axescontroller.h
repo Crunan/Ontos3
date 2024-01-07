@@ -114,7 +114,7 @@ public:
 signals:
 
     void stageStatusUpdate(QString status1, QString status2);
-    //void stageResponseReceived(QString resonse);
+    void updateUIAxisStatus();
 
     // init state machine UI updating signals
     void initSMStartup();
@@ -172,12 +172,6 @@ signals:
     void vacStateChanged(bool state);
     void xLimitsChanged(double xmin, double xmax);
     void yLimitsChanged(double ymin, double ymax);
-
-private slots:
-    // state machine on entry handlers
-    //void InitIdleOnEntry();
-    //void TwoSpotIdleOnEntry();
-    //void HomeIdleOnEntry();
 
 private:
     // status bit parsers
