@@ -11,6 +11,7 @@ static const char LOG_DIRECTORY[] = "/opt/OTT_PLUS/logs/";
 static const char COLLISION_SYSTEM_ENABLED_SETTING[] = "/toolSettings/collisionSystemEnabled";
 static const char HEATER_ENABLED_SETTING[] = "/toolSettings/heaterEnabled";
 static const char BATCHID_ENABLED_SETTING[] = "/toolSettings/batchIDEnabled";
+static const char LED_LIGHT_INTENSITY[] = "/toolSettings/LEDLightIntensity";
 
 // recipe key
 static const char RECIPE_PWR_KEY[] = "PWR";

@@ -80,6 +80,7 @@ public slots:
     void connectMFCFlowBars();
     void updateRecipeFlow(const int mfcNumber, const double recipeflow);
     void actualFlowChanged(const int mfcNumber, const double actualFlow);
+    void setUINumberOfMFCs(const int numMFCs);
 
     // recipe
     void AutoTuneCheckbox_stateChanged(int value);
@@ -161,7 +162,9 @@ private slots:
     void on_heater_checkbox_clicked(bool checked);
     void on_batchIDButton_clicked();
     void on_refresh_cascade_recipe_button_clicked();
-    void on_horizontalSlider_sliderReleased();
+    void on_LEDLightControlhorizontalSlider_valueChanged(int value);
+
+    void on_plsmaBtn_clicked();
 
 private:
     // Action Button methods
@@ -200,7 +203,6 @@ private:
     void RunStartup();
     void RunStatusPolling();
     void GetExeCfg();
-    void loadConfigGUI(QStringList value);
     void setupMainStateMachine();
     void UpdateStatus();
     void showStageControls(bool show);

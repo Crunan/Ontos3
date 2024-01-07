@@ -49,6 +49,7 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(&m_mainCTL, &PlasmaController::scanBoxChanged, this, &MainWindow::scanBoxChanged);
     connect(&m_mainCTL, &PlasmaController::plasmaStateChanged, this, &MainWindow::plasmaStateChanged);
     connect(&m_mainCTL, &PlasmaController::batchIDLoggingIsActive, this, &MainWindow::batchIDLoggingIsActive);
+    connect(&m_mainCTL, &PlasmaController::setUINumberOfMFCs, this, &MainWindow::setUINumberOfMFCs);
     connect(&m_mainCTL.getTuner(), &Tuner::recipePositionChanged, this, &MainWindow::setRecipeMBtuner);
     connect(&m_mainCTL.getTuner(), &Tuner::updateUIRecipePosition, this, &MainWindow::setRecipeMBtuner);
     connect(&m_mainCTL.getPlasmaHead(), &PlasmaHead::headTemperatureChanged, this, &MainWindow::headTemperatureChanged);
@@ -133,7 +134,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 }
 
 // style sheets take a bit to load when starting up.
-// the effect is that the style sheets don't take full effect
+// the result is that the style sheets don't take full effect
 // until after the mainwindow is visible.  This creates a little
 // delay to handle that
 void MainWindow::showEvent(QShowEvent *)
@@ -183,13 +184,15 @@ void MainWindow::readSettings()
     bool batchID = m_persistentSettings.value(BATCHID_ENABLED_SETTING, false).toBool();
     bool collisionSystem = m_persistentSettings.value(COLLISION_SYSTEM_ENABLED_SETTING, false).toBool();
     bool heaterEnabled = m_persistentSettings.value(HEATER_ENABLED_SETTING, false).toBool();
+    int LEDLightIntensity = m_persistentSettings.value(LED_LIGHT_INTENSITY, 0).toInt();
 
     // update the UI components
     if (batchID) {
         m_mainCTL.batchIDLoggingOn(true);
         batchIDLoggingIsActive();
     }
-
+    // uncomment to set previous LED light intensity
+    //ui->LEDLightControlhorizontalSlider->setValue(LEDLightIntensity);
     ui->collision_system_checkbox->setChecked(collisionSystem);
     ui->heater_checkbox->setChecked(heaterEnabled);
 }
@@ -201,6 +204,8 @@ void MainWindow::connectRecipeButtons()
     connectMFCRecipeButton(ui->loadMFC2Button, 2);
     connectMFCRecipeButton(ui->loadMFC3Button, 3);
     connectMFCRecipeButton(ui->loadMFC4Button, 4);
+    connectMFCRecipeButton(ui->loadMFC5Button, 5);
+    connectMFCRecipeButton(ui->loadMFC6Button, 6);
 }
 
 void MainWindow::connectMFCFlowBars()
@@ -253,17 +258,6 @@ void MainWindow::connectMFCRecipeButton(QPushButton* button, const int& mfcNumbe
 {
     button->setProperty("MFCNumber", mfcNumber);  // Store the MFC index in the button's property
     connect(button, &QPushButton::clicked, this, &MainWindow::openRecipeWindowMFC);
-}
-
-
-void MainWindow::loadConfigGUI(QStringList value)
-{
-    ui->gas1_label->setText(value[0]);
-    ui->gas2_label->setText(value[1]);
-    ui->gas3_label->setText(value[2]);
-    ui->gas4_label->setText(value[3]);
-    ui->gas5_label->setText(value[4]);
-    ui->gas6_label->setText(value[5]);
 }
 
 // determine if there is a 3 axis board attached
@@ -477,6 +471,7 @@ void MainWindow::serialConnected()
     if (!m_mainCTL.isOpen()) return;
 
     CTLResetTimeOut = 2500ms / m_pMainLoop->getTimerInterval();
+
     // start the main state machine
     emit MSM_TransitionStartup();
 
@@ -528,9 +523,6 @@ void MainWindow::setupMainStateMachine()
     m_mainStateMachine.addState(m_pMainPollingState);
     m_mainStateMachine.addState(m_pMainShutdownState);
 
-    // entry and exit connections
-    //connect(m_pMainStartupState, &QState::entered, this, &MainWindow::StartupOnEntry());
-
     // set initial state to idle
     m_mainStateMachine.setInitialState(m_pMainIdleState);
 
@@ -540,7 +532,7 @@ void MainWindow::setupMainStateMachine()
 
 void MainWindow::runMainStateMachine()
 {
-    if (m_mainStateMachine.configuration().contains(m_pMainStartupState)) { // in Startup state
+    if (m_mainStateMachine.configuration().contains(m_pMainStartupState)) { // in Startup state        
         if (CTLResetTimeOut > 0ms) {
             CTLResetTimeOut -= 1ms;
         }
@@ -687,9 +679,6 @@ void MainWindow::stageStatusUpdate(QString statusNow, QString statusNext)
     ui->axisstatus_2->setText(statusNext);
 }
 
-// Mike: this works fine but should be refactored at some point
-// This should probably come from a signal emitted from AxesController
-// instead of polling.  Look at AxesController::checkAndLogAxesStatusChange()
 void MainWindow::AxisStatusToUI()
 {
     // XAxis
@@ -812,7 +801,7 @@ void MainWindow::installRecipe(QString sRecipeFileAndPath)
 
 void MainWindow::saveRecipe()
 {
-    // Create the directory path
+    // Create the directory pathmfc4_recipe
     QString directoryPath = RECIPE_DIRECTORY;
 
     // Create the directory if it doesn't exist
@@ -1867,6 +1856,8 @@ void MainWindow::setUIEngineerMode()
     ui->loadMFC2Button->setEnabled(true);
     ui->loadMFC3Button->setEnabled(true);
     ui->loadMFC4Button->setEnabled(true);
+    ui->loadMFC5Button->setEnabled(true);
+    ui->loadMFC6Button->setEnabled(true);
     ui->load_thick->setEnabled(true);
     ui->load_gap->setEnabled(true);
     ui->load_autoscan->setEnabled(true);
@@ -1916,6 +1907,8 @@ void MainWindow::setUIOperatorMode()
     ui->loadMFC2Button->setEnabled(false);
     ui->loadMFC3Button->setEnabled(false);
     ui->loadMFC4Button->setEnabled(false);
+    ui->loadMFC5Button->setEnabled(false);
+    ui->loadMFC6Button->setEnabled(false);
     ui->load_thick->setEnabled(false);
     ui->load_gap->setEnabled(false);
     ui->load_autoscan->setEnabled(false);
@@ -2093,9 +2086,38 @@ void MainWindow::on_batchIDButton_clicked()
     }
 }
 
-void MainWindow::on_horizontalSlider_sliderReleased()
+// configure the gasses layout according to the number of
+// MFC's returned by the main controller
+void MainWindow::setUINumberOfMFCs(const int numMFCs)
 {
-    int position = ui->horizontalSlider->value();
+    if (numMFCs == 5) { // if we have 5 MFC's hide MFC 6
+        ui->gas6_widget->hide();
+        ui->loadMFC6Button->hide();
+        ui->mfc6_recipe->hide();
+    }
+    else if (numMFCs == 4) { // if we have 4 MFC's hide MFC 5 and 6
+        ui->gas5_widget->hide();
+        ui->gas6_widget->hide();
+        ui->loadMFC6Button->hide();
+        ui->loadMFC5Button->hide();
+        ui->mfc5_recipe->hide();
+        ui->mfc6_recipe->hide();
+    }
+}
+
+// set the LED light intensity
+void MainWindow::on_LEDLightControlhorizontalSlider_valueChanged(int value)
+{
+    int position = ui->LEDLightControlhorizontalSlider->value();
     m_mainCTL.setLEDLightIntensity(position);
+
+    // save the setting
+    m_persistentSettings.setValue(LED_LIGHT_INTENSITY, position);
+}
+
+
+void MainWindow::on_plsmaBtn_clicked()
+{
+
 }
 

@@ -11,7 +11,7 @@ int ledStatusLast = 0;
 
 PlasmaController::PlasmaController(QWidget* parent)
   : QObject(parent),
-    m_mfcs({ new MFC(1), new MFC(2), new MFC(3), new MFC(4), new MFC(5), new MFC(6) }),
+    m_mfcs({ new MFC(1), new MFC(2), new MFC(3), new MFC(4), new MFC(5), new MFC(6) }), // a max of 6 mfc's
     m_lightTower(),
     m_pSerialInterface(new SerialInterface()),
     m_config(),
@@ -658,33 +658,6 @@ MFC* PlasmaController::findMFCByNumber(int mfcNumber)
     return nullptr;
 }
 
-int PlasmaController::numberOfMFCs()
-{
-    QString command = "$30%";
-    sendCommand(command);
-    QString response = readResponse();
-    int numMFCs = parseResponseForNumberOfMFCs(response);
-
-    return numMFCs;
-}
-
-int PlasmaController::parseResponseForNumberOfMFCs(QString& response)
-{
-    // _ $30%; resp[!300m#], m = number of MFCs
-    int numMFCIndex = 5;
-
-    // Extract the number of MFCs substring
-    QString numMFCsStr = response.mid(1, numMFCIndex - 1);
-
-    // Convert the MFC number to an integer
-    int numMFCs = numMFCsStr.toInt();
-
-    // Output the extracted data (for demonstration purposes)
-    qDebug() << "Number of MFC's:" << numMFCs;
-
-    return numMFCs;
-}
-
 void PlasmaController::runDiameter()
 {
     double radius =  m_waferDiameter.getCurrentWaferDiameterSelection() / 2.0;
@@ -841,15 +814,16 @@ void PlasmaController::handleSetPWRRecipeWattsCommand(const int recipeWatts)
 
 void PlasmaController::RunRecipe(const bool newRunState) // handles turning the recipe on/off
 {
+    QString response;
     if (newRunState) {
         sendCommand("$8701%"); //SET_EXEC_RECIPE  $870p% p=1 Execute Recipe, p=0 RF off, Recipe off
-        readResponse();
+        response = readResponse();
         Logger::logInfo("Execute Recipe : Enabled");
         emit recipeExecutionStateChanged(true);
     }
     else {
         sendCommand("$8700%"); //SET_EXEC_RECIPE  $870p% p=1 Execute Recipe, p=0 RF off, Recipe off
-        readResponse();
+        response = readResponse();
         Logger::logInfo("Execute Recipe : Disabled");
         emit recipeExecutionStateChanged(false);
     }
@@ -1195,7 +1169,7 @@ void PlasmaController::LaserSenseOff()
 // this replaces the collisionlaser()
 void PlasmaController::PollForCollision()
 {
-    if (m_stageCTL.getXAxisError() == 8 || // TODO: replace with symbolic constants
+    if (m_stageCTL.getXAxisError() == 8 || // TODO: replace with symbolic constantsAxisStatusToUI
         m_stageCTL.getYAxisError() == 8 ||
         m_stageCTL.getZAxisError() == 8) {
 
@@ -1248,12 +1222,13 @@ void PlasmaController::howManyMFCs()
     sendCommand("$220009%");
     QString response = readResponse();
     if (response.length() > 8) {
-        QString StrVar = response.mid(8,1);
+        QString StrVar = response.mid(7,1);
         bool ok = false;
         int numMFCs = StrVar.toInt(&ok);
         if (ok) {
             // resize (shrink) the MFC qlist if needed
             m_mfcs.resize(numMFCs);
+            emit setUINumberOfMFCs(numMFCs);
             Logger::logInfo("Number of MFC's: " + StrVar + "");
         }
     }
@@ -1265,7 +1240,7 @@ void PlasmaController::getBatchIDLoggingActive() {
     sendCommand("$220011%");
     QString response = readResponse();
     if (response.length() > 8) {
-        QString StrVar = response.mid(8, 1);
+        QString StrVar = response.mid(7, 1);
         bool ok = false;
         int batchLogging = StrVar.toInt(&ok);
         if (ok) {

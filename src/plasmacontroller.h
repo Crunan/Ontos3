@@ -45,7 +45,6 @@ public:
     void setLEDStatus(int& bits);
 
     MFC* findMFCByNumber(int mfcNumber);
-    int numberOfMFCs();
     void runDiameter();
     void setLEDLightIntensity(int percent);
     bool has3Axis();
@@ -146,10 +145,10 @@ signals:
     void loadCascadeRecipe();
 
     void scanBoxChanged();
+    void setUINumberOfMFCs(int numMFCs);
 
 public slots:
     // MFCs
-    int parseResponseForNumberOfMFCs(QString& responseStr);
     double handleGetMFCRecipeFlowCommand(QString& responseStr);
     void handleSetMFCRecipeFlowCommand(const int mfcNumber, const double recipeFlow);
 

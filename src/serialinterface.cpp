@@ -57,7 +57,6 @@ bool SerialInterface::sendCommand(QString command)
     if (commandLength> AUX_INPUT_BUFFER_MAX_SIZE) commandLength = AUX_INPUT_BUFFER_MAX_SIZE;
 
     if (m_serialPort.isOpen()) {
-        QByteArray sendData = command.toUtf8();
 
         m_serialPort.write(command.toLatin1(), commandLength);
 
