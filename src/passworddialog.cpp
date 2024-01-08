@@ -22,12 +22,12 @@ QString PasswordDialog::getUserEnteredPassword()
 void PasswordDialog::clearPassword()
 {
     m_userEnteredPassword = "";
-    ui->lineEdit->clear();
+    ui->textEdit->clear();
 }
 
 void PasswordDialog::on_buttonBox_accepted()
 {
-    m_userEnteredPassword = ui->lineEdit->text();
+    m_userEnteredPassword = ui->textEdit->toPlainText();
     emit userEnteredPassword();
 }
 

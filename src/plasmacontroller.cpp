@@ -75,14 +75,8 @@ PlasmaController::~PlasmaController()
         delete mfc;
     }
 
-    // cleanup shared serial resource
-    if (m_pSerialInterface != nullptr) {
-        if (m_pSerialInterface->isOpen()) {
-            m_pSerialInterface->close();
-        }
-        delete m_pSerialInterface;
-        m_pSerialInterface = nullptr;
-    }
+    delete m_pSerialInterface;
+    m_pSerialInterface = nullptr;
 
     delete m_pRecipe;
 
@@ -985,7 +979,8 @@ void PlasmaController::parseResponseForCTLStatus(const QString& response)
     QStringList subsystemData = response.mid(6, response.length() - 7).split(";");
 
     // Check if we have enough data to update the subsystems
-    if (subsystemData.size() != 12) {
+    //if (subsystemData.size() != 12) {
+    if (subsystemData.size() != 14) {
         // Handle error or return if there is not enough data
         return;
     }
@@ -1006,14 +1001,14 @@ void PlasmaController::parseResponseForCTLStatus(const QString& response)
     setRecipeExecuting(execRecipe);
 
     // Extract and update MFC actual flow values
-    for (int i = 1; i <= 4; i++) {
+    for (int i = 1; i <= 6; i++) {
         MFC* mfc = findMFCByNumber(i);
         double mfcFlow = subsystemData[4 + i].toDouble();
         mfc->setActualFlow(mfcFlow);
     }
 
     // Extract and update plasmahead temperature
-    double temperature = subsystemData[9].toDouble();
+    double temperature = subsystemData[11].toDouble();
     m_plasmaHead.setTemperature(temperature);
 }
 

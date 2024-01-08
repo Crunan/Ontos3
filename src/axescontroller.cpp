@@ -95,6 +95,8 @@ AxesController::~AxesController()
     delete m_pStageTestMinYState;
     delete m_pStageTestShutdownState;
     delete m_pStageTestSuperState;
+
+    m_pSerialInterface = nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////////////////
