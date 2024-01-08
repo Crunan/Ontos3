@@ -77,14 +77,8 @@ PlasmaController::~PlasmaController()
         delete mfc;
     }
 
-    // cleanup shared serial resource
-    if (m_pSerialInterface != nullptr) {
-        if (m_pSerialInterface->isOpen()) {
-            m_pSerialInterface->close();
-        }
-        delete m_pSerialInterface;
-        m_pSerialInterface = nullptr;
-    }
+    delete m_pSerialInterface;
+    m_pSerialInterface = nullptr;
 
     delete m_pRecipe;
 
