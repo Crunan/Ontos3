@@ -6,11 +6,11 @@
 {% endhint %}
 
 {% hint style="danger" %}
-* **Use of any other gases than those described in this manual is not authorized by OES and may result in safety hazards and/or equipment damage as well as voidance of warranty.**
+* **Use of any other gases than those described in this manual is not authorized by OES and may result in safety hazards and/or equipment damage as well as voiding of warranty.**
 *   **The minimum combined Gas flow for carrier gasses is factory set to prevent**
 
     **damage to the Plasma Head.**
-* **The amount of Hydrogen within the gas mixture typically is between 3% & 5%, dependent upon local LEL standards. Please consult your local gas supplier for information regarding your area.**
+* **The amount of Hydrogen within the gas mixture typically is between 3% & 5%, dependent upon local LEL standards. Please consult your local gas supplier or in-house safety team for information regarding your area.**
 {% endhint %}
 
 The gas input ports (labelled 1-6) should be connected as follows:
@@ -80,3 +80,4 @@ For systems equipped with the optional O2 gas kit.
 * Nitrogen 20 PSI with flow rate >= 1.0 SLPM (0.04 CFM)
 {% endtab %}
 {% endtabs %}
+

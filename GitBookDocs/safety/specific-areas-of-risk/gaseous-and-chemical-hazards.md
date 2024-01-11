@@ -3,7 +3,7 @@
 The ONTOS _CLEAN_ incorporates specific safety mechanisms that ensure a secure operational environment, provided that gases are used and managed in strict accordance with this manual. It's crucial to recognize that the safety features are designed based on the designated gases outlined here.&#x20;
 
 {% hint style="danger" %}
-&#x20;**Using any other gases not specified in this manual will not be covered by the system's safety design features.**
+&#x20;**Using any other gases not specified in this manual will not be covered by the system's safety design features and will void the warranty.**
 {% endhint %}
 
 **Unapproved Gas Usage:** Employing gases other than those specified in this manual is not authorized by OES (Ontos Equipment Systems). Doing so could lead to potential safety hazards, equipment damage, and may even void the warranty of the equipment. For requests to qualify and approve additional gases, please contact us at [support@ontosplasma.com](mailto:support@ontosplasma.com).

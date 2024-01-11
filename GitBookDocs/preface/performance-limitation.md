@@ -8,4 +8,4 @@ We strongly recommend that users carefully consider the environmental conditions
 
 Should you have any questions or require guidance on configuring the appropriate environmental conditions for your system, please feel free to contact our support team at [support@set-na.com](mailto:support@set-na.com).&#x20;
 
-OES recommends the following guidelines for [Environmental Conditions](broken-reference).
+OES recommends the following guidelines for [Environmental Conditions](../installation/environmental-conditions.md).

@@ -6,6 +6,6 @@ The Ozone Safety Kit, available as an optional package, offers users an addition
 
 * **External Ozone Sensor:** Engineered to detect the presence of Ozone, this sensor plays a pivotal role in enhancing safety measures. Upon detecting Ozone, the sensor acts as a safeguard by promptly causing an ESTOP condition through the interlock circuit.
 
-**Verifying Inclusion:** To determine whether your ONTOS _CLEAN_ includes the Optional Ozone Safety Kit, please refer to your purchase order or the documentation provided upon acquisition.
+**Verifying Inclusion:** To determine whether your ONTOS _CLEAN_ includes the Optional Ozone Safety Kit, please refer to your purchase order or the documentation provided upon acquisition. Visual verification can be made by finding the external ozone sensor located on the back of the machine.&#x20;
 
-**Safety Considerations:** It's important to reiterate that the use of gases other than those explicitly mentioned in the manual could result in warranty voidance and potentially introduce significant safety risks. Maintaining strict adherence to the designated gases and safety measures ensures a secure operational environment and the longevity of your ONTOS _CLEAN_.
+**Safety Considerations:** It's important to reiterate that the use of gases other than those explicitly mentioned in the manual could result in warranty voiding and potentially introduce significant safety risks. Maintaining strict adherence to the designated gases and safety measures ensures a secure operational environment and the longevity of your ONTOS _CLEAN_.

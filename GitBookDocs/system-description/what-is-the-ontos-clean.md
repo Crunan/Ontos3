@@ -1,6 +1,6 @@
 # What is the ONTOS CLEAN?
 
-The ONTOS _CLEAN_ is a surface preparation tool which uses a stable plasma at atmospheric conditions to alter the surface of a substrate. Process capability includes, but is not limited to, surface cleaning, oxide reduction, organic reduction or surface activation.
+The ONTOS _CLEAN_ is a surface preparation tool which uses downstream products of an internal plasma at atmospheric conditions to alter the surface of a substrate. Process capability includes, but is not limited to, oxide reduction, surface passivation, surface oxidation, organic removal or surface activation.
 
 Typical subsequent processes might include soldering, joining, bonding, etching, deposition, plating, or other semiconductor fabrication or assembly steps.&#x20;
 
