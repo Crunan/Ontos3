@@ -46,6 +46,7 @@
 * [Utilities](GitBookDocs/installation/utilities.md)
 * [Rear Facilities Panel](GitBookDocs/installation/rear-facilities-panel.md)
 * [Gasses](GitBookDocs/installation/gasses.md)
+* [Chuck Swap](installation/chuck-swap.md)
 * [Seismic Anchoring Installation](GitBookDocs/installation/seismic-anchoring-installation.md)
 * [Securing the Stand Leveling Casters](GitBookDocs/installation/securing-the-stand-leveling-casters.md)
 * [Safety Circuit Wiring Diagram](GitBookDocs/installation/wiring-diagram.md)

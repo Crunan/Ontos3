@@ -11,4 +11,6 @@ Follow these steps for powering up the ONTOS _CLEAN_:
 4. **Start Button Activation:** Press and release the green start button. The button will illuminate, indicating the system's activation is in progress.
 {% endhint %}
 
+<figure><img src="broken-reference" alt=""><figcaption><p>Power Switch (Off position)</p></figcaption></figure>
+
 Once the green start button is illuminated, the ONTOS _CLEAN_ will initiate its startup sequence.&#x20;

@@ -6,7 +6,7 @@ The ONTOS _CLEAN_ must be securely anchored to prevent movement or displacement 
 
 Before proceeding with the seismic anchoring process, it is essential to understand the seismic requirements specific to your location and facility. Local building codes, regulations, and seismic design criteria should be consulted to determine the necessary anchoring specifications. The goal is to ensure that the tool remains stable and intact even in the event of an earthquake.
 
-<figure><img src="../../.gitbook/assets/seismicanchors.png" alt="" width="491"><figcaption><p>Anchor Locations</p></figcaption></figure>
+<figure><img src="broken-reference" alt=""><figcaption><p>Anchor Locations</p></figcaption></figure>
 
 #### Anchoring Preparation
 

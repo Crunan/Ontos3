@@ -8,11 +8,11 @@ Order of gasses may change for each tool based on customer requirements, please 
 
 {% tabs %}
 {% tab title="Machine Power" %}
-**Power Consumption:** The system's power consumption is rated at 1900 W (16A@120V / 8A@240V), 50/60 Hz with a tolerance of ±10%.&#x20;
+**Maximum Power Consumption:** 1900 W (16A@120V / 8A@240V), 50/60 Hz&#x20;
 
-**Power Conditioning:** The incoming power for the Ontos _CLEAN_ requires conditioning to ensure 500V AC maximum surge exposure
+**Power Conditioning:** 500V AC maximum surge exposure
 
-**Recommended Utility:** To ensure optimal performance, it is recommended to provide a power supply of 20A@120V / 10A@240V, 50/60 Hz.
+**Recommended Utility:** 20A@120V / 10A@240V, 50/60 Hz.
 
 **Power Plug**: See Below
 

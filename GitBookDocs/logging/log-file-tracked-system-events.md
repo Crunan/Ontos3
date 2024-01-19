@@ -62,7 +62,7 @@ The Log File feature in the ONTOS _CLEAN_ software serves as a comprehensive rec
     | Status Bits changed: Power from RF too low           | <mark style="color:red;">"Power Fwd Low"</mark>                                                          |
     | Status Bits changed: Head Temperature too high       | <mark style="color:red;">"Head Too Hot"</mark>                                                           |
 * **Log File Management**:
-  * The log file can be easily copied or moved to external storage such as a USB drive or a network location. Utilize Windows Cut/Copy functions for this purpose.
+  * The log file can be easily copied or moved to external storage such as a USB drive or a network location. Utilize Cut/Copy functions for this purpose.
   * The destination for storing the log file can be chosen as needed.
 
 By maintaining a detailed log of various operations, events, and system status changes, the Log File functionality empowers operators and engineers with a comprehensive record for analysis, troubleshooting, and process optimization within the ONTOS _CLEAN_.
