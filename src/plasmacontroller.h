@@ -100,9 +100,6 @@ public:
     void MBLeft();
     void MBRight();
 
-    // plasma head
-    void heaterOn(bool state);
-
 signals:
     void responseReceived(const QString& response);
     void plasmaStateChanged(bool plasmaActive);

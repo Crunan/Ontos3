@@ -310,7 +310,8 @@ void PlasmaController::RunScanAxesSM()
                 emit SSM_StatusUpdate("Scanning", message); // update ui
             }
             // turn off Substrate N2 Purge (assume it's on)
-            m_stageCTL.toggleN2PurgeOff();
+            // m_stageCTL.toggleN2PurgeOff();
+
             // set max Z speed and move to parkZ
             m_stageCTL.move(ZAXIS_COMMAND_NUM, m_stageCTL.ZMaxSpeed(), m_scanZParkPos);
             // log the move
@@ -563,7 +564,7 @@ void PlasmaController::RunDoorOpenSM()
 
     if (m_doorOpenStateMachine.configuration().contains(m_pDODoorOpenedNonProcessState)) {
         QString abortMessage = "Door opened while stage was moving. Stage position has been lost, close the doors and click OK to initialize the stage and send stage to the Load position.";
-        emit m_abortMessages.showAbortMessageBox(abortMessage);
+        emit m_abortMessages.showAbortMessageBox(abortMessage, false);
         emit DOSM_TransitionClosed();
     }
     else if (m_doorOpenStateMachine.configuration().contains(m_pDODoorsClosedState)) {
@@ -932,7 +933,7 @@ void PlasmaController::parseAbortCode(QString code)
         QString abortCodeStr = code.mid(3,4);
 
         bool ok = false;
-        int abortCodeInt = abortCodeStr.toInt(&ok);
+        int abortCodeInt = abortCodeStr.toInt(&ok, 16);
         if (ok) {
             if (abortCodeInt > 0) {
                 if (m_abortMessages.containsAbortMessage(abortCodeInt)) {
@@ -944,20 +945,26 @@ void PlasmaController::parseAbortCode(QString code)
                         m_processDoorAbort = true;
                     // immediately set the light tower
                     setLightTower();
-                    // show a message box
-                    emit m_abortMessages.showAbortMessageBox(abortMessage);
+
+                    if (abortCodeInt == AbortCodeMessages::AC_ESTOP) {
+                        // show a message box
+                        emit m_abortMessages.showAbortMessageBox(abortMessage, true);
+                    }
+                    else {
+                        emit m_abortMessages.showAbortMessageBox(abortMessage, false);
+                    }
                 }
                 else {
                     QString errorMessage = "Abort occurred, no corresponding abort code found.";
                     Logger::logCritical(errorMessage);
-                    emit m_abortMessages.showAbortMessageBox(errorMessage);
+                    emit m_abortMessages.showAbortMessageBox(errorMessage, false);
                 }
             }
         }
         else {
             QString errorMessage = "Abort occurred, no corresponding abort code found.";
             Logger::logCritical(errorMessage);
-            emit m_abortMessages.showAbortMessageBox(errorMessage);
+            emit m_abortMessages.showAbortMessageBox(errorMessage, false);
         }
     }
 }
@@ -1196,20 +1203,6 @@ void PlasmaController::MBRight()
 {
     sendCommand("$11010032%"); // $110dxxxx%  d=1,0 xxxx = num steps; resp[!110dxxxx#] when move STARTED
     readResponse();
-}
-
-void PlasmaController::heaterOn(bool state)
-{
-    if (state) {
-        sendCommand("$CE35.0%"); // $CEtt.t% resp [!CEtt.t#] where tt.t is target temp in 'C. t=0 is off
-        readResponse();
-        Logger::logInfo("Preheat Plasma Recipe ON");
-    }
-    else {
-        sendCommand("$CE00.0%"); // $CEtt.t% resp [!CEtt.t#] where tt.t is target temp in 'C. t=0 is off
-        readResponse();
-        Logger::logInfo("Preheat Plasma Recipe OFF");
-    }
 }
 
 void PlasmaController::howManyMFCs()
