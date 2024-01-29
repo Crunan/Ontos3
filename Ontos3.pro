@@ -1,13 +1,13 @@
 QT += core gui widgets serialport statemachine
 
-VERSION = 01.00.10
+VERSION = 01.00.13
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
 greaterThan(QT_MAJOR_VERSION, 4)
 
 CONFIG += c++17
 
-DEFINES += PATH=\\\"$$PWD\\\"
+#DEFINES += PATH=\\\"$$PWD\\\"
 
 include(qtsingleapplication/src/qtsingleapplication.pri)
 
@@ -74,5 +74,6 @@ FORMS += \
 RESOURCES += \
     src/ONTOS3.qrc
 
-#INCLUDEPATH += $$PWD/include
+
+
 

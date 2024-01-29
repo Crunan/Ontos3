@@ -2,7 +2,6 @@
 #include "ui_mainwindow.h"
 
 #include <QApplication>
-#include <QFileDialog>
 #include <QTextStream>
 #include <QDebug>
 #include "UtilitiesAndConstants.h"
@@ -20,6 +19,8 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     m_pSettings(new SettingsDialog),
     m_mainCTL(),
     m_persistentSettings(),
+    m_pRecipeFileDialog(0), // gets initialized at time of use
+    m_pRecipeInputDialog(new QInputDialog(this)),
     m_config(),
     m_engineeringMode(false)
 {
@@ -35,8 +36,6 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(&m_mainCTL.getAxesController(), &AxesController::setUIHomeSMDone, this, &MainWindow::homeStateMachineDone);
     connect(&m_mainCTL.getAxesController(), &AxesController::initSMStartup, this, &MainWindow::initStateMachineStartup);
     connect(&m_mainCTL.getAxesController(), &AxesController::initSMDone, this, &MainWindow::initStateMachineDone);
-    connect(&m_mainCTL.getAxesController(), &AxesController::setUITwoSpotSMStartup, this, &MainWindow::twoSpotStateMachineStartup);
-    connect(&m_mainCTL.getAxesController(), &AxesController::setUITwoSpotSMDone, this, &MainWindow::twoSpotStateMachineDone);
     connect(&m_mainCTL.getAxesController(), &AxesController::pinsStateChanged, this, &MainWindow::pinsStateChanged);
     connect(&m_mainCTL.getAxesController(), &AxesController::joystickStateChanged, this, &MainWindow::joystickStateChanged);
     connect(&m_mainCTL.getAxesController(), &AxesController::n2StateChanged, this, &MainWindow::n2StateChanged);
@@ -108,6 +107,7 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
 MainWindow::~MainWindow() {
     delete m_pSettings;
     delete ui;
+    delete m_pRecipeInputDialog;
 
     // cleanup state machine
     delete m_pMainStartupState;
@@ -123,11 +123,9 @@ void MainWindow::showStatusMessage(const QString &message)
     m_pStatus->setText(message);
 }
 
-void MainWindow::closeEvent(QCloseEvent *event) {
+void MainWindow::closeEvent(QCloseEvent *event)
+{
 
-    if (m_mainCTL.isOpen()) {
-        m_mainCTL.close();
-    }
     Logger::logInfo("Shutting Down -------------------");
     Logger::clean();
 
@@ -184,18 +182,13 @@ void MainWindow::readSettings()
     // read the persistent settings
     bool batchID = m_persistentSettings.value(BATCHID_ENABLED_SETTING, false).toBool();
     bool collisionSystem = m_persistentSettings.value(COLLISION_SYSTEM_ENABLED_SETTING, false).toBool();
-    bool heaterEnabled = m_persistentSettings.value(HEATER_ENABLED_SETTING, false).toBool();
-    int LEDLightIntensity = m_persistentSettings.value(LED_LIGHT_INTENSITY, 0).toInt();
 
     // update the UI components
     if (batchID) {
         m_mainCTL.batchIDLoggingOn(true);
         batchIDLoggingIsActive();
     }
-    // uncomment to set previous LED light intensity
-    //ui->LEDLightControlhorizontalSlider->setValue(LEDLightIntensity);
     ui->collision_system_checkbox->setChecked(collisionSystem);
-    ui->heater_checkbox->setChecked(heaterEnabled);
 }
 
 void MainWindow::connectRecipeButtons()
@@ -217,6 +210,7 @@ void MainWindow::connectMFCFlowBars()
         connect(m_mainCTL.getMFCs()[i], &MFC::recipeFlowChanged, this, &MainWindow::updateRecipeFlow);
         connect(m_mainCTL.getMFCs()[i], &MFC::updateUIRecipeFlow, this, &MainWindow::updateRecipeFlow);
         connect(m_mainCTL.getMFCs()[i], &MFC::updateUIActualFlow, this, &MainWindow::actualFlowChanged);
+        connect(m_mainCTL.getMFCs()[i], &MFC::rangeChanged, this, &MainWindow::rangeChanged);
     }
 }
 
@@ -278,7 +272,6 @@ void MainWindow::homeStateMachineStartup()
 
     // disable other stage movement buttons
     ui->init_button->setEnabled(false);
-    ui->twospot_button->setEnabled(false);
     ui->diameter_button->setEnabled(false);
     ui->scan_button->setEnabled(false);
     ui->Stagepins_button->setEnabled(false);
@@ -298,7 +291,6 @@ void MainWindow::homeStateMachineDone()
 
     if (m_engineeringMode) {
         // enable other stage movement buttons
-        ui->twospot_button->setEnabled(true);
         ui->diameter_button->setEnabled(true);
     }
 }
@@ -310,7 +302,6 @@ void MainWindow::initStateMachineStartup()
     ui->init_button->setEnabled(false);
 
     // disable the other state movement buttons
-    ui->twospot_button->setEnabled(false);
     ui->diameter_button->setEnabled(false);
     ui->wafer_diameter->setEnabled(false);
     ui->scan_button->setEnabled(false);
@@ -330,39 +321,11 @@ void MainWindow::initStateMachineDone()
 
     if (m_engineeringMode) {
         // enable the buttons that we disabled
-        ui->twospot_button->setEnabled(true);
         ui->diameter_button->setEnabled(true);
         ui->wafer_diameter->setEnabled(true);
         ui->diameter_button->setEnabled(true);
         ui->menuStage_Test->setEnabled(true);
         ui->Joystick_button->setEnabled(true);
-    }
-}
-
-void MainWindow::twoSpotStateMachineStartup()
-{
-    ui->twospot_button->setText("STOP");
-
-    // disable the other stage movement buttons
-    ui->Home_button->setEnabled(false);
-    ui->init_button->setEnabled(false);
-    ui->scan_button->setEnabled(false);
-    ui->diameter_button->setEnabled(false);
-}
-
-void MainWindow::twoSpotStateMachineDone()
-{
-    ui->twospot_button->setChecked(false);
-    ui->twospot_button->setText("TWO SPOT");
-
-    scanBoxChanged();
-
-    if (m_engineeringMode) {
-        // enable the buttons that we disabled
-        ui->Home_button->setEnabled(true);
-        ui->init_button->setEnabled(true);
-        ui->scan_button->setEnabled(true);
-        ui->diameter_button->setEnabled(true);
     }
 }
 
@@ -373,7 +336,6 @@ void MainWindow::SSM_Started()
     // disable other stage movement buttons
     ui->init_button->setEnabled(false);
     ui->Home_button->setEnabled(false);
-    ui->twospot_button->setEnabled(false);
     ui->diameter_button->setEnabled(false);
     ui->Stagepins_button->setEnabled(false);
     ui->vac_button->setEnabled(false);
@@ -556,7 +518,6 @@ void MainWindow::runMainStateMachine()
                 m_mainCTL.setLightTower();
                 m_mainCTL.RunDoorOpenSM();
                 m_mainCTL.getAxesController().RunInitAxesSM();
-                m_mainCTL.getAxesController().RunTwoSpotSM();
                 m_mainCTL.getAxesController().RunStageTestSM();
                 m_mainCTL.getAxesController().RunHomeAxesSM();
                 m_mainCTL.RunScanAxesSM();
@@ -626,9 +587,15 @@ void MainWindow::SSM_StatusUpdate(QString status, QString next)
     ui->axisstatus_2->setText(next);
 }
 
-void MainWindow::showAbortMessageBox(QString message)
+void MainWindow::showAbortMessageBox(QString message, bool shutdown)
 {
-    QMessageBox::critical(this, "ABORT CONDITION", message);
+    if (shutdown) {
+        QMessageBox::critical(this, "ABORT CONDITION", message + " Press OK to shutdown app");
+        QApplication::quit();
+    }
+    else {
+        QMessageBox::critical(this, "ABORT CONDITION", message);
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -712,45 +679,6 @@ void MainWindow::AxisStatusToUI()
 // Recipe
 //////////////////////////////////////////////////////////////////////////////////
 
-void MainWindow::AutoTuneCheckbox_stateChanged(int value)
-{
-    m_mainCTL.getTuner().setAutoTune(value);
-}
-
-void MainWindow::openRecipeWindowMFC()
-{
-    QString strRange;
-    int mfcNumber;
-    MFC* mfc = nullptr;
-
-    QPushButton* button = qobject_cast<QPushButton*>(sender());
-    if (button) {
-        // Retrieve the MFC number from the button's property
-        mfcNumber = button->property("MFCNumber").toInt();  // Retrieve the MFC index from the button's property
-        mfc = m_mainCTL.findMFCByNumber(mfcNumber);
-        if (mfc) {
-            strRange = mfc->getRangeQString();
-        }
-    }
-
-    bool ok;
-    QString msg = "Format xx.yy (max value: " + strRange + ")";
-    QString recipeStr = QInputDialog::getText(nullptr, "MFC Setpoint",  msg, QLineEdit::Normal, "", &ok);
-
-    if (ok && !recipeStr.isEmpty()) { // User entered a string and clicked OK
-        bool validNum;
-        double enteredValue = recipeStr.toDouble(&validNum);
-        double range = mfc->getRange();
-        if (validNum && enteredValue <= range && enteredValue >= 0) {
-            mfc->setRecipeFlow(enteredValue);
-        }
-    } else {
-        // User either clicked Cancel or did not enter any string
-        // Handle accordingly
-        return;
-    }
-}
-
 void MainWindow::openRecipe()
 {
     // Create a file dialog
@@ -759,29 +687,34 @@ void MainWindow::openRecipe()
 
     QString initialDirectory = RECIPE_DIRECTORY;
 
-    // Set the initial directory
-    dialog.setDirectory(initialDirectory);
-    // Set the window title and filter for specific file types
-    dialog.setWindowTitle("Open Recipe File");
-    dialog.setNameFilter("Recipe Files (*.rcp)");
+    m_pRecipeFileDialog = new QFileDialog(this, "Open Recipe File", initialDirectory, "Recipe Files (*.rcp)");
+    m_pRecipeFileDialog->setAcceptMode(QFileDialog::AcceptOpen);
 
-    // Execute the file dialog
-    if (dialog.exec()) {
-        // Get the selected file path
-        QString filePath = dialog.selectedFiles().first();
+    connect(m_pRecipeFileDialog, &QFileDialog::fileSelected, this, &MainWindow::OpenRecipeFileSelected);
+    connect(m_pRecipeFileDialog, &QFileDialog::rejected, this, &MainWindow::OpenRecipeRejected);
 
-        // set appropriate fields to use the recipe
-        installRecipe(filePath);
+    m_pRecipeFileDialog->setOption(QFileDialog::DontUseNativeDialog);
+    m_pRecipeFileDialog->show();
+}
 
-        // clear cascade recipe since it's now assumed the user does not want to run
-        // cascade recipes
-        ui->cascade_recipe_name->clear();
-        ui->listCascadeRecipes->clear();
-        m_mainCTL.clearCascadeRecipes();
-    } else {
-        // User canceled the file dialog
-        Logger::logDebug("File selection canceled.");
-    }
+
+void MainWindow::OpenRecipeFileSelected(const QString &file)
+{
+    // set appropriate fields to use the recipe
+    installRecipe(file);
+
+    // clear cascade recipe since it's now assumed the user does not want to run
+    // cascade recipes
+    ui->cascade_recipe_name->clear();
+    ui->listCascadeRecipes->clear();
+    m_mainCTL.clearCascadeRecipes();
+
+    //delete m_pRecipeFileDialog;
+}
+
+void MainWindow::OpenRecipeRejected()
+{
+   delete m_pRecipeFileDialog;
 }
 
 void MainWindow::installRecipe(QString sRecipeFileAndPath)
@@ -810,8 +743,19 @@ void MainWindow::saveRecipe()
        directory.mkpath(directoryPath);
     }
 
-    // Open the file dialog for saving
-    QString selectedFileName = QFileDialog::getSaveFileName(this, "Save Recipe", directoryPath, "Recipe Files (*.rcp)");
+    m_pRecipeFileDialog = new QFileDialog(this, "Save Recipe", directoryPath, "Recipe Files (*.rcp)");
+    m_pRecipeFileDialog->setAcceptMode(QFileDialog::AcceptSave);
+
+    connect(m_pRecipeFileDialog, &QFileDialog::fileSelected, this, &MainWindow::SaveRecipeFileSelected);
+    connect(m_pRecipeFileDialog, &QFileDialog::rejected, this, &MainWindow::SaveRecipeFileRejected);
+
+    m_pRecipeFileDialog->setOption(QFileDialog::DontUseNativeDialog);
+    m_pRecipeFileDialog->show();
+}
+
+void MainWindow::SaveRecipeFileSelected(const QString &file)
+{
+    QString selectedFileName = file;
     if (!selectedFileName.isEmpty()) {
        // Create the file path
        QString filePath = selectedFileName;
@@ -888,7 +832,14 @@ void MainWindow::saveRecipe()
             Logger::logInfo("Failed to open file for writing: " + file.errorString());
        }
     }
+    //delete m_pRecipeFileDialog;
 }
+
+void MainWindow::SaveRecipeFileRejected()
+{
+    delete m_pRecipeFileDialog;
+}
+
 
 // update the recipe progress bar and values
 void MainWindow::updateRecipeFlow(const int mfcNumber, const double recipeFlow)
@@ -896,7 +847,7 @@ void MainWindow::updateRecipeFlow(const int mfcNumber, const double recipeFlow)
     // This uses the parameters passed in the signal
     if (mfcNumber == 1) {
        // set vertical progress bar
-       double range = m_mainCTL.findMFCByNumber(1)->getRange();
+       double range = m_mainCTL.findMFCByNumber(1)->getRange();       
        int percentage = 0;
        if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
        ui->gas1_sliderBar->setValue(int(percentage));
@@ -1044,6 +995,10 @@ void MainWindow::cyclesChanged()
     ui->cycles_recipe->setText(m_mainCTL.getRecipe()->getCyclesQStr());
 }
 
+void MainWindow::AutoTuneCheckbox_stateChanged(int value)
+{
+    m_mainCTL.getTuner().setAutoTune(value);
+}
 
 //////////////////////////////////////////////////////////////////////////////////
 // runtime updates
@@ -1054,8 +1009,8 @@ void MainWindow::forwardWattsChanged()
 
     // dashboard
     ui->RF_Actual_LCD->display(watts);
-    if (watts > 5) ui->RF_bar->setValue(watts);
-    else ui->RF_bar->setValue(0);
+    ui->RF_bar->setMaximum(m_mainCTL.getPower().getMaxForwardWatts());
+    ui->RF_bar->setValue(watts);
 }
 
 void MainWindow::reflectedWattsChanged()
@@ -1064,14 +1019,15 @@ void MainWindow::reflectedWattsChanged()
 
     // dashboard
     ui->RefRF_Actual_LCD->display(watts);
-    if (watts > 5) ui->RefRF_bar->setValue(watts);
-    else ui->RefRF_bar->setValue(0);
+    ui->RefRF_bar->setValue(watts);
 }
 
 void MainWindow::MBactualPositionChanged(const double actualPosition)
 {
+    //double testPosition = 55.00;
+    QString sDisplayValue = QString::number(actualPosition, 'f', 2);
     // dashboard
-    ui->MB_Actual_LCD->display(actualPosition);
+    ui->MB_Actual_LCD->display(sDisplayValue);
     ui->MB_Pos_Bar->setValue(int(actualPosition));
 }
 
@@ -1093,6 +1049,9 @@ void MainWindow::actualFlowChanged(const int mfcNumber, const double actualFlow)
        int percentage = 0;
        if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
 
+       // set max
+       ui->gas1_max_label->setText(QString::number(range, 'f', 1));
+
        // update the progress bar
        if (percentage > 5) {// progress bars don't look right when value is less than 5
            ui->gas1ProgressBar->setValue(int(percentage));
@@ -1105,8 +1064,12 @@ void MainWindow::actualFlowChanged(const int mfcNumber, const double actualFlow)
     else if (mfcNumber == 2) {
        // set vertical progress bar
        double range = m_mainCTL.findMFCByNumber(2)->getRange();
+
        int percentage = 0;
        if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
+
+       // set max
+       ui->gas2_max_label->setText(QString::number(range, 'f', 1));
 
        // update the progress bar
        if (percentage > 5) {// progress bars don't look right when value is less than 5
@@ -1123,6 +1086,9 @@ void MainWindow::actualFlowChanged(const int mfcNumber, const double actualFlow)
        int percentage = 0;
        if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
 
+       // set max
+       ui->gas3_max_label->setText(QString::number(range, 'f', 1));
+
        // update the progress bar
        if (percentage > 5) {// progress bars don't look right when value is less than 5
            ui->gas3ProgressBar->setValue(int(percentage));
@@ -1138,6 +1104,9 @@ void MainWindow::actualFlowChanged(const int mfcNumber, const double actualFlow)
        int percentage = 0;
        if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
 
+       // set max
+       ui->gas4_max_label->setText(QString::number(range, 'f', 1));
+
        // update the progress bar
        if (percentage > 5) {// progress bars don't look right when value is less than 5
            ui->gas4ProgressBar->setValue(int(percentage));
@@ -1152,6 +1121,9 @@ void MainWindow::actualFlowChanged(const int mfcNumber, const double actualFlow)
        double range = m_mainCTL.findMFCByNumber(5)->getRange();
        int percentage = 0;
        if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
+
+       // set max
+       ui->gas5_max_label->setText(QString::number(range, 'f', 1));
 
        // update the progress bar
        if (percentage > 5) {// progress bars don't look right when value is less than 5
@@ -1176,6 +1148,34 @@ void MainWindow::actualFlowChanged(const int mfcNumber, const double actualFlow)
 
        // set the dashboard and plasma tab edit box below the progress bar
        ui->gas6_actual_SLPM->setText(QString::number(actualFlow));
+    }
+}
+
+void MainWindow::rangeChanged(const int mfcNumber, double range)
+{
+    if (mfcNumber == 1) {
+        // set max
+        ui->gas1_max_label->setText(QString::number(range, 'f', 1));
+    }
+    else if (mfcNumber == 2) {
+        // set max
+        ui->gas2_max_label->setText(QString::number(range, 'f', 1));
+    }
+    else if (mfcNumber == 3) {
+        // set max
+        ui->gas3_max_label->setText(QString::number(range, 'f', 1));
+    }
+    else if (mfcNumber == 4) {
+        // set max
+        ui->gas4_max_label->setText(QString::number(range, 'f', 1));
+    }
+    else if (mfcNumber == 5) {
+        // set max
+        ui->gas5_max_label->setText(QString::number(range, 'f', 1));
+    }
+    else if (mfcNumber == 6) {
+        // set max
+        ui->gas6_max_label->setText(QString::number(range, 'f', 1));
     }
 }
 
@@ -1340,6 +1340,7 @@ void MainWindow::on_loadCascadeRecipeButton_clicked()
 
             // update the cascade Recipe Field
             ui->cascade_recipe_name->setText(fileName);
+            QApplication::processEvents();
 
             // Close the file
             file.close();
@@ -1412,6 +1413,7 @@ void MainWindow::loadCascadeRecipe()
        QString recipeName = m_mainCTL.getRecipe()->getCascadeRecipeList().at(0);
 
        installRecipe(QString(RECIPE_DIRECTORY) + "/" + recipeName);
+       QApplication::processEvents();
 
        // and reset our index in case the user wants to run the list again
        m_mainCTL.getRecipe()->resetCascadeIndex();
@@ -1437,18 +1439,6 @@ void MainWindow::on_Home_button_toggled(bool checked)
     else {
        ui->Home_button->setChecked(false);
        m_mainCTL.getAxesController().StopHome();
-    }
-}
-
-// two spot on dashboard
-void MainWindow::on_twospot_button_toggled(bool checked)
-{
-    if (checked) {
-        m_mainCTL.getAxesController().StartTwoSpot();
-    }
-    else {
-        ui->twospot_button->setChecked(false);
-        m_mainCTL.getAxesController().StopTwoSpot();
     }
 }
 
@@ -1572,14 +1562,35 @@ void MainWindow::on_plsmaBtn_toggled(bool checked)
 // thickness button on dashboard
 void MainWindow::on_load_thick_clicked()
 {
-    bool ok;
-    QString msg = "Format xx.yy (max value: ";
+    // clear the previous value
+    m_pRecipeInputDialog->setTextValue("");
 
+    // disconnect any previous connections
+    disconnect(m_pRecipeInputDialog, &QInputDialog::accepted, 0, 0);
+
+    //m_pRecipeInputDialog = new QInputDialog(this);
+    m_pRecipeInputDialog->setWindowTitle("Substrate Thickness in mm");
+    m_pRecipeInputDialog->setInputMode(QInputDialog::TextInput);
+
+
+    QString msg = "Format xx.yy (max value: ";
     double maxVal = m_mainCTL.getAxesController().getZp2BaseDbl() - m_mainCTL.getRecipe()->getThickness();
     msg += QString::number(maxVal, 'f', 2) + ")";
 
-    QString recipeStr = QInputDialog::getText(this, "Substrate Thickness in mm", msg, QLineEdit::Normal, "", &ok);
-    if (ok) {
+    m_pRecipeInputDialog->setLabelText(msg);
+    connect(m_pRecipeInputDialog, &QInputDialog::accepted, this, &MainWindow::Recipe_ThicknessAccepted);
+
+    m_pRecipeInputDialog->setFocus();
+    m_pRecipeInputDialog->show();
+    m_pRecipeInputDialog->adjustSize();
+    QApplication::processEvents();
+}
+
+void MainWindow::Recipe_ThicknessAccepted()
+{
+    QString recipeStr = m_pRecipeInputDialog->textValue();
+    double maxVal = m_mainCTL.getAxesController().getZp2BaseDbl() - m_mainCTL.getRecipe()->getThickness();
+    if (!recipeStr.isEmpty()) {
         bool validNum;
         double recipeVal = recipeStr.toDouble(&validNum);
         if (validNum && recipeVal <= maxVal && recipeVal >= 0) {
@@ -1591,14 +1602,34 @@ void MainWindow::on_load_thick_clicked()
 // gap button on dashboard
 void MainWindow::on_load_gap_clicked()
 {
-    bool ok;
+    // clear the previous value
+    m_pRecipeInputDialog->setTextValue("");
+
+    // disconnect any previous connections
+    disconnect(m_pRecipeInputDialog, &QInputDialog::accepted, 0, 0);
+
+    m_pRecipeInputDialog->setWindowTitle("Plasma Z Gap in mm");
+    m_pRecipeInputDialog->setInputMode(QInputDialog::TextInput);
+
     QString msg = "Format xx.yy (min value: 0.5) (max value: ";
-
     double maxVal = m_mainCTL.getAxesController().getZp2BaseDbl() - m_mainCTL.getRecipe()->getThickness();
-    msg += QString::number(maxVal, 'f', 2) + ")";
+    msg += QString::number(maxVal, 'f', 2) + ")   ";
 
-    QString recipeStr = QInputDialog::getText(this, "Plasma Z Gap in mm", msg, QLineEdit::Normal, "", &ok);
-    if (ok) {
+    m_pRecipeInputDialog->setLabelText(msg);
+    connect(m_pRecipeInputDialog, &QInputDialog::accepted, this, &MainWindow::Recipe_GapAccepted);
+
+    m_pRecipeInputDialog->setFocus();
+    m_pRecipeInputDialog->show();
+    m_pRecipeInputDialog->adjustSize();
+    QApplication::processEvents();
+}
+
+void MainWindow::Recipe_GapAccepted()
+{
+    QString recipeStr = m_pRecipeInputDialog->textValue();
+    double maxVal = m_mainCTL.getAxesController().getZp2BaseDbl() - m_mainCTL.getRecipe()->getThickness();
+
+    if (!recipeStr.isEmpty()) {
         bool validNum;
         double recipeVal = recipeStr.toDouble(&validNum);
         if (validNum && recipeVal <= maxVal && recipeVal >= 0.5) {
@@ -1610,11 +1641,30 @@ void MainWindow::on_load_gap_clicked()
 // overlap button on dashboard
 void MainWindow::on_load_overlap_clicked()
 {
-    bool ok;
-    QString msg = "Format xx.yy (max value: " + m_mainCTL.getPlasmaHead().getSlitLengthQStr() + ")";
+    // clear the previous value
+    m_pRecipeInputDialog->setTextValue("");
 
-    QString recipeStr = QInputDialog::getText(this, "Overlap in mm", msg, QLineEdit::Normal, "", &ok);
-    if (ok) {
+    // disconnect any previous connections
+    disconnect(m_pRecipeInputDialog, &QInputDialog::accepted, 0, 0);
+
+    m_pRecipeInputDialog->setWindowTitle("Overlap in mm");
+    m_pRecipeInputDialog->setInputMode(QInputDialog::TextInput);
+
+    QString msg = "Format xx.yy (max value: " + m_mainCTL.getPlasmaHead().getSlitLengthQStr() + ")   ";
+    m_pRecipeInputDialog->setLabelText(msg);
+    connect(m_pRecipeInputDialog, &QInputDialog::accepted, this, &MainWindow::Recipe_OverlapAccepted);
+
+    m_pRecipeInputDialog->setFocus();
+    m_pRecipeInputDialog->show();
+    m_pRecipeInputDialog->adjustSize();
+    QApplication::processEvents();
+}
+
+void MainWindow::Recipe_OverlapAccepted()
+{
+    QString recipeStr = m_pRecipeInputDialog->textValue();
+
+    if (!recipeStr.isEmpty()) {
         bool validNum;
         double recipeVal = recipeStr.toDouble(&validNum);
         if (validNum && recipeVal <= m_mainCTL.getPlasmaHead().getSlitLength() && recipeVal >= 0) {
@@ -1626,11 +1676,30 @@ void MainWindow::on_load_overlap_clicked()
 // speed button on dashboard
 void MainWindow::on_loadSpeedButton_clicked()
 {
-    bool ok;
-    QString msg = "Format xx.yy (max value: " + m_mainCTL.getAxesController().getYAxisMaxSpeedQStr() + ")";
+    // clear the previous value
+    m_pRecipeInputDialog->setTextValue("");
 
-    QString recipeStr = QInputDialog::getText(this, "Scan Speed Enter mm/sec Value", msg, QLineEdit::Normal, "", &ok);
-    if (ok) {
+    // disconnect any previous connections
+    disconnect(m_pRecipeInputDialog, &QInputDialog::accepted, 0, 0);
+
+    m_pRecipeInputDialog->setWindowTitle("Scan Speed Enter mm/sec Value");
+    m_pRecipeInputDialog->setInputMode(QInputDialog::TextInput);
+
+    QString msg = "Format xx.yy (max value: " + m_mainCTL.getAxesController().getYAxisMaxSpeedQStr() + ")   ";
+    m_pRecipeInputDialog->setLabelText(msg);
+    connect(m_pRecipeInputDialog, &QInputDialog::accepted, this, &MainWindow::Recipe_SpeedAccepted);
+
+    m_pRecipeInputDialog->setFocus();
+    m_pRecipeInputDialog->show();
+    m_pRecipeInputDialog->adjustSize();
+    QApplication::processEvents();
+}
+
+void MainWindow::Recipe_SpeedAccepted()
+{
+    QString recipeStr = m_pRecipeInputDialog->textValue();
+
+    if (!recipeStr.isEmpty()) {
         bool validNum;
         double recipeVal = recipeStr.toDouble(&validNum);
         if (validNum && recipeVal <= m_mainCTL.getAxesController().YMaxSpeed() && recipeVal > 0) {
@@ -1642,9 +1711,30 @@ void MainWindow::on_loadSpeedButton_clicked()
 // cycles button on dashboard
 void MainWindow::on_load_cycles_clicked()
 {
-    bool ok;
-    QString recipeStr = QInputDialog::getText(this, "Scan Cycles Enter Integer Value", "Format xxx (max value: 100)", QLineEdit::Normal, "", &ok);
-    if (ok) {
+    // clear the previous value
+    m_pRecipeInputDialog->setTextValue("");
+
+    // disconnect any previous connections
+    disconnect(m_pRecipeInputDialog, &QInputDialog::accepted, 0, 0);
+
+    m_pRecipeInputDialog->setWindowTitle("Scan Cycles Enter Integer Value");
+    m_pRecipeInputDialog->setInputMode(QInputDialog::TextInput);
+
+    QString msg = "Format xxx (max value: 100)       ";
+    m_pRecipeInputDialog->setLabelText(msg);
+    connect(m_pRecipeInputDialog, &QInputDialog::accepted, this, &MainWindow::Recipe_CyclesAccepted);
+
+    m_pRecipeInputDialog->setFocus();
+    m_pRecipeInputDialog->show();
+    m_pRecipeInputDialog->adjustSize();
+    QApplication::processEvents();
+}
+
+void MainWindow::Recipe_CyclesAccepted()
+{
+    QString recipeStr = m_pRecipeInputDialog->textValue();
+
+    if (!recipeStr.isEmpty()) {
         bool validNum;
         int recipeVal = recipeStr.toInt(&validNum);
         if (validNum && recipeVal <= 100 && recipeVal > 0) {
@@ -1665,14 +1755,90 @@ void MainWindow::on_save_recipe_button_clicked()
     saveRecipe();
 }
 
-void MainWindow::on_loadRFButton_clicked()
+void MainWindow::openRecipeWindowMFC()
+{
+    QString strRange;
+    int mfcNumber;
+    MFC* mfc = nullptr;
+
+    QPushButton* button = qobject_cast<QPushButton*>(sender());
+    if (button) {
+        // Retrieve the MFC number from the button's property
+        mfcNumber = button->property("MFCNumber").toInt();  // Retrieve the MFC index from the button's property
+        mfc = m_mainCTL.findMFCByNumber(mfcNumber);
+        if (mfc) {
+            strRange = mfc->getRangeQString();
+        }
+    }
+
+    // clear the previous value
+    m_pRecipeInputDialog->setTextValue("");
+    m_pRecipeInputDialog->setWindowTitle("MFC Setpoint");
+    m_pRecipeInputDialog->setInputMode(QInputDialog::TextInput);
+    m_pRecipeInputDialog->setProperty("MFC_Num", mfcNumber);
+
+    QString msg = "Format xx.yy (max value: " + strRange + ")   ";
+
+    m_pRecipeInputDialog->setLabelText(msg);
+
+    // disconnect any previous connections
+    disconnect(m_pRecipeInputDialog, &QInputDialog::accepted, 0, 0);
+
+    connect(m_pRecipeInputDialog, &QInputDialog::accepted, this, &MainWindow::Recipe_MFCSetpointAccepted);
+
+    m_pRecipeInputDialog->setFocus();
+    m_pRecipeInputDialog->show();
+    m_pRecipeInputDialog->adjustSize();
+    QApplication::processEvents();
+}
+
+
+void MainWindow::Recipe_MFCSetpointAccepted()
 {
     bool ok;
-    QString msg = "Format xxx (max value: ";
-    msg += m_mainCTL.getPower().getMaxForwardWattsQStr() + ")";
-    QString recipeStr = QInputDialog::getText(nullptr, "RF Setpoint", msg, QLineEdit::Normal, "", &ok);
+    QString recipeStr = m_pRecipeInputDialog->textValue();
+    int mfcNumber = m_pRecipeInputDialog->property("MFC_Num").toInt(&ok);
 
     if (ok && !recipeStr.isEmpty()) { // User entered a string and clicked OK
+        MFC *mfc = m_mainCTL.findMFCByNumber(mfcNumber);
+        bool validNum;
+        double enteredValue = recipeStr.toDouble(&validNum);
+        double range = mfc->getRange();
+        if (validNum && enteredValue <= range && enteredValue >= 0 && mfc) {
+            mfc->setRecipeFlow(enteredValue);
+        }
+    }
+}
+
+void MainWindow::on_loadRFButton_clicked()
+{
+    // clear the previous value
+    m_pRecipeInputDialog->setTextValue("");
+
+    // disconnect any previous connections
+    disconnect(m_pRecipeInputDialog, &QInputDialog::accepted, 0, 0);
+
+    m_pRecipeInputDialog->setWindowTitle("RF Setpoint");
+    m_pRecipeInputDialog->setInputMode(QInputDialog::TextInput);
+
+
+    QString msg = "Format xxx (max value: ";
+    msg += m_mainCTL.getPower().getMaxForwardWattsQStr() + ")   ";
+
+    m_pRecipeInputDialog->setLabelText(msg);
+    connect(m_pRecipeInputDialog, &QInputDialog::accepted, this, &MainWindow::Recipe_RFSetpointAccepted);
+
+    m_pRecipeInputDialog->setFocus();
+    m_pRecipeInputDialog->show();
+    m_pRecipeInputDialog->adjustSize();
+    QApplication::processEvents();
+}
+
+void MainWindow::Recipe_RFSetpointAccepted()
+{
+    QString recipeStr = m_pRecipeInputDialog->textValue();
+    
+    if (!recipeStr.isEmpty()) { // User entered a string and clicked OK
         bool validNum;
         int recipe = recipeStr.toInt(&validNum);
         if (validNum && recipe >= 0 && recipe <= m_mainCTL.getPower().getMaxForwardWatts()) {
@@ -1683,63 +1849,90 @@ void MainWindow::on_loadRFButton_clicked()
 
 void MainWindow::on_loadMBButton_clicked()
 {
-    bool ok;
-    QString recipeStr = QInputDialog::getText(nullptr, "Tuner Position Enter Percentage", "Format xxx (max value: 100)", QLineEdit::Normal, "", &ok);
+    // clear the previous value
+    m_pRecipeInputDialog->setTextValue("");
 
-    if (ok && !recipeStr.isEmpty()) { // User entered a string and clicked OK
+    // disconnect any previous connections
+    disconnect(m_pRecipeInputDialog, &QInputDialog::accepted, 0, 0);
+
+    m_pRecipeInputDialog->setWindowTitle("Tuner Position Enter Percentage");
+    m_pRecipeInputDialog->setInputMode(QInputDialog::TextInput);
+
+    QString msg = "Format xxx.xx (max value: 100)   ";
+    m_pRecipeInputDialog->setLabelText(msg);
+    connect(m_pRecipeInputDialog, &QInputDialog::accepted, this, &MainWindow::Recipe_MBSetpointAccepted);
+    
+    m_pRecipeInputDialog->setFocus();
+    m_pRecipeInputDialog->show();
+    m_pRecipeInputDialog->adjustSize();
+    QApplication::processEvents();
+}
+
+void MainWindow::Recipe_MBSetpointAccepted()
+{
+    QString recipeStr = m_pRecipeInputDialog->textValue();
+    
+    if (!recipeStr.isEmpty()) { 
         bool validNum;
-        int recipeVal = recipeStr.toInt(&validNum);
-        if (validNum && recipeVal >= 0 && recipeVal <= 100) {
+        double recipeVal = recipeStr.toDouble(&validNum);
+        if (validNum && recipeVal >= 0.0 && recipeVal <= 100.0) {
             m_mainCTL.getTuner().setRecipePosition(recipeVal);
         }
     }
 }
 
+
 void MainWindow::on_loadAutoTuneButton_clicked()
 {
-    QStringList items;
-    items << "OFF" << "ON";
-
-    bool ok;
-    QString item = QInputDialog::getItem(nullptr, "Tuner Autotune", "Please choose an auto tune state", items, 0, false, &ok);
-
-    if (ok && !item.isEmpty()) {
-        if (item == "OFF") {
-            m_mainCTL.getTuner().setAutoTune(false);
-        }
-        else {
-            m_mainCTL.getTuner().setAutoTune(true);
-        }
+    if (ui->autotune_recipe->text() == "OFF") {
+        m_mainCTL.getTuner().setAutoTune(true);
+        ui->autotune_recipe->setText("ON");
+    }
+    else {
+        m_mainCTL.getTuner().setAutoTune(false);
+        ui->autotune_recipe->setText("OFF");
     }
 }
 
 void MainWindow::on_load_autoscan_clicked()
 {
-    QStringList items;
-    items << "OFF" << "ON";
-
-    bool ok;
-    QString item = QInputDialog::getItem(nullptr, "Auto scan", "Please choose an auto scan state", items, 0, false, &ok);
-
-    if (ok && !item.isEmpty()) {
-        if (item == "OFF") {
-            m_mainCTL.getRecipe()->setAutoScan(false);
-        }
-        else {
-            m_mainCTL.getRecipe()->setAutoScan(true);
-        }
+    if (ui->autoscan_recipe->text() == "OFF") {
+        m_mainCTL.getRecipe()->setAutoScan(true);
+        ui->autoscan_recipe->setText("ON");
+    }
+    else {
+        m_mainCTL.getRecipe()->setAutoScan(false);
+        ui->autoscan_recipe->setText("OFF");
     }
 }
 
 void MainWindow::on_x1_set_clicked()
 {
-    bool ok;
+    // clear the previous value
+    m_pRecipeInputDialog->setTextValue("");
+
+    // disconnect any previous connections
+    disconnect(m_pRecipeInputDialog, &QInputDialog::accepted, 0, 0);
+
+    m_pRecipeInputDialog->setWindowTitle("Scan Box X min in mm");
+    m_pRecipeInputDialog->setInputMode(QInputDialog::TextInput);
+
     QString msg = "Format +/- xxx.yy (max value: ";
-    msg += m_mainCTL.getAxesController().getXPH2BaseQStr() + ")";
+    msg += m_mainCTL.getAxesController().getXPH2BaseQStr() + ")   ";
+    m_pRecipeInputDialog->setLabelText(msg);
+    connect(m_pRecipeInputDialog, &QInputDialog::accepted, this, &MainWindow::Recipe_X1Accepted);
 
-    QString recipeStr = QInputDialog::getText(nullptr, "Scan Box X min in mm", msg, QLineEdit::Normal, "", &ok);
+    m_pRecipeInputDialog->setFocus();
+    m_pRecipeInputDialog->show();
+    m_pRecipeInputDialog->adjustSize();
+    QApplication::processEvents();
+}
 
-    if (ok && !recipeStr.isEmpty()) {
+void MainWindow::Recipe_X1Accepted()
+{
+    QString recipeStr = m_pRecipeInputDialog->textValue();
+
+    if (!recipeStr.isEmpty()) {
         bool validNum;
         double x1 = recipeStr.toDouble(&validNum);
         if (validNum && x1 <= m_mainCTL.getAxesController().getXPH2Base() && x1 >= (-1*m_mainCTL.getAxesController().getXPH2Base())) {
@@ -1749,14 +1942,32 @@ void MainWindow::on_x1_set_clicked()
 }
 
 void MainWindow::on_x2_set_clicked()
-{    
-    bool ok;
+{
+    // clear the previous value
+    m_pRecipeInputDialog->setTextValue("");
+
+    // disconnect any previous connections
+    disconnect(m_pRecipeInputDialog, &QInputDialog::accepted, 0, 0);
+
+    m_pRecipeInputDialog->setWindowTitle("Scan Box X min in mm");
+    m_pRecipeInputDialog->setInputMode(QInputDialog::TextInput);
+
     QString msg = "Format +/- xxx.yy (max value: ";
-    msg += m_mainCTL.getAxesController().getXPH2BaseQStr() + ")";
+    msg += m_mainCTL.getAxesController().getXPH2BaseQStr() + ")   ";
+    m_pRecipeInputDialog->setLabelText(msg);
+    connect(m_pRecipeInputDialog, &QInputDialog::accepted, this, &MainWindow::Recipe_X2Accepted);
 
-    QString recipeStr = QInputDialog::getText(nullptr, "Scan Box X max in mm", msg, QLineEdit::Normal, "", &ok);
+    m_pRecipeInputDialog->setFocus();
+    m_pRecipeInputDialog->show();
+    m_pRecipeInputDialog->adjustSize();
+    QApplication::processEvents();
+}
 
-    if (ok && !recipeStr.isEmpty()) {
+void MainWindow::Recipe_X2Accepted()
+{
+    QString recipeStr = m_pRecipeInputDialog->textValue();
+
+    if (!recipeStr.isEmpty()) {
         bool validNum;
         double x2 = recipeStr.toDouble(&validNum);
         if (validNum && x2 <= m_mainCTL.getAxesController().getXPH2Base() && x2 >= (-1*m_mainCTL.getAxesController().getXPH2Base())) {
@@ -1767,13 +1978,31 @@ void MainWindow::on_x2_set_clicked()
 
 void MainWindow::on_y1_set_clicked()
 {
-    bool ok;
+    // clear the previous value
+    m_pRecipeInputDialog->setTextValue("");
+
+    // disconnect any previous connections
+    disconnect(m_pRecipeInputDialog, &QInputDialog::accepted, 0, 0);
+
+    m_pRecipeInputDialog->setWindowTitle("Scan Box X min in mm");
+    m_pRecipeInputDialog->setInputMode(QInputDialog::TextInput);
+
     QString msg = "Format +/- xxx.yy (max value: ";
-    msg += m_mainCTL.getAxesController().getYPH2BaseQStr() + ")";
+    msg += m_mainCTL.getAxesController().getYPH2BaseQStr() + ")   ";
+    m_pRecipeInputDialog->setLabelText(msg);
+    connect(m_pRecipeInputDialog, &QInputDialog::accepted, this, &MainWindow::Recipe_Y1Accepted);
 
-    QString recipeStr = QInputDialog::getText(nullptr, "Scan Box Y min in mm", msg, QLineEdit::Normal, "", &ok);
+    m_pRecipeInputDialog->setFocus();
+    m_pRecipeInputDialog->show();
+    m_pRecipeInputDialog->adjustSize();
+    QApplication::processEvents();
+}
 
-    if (ok && !recipeStr.isEmpty()) {
+void MainWindow::Recipe_Y1Accepted()
+{
+    QString recipeStr = m_pRecipeInputDialog->textValue();
+
+    if (!recipeStr.isEmpty()) {
         bool validNum;
         double y1 = recipeStr.toDouble(&validNum);
         if (validNum && y1 <= m_mainCTL.getAxesController().getYPH2Base() && y1 >= (-1*m_mainCTL.getAxesController().getYPH2Base())) {
@@ -1784,13 +2013,31 @@ void MainWindow::on_y1_set_clicked()
 
 void MainWindow::on_y2_set_clicked()
 {
-    bool ok;
+    // clear the previous value
+    m_pRecipeInputDialog->setTextValue("");
+
+    // disconnect any previous connections
+    disconnect(m_pRecipeInputDialog, &QInputDialog::accepted, 0, 0);
+
+    m_pRecipeInputDialog->setWindowTitle("Scan Box X min in mm");
+    m_pRecipeInputDialog->setInputMode(QInputDialog::TextInput);
+
     QString msg = "Format +/- xxx.yy (max value: ";
-    msg += m_mainCTL.getAxesController().getYPH2BaseQStr() + ")";
+    msg += m_mainCTL.getAxesController().getYPH2BaseQStr() + ")   ";
+    m_pRecipeInputDialog->setLabelText(msg);
+    connect(m_pRecipeInputDialog, &QInputDialog::accepted, this, &MainWindow::Recipe_Y2Accepted);
 
-    QString recipeStr = QInputDialog::getText(nullptr, "Scan Box Y max in mm", msg, QLineEdit::Normal, "", &ok);
+    m_pRecipeInputDialog->setFocus();
+    m_pRecipeInputDialog->show();
+    m_pRecipeInputDialog->adjustSize();
+    QApplication::processEvents();
+}
 
-    if (ok && !recipeStr.isEmpty()) {
+void MainWindow::Recipe_Y2Accepted()
+{
+    QString recipeStr = m_pRecipeInputDialog->textValue();
+
+    if (!recipeStr.isEmpty()) {
         bool validNum;
         double y2 = recipeStr.toDouble(&validNum);
         if (validNum && y2 <= m_mainCTL.getAxesController().getYPH2Base() && y2 >= (-1*m_mainCTL.getAxesController().getYPH2Base())) {
@@ -1833,7 +2080,6 @@ void MainWindow::disableControlButtons()
     ui->Stagepins_button->setEnabled(false);
     ui->menuStage_Test->setEnabled(false);
     ui->diameter_button->setEnabled(false);
-    ui->twospot_button->setEnabled(false);
     ui->wafer_diameter->setEnabled(false);
     ui->n2_purge_button->setEnabled(false);
     ui->plsmaBtn->setEnabled(false);
@@ -1893,7 +2139,6 @@ void MainWindow::setUIEngineerMode()
         ui->Stagepins_button->setEnabled(true);
         ui->menuStage_Test->setEnabled(true);
         ui->diameter_button->setEnabled(true);
-        ui->twospot_button->setEnabled(true);
         ui->wafer_diameter->setEnabled(true);
     }
 }
@@ -1925,7 +2170,6 @@ void MainWindow::setUIOperatorMode()
     // disable control buttons
     ui->diameter_button->setEnabled(false);
     ui->n2_purge_button->setEnabled(false);
-    ui->twospot_button->setEnabled(false);
     ui->wafer_diameter->setEnabled(false);
     ui->plsmaBtn->setEnabled(false);
     ui->MB_Right_Button->setEnabled(false);
@@ -2059,32 +2303,40 @@ void MainWindow::on_collision_system_checkbox_clicked(bool checked)
     m_persistentSettings.setValue(COLLISION_SYSTEM_ENABLED_SETTING, checked);
 }
 
-// heater on tool settings tab
-void MainWindow::on_heater_checkbox_clicked(bool checked)
-{
-    m_mainCTL.heaterOn(checked);
-
-    // save the setting
-    m_persistentSettings.setValue(HEATER_ENABLED_SETTING, checked);
-}
-
-
 void MainWindow::on_batchIDButton_clicked()
 {
-    bool ok;
-    QString input = QInputDialog::getText(nullptr, "Batch ID #", "Enter the Batch ID #", QLineEdit::Normal, "", &ok);
+    // disconnect any previous connections
+    disconnect(m_pRecipeInputDialog, &QInputDialog::accepted, 0, 0);
 
-    if (ok) {
-        if (input == "" || input.length() > 45) {
+    m_pRecipeInputDialog->setWindowTitle("Batch ID #");
+    m_pRecipeInputDialog->setInputMode(QInputDialog::TextInput);
+
+    QString msg = "Enter the Batch ID #";
+    m_pRecipeInputDialog->setLabelText(msg);
+    connect(m_pRecipeInputDialog, &QInputDialog::accepted, this, &MainWindow::Recipe_BatchIDAccepted);
+
+    m_pRecipeInputDialog->setFocus();
+    m_pRecipeInputDialog->show();
+    m_pRecipeInputDialog->adjustSize();
+    QApplication::processEvents();
+}
+
+void MainWindow::Recipe_BatchIDAccepted()
+{
+    QString recipeStr = m_pRecipeInputDialog->textValue();
+
+    if (!recipeStr.isEmpty()) {
+        if (recipeStr == "" || recipeStr.length() > 45) {
             return;
         }
         else {
             Logger::logInfo("----------------------------BATCH ID # ---------------------------------");
-            Logger::logInfo("Logging Batch ID #: " + input);
-            ui->batchIDedit->setText(input);
+            Logger::logInfo("Logging Batch ID #: " + recipeStr);
+            ui->batchIDedit->setText(recipeStr);
         }
     }
 }
+
 
 // configure the gasses layout according to the number of
 // MFC's returned by the main controller
@@ -2105,19 +2357,11 @@ void MainWindow::setUINumberOfMFCs(const int numMFCs)
     }
 }
 
-// set the LED light intensity
-void MainWindow::on_LEDLightControlhorizontalSlider_valueChanged(int value)
-{
-    int position = ui->LEDLightControlhorizontalSlider->value();
-    m_mainCTL.setLEDLightIntensity(position);
 
-    // save the setting
-    m_persistentSettings.setValue(LED_LIGHT_INTENSITY, position);
+void MainWindow::on_LEDIntensitySpinBox_valueChanged(double arg1)
+{
+    int intensity = arg1;
+    m_mainCTL.setLEDLightIntensity(intensity);
 }
 
-
-void MainWindow::on_plsmaBtn_clicked()
-{
-
-}
 

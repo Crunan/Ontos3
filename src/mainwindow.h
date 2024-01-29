@@ -19,6 +19,7 @@
 #include <QLineEdit>
 #include "passworddialog.h"
 #include <QSettings>
+#include <QFileDialog>
 
 using namespace std::literals;
 
@@ -50,7 +51,7 @@ public slots:
     void setInitialUIState();
     void openRecipeWindowMFC();
     void stageStatusUpdate(QString statusNow, QString statusNext);
-    void showAbortMessageBox(QString message);
+    void showAbortMessageBox(QString message, bool shutdown);
     void batchIDLoggingIsActive();
 
     // Serial Port
@@ -63,8 +64,6 @@ public slots:
     void homeStateMachineDone();
     void initStateMachineStartup();
     void initStateMachineDone();
-    void twoSpotStateMachineStartup();
-    void twoSpotStateMachineDone();
     void runMainStateMachine();
 
     // real time data updates
@@ -97,6 +96,7 @@ public slots:
     void yLimitsChanged();
     void cyclesChanged();
     void loadCascadeRecipe();
+    void rangeChanged(const int mfcNumber, double range);
 
     // callbacks
     void pinsStateChanged(bool state);
@@ -110,6 +110,25 @@ public slots:
     void scanBoxChanged();
     void userEnteredPassword();
 
+    // recipe set value slots
+    void Recipe_RFSetpointAccepted();
+    void Recipe_MBSetpointAccepted();
+    void Recipe_MFCSetpointAccepted();
+    void Recipe_ThicknessAccepted();
+    void Recipe_X1Accepted();
+    void Recipe_X2Accepted();
+    void Recipe_Y1Accepted();
+    void Recipe_Y2Accepted();
+    void Recipe_CyclesAccepted();
+    void Recipe_SpeedAccepted();
+    void Recipe_OverlapAccepted();
+    void Recipe_GapAccepted();
+    void Recipe_BatchIDAccepted();
+    void SaveRecipeFileSelected(const QString &file);
+    void OpenRecipeFileSelected(const QString &file);
+    void OpenRecipeRejected();
+    void SaveRecipeFileRejected();
+
 private slots:
     // controls handlers
     void on_init_button_clicked();
@@ -122,7 +141,6 @@ private slots:
     void on_vac_button_toggled(bool checked);
     void on_n2_purge_button_toggled(bool checked);
     void on_Home_button_toggled(bool checked);
-    void on_twospot_button_toggled(bool checked);
     void on_loadRecipeButton_clicked();
     void on_loadRFButton_clicked();
     void on_scan_button_toggled(bool checked);
@@ -159,12 +177,10 @@ private slots:
     void on_actionTest_Z_toggled(bool arg1);
     void on_batchID_checkBox_clicked(bool checked);
     void on_collision_system_checkbox_clicked(bool checked);
-    void on_heater_checkbox_clicked(bool checked);
     void on_batchIDButton_clicked();
     void on_refresh_cascade_recipe_button_clicked();
-    void on_LEDLightControlhorizontalSlider_valueChanged(int value);
 
-    void on_plsmaBtn_clicked();
+    void on_LEDIntensitySpinBox_valueChanged(double arg1);
 
 private:
     // Action Button methods
@@ -218,6 +234,10 @@ private:
     SettingsDialog* m_pSettings;
     PlasmaController m_mainCTL;
     QSettings m_persistentSettings;
+
+    // recipe non modal dialogs
+    QFileDialog *m_pRecipeFileDialog;
+    QInputDialog *m_pRecipeInputDialog;
 
     bool m_has3AxisBoard;
 
