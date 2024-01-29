@@ -13,7 +13,7 @@ int Tuner::getActualPosition() const
     return m_actualPosition;
 }
 
-void Tuner::setActualPosition(int position)
+void Tuner::setActualPosition(double position)
 {
     if (m_actualPosition != position) {
         m_actualPosition = position;
@@ -28,16 +28,16 @@ int Tuner::getRecipePosition() const
 
 QString Tuner::getRecipePositionQStr() const
 {
-    return QString::number(m_recipePosition);
+    return QString::number(m_recipePosition, 'f', 2);
 }
 
-void Tuner::setRecipePosition(int setpoint)
+void Tuner::setRecipePosition(double setpoint)
 {
     m_recipePosition = setpoint;
     emit recipePositionChanged(m_recipePosition);
 }
 
-void Tuner::updateRecipePosition(int setpoint)
+void Tuner::updateRecipePosition(double setpoint)
 {
     m_recipePosition = setpoint;
     emit updateUIRecipePosition(m_recipePosition);
