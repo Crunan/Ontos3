@@ -20,7 +20,7 @@ SerialInterface::SerialInterface() :
 SerialInterface::~SerialInterface()
 {
     m_done = true;
-    m_serialPort.close();
+    //m_serialPort.close();
     delete m_pSerialWatchdogTimer;
 }
 
