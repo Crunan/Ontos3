@@ -34,7 +34,7 @@ public:
     bool containsAbortMessage(int val);
 
 signals:
-    void showAbortMessageBox(QString abortMessage);
+    void showAbortMessageBox(QString abortMessage, bool shutdown);
 
 private:
     QMap<AbortCode, QString> m_abortMessages;
