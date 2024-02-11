@@ -167,16 +167,19 @@ signals:
 
     // update ui
     void pinsStateChanged(bool state);
-    void joystickStateChanged(bool state);
+    //void joystickStateChanged(bool state);
     void n2StateChanged(bool state);
     void vacStateChanged(bool state);
     void xLimitsChanged(double xmin, double xmax);
     void yLimitsChanged(double ymin, double ymax);
 
+public slots:
+    void gameControllerMove(int axis, int pct);
+
 private:
     // status bit parsers
     void doorsStatus();
-    void joyBtnStatus();
+    //void joyBtnStatus();
     void vacStatus();
     void N2PurgeStatus();
 

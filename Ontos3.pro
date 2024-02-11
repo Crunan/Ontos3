@@ -1,6 +1,6 @@
 QT += core gui widgets serialport statemachine
 
-VERSION = 01.00.13
+VERSION = 01.00.14
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
 greaterThan(QT_MAJOR_VERSION, 4)
@@ -15,7 +15,11 @@ include(qtsingleapplication/src/qtsingleapplication.pri)
 # In order to do so, uncomment the following line.
 # DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+LIBS += -L/usr/lib/x86_64-linux-gnu -lSDL2 -ldl -lpthread
+INCLUDES += /usr/include/SDL2
+
 SOURCES += \
+    src/gamepadcontroller.cpp \
     src/UtilitiesAndConstants.cpp \
     src/abortcodemessages.cpp \
     src/passworddialog.cpp \
@@ -42,6 +46,7 @@ SOURCES += \
 
 
 HEADERS += \
+    src/gamepadcontroller.h \
     src/UtilitiesAndConstants.h \
     src/abortcodemessages.h \
     src/passworddialog.h \

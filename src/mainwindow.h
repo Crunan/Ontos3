@@ -20,6 +20,7 @@
 #include "passworddialog.h"
 #include <QSettings>
 #include <QFileDialog>
+#include "gamepadcontroller.h"
 
 using namespace std::literals;
 
@@ -238,6 +239,8 @@ private:
     // recipe non modal dialogs
     QFileDialog *m_pRecipeFileDialog;
     QInputDialog *m_pRecipeInputDialog;
+
+    GamepadController m_gamepadController;
 
     bool m_has3AxisBoard;
 

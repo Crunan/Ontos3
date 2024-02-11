@@ -5,6 +5,7 @@
 #include "logger.h"
 #include <QTimer>
 #include "UtilitiesAndConstants.h"
+#include "gamepadcontroller.h"
 
 const int AUX_INPUT_BUFFER_MAX_SIZE = 90;
 const int SERIAL_RESPONSE_TIMEOUT = 2000; // timeout waiting for control pcb response (milliseconds)
@@ -786,6 +787,30 @@ bool AxesController::nextStateReady()
     return false;
 }
 
+void AxesController::gameControllerMove(int axis, int pct)
+{
+    // $AB0xss.s%; resp [!AB0xss.s#] where 0x = axis number, ss.s is plus/minus percent of max joy speed
+    QString joyMoveCmd = "$AB0";
+
+    // map to our axis notation
+    switch(axis) {
+    case GamepadController::CONTROLLER_AXIS_LEFTX: // maps to X axis
+        joyMoveCmd += QString::number(XAXIS_COMMAND_NUM);
+        break;
+    case GamepadController::CONTROLLER_AXIS_LEFTY: // maps to Y axis
+        joyMoveCmd += QString::number(YAXIS_COMMAND_NUM);
+        break;
+    case GamepadController::CONTROLLER_AXIS_RIGHTY: // maps to Z axis
+        joyMoveCmd += QString::number(ZAXIS_COMMAND_NUM);
+        break;
+    }
+    //joyMoveCmd = "$AB011000%";
+    joyMoveCmd += QString::number(pct) + "%";
+    sendCommand(joyMoveCmd);
+    readResponse();
+    //Logger::logInfo("gameControllerMove(" + QString::number(axis) + ", " + QString::number(pct) + ")");
+}
+
 void AxesController::setValve2On()
 {
     sendCommand("$C701%"); //SET_VALVE_2 $C70n% resp[!C70n#] n = 0, 1 (off, on)
@@ -895,7 +920,7 @@ void AxesController::updateAxisStatus()
 
         // Check various status bits
         doorsStatus();
-        joyBtnStatus();
+        //joyBtnStatus();
         vacStatus();
         N2PurgeStatus();
 
@@ -990,13 +1015,14 @@ void AxesController::doorsStatus()
     }
 }
 
-void AxesController::joyBtnStatus()
+/*void AxesController::joyBtnStatus()
 {
     bool ok = false;
     int bit = m_config.getValueForKey(CONFIG_JOY_STATUS_BIT).toInt(&ok);
 
     if (ok) {
         m_joystickOn = isBitSet(m_LEDstates, bit);
+        Logger::logInfo(QString::number(m_LEDstates));
 
         if (m_joystickOn != joystickOnLast) {
             joystickOnLast = m_joystickOn;
@@ -1012,7 +1038,7 @@ void AxesController::joyBtnStatus()
     else {
         Logger::logCritical("Cannot find config file entry for: " + QString(CONFIG_JOY_STATUS_BIT));
     }
-}
+}*/
 
 void AxesController::vacStatus()
 {
@@ -1416,7 +1442,7 @@ void AxesController::togglePinsOff()
 
 void AxesController::toggleJoystickOn()
 {
-    sendCommand("$BE%");
+    sendCommand("$BD%");
     readResponse();
 }
 

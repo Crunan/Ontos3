@@ -37,7 +37,9 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(&m_mainCTL.getAxesController(), &AxesController::initSMStartup, this, &MainWindow::initStateMachineStartup);
     connect(&m_mainCTL.getAxesController(), &AxesController::initSMDone, this, &MainWindow::initStateMachineDone);
     connect(&m_mainCTL.getAxesController(), &AxesController::pinsStateChanged, this, &MainWindow::pinsStateChanged);
-    connect(&m_mainCTL.getAxesController(), &AxesController::joystickStateChanged, this, &MainWindow::joystickStateChanged);
+
+    connect(&m_gamepadController, &GamepadController::joystickStateChanged, this, &MainWindow::joystickStateChanged);
+
     connect(&m_mainCTL.getAxesController(), &AxesController::n2StateChanged, this, &MainWindow::n2StateChanged);
     connect(&m_mainCTL.getAxesController(), &AxesController::vacStateChanged, this, &MainWindow::vacStateChanged);
     connect(&m_mainCTL.getAxesController(), &AxesController::updateUIAxisStatus, this, &MainWindow::AxisStatusToUI);
@@ -78,6 +80,8 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(&m_mainCTL.getTuner(), &Tuner::autoTuneChanged, this, &MainWindow::autoTuneChanged);
     connect(&m_mainCTL.getTuner(), &Tuner::updateUIAutoTune, this, &MainWindow::autoTuneChanged);
     connect(&m_mainCTL.getTuner(), &Tuner::actualPositionChanged, this, &MainWindow::MBactualPositionChanged);
+    // connect gamecontroller signal with axescontroller slot
+    connect(&m_gamepadController, &GamepadController::gameControllerMove, &m_mainCTL.getAxesController(), &AxesController::gameControllerMove);
 
     // disable until implemented
     ui->request_terminal->setEnabled(false);
@@ -136,12 +140,17 @@ void MainWindow::closeEvent(QCloseEvent *event)
 // the result is that the style sheets don't take full effect
 // until after the mainwindow is visible.  This creates a little
 // delay to handle that
+static bool firstShow = true;
 void MainWindow::showEvent(QShowEvent *)
 {
-    // hide stage controls
-    showStageControls(false);
+    if (firstShow) {
+        // hide stage controls
+        showStageControls(false);
 
-    QTimer::singleShot(50, this, &MainWindow::setInitialUIState);
+        QTimer::singleShot(50, this, &MainWindow::setInitialUIState);
+
+        firstShow = false;
+    }
 }
 
 void MainWindow::setInitialUIState()
@@ -507,6 +516,7 @@ void MainWindow::runMainStateMachine()
         }
     }
     else if (m_mainStateMachine.configuration().contains(m_pMainPollingState)) { // in Polling state
+        m_gamepadController.PollForEvents();
         SM_PollCounter += 1;
         if (SM_PollCounter >= SM_POLL_PERIOD) {
             SM_PollCounter = 0;
@@ -524,6 +534,7 @@ void MainWindow::runMainStateMachine()
                 m_mainCTL.RunCollisionSM();
                 m_mainCTL.PollForCollision();
                 m_mainCTL.getAxesController().getAxisStatus();
+                //m_gamepadController.PollForEvents();
             }
         }
     }
@@ -615,11 +626,14 @@ void MainWindow::joystickStateChanged(bool state)
 {
     if (state) {
         ui->Joystick_button->setText("JOY OFF");
+        ui->Joystick_button->setChecked(true);
     }
     else {
         ui->Joystick_button->setText("JOY");
+        ui->Joystick_button->setChecked(false);
     }
 }
+
 void MainWindow::n2StateChanged(bool state)
 {
     if (state) {
@@ -708,8 +722,6 @@ void MainWindow::OpenRecipeFileSelected(const QString &file)
     ui->cascade_recipe_name->clear();
     ui->listCascadeRecipes->clear();
     m_mainCTL.clearCascadeRecipes();
-
-    //delete m_pRecipeFileDialog;
 }
 
 void MainWindow::OpenRecipeRejected()
@@ -832,7 +844,6 @@ void MainWindow::SaveRecipeFileSelected(const QString &file)
             Logger::logInfo("Failed to open file for writing: " + file.errorString());
        }
     }
-    //delete m_pRecipeFileDialog;
 }
 
 void MainWindow::SaveRecipeFileRejected()
@@ -1479,12 +1490,32 @@ void MainWindow::on_n2_purge_button_toggled(bool checked)
 
 // joystick button on dashboard
 void MainWindow::on_Joystick_button_toggled(bool checked)
-{
+{    
     if (checked) {
-        m_mainCTL.getAxesController().toggleJoystickOn();
+        if (m_gamepadController.Init()) {
+            m_mainCTL.getAxesController().toggleJoystickOn();
+            ui->Joystick_button->setText("JOY OFF");
+        }
+        else {
+            // popup needed to tell user to check joystick connection
+            QMessageBox *msgBox = new QMessageBox(this);
+            msgBox->setIcon(QMessageBox::Warning);
+            msgBox->setWindowTitle("No Gamepad Controller Detected");
+            msgBox->setText("Please check the gamepad connection and try again");
+            //QPushButton *btnCancel =  msgBox->addButton( "Cancel", QMessageBox::RejectRole );
+            QPushButton *btnOK =  msgBox->addButton( "OK", QMessageBox::AcceptRole );
+            msgBox->setAttribute(Qt::WA_DeleteOnClose); // delete pointer after close
+            msgBox->setModal(false);
+            msgBox->show();
+
+            ui->Joystick_button->setChecked(false);
+            ui->Joystick_button->setText("JOY");
+        }
     }
     else {
-        m_mainCTL.getAxesController().toggleJoystickOff();ui->menuStage_Test->setEnabled(false);
+        m_gamepadController.Close();
+        m_mainCTL.getAxesController().toggleJoystickOff();
+        ui->Joystick_button->setText("JOY");
     }
 }
 
@@ -2363,5 +2394,4 @@ void MainWindow::on_LEDIntensitySpinBox_valueChanged(double arg1)
     int intensity = arg1;
     m_mainCTL.setLEDLightIntensity(intensity);
 }
-
 
