@@ -22,6 +22,7 @@ SOURCES += \
     src/gamepadcontroller.cpp \
     src/UtilitiesAndConstants.cpp \
     src/abortcodemessages.cpp \
+    src/operatortab.cpp \
     src/passworddialog.cpp \
     src/diameter.cpp \
     src/lighttower.cpp \
@@ -49,6 +50,7 @@ HEADERS += \
     src/gamepadcontroller.h \
     src/UtilitiesAndConstants.h \
     src/abortcodemessages.h \
+    src/operatortab.h \
     src/passworddialog.h \
     src/diameter.h \
     src/axescontroller.h \

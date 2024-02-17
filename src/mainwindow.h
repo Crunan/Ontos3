@@ -10,6 +10,7 @@
 #include "axescontroller.h"
 #include <chrono>
 
+
 #include <QListWidget>
 #include <QMainWindow>
 #include <QMessageBox>
@@ -21,6 +22,9 @@
 #include <QSettings>
 #include <QFileDialog>
 #include "gamepadcontroller.h"
+
+
+class OperatorTab;
 
 using namespace std::literals;
 
@@ -40,6 +44,11 @@ public:
 
     //gets called right before the main window is about to show
     void showEvent(QShowEvent *) override;
+
+    typedef enum {
+        OPERATOR_TAB,
+        ENGINEER_TAB
+    } tabs;
 
 signals:
     // main state machine state transiton signals
@@ -183,7 +192,10 @@ private slots:
 
     void on_LEDIntensitySpinBox_valueChanged(double arg1);
 
+    void on_mainTabWidget_currentChanged(int index);
+
 private:
+
     // Action Button methods
     void showStatusMessage(const QString &message);
     // hit x in top right
@@ -227,6 +239,13 @@ private:
     void AxisStatusToUI();
     void RecipeToUI();
     void setMFCLabels();
+
+    // helper function that connects the operator
+    // tabs UI components slots to their respective
+    // signals
+    void connectOperatorTabSlots();
+    // operator tab class
+    OperatorTab *m_pOperatortab;
 
     MainLoop *m_pMainLoop;
     Ui::MainWindow* ui;

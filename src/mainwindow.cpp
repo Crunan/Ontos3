@@ -5,6 +5,7 @@
 #include <QTextStream>
 #include <QDebug>
 #include "UtilitiesAndConstants.h"
+#include "operatortab.h"
 
 int SM_PollCounter = 0;
 const int SM_POLL_PERIOD = 5;
@@ -14,6 +15,7 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     QMainWindow(parent),
     m_pMainLoop(loop),
     ui(new Ui::MainWindow),
+
     m_pStatus(new QLabel),
     m_passDialog(this),
     m_pSettings(new SettingsDialog),
@@ -25,6 +27,8 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     m_engineeringMode(false)
 {
     ui->setupUi(this);
+    m_pOperatortab = new OperatorTab(ui);
+
     this->setWindowTitle("ONTOS3 INTERFACE v" + QString(APP_VERSION));
 
     // setup the state machine
@@ -2314,7 +2318,13 @@ void MainWindow::on_batchID_checkBox_clicked(bool checked)
 void MainWindow::batchIDEnabled()
 {
     if (ui->batchID_checkBox->isChecked()) {
-        // show button and text box
+        // show button and text box    connect(&m_mainCTL.getTuner(), &Tuner::recipePositionChanged, this, &MainWindow::setRecipeMBtuner);
+        connect(&m_mainCTL.getTuner(), &Tuner::updateUIRecipePosition, this, &MainWindow::setRecipeMBtuner);
+        connect(&m_mainCTL.getPlasmaHead(), &PlasmaHead::headTemperatureChanged, this, &MainWindow::headTemperatureChanged);
+        connect(&m_passDialog, &PasswordDialog::userEnteredPassword, this, &MainWindow::userEnteredPassword);
+        connect(m_mainCTL.getSerialInterface(), &SerialInterface::serialClosed, this, &MainWindow::serialDisconnected);
+        connect(m_mainCTL.getSerialInterface(), &SerialInterface::serialOpen, this, &MainWindow::serialConnected);
+        connect(m_mainCTL.getSerialInterface(), &SerialInterface::readTimeoutError, this, &MainWindow::readTimeoutError);
         ui->batchIDButton->setEnabled(true);
         ui->batchIDedit->setEnabled(true);
     }
@@ -2393,5 +2403,46 @@ void MainWindow::on_LEDIntensitySpinBox_valueChanged(double arg1)
 {
     int intensity = arg1;
     m_mainCTL.setLEDLightIntensity(intensity);
+}
+
+// Tab clicked callback.  Index is new tab
+void MainWindow::on_mainTabWidget_currentChanged(int index)
+{
+    switch(index){
+    case 3:
+        connectOperatorTabSlots(); // this happens in main form.  add appropriate slots to OperatorTab object
+        break;
+    }
+}
+
+void MainWindow::connectOperatorTabSlots()
+{
+    // ui updates from axescontroller
+    // connect(&m_mainCTL.getAxesController(), &AxesController::stageStatusUpdate, m_pOperatortab, &OperatorTab::stageStatusUpdate);
+    // connect(&m_mainCTL.getAxesController(), &AxesController::pinsStateChanged, m_pOperatortab, &OperatorTab::pinsStateChanged);
+    // connect(&m_mainCTL.getAxesController(), &AxesController::vacStateChanged, m_pOperatortab, &OperatorTab::vacStateChanged);
+    // connect(&m_mainCTL.getAxesController(), &AxesController::updateUIAxisStatus, m_pOperatortab, &OperatorTab::AxisStatusToUI);
+    // // init and home state machines
+    // connect(&m_mainCTL.getAxesController(), &AxesController::initSMStartup, m_pOperatortab, &OperatorTab::initStateMachineStartup);
+    // connect(&m_mainCTL.getAxesController(), &AxesController::initSMDone, m_pOperatortab, &OperatorTab::initStateMachineDone);
+    // connect(&m_mainCTL.getAxesController(), &AxesController::setUIHomeSMStartup, m_pOperatortab, &OperatorTab::homeStateMachineStartup);
+    // connect(&m_mainCTL.getAxesController(), &AxesController::setUIHomeSMDone, m_pOperatortab, &OperatorTab::homeStateMachineDone);
+    // // scan/collision state machine
+    // connect(&m_mainCTL, &PlasmaController::CSM_StatusUpdate, m_pOperatortab, &OperatorTab::CSM_StatusUpdate);
+    // connect(&m_mainCTL, &PlasmaController::SSM_StatusUpdate, m_pOperatortab, &OperatorTab::SSM_StatusUpdate);
+    // connect(&m_mainCTL, &PlasmaController::SSM_Started, m_pOperatortab, &OperatorTab::SSM_Started);
+    // connect(&m_mainCTL, &PlasmaController::SSM_Done, m_pOperatortab, &OperatorTab::SSM_Done);
+    // // plasma status
+    // connect(&m_mainCTL, &PlasmaController::plasmaStateChanged, m_pOperatortab, &OperatorTab::plasmaStateChanged);
+    // connect(&m_mainCTL.getPlasmaHead(), &PlasmaHead::headTemperatureChanged, m_pOperatortab, &OperatorTab::headTemperatureChanged);
+    // connect(&m_mainCTL.getAbortMessages(), &AbortCodeMessages::showAbortMessageBox, m_pOperatortab, &OperatorTab::showAbortMessageBox);
+    // connect(m_mainCTL.getSerialInterface(), &SerialInterface::readTimeoutError, m_pOperatortab, &OperatorTab::readTimeoutError);
+    // // matchbox position
+    // connect(&m_mainCTL.getTuner(), &Tuner::actualPositionChanged, m_pOperatortab, &OperatorTab::MBactualPositionChanged);
+    // // recipe params gap/thickness
+    // connect(m_mainCTL.getRecipe(), &PlasmaRecipe::thicknessChanged, m_pOperatortab, &OperatorTab::thicknessChanged);
+    // connect(m_mainCTL.getRecipe(), &PlasmaRecipe::gapChanged, m_pOperatortab, &OperatorTab::gapChanged);
+    // // forward power
+    // connect(&m_mainCTL.getPower(), &PWR::forwardWattsChanged, m_pOperatortab, &OperatorTab::forwardWattsChanged);
 }
 
