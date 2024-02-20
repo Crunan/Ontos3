@@ -50,6 +50,8 @@ public:
         ENGINEER_TAB
     } tabs;
 
+    void engineerModeSelected() { m_passDialog.show(); }
+
 signals:
     // main state machine state transiton signals
     void MSM_TransitionPolling();
@@ -139,6 +141,11 @@ public slots:
     void OpenRecipeRejected();
     void SaveRecipeFileRejected();
 
+    // recipe loaded broadcast
+    //void
+
+
+
 private slots:
     // controls handlers
     void on_init_button_clicked();
@@ -193,6 +200,8 @@ private slots:
     void on_LEDIntensitySpinBox_valueChanged(double arg1);
 
     void on_mainTabWidget_currentChanged(int index);
+
+    void on_pushButton_clicked(bool checked);
 
 private:
 

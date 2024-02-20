@@ -1419,7 +1419,7 @@ void AxesController::resetAxes()
     readResponse();
 }
 
-void AxesController::togglePinsOn()
+void AxesController::togglePinsOn() // TODO: rename to pins up
 {
     QString StrCmd{};
     QString pin_pos = QString::number(m_stage.getPinsExposedPos());
@@ -1429,7 +1429,7 @@ void AxesController::togglePinsOn()
     Logger::logInfo("Stage Pins : enabled");
     emit pinsStateChanged(true);
 }
-void AxesController::togglePinsOff()
+void AxesController::togglePinsOff() // TODO: rename to pins down
 {
     QString StrCmd{};
     QString pin_pos = QString::number(m_stage.getPinsBuriedPos());

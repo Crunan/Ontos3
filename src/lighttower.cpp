@@ -13,6 +13,6 @@ LightTower::LightState LightTower::getState() const
 void LightTower::setState(LightState newState)
 {
     currentState = newState;
-    emit lightTowerStateChanged();
+    emit lightTowerStateChanged(newState);
 }
 

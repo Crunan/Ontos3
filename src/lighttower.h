@@ -22,7 +22,7 @@ public:
     void setState(LightState state);
 
 signals:
-    void lightTowerStateChanged();
+    void lightTowerStateChanged(LightState state);
 
 private:
     LightState currentState;

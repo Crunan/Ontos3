@@ -27,7 +27,7 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     m_engineeringMode(false)
 {
     ui->setupUi(this);
-    m_pOperatortab = new OperatorTab(ui);
+    m_pOperatortab = new OperatorTab(ui, m_mainCTL, this, parent);
 
     this->setWindowTitle("ONTOS3 INTERFACE v" + QString(APP_VERSION));
 
@@ -110,12 +110,17 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
 
     // give things a little time to settle before opening the serial port
     QTimer::singleShot(50, this, &MainWindow::openMainPort);
+
+
+    // temporary
+    connectOperatorTabSlots();
 }
 
 MainWindow::~MainWindow() {
-    delete m_pSettings;
     delete ui;
+    delete m_pSettings;
     delete m_pRecipeInputDialog;
+    delete m_pOperatortab;
 
     // cleanup state machine
     delete m_pMainStartupState;
@@ -538,7 +543,6 @@ void MainWindow::runMainStateMachine()
                 m_mainCTL.RunCollisionSM();
                 m_mainCTL.PollForCollision();
                 m_mainCTL.getAxesController().getAxisStatus();
-                //m_gamepadController.PollForEvents();
             }
         }
     }
@@ -2378,7 +2382,6 @@ void MainWindow::Recipe_BatchIDAccepted()
     }
 }
 
-
 // configure the gasses layout according to the number of
 // MFC's returned by the main controller
 void MainWindow::setUINumberOfMFCs(const int numMFCs)
@@ -2398,7 +2401,6 @@ void MainWindow::setUINumberOfMFCs(const int numMFCs)
     }
 }
 
-
 void MainWindow::on_LEDIntensitySpinBox_valueChanged(double arg1)
 {
     int intensity = arg1;
@@ -2408,41 +2410,52 @@ void MainWindow::on_LEDIntensitySpinBox_valueChanged(double arg1)
 // Tab clicked callback.  Index is new tab
 void MainWindow::on_mainTabWidget_currentChanged(int index)
 {
-    switch(index){
-    case 3:
-        connectOperatorTabSlots(); // this happens in main form.  add appropriate slots to OperatorTab object
-        break;
-    }
+    // switch(index){
+    // case OPERATOR_TAB:
+    //     connectOperatorTabSlots(); // this happens in main form.  add appropriate slots to OperatorTab object
+    //     break;
+    // }
 }
 
 void MainWindow::connectOperatorTabSlots()
 {
     // ui updates from axescontroller
-    // connect(&m_mainCTL.getAxesController(), &AxesController::stageStatusUpdate, m_pOperatortab, &OperatorTab::stageStatusUpdate);
-    // connect(&m_mainCTL.getAxesController(), &AxesController::pinsStateChanged, m_pOperatortab, &OperatorTab::pinsStateChanged);
-    // connect(&m_mainCTL.getAxesController(), &AxesController::vacStateChanged, m_pOperatortab, &OperatorTab::vacStateChanged);
-    // connect(&m_mainCTL.getAxesController(), &AxesController::updateUIAxisStatus, m_pOperatortab, &OperatorTab::AxisStatusToUI);
-    // // init and home state machines
-    // connect(&m_mainCTL.getAxesController(), &AxesController::initSMStartup, m_pOperatortab, &OperatorTab::initStateMachineStartup);
-    // connect(&m_mainCTL.getAxesController(), &AxesController::initSMDone, m_pOperatortab, &OperatorTab::initStateMachineDone);
-    // connect(&m_mainCTL.getAxesController(), &AxesController::setUIHomeSMStartup, m_pOperatortab, &OperatorTab::homeStateMachineStartup);
-    // connect(&m_mainCTL.getAxesController(), &AxesController::setUIHomeSMDone, m_pOperatortab, &OperatorTab::homeStateMachineDone);
-    // // scan/collision state machine
-    // connect(&m_mainCTL, &PlasmaController::CSM_StatusUpdate, m_pOperatortab, &OperatorTab::CSM_StatusUpdate);
-    // connect(&m_mainCTL, &PlasmaController::SSM_StatusUpdate, m_pOperatortab, &OperatorTab::SSM_StatusUpdate);
-    // connect(&m_mainCTL, &PlasmaController::SSM_Started, m_pOperatortab, &OperatorTab::SSM_Started);
-    // connect(&m_mainCTL, &PlasmaController::SSM_Done, m_pOperatortab, &OperatorTab::SSM_Done);
-    // // plasma status
-    // connect(&m_mainCTL, &PlasmaController::plasmaStateChanged, m_pOperatortab, &OperatorTab::plasmaStateChanged);
-    // connect(&m_mainCTL.getPlasmaHead(), &PlasmaHead::headTemperatureChanged, m_pOperatortab, &OperatorTab::headTemperatureChanged);
-    // connect(&m_mainCTL.getAbortMessages(), &AbortCodeMessages::showAbortMessageBox, m_pOperatortab, &OperatorTab::showAbortMessageBox);
-    // connect(m_mainCTL.getSerialInterface(), &SerialInterface::readTimeoutError, m_pOperatortab, &OperatorTab::readTimeoutError);
-    // // matchbox position
-    // connect(&m_mainCTL.getTuner(), &Tuner::actualPositionChanged, m_pOperatortab, &OperatorTab::MBactualPositionChanged);
-    // // recipe params gap/thickness
-    // connect(m_mainCTL.getRecipe(), &PlasmaRecipe::thicknessChanged, m_pOperatortab, &OperatorTab::thicknessChanged);
-    // connect(m_mainCTL.getRecipe(), &PlasmaRecipe::gapChanged, m_pOperatortab, &OperatorTab::gapChanged);
-    // // forward power
-    // connect(&m_mainCTL.getPower(), &PWR::forwardWattsChanged, m_pOperatortab, &OperatorTab::forwardWattsChanged);
+    connect(&m_mainCTL.getAxesController(), &AxesController::stageStatusUpdate, m_pOperatortab, &OperatorTab::stageStatusUpdate);
+    connect(&m_mainCTL.getAxesController(), &AxesController::pinsStateChanged, m_pOperatortab, &OperatorTab::pinsStateChanged);
+    connect(&m_mainCTL.getAxesController(), &AxesController::vacStateChanged, m_pOperatortab, &OperatorTab::vacStateChanged);
+    connect(&m_mainCTL.getAxesController(), &AxesController::updateUIAxisStatus, m_pOperatortab, &OperatorTab::axisStatusToUI);
+    // init and home state machines
+    connect(&m_mainCTL.getAxesController(), &AxesController::initSMStartup, m_pOperatortab, &OperatorTab::ISM_Startup);
+    connect(&m_mainCTL.getAxesController(), &AxesController::initSMDone, m_pOperatortab, &OperatorTab::ISM_Done);
+    connect(&m_mainCTL.getAxesController(), &AxesController::setUIHomeSMStartup, m_pOperatortab, &OperatorTab::HSM_Startup);
+    connect(&m_mainCTL.getAxesController(), &AxesController::setUIHomeSMDone, m_pOperatortab, &OperatorTab::HSM_Done);
+    // scan/collision state machine
+    connect(&m_mainCTL, &PlasmaController::CSM_StatusUpdate, m_pOperatortab, &OperatorTab::CSM_StatusUpdate);
+    connect(&m_mainCTL, &PlasmaController::SSM_StatusUpdate, m_pOperatortab, &OperatorTab::SSM_StatusUpdate);
+    connect(&m_mainCTL, &PlasmaController::SSM_Started, m_pOperatortab, &OperatorTab::SSM_Started);
+    connect(&m_mainCTL, &PlasmaController::SSM_Done, m_pOperatortab, &OperatorTab::SSM_Done);
+    // light tower
+    connect(&m_mainCTL.getLightTower(), &LightTower::lightTowerStateChanged, m_pOperatortab, &OperatorTab::lightTowerStateChanged);
+    // plasma status
+    connect(&m_mainCTL, &PlasmaController::plasmaStateChanged, m_pOperatortab, &OperatorTab::plasmaStateChanged);
+    connect(&m_mainCTL.getPlasmaHead(), &PlasmaHead::headTemperatureChanged, m_pOperatortab, &OperatorTab::headTemperatureChanged);
+    // matchbox position
+    connect(&m_mainCTL.getTuner(), &Tuner::actualPositionChanged, m_pOperatortab, &OperatorTab::MBactualPositionChanged);
+    // recipe file
+   // connect(m_pOperatortab, &OperatorTab::
+    // recipe params gap/thickness
+    connect(m_mainCTL.getRecipe(), &PlasmaRecipe::thicknessChanged, m_pOperatortab, &OperatorTab::thicknessChanged);
+    connect(m_mainCTL.getRecipe(), &PlasmaRecipe::gapChanged, m_pOperatortab, &OperatorTab::gapChanged);
+    // forward power
+    connect(&m_mainCTL.getPower(), &PWR::forwardWattsChanged, m_pOperatortab, &OperatorTab::forwardWattsChanged);
+}
+
+
+void MainWindow::on_pushButton_clicked(bool checked)
+{
+    if (checked) // make red
+        this->m_pOperatortab->mfcFlowLinesOn(1, true);
+    else
+        this->m_pOperatortab->mfcFlowLinesOn(1, false);
 }
 

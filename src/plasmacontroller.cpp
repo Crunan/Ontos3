@@ -1037,17 +1037,17 @@ void PlasmaController::setLightTower()
     case LightTower::LT_ERROR: // Light tower turns red - error commands and dangrous conditions
         sendCommand("$CB01%"); //  $C    sendCommand("$8701%"); //SET_EXEC_RECIPE  $870p% p=1 Execute Recipe, p=0 RF off, Recipe off
         readResponse();
-        m_lightTower.setState(LightTower::LT_INACTIVE);
+        //m_lightTower.setState(LightTower::LT_INACTIVE);
         break;
     case LightTower::LT_READY: // Light tower turns amber - ready to recieve/process commands
         sendCommand("$CB02%"); //  $CB0n% resp[!CB0n#] n = 0,1,2,3 (none, red, amber, green)
         readResponse();
-        m_lightTower.setState(LightTower::LT_INACTIVE);
+        //m_lightTower.setState(LightTower::LT_INACTIVE);
         break;
     case LightTower::LT_ACTIVE:
         sendCommand("$CB03%"); //  $CB0n% resp[!CB0n#] n = 0,1,2,3 (none, red, amber, green)
         readResponse();
-        m_lightTower.setState(LightTower::LT_INACTIVE);
+        //m_lightTower.setState(LightTower::LT_INACTIVE);
         break;
     case LightTower::LT_INACTIVE:
         break;
@@ -1171,7 +1171,7 @@ void PlasmaController::LaserSenseOff()
 // this replaces the collisionlaser()
 void PlasmaController::PollForCollision()
 {
-    if (m_stageCTL.getXAxisError() == 8 || // TODO: replace with symbolic constantsAxisStatusToUI
+    if (m_stageCTL.getXAxisError() == 8 || // TODO: replace with symbolic constants
         m_stageCTL.getYAxisError() == 8 ||
         m_stageCTL.getZAxisError() == 8) {
 

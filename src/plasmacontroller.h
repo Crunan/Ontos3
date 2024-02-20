@@ -88,6 +88,7 @@ public:
     bool getPlasmaActive() { return m_plasmaActive; }
     bool getEstopActive() { return m_estopActive; }
     AbortCodeMessages& getAbortMessages() { return m_abortMessages; }
+    LightTower& getLightTower() { return m_lightTower; }
 
     // laser access
     void LaserSenseOn();
