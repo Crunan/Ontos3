@@ -25,6 +25,7 @@
 
 
 class OperatorTab;
+class EngineerTab;
 
 using namespace std::literals;
 
@@ -241,6 +242,8 @@ private:
     void connectOperatorTabSlots();
     // operator tab class
     OperatorTab *m_pOperatortab;
+    // engineer tab class
+    EngineerTab *m_pEngineertab;
 
     MainLoop *m_pMainLoop;
     Ui::MainWindow* ui;

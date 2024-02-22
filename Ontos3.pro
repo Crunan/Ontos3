@@ -19,6 +19,7 @@ LIBS += -L/usr/lib/x86_64-linux-gnu -lSDL2 -ldl -lpthread
 INCLUDES += /usr/include/SDL2
 
 SOURCES += \
+    src/engineertab.cpp \
     src/gamepadcontroller.cpp \
     src/UtilitiesAndConstants.cpp \
     src/abortcodemessages.cpp \
@@ -47,6 +48,7 @@ SOURCES += \
 
 
 HEADERS += \
+    src/engineertab.h \
     src/gamepadcontroller.h \
     src/UtilitiesAndConstants.h \
     src/abortcodemessages.h \

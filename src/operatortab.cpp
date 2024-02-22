@@ -600,6 +600,3 @@ void OperatorTab::comboBoxOPLogin_currentTextChanged(const QString &arg1)
 }
 
 
-
-
-
