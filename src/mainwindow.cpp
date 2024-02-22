@@ -6,6 +6,7 @@
 #include <QDebug>
 #include "UtilitiesAndConstants.h"
 #include "operatortab.h"
+#include "engineertab.h"
 
 int SM_PollCounter = 0;
 const int SM_POLL_PERIOD = 5;
@@ -28,6 +29,7 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
 {
     ui->setupUi(this);
     m_pOperatortab = new OperatorTab(ui, m_mainCTL, this, parent);
+    m_pEngineertab = new EngineerTab(ui, m_mainCTL, this, parent);
 
     this->setWindowTitle("ONTOS3 INTERFACE v" + QString(APP_VERSION));
 
@@ -121,6 +123,7 @@ MainWindow::~MainWindow() {
     delete m_pSettings;
     delete m_pRecipeInputDialog;
     delete m_pOperatortab;
+    delete m_pEngineertab;
 
     // cleanup state machine
     delete m_pMainStartupState;
