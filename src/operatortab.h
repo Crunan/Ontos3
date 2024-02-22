@@ -21,9 +21,9 @@ public:
 
 public slots:
     // stage status to UI
-    void stageStatusUpdate(QString status1, QString status2);
-    void pinsStateChanged(bool state);
-    void vacStateChanged(bool state);
+    void stageStatusUpdate(const QString status1, const QString status2);
+    void pinsStateChanged(const bool state);
+    void vacStateChanged(const bool state);
     void axisStatusToUI();
     // home state machine
     void HSM_Startup();
@@ -32,23 +32,25 @@ public slots:
     void ISM_Startup();
     void ISM_Done();
     // collision state machine
-    void CSM_StatusUpdate(QString status, QString next);
+    void CSM_StatusUpdate(const QString status, const QString next);
     // scan state machine
     void SSM_Started();
     void SSM_Done();
-    void SSM_StatusUpdate(QString status, QString next);
+    void SSM_StatusUpdate(const QString status, const QString next);
     // process status
+    void setUINumberOfMFCs(const int numMFCs);
+    void displayAbortMessage(const QString message);
     void forwardWattsChanged();
     void MBactualPositionChanged(const double actualPosition);
     void headTemperatureChanged();
-    void plasmaStateChanged(bool plasmaActive);
+    void plasmaStateChanged(const bool plasmaActive);
     void thicknessChanged();
     void gapChanged();
     void updateRecipeFlow(const int mfcNumber, const double recipeFlow);
     void actualFlowChanged(const int mfcNumber, const double actualFlow);
-    void lightTowerStateChanged(LightTower::LightState state);
-
-    void mfcFlowLinesOn(int mfcNum, bool on);
+    void lightTowerStateChanged(const LightTower::LightState state);
+    void doorStateChanged(bool state);
+    void mfcFlowLinesOn(const int mfcNum, const bool on);
 
 private slots:
     void btnChuckVacOnOff_clicked(bool checked);

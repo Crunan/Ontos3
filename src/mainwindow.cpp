@@ -613,7 +613,8 @@ void MainWindow::showAbortMessageBox(QString message, bool shutdown)
         QApplication::quit();
     }
     else {
-        QMessageBox::critical(this, "ABORT CONDITION", message);
+        emit displayAbortMessage(message);  // forward to a child tab
+        //QMessageBox::critical(this, "ABORT CONDITION", message);
     }
 }
 
@@ -2424,6 +2425,7 @@ void MainWindow::connectOperatorTabSlots()
     connect(&m_mainCTL.getAxesController(), &AxesController::pinsStateChanged, m_pOperatortab, &OperatorTab::pinsStateChanged);
     connect(&m_mainCTL.getAxesController(), &AxesController::vacStateChanged, m_pOperatortab, &OperatorTab::vacStateChanged);
     connect(&m_mainCTL.getAxesController(), &AxesController::updateUIAxisStatus, m_pOperatortab, &OperatorTab::axisStatusToUI);
+    connect(&m_mainCTL.getAxesController(), &AxesController::doorStateChanged, m_pOperatortab, &OperatorTab::doorStateChanged);
     // init and home state machines
     connect(&m_mainCTL.getAxesController(), &AxesController::initSMStartup, m_pOperatortab, &OperatorTab::ISM_Startup);
     connect(&m_mainCTL.getAxesController(), &AxesController::initSMDone, m_pOperatortab, &OperatorTab::ISM_Done);
@@ -2441,21 +2443,25 @@ void MainWindow::connectOperatorTabSlots()
     connect(&m_mainCTL.getPlasmaHead(), &PlasmaHead::headTemperatureChanged, m_pOperatortab, &OperatorTab::headTemperatureChanged);
     // matchbox position
     connect(&m_mainCTL.getTuner(), &Tuner::actualPositionChanged, m_pOperatortab, &OperatorTab::MBactualPositionChanged);
-    // recipe file
-   // connect(m_pOperatortab, &OperatorTab::
     // recipe params gap/thickness
     connect(m_mainCTL.getRecipe(), &PlasmaRecipe::thicknessChanged, m_pOperatortab, &OperatorTab::thicknessChanged);
     connect(m_mainCTL.getRecipe(), &PlasmaRecipe::gapChanged, m_pOperatortab, &OperatorTab::gapChanged);
     // forward power
     connect(&m_mainCTL.getPower(), &PWR::forwardWattsChanged, m_pOperatortab, &OperatorTab::forwardWattsChanged);
+    // abort message
+    connect(this, &MainWindow::displayAbortMessage, m_pOperatortab, &OperatorTab::displayAbortMessage);
+    // mfc
+    connect(&m_mainCTL, &PlasmaController::setUINumberOfMFCs, m_pOperatortab, &OperatorTab::setUINumberOfMFCs);
 }
 
 
 void MainWindow::on_pushButton_clicked(bool checked)
 {
-    if (checked) // make red
-        this->m_pOperatortab->mfcFlowLinesOn(1, true);
-    else
-        this->m_pOperatortab->mfcFlowLinesOn(1, false);
+    // if (checked) // make red
+    //     this->m_pOperatortab->mfcFlowLinesOn(1, true);
+    // else
+    //     this->m_pOperatortab->mfcFlowLinesOn(1, false);
+    emit displayAbortMessage("what the fuck is going on?");
 }
+
 

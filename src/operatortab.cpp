@@ -33,6 +33,8 @@ OperatorTab::OperatorTab(Ui::MainWindow* ui, PlasmaController &controller, MainW
     connect(m_pUI->btnOPInit, &QPushButton::clicked, this, &OperatorTab::btnOPInit_clicked);
     connect(m_pUI->comboBoxOPRecipe, &QComboBox::currentTextChanged, this, &OperatorTab::comboBoxOPRecipe_currentTextChanged);
     connect(m_pUI->comboBoxOPLogin, &QComboBox::currentTextChanged, this, &OperatorTab::comboBoxOPLogin_currentTextChanged);
+
+    m_pUI->btnOPAcknowledge->hide();
 }
 
 OperatorTab::~OperatorTab()
@@ -59,7 +61,7 @@ void OperatorTab::populateRecipeComboBox()
 void OperatorTab::connectMFCFlowBars()
 {
     for (int i = 0; i < m_controller.getMFCs().size(); ++i) {
-        //connect(m_controller.getMFCs()[i], &MFC::recipeFlowChanged, this, &OperatorTab::updateRecipeFlow);
+        connect(m_controller.getMFCs()[i], &MFC::recipeFlowChanged, this, &OperatorTab::updateRecipeFlow);
         connect(m_controller.getMFCs()[i], &MFC::updateUIActualFlow, this, &OperatorTab::actualFlowChanged);
     }
 }
@@ -93,14 +95,6 @@ void OperatorTab::lightTowerSetInactive()
 }
 
 
-/////////////////////////////
-// static const char mfcFlowLinesActive[] = "border: 2px solid rgb(52, 101, 164);";
-// static const char mfcFlowLinesInactive[] = "border: 2px solid black;";
-// static const char mfcBoxActive[] = "background-color: rgb(52, 101, 164);";
-// static const char mfcBoxActivText[] = "color: rgb(255, 255, 255);";
-// static const char mfcBoxInactive[] = "background-color: rgb(base);";
-// static const char mfcBoxInactivText[] = "color: rgb(0, 0, 0);";
-////////////////////////////////
 void OperatorTab::mfcFlowLinesOn(int mfcNum, bool on)
 {
     QString lineColor = (on == true) ? QString(mfcFlowLinesActive) : QString(mfcFlowLinesInactive);
@@ -117,19 +111,99 @@ void OperatorTab::mfcFlowLinesOn(int mfcNum, bool on)
         m_pUI->lblOPMFC1->setStyleSheet(textColor);
     }
     else if (mfcNum == 2) {
+        // set line colors
+        m_pUI->lineOPMFC2pre->setStyleSheet(lineColor);
+        m_pUI->lineOPMFC2post->setStyleSheet(lineColor);
+        m_pUI->lineOPMFC2vert->setStyleSheet(lineColor);
+        // set box and text color
+        m_pUI->frameMFC2->setStyleSheet(boxColor);
+        m_pUI->lblOPMFC2->setStyleSheet(textColor);
     }
     else if (mfcNum == 3) {
+        // set line colors
+        m_pUI->lineOPMFC3pre->setStyleSheet(lineColor);
+        m_pUI->lineOPMFC3post->setStyleSheet(lineColor);
+        m_pUI->lineOPMFC3vert->setStyleSheet(lineColor);
+        // set box and text color
+        m_pUI->frameMFC3->setStyleSheet(boxColor);
+        m_pUI->lblOPMFC3->setStyleSheet(textColor);
     }
     else if (mfcNum == 4) {
+        // set line colors
+        m_pUI->lineOPMFC4pre->setStyleSheet(lineColor);
+        m_pUI->lineOPMFC4post->setStyleSheet(lineColor);
+        m_pUI->lineOPMFC4vert->setStyleSheet(lineColor);
+        // set box and text color
+        m_pUI->frameMFC4->setStyleSheet(boxColor);
+        m_pUI->lblOPMFC4->setStyleSheet(textColor);
     }
     else if (mfcNum == 5) {
+        // set line colors
+        m_pUI->lineOPMFC5pre->setStyleSheet(lineColor);
+        m_pUI->lineOPMFC5post->setStyleSheet(lineColor);
+        m_pUI->lineOPMFC5vert->setStyleSheet(lineColor);
+        // set box and text color
+        m_pUI->frameMFC5->setStyleSheet(boxColor);
+        m_pUI->lblOPMFC5->setStyleSheet(textColor);
     }
     else if (mfcNum == 6) {
+        // set line colors
+        m_pUI->lineOPMFC6pre->setStyleSheet(lineColor);
+        m_pUI->lineOPMFC6post->setStyleSheet(lineColor);
+        m_pUI->lineOPMFC6vert->setStyleSheet(lineColor);
+        // set box and text color
+        m_pUI->frameMFC6->setStyleSheet(boxColor);
+        m_pUI->lblOPMFC6->setStyleSheet(textColor);
     }
+}
+
+// configure the gasses layout according to the number of
+// MFC's returned by the main controller
+void OperatorTab::setUINumberOfMFCs(const int numMFCs)
+{
+    if (numMFCs == 5) { // if we have 5 MFC's hide MFC 6
+        m_pUI->progressBarOPMFC6->hide();
+        m_pUI->lineOPMFC6pre->hide();
+        m_pUI->frameMFC6->hide();
+        m_pUI->lineOPMFC6post->hide();
+        m_pUI->lineOPMFC6vert->hide();
+    }
+    else if (numMFCs == 4) { // if we have 4 MFC's hide MFC 5 and 6
+        m_pUI->progressBarOPMFC5->hide();
+        m_pUI->lineOPMFC5pre->hide();
+        m_pUI->frameMFC5->hide();
+        m_pUI->lineOPMFC5post->hide();
+        m_pUI->lineOPMFC5vert->hide();
+
+        m_pUI->progressBarOPMFC6->hide();
+        m_pUI->lineOPMFC6pre->hide();
+        m_pUI->frameMFC6->hide();
+        m_pUI->lineOPMFC6post->hide();
+        m_pUI->lineOPMFC6vert->hide();
+    }
+}
+
+void OperatorTab::displayAbortMessage(QString smsg)
+{
+    m_pUI->texteditOPTabAxisStatus->setTextColor(QColor(133, 2, 2));
+    m_pUI->texteditOPTabAxisStatus->setText(smsg);
+    m_pUI->btnOPAcknowledge->show();
 }
 
 
 //////////////// SLOTS //////////////////////////
+
+void OperatorTab::doorStateChanged(bool state)
+{
+    if (state) {
+        m_pUI->lblOPDoorOpen->setText("Yes");
+    }
+    else {
+        m_pUI->lblOPDoorOpen->setText("No");
+    }
+}
+
+
 void OperatorTab::lightTowerStateChanged(LightTower::LightState state)
 {
     switch(state) {
@@ -181,85 +255,43 @@ void OperatorTab::axisStatusToUI()
 // update the recipe progress bar and values
 void OperatorTab::updateRecipeFlow(const int mfcNumber, const double recipeFlow)
 {
-    // // This uses the parameters passed in the signal
-    // if (mfcNumber == 1) {
-    //     // set vertical progress bar
-    //     double range = m_mainCTL.findMFCByNumber(1)->getRange();
-    //     int percentage = 0;
-    //     if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
-    //     ui->gas1_sliderBar->setValue(int(percentage));
-
-    //     // set dashboard and plasma tab recipe edit box
-    //     ui->mfc1_recipe->setText(QString::number(recipeFlow, 'f', 2));
-
-    //     // set the dashboard and plasma tab edit box below the progress bar
-    //     ui->gas1_recipe_SLPM->setText(QString::number(recipeFlow, 'f', 2));
-    // }
-    // else if (mfcNumber == 2) {
-    //     // set vertical progress bar
-    //     double range = m_mainCTL.findMFCByNumber(2)->getRange();
-    //     int percentage = 0;
-    //     if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
-    //     ui->gas2_sliderBar->setValue(int(percentage));
-
-    //     // set dashboard and plasma tab recipe edit box
-    //     ui->mfc2_recipe->setText(QString::number(recipeFlow, 'f', 2));
-
-    //     // set the dashboard and plasma tab edit box below the progress bar
-    //     ui->gas2_recipe_SLPM->setText(QString::number(recipeFlow, 'f', 2));
-    // }
-    // else if (mfcNumber == 3) {
-    //     // set vertical progress bar
-    //     double range = m_mainCTL.findMFCByNumber(3)->getRange();
-    //     int percentage = 0;
-    //     if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
-    //     ui->gas3_sliderBar->setValue(int(percentage));
-
-    //     // set dashboard and plasma tab recipe edit box
-    //     ui->mfc3_recipe->setText(QString::number(recipeFlow, 'f', 2));
-
-    //     // set the dashboard and plasma tab edit box below the progress bar
-    //     ui->gas3_recipe_SLPM->setText(QString::number(recipeFlow, 'f', 2));
-    // }
-    // else if (mfcNumber == 4) {
-    //     // set vertical progress bar
-    //     double range = m_mainCTL.findMFCByNumber(4)->getRange();
-    //     int percentage = 0;
-    //     if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
-    //     ui->gas4_sliderBar->setValue(int(percentage));
-
-    //     // set dashboard and plasma tab recipe edit box
-    //     ui->mfc4_recipe->setText(QString::number(recipeFlow, 'f', 2));
-
-    //     // set the dashboard and plasma tab edit box below the progress bar
-    //     ui->gas4_recipe_SLPM->setText(QString::number(recipeFlow, 'f', 2));
-    // }
-    // else if (mfcNumber == 5) {
-    //     // set vertical progress bar
-    //     double range = m_mainCTL.findMFCByNumber(5)->getRange();
-    //     int percentage = 0;
-    //     if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
-    //     ui->gas5_sliderBar->setValue(int(percentage));
-
-    //     // set dashboard and plasma tab recipe edit box
-    //     ui->mfc5_recipe->setText(QString::number(recipeFlow, 'f', 2));
-
-    //     // set the dashboard and plasma tab edit box below the progress bar
-    //     ui->gas5_recipe_SLPM->setText(QString::number(recipeFlow, 'f', 2));
-    // }
-    // else if (mfcNumber == 6) {
-    //     // set vertical progress bar
-    //     double range = m_mainCTL.findMFCByNumber(6)->getRange();
-    //     int percentage = 0;
-    //     if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
-    //     ui->gas6_sliderBar->setValue(int(percentage));
-
-    //     // set dashboard and plasma tab recipe edit box
-    //     ui->mfc6_recipe->setText(QString::number(recipeFlow, 'f', 2));
-
-    //     // set the dashboard and plasma tab edit box below the progress bar
-    //     ui->gas6_recipe_SLPM->setText(QString::number(recipeFlow, 'f', 2));
-    // }
+    // This uses the parameters passed in the signal
+    if (mfcNumber == 1) {
+        double range = m_controller.findMFCByNumber(1)->getRange();
+        int percentage = 0;
+        if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
+        m_pUI->progressBarOPMFC1->setValue(int(percentage));
+    }
+    else if (mfcNumber == 2) {
+        double range = m_controller.findMFCByNumber(2)->getRange();
+        int percentage = 0;
+        if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
+        m_pUI->progressBarOPMFC2->setValue(int(percentage));
+    }
+    else if (mfcNumber == 3) {
+        double range = m_controller.findMFCByNumber(3)->getRange();
+        int percentage = 0;
+        if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
+        m_pUI->progressBarOPMFC3->setValue(int(percentage));
+    }
+    else if (mfcNumber == 4) {
+        double range = m_controller.findMFCByNumber(4)->getRange();
+        int percentage = 0;
+        if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
+        m_pUI->progressBarOPMFC4->setValue(int(percentage));
+    }
+    else if (mfcNumber == 5) {
+        double range = m_controller.findMFCByNumber(5)->getRange();
+        int percentage = 0;
+        if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
+        m_pUI->progressBarOPMFC5->setValue(int(percentage));
+    }
+    else if (mfcNumber == 6) {
+        double range = m_controller.findMFCByNumber(6)->getRange();
+        int percentage = 0;
+        if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
+        m_pUI->progressBarOPMFC6->setValue(int(percentage));
+    }
 }
 
 void OperatorTab::actualFlowChanged(const int mfcNumber, const double actualFlow)

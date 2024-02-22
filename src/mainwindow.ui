@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1970</width>
-    <height>1000</height>
+    <width>2015</width>
+    <height>1028</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -484,7 +484,7 @@ QProgressBar::Chunk
        <item row="1" column="1">
         <widget class="Line" name="lineOPMFC1pre">
          <property name="styleSheet">
-          <string notr="true">background-color: rgb(52, 101, 164);</string>
+          <string notr="true"/>
          </property>
          <property name="frameShadow">
           <enum>QFrame::Plain</enum>
@@ -658,7 +658,7 @@ QProgressBar::Chunk
         </widget>
        </item>
        <item row="11" column="2">
-        <widget class="QFrame" name="frame_12">
+        <widget class="QFrame" name="frameMFC6">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
            <horstretch>0</horstretch>
@@ -711,7 +711,7 @@ QProgressBar::Chunk
         </widget>
        </item>
        <item row="5" column="1">
-        <widget class="Line" name="lineOPMFC3Pre">
+        <widget class="Line" name="lineOPMFC3pre">
          <property name="frameShadow">
           <enum>QFrame::Plain</enum>
          </property>
@@ -727,7 +727,7 @@ QProgressBar::Chunk
         </widget>
        </item>
        <item row="7" column="1">
-        <widget class="Line" name="lineOPMFC4Pre">
+        <widget class="Line" name="lineOPMFC4pre">
          <property name="frameShadow">
           <enum>QFrame::Plain</enum>
          </property>
@@ -801,7 +801,7 @@ QProgressBar::Chunk
         </widget>
        </item>
        <item row="9" column="1">
-        <widget class="Line" name="lineOPMFC5Pre">
+        <widget class="Line" name="lineOPMFC5pre">
          <property name="frameShadow">
           <enum>QFrame::Plain</enum>
          </property>
@@ -817,7 +817,7 @@ QProgressBar::Chunk
         </widget>
        </item>
        <item row="11" column="1">
-        <widget class="Line" name="lineOPMFC6Pre">
+        <widget class="Line" name="lineOPMFC6pre">
          <property name="frameShadow">
           <enum>QFrame::Plain</enum>
          </property>
@@ -1486,6 +1486,12 @@ color: rgb(255, 255, 255);</string>
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="maximumSize">
                  <size>
                   <width>16777215</width>
@@ -1495,8 +1501,47 @@ color: rgb(255, 255, 255);</string>
                 <property name="readOnly">
                  <bool>true</bool>
                 </property>
+                <property name="overwriteMode">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QFrame" name="frameOPacknowledgeButton">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>150</height>
+              </size>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::Box</enum>
+             </property>
+             <property name="lineWidth">
+              <number>0</number>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_13">
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
              </layout>
             </widget>
            </item>
@@ -1692,57 +1737,6 @@ color: rgb(255, 255, 255);</string>
       </property>
       <property name="midLineWidth">
        <number>1</number>
-      </property>
-     </widget>
-     <widget class="QComboBox" name="comboBoxOPLogin">
-      <property name="geometry">
-       <rect>
-        <x>1735</x>
-        <y>25</y>
-        <width>161</width>
-        <height>40</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <family>Century Gothic</family>
-        <pointsize>16</pointsize>
-       </font>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">background-color: rgb(78, 154, 6);</string>
-      </property>
-      <property name="currentText">
-       <string>Operator</string>
-      </property>
-      <item>
-       <property name="text">
-        <string>Operator</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Engineer</string>
-       </property>
-      </item>
-     </widget>
-     <widget class="QLabel" name="label_8">
-      <property name="geometry">
-       <rect>
-        <x>1580</x>
-        <y>36</y>
-        <width>141</width>
-        <height>19</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <family>Century Gothic</family>
-        <pointsize>16</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Access Level</string>
       </property>
      </widget>
      <widget class="QFrame" name="frame_8">
@@ -2501,7 +2495,7 @@ background-color: palette(base)</string>
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
         <x>1600</x>
@@ -2535,6 +2529,57 @@ background-color: palette(base)</string>
          <property name="text">
           <string>No</string>
          </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="">
+      <property name="geometry">
+       <rect>
+        <x>1580</x>
+        <y>25</y>
+        <width>266</width>
+        <height>35</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <item>
+        <widget class="QLabel" name="label_8">
+         <property name="font">
+          <font>
+           <family>Century Gothic</family>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Access Level</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="comboBoxOPLogin">
+         <property name="font">
+          <font>
+           <family>Century Gothic</family>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: rgb(78, 154, 6);</string>
+         </property>
+         <property name="currentText">
+          <string>Operator</string>
+         </property>
+         <item>
+          <property name="text">
+           <string>Operator</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Engineer</string>
+          </property>
+         </item>
         </widget>
        </item>
       </layout>
@@ -6635,7 +6680,7 @@ font: 14pt &quot;Ubuntu Bold&quot;;
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1970</width>
+     <width>2015</width>
      <height>23</height>
     </rect>
    </property>

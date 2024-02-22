@@ -167,7 +167,7 @@ signals:
 
     // update ui
     void pinsStateChanged(bool state);
-    //void joystickStateChanged(bool state);
+    void doorStateChanged(bool state);
     void n2StateChanged(bool state);
     void vacStateChanged(bool state);
     void xLimitsChanged(double xmin, double xmax);
@@ -179,7 +179,6 @@ public slots:
 private:
     // status bit parsers
     void doorsStatus();
-    //void joyBtnStatus();
     void vacStatus();
     void N2PurgeStatus();
 

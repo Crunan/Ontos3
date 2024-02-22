@@ -58,6 +58,7 @@ signals:
     void MSM_TransitionStartup();
     void MSM_TransitionShutdown();
     void MSM_TransitionIdle();
+    void displayAbortMessage(QString smsg);
 
 public slots:
     void setInitialUIState();
@@ -141,11 +142,6 @@ public slots:
     void OpenRecipeRejected();
     void SaveRecipeFileRejected();
 
-    // recipe loaded broadcast
-    //void
-
-
-
 private slots:
     // controls handlers
     void on_init_button_clicked();
@@ -196,11 +192,8 @@ private slots:
     void on_collision_system_checkbox_clicked(bool checked);
     void on_batchIDButton_clicked();
     void on_refresh_cascade_recipe_button_clicked();
-
     void on_LEDIntensitySpinBox_valueChanged(double arg1);
-
     void on_mainTabWidget_currentChanged(int index);
-
     void on_pushButton_clicked(bool checked);
 
 private:
@@ -212,28 +205,21 @@ private:
     // serial port signals sent from serialInterface
     void serialDisconnected();
     void serialConnected();
-
     // update the ui based on login
     void setUIOperatorMode();
     void setUIEngineerMode();
     void disableControlButtons();
-
     void connectMFCRecipeButton(QPushButton* button, const int &mfcNumber);
     // Connection for Recipes buttons
     void connectRecipeButtons();
-
     // Connection for Cascade Recipes buttons
     void connectCascadeRecipeButtons();
-
     // Function for loading recipes into Qlist
     void populateRecipeListWidgetFromDirectory(QListWidget* listWidget);
-
     void consoleMainCTLSetup();
     void batchIDEnabled();
-
     // persistent settings
     void readSettings();
-
     // determine if there is a 3 axis board attached
     void has3Axis();
 

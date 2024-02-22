@@ -920,7 +920,6 @@ void AxesController::updateAxisStatus()
 
         // Check various status bits
         doorsStatus();
-        //joyBtnStatus();
         vacStatus();
         N2PurgeStatus();
 
@@ -1008,37 +1007,14 @@ void AxesController::doorsStatus()
                 Logger::logInfo("Doors : open");
             else
                 Logger::logInfo("Doors : closed");
+
+            emit doorStateChanged(m_doorsOpen);
         }
     }
     else {
         Logger::logCritical("Cannot find config file entry for: " + QString(CONFIG_DOOR_STATUS_BIT));
     }
 }
-
-/*void AxesController::joyBtnStatus()
-{
-    bool ok = false;
-    int bit = m_config.getValueForKey(CONFIG_JOY_STATUS_BIT).toInt(&ok);
-
-    if (ok) {
-        m_joystickOn = isBitSet(m_LEDstates, bit);
-        Logger::logInfo(QString::number(m_LEDstates));
-
-        if (m_joystickOn != joystickOnLast) {
-            joystickOnLast = m_joystickOn;
-
-            if (m_joystickOn)
-                Logger::logInfo("Joystick : enabled");
-            else
-                Logger::logInfo("Joystick : disabled");
-
-            emit joystickStateChanged(m_joystickOn);
-        }
-    }
-    else {
-        Logger::logCritical("Cannot find config file entry for: " + QString(CONFIG_JOY_STATUS_BIT));
-    }
-}*/
 
 void AxesController::vacStatus()
 {
