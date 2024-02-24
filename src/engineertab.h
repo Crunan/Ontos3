@@ -44,6 +44,10 @@ private slots:
     void comboBoxENRecipe_currentTextChanged(const QString &arg1);
     void comboBoxENLogin_currentTextChanged(const QString &arg1);
 
+    void on_comboBoxOPLogin_currentTextChanged(const QString &arg1);
+
+    void on_pushButton_clicked();
+
 private:
     Ui::MainWindow* m_pUI;
     MainWindow* m_pMWndw;

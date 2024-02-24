@@ -40,7 +40,7 @@ void PWR::setForwardWatts(int value)
 {
     if (m_forwardWatts != value) {
         m_forwardWatts = value;
-        emit forwardWattsChanged();
+        emit forwardWattsChanged(m_forwardWatts);
     }
 }
 
@@ -66,7 +66,7 @@ void PWR::setReflectedWatts(int value)
 {
     if (m_reflectedWatts != value) {
         m_reflectedWatts = value;
-        emit reflectedWattsChanged();
+        emit reflectedWattsChanged(m_reflectedWatts);
     }
 }
 int PWR::getDefaultRecipe() const

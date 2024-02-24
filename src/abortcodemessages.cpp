@@ -15,7 +15,7 @@ AbortCodeMessages::AbortCodeMessages(QObject *parent) :
     m_abortMessages[AC_NO_GAS_6] = "MFC_6 Low Flow";
     m_abortMessages[AC_BAD_HELIUM] = "BAD HELIUM";
     m_abortMessages[AC_ESTOP] = "ESTOP ACTIVE";
-    m_abortMessages[AC_DOORS_OPEN] = "ABORT: DOOR OPENED, Please close the door and press OK to reinitialize";
+    m_abortMessages[AC_DOORS_OPEN] = "ABORT: DOOR OPENED, Please close the door and press Acknowledge to reinitialize";
     m_abortMessages[AC_PWR_FWD_LOW] = "Power Fwd Low";
     m_abortMessages[AC_OVER_TEMP] = "Head Too Hot";
     m_abortMessages[AC_NO_CDA] = "No CDA";

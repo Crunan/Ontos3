@@ -10,8 +10,8 @@ static const char lightTowerGreenStyleSheet[] = "QFrame { background-color: rgb(
 static const char lightTowerYellowStyleSheet[] = "QFrame { background-color: rgb(252, 233, 79) }";
 static const char lightTowerRedStyleSheet[] = "QFrame { background-color: rgb(204, 0, 0) }";
 static const char lightTowerInactiveStyleSheet[] = "QFrame { background-color: palette(base) }";
-static const char mfcFlowLinesActive[] = "border: 1px solid rgb(52, 101, 164);";
-static const char mfcFlowLinesInactive[] = "border: 1px solid black;";
+static const char mfcFlowLinesActive[] = "border: 2px solid rgb(52, 101, 164);";
+static const char mfcFlowLinesInactive[] = "border: 2px solid black;";
 static const char mfcBoxActive[] = "background-color: rgb(52, 101, 164);";
 static const char mfcBoxActivText[] = "color: rgb(255, 255, 255);";
 static const char mfcBoxInactive[] = "background-color: rgb(base);";
@@ -22,19 +22,35 @@ OperatorTab::OperatorTab(Ui::MainWindow* ui, PlasmaController &controller, MainW
     QObject(parent),
     m_pUI(ui),
     m_pMWndw(mWndw),
-    m_controller(controller)
+    m_controller(controller),
+    m_plasmaActive(false),
+    m_config()
 {
     populateRecipeComboBox();
 
     connect(m_pUI->btnOPChuckVacOnOff, &QPushButton::clicked, this, &OperatorTab::btnChuckVacOnOff_clicked);
     connect(m_pUI->btnOPPinsUpDown, &QPushButton::clicked, this, &OperatorTab::btnOPPinsUpDown_clicked);
     connect(m_pUI->btnOPStartPlasma, &QPushButton::clicked, this, &OperatorTab::btnOPStartPlasma_clicked);
-    connect(m_pUI->btnOPHome, &QPushButton::clicked, this, &OperatorTab::btnOPHome_clicked);
+    connect(m_pUI->btnOPLoad, &QPushButton::clicked, this, &OperatorTab::btnOPLoad_clicked);
     connect(m_pUI->btnOPInit, &QPushButton::clicked, this, &OperatorTab::btnOPInit_clicked);
     connect(m_pUI->comboBoxOPRecipe, &QComboBox::currentTextChanged, this, &OperatorTab::comboBoxOPRecipe_currentTextChanged);
     connect(m_pUI->comboBoxOPLogin, &QComboBox::currentTextChanged, this, &OperatorTab::comboBoxOPLogin_currentTextChanged);
 
+    connectMFCFlowBars();
+
+    // hide the ack button until there is an abort condition
     m_pUI->btnOPAcknowledge->hide();
+
+    // default to 6 mfc's
+    m_pUI->stackedWidgetMFC->setCurrentIndex(MFC6_STACKED_WIDGET_PAGE);
+
+    // hide flow labels initially
+    m_pUI->lblOPMFC1ActualFlow->hide();
+    m_pUI->lblOPMFC2ActualFlow->hide();
+    m_pUI->lblOPMFC3ActualFlow->hide();
+    m_pUI->lblOPMFC4ActualFlow->hide();
+    m_pUI->lblOPMFC5ActualFlow->hide();
+    m_pUI->lblOPMFC6ActualFlow->hide();
 }
 
 OperatorTab::~OperatorTab()
@@ -56,6 +72,9 @@ void OperatorTab::populateRecipeComboBox()
         // Add each file name to the list widget
         m_pUI->comboBoxOPRecipe->addItem(fileInfo.fileName());
     }
+
+    m_pUI->comboBoxOPRecipe->setPlaceholderText(QStringLiteral(""));
+    m_pUI->comboBoxOPRecipe->setCurrentIndex(-1);
 }
 
 void OperatorTab::connectMFCFlowBars()
@@ -103,54 +122,54 @@ void OperatorTab::mfcFlowLinesOn(int mfcNum, bool on)
 
     if (mfcNum == 1) {
         // set line colors
-        m_pUI->lineOPMFC1pre->setStyleSheet(lineColor);
-        m_pUI->lineOPMFC1post->setStyleSheet(lineColor);
-        m_pUI->lineOPMFC1vert->setStyleSheet(lineColor);
+        // m_pUI->lineOPMFC1pre->setStyleSheet(lineColor);
+        // m_pUI->lineOPMFC1post->setStyleSheet(lineColor);
+        // m_pUI->lineOPMFC1vert->setStyleSheet(lineColor);
         // set box and text color
         m_pUI->frameMFC1->setStyleSheet(boxColor);
         m_pUI->lblOPMFC1->setStyleSheet(textColor);
     }
     else if (mfcNum == 2) {
         // set line colors
-        m_pUI->lineOPMFC2pre->setStyleSheet(lineColor);
-        m_pUI->lineOPMFC2post->setStyleSheet(lineColor);
-        m_pUI->lineOPMFC2vert->setStyleSheet(lineColor);
+        // m_pUI->lineOPMFC2pre->setStyleSheet(lineColor);
+        // m_pUI->lineOPMFC2post->setStyleSheet(lineColor);
+        // m_pUI->lineOPMFC2vert->setStyleSheet(lineColor);
         // set box and text color
         m_pUI->frameMFC2->setStyleSheet(boxColor);
         m_pUI->lblOPMFC2->setStyleSheet(textColor);
     }
     else if (mfcNum == 3) {
         // set line colors
-        m_pUI->lineOPMFC3pre->setStyleSheet(lineColor);
-        m_pUI->lineOPMFC3post->setStyleSheet(lineColor);
-        m_pUI->lineOPMFC3vert->setStyleSheet(lineColor);
+        // m_pUI->lineOPMFC3pre->setStyleSheet(lineColor);
+        // m_pUI->lineOPMFC3post->setStyleSheet(lineColor);
+        // m_pUI->lineOPMFC3vert->setStyleSheet(lineColor);
         // set box and text color
         m_pUI->frameMFC3->setStyleSheet(boxColor);
         m_pUI->lblOPMFC3->setStyleSheet(textColor);
     }
     else if (mfcNum == 4) {
         // set line colors
-        m_pUI->lineOPMFC4pre->setStyleSheet(lineColor);
-        m_pUI->lineOPMFC4post->setStyleSheet(lineColor);
-        m_pUI->lineOPMFC4vert->setStyleSheet(lineColor);
+        // m_pUI->lineOPMFC4pre->setStyleSheet(lineColor);
+        // m_pUI->lineOPMFC4post->setStyleSheet(lineColor);
+        // m_pUI->lineOPMFC4vert->setStyleSheet(lineColor);
         // set box and text color
         m_pUI->frameMFC4->setStyleSheet(boxColor);
         m_pUI->lblOPMFC4->setStyleSheet(textColor);
     }
     else if (mfcNum == 5) {
         // set line colors
-        m_pUI->lineOPMFC5pre->setStyleSheet(lineColor);
-        m_pUI->lineOPMFC5post->setStyleSheet(lineColor);
-        m_pUI->lineOPMFC5vert->setStyleSheet(lineColor);
+        // m_pUI->lineOPMFC5pre->setStyleSheet(lineColor);
+        // m_pUI->lineOPMFC5post->setStyleSheet(lineColor);
+        // m_pUI->lineOPMFC5vert->setStyleSheet(lineColor);
         // set box and text color
         m_pUI->frameMFC5->setStyleSheet(boxColor);
         m_pUI->lblOPMFC5->setStyleSheet(textColor);
     }
     else if (mfcNum == 6) {
         // set line colors
-        m_pUI->lineOPMFC6pre->setStyleSheet(lineColor);
-        m_pUI->lineOPMFC6post->setStyleSheet(lineColor);
-        m_pUI->lineOPMFC6vert->setStyleSheet(lineColor);
+        // m_pUI->lineOPMFC6pre->setStyleSheet(lineColor);
+        // m_pUI->lineOPMFC6post->setStyleSheet(lineColor);
+        // m_pUI->lineOPMFC6vert->setStyleSheet(lineColor);
         // set box and text color
         m_pUI->frameMFC6->setStyleSheet(boxColor);
         m_pUI->lblOPMFC6->setStyleSheet(textColor);
@@ -161,25 +180,22 @@ void OperatorTab::mfcFlowLinesOn(int mfcNum, bool on)
 // MFC's returned by the main controller
 void OperatorTab::setUINumberOfMFCs(const int numMFCs)
 {
-    if (numMFCs == 5) { // if we have 5 MFC's hide MFC 6
-        m_pUI->progressBarOPMFC6->hide();
-        m_pUI->lineOPMFC6pre->hide();
-        m_pUI->frameMFC6->hide();
-        m_pUI->lineOPMFC6post->hide();
+    if (numMFCs == 4) {
+        m_pUI->stackedWidgetMFC->setCurrentIndex(MFC4_STACKED_WIDGET_PAGE);
+        m_pUI->lineOPMFC5vert->hide();
         m_pUI->lineOPMFC6vert->hide();
     }
-    else if (numMFCs == 4) { // if we have 4 MFC's hide MFC 5 and 6
-        m_pUI->progressBarOPMFC5->hide();
-        m_pUI->lineOPMFC5pre->hide();
-        m_pUI->frameMFC5->hide();
-        m_pUI->lineOPMFC5post->hide();
-        m_pUI->lineOPMFC5vert->hide();
-
-        m_pUI->progressBarOPMFC6->hide();
-        m_pUI->lineOPMFC6pre->hide();
-        m_pUI->frameMFC6->hide();
-        m_pUI->lineOPMFC6post->hide();
+    else if (numMFCs == 5) { // if we have 5 MFC's hide MFC 6
+        m_pUI->stackedWidgetMFC->setCurrentIndex(MFC5_STACKED_WIDGET_PAGE);
+        m_pUI->lineOPMFC5vert->show();
         m_pUI->lineOPMFC6vert->hide();
+    }
+    else if (numMFCs == 6) { // if we have 4 MFC's hide MFC 5 and 6
+        m_pUI->stackedWidgetMFC->setCurrentIndex(MFC6_STACKED_WIDGET_PAGE);
+        m_pUI->lineOPMFC5vert->show();
+        m_pUI->lineOPMFC6vert->show();
+
+
     }
 }
 
@@ -261,36 +277,48 @@ void OperatorTab::updateRecipeFlow(const int mfcNumber, const double recipeFlow)
         int percentage = 0;
         if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
         m_pUI->progressBarOPMFC1->setValue(int(percentage));
+
+        if (percentage > 0) m_pUI->lblOPMFC1ActualFlow->show();
     }
     else if (mfcNumber == 2) {
         double range = m_controller.findMFCByNumber(2)->getRange();
         int percentage = 0;
         if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
         m_pUI->progressBarOPMFC2->setValue(int(percentage));
+
+        if (percentage > 0) m_pUI->lblOPMFC2ActualFlow->show();
     }
     else if (mfcNumber == 3) {
         double range = m_controller.findMFCByNumber(3)->getRange();
         int percentage = 0;
         if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
         m_pUI->progressBarOPMFC3->setValue(int(percentage));
+
+        if (percentage > 0) m_pUI->lblOPMFC3ActualFlow->show();
     }
     else if (mfcNumber == 4) {
         double range = m_controller.findMFCByNumber(4)->getRange();
         int percentage = 0;
         if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
         m_pUI->progressBarOPMFC4->setValue(int(percentage));
+
+        if (percentage > 0) m_pUI->lblOPMFC4ActualFlow->show();
     }
     else if (mfcNumber == 5) {
         double range = m_controller.findMFCByNumber(5)->getRange();
         int percentage = 0;
         if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
         m_pUI->progressBarOPMFC5->setValue(int(percentage));
+
+        if (percentage > 0) m_pUI->lblOPMFC5ActualFlow->show();
     }
     else if (mfcNumber == 6) {
         double range = m_controller.findMFCByNumber(6)->getRange();
         int percentage = 0;
         if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
         m_pUI->progressBarOPMFC6->setValue(int(percentage));
+
+        if (percentage > 0) m_pUI->lblOPMFC6ActualFlow->show();
     }
 }
 
@@ -303,10 +331,14 @@ void OperatorTab::actualFlowChanged(const int mfcNumber, const double actualFlow
         int percentage = 0;
         if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
 
-        m_pUI->lblOPMFC1ActualFlow->setText(QString::number(range, 'f', 1));
-
-        // update the progress bar
-        m_pUI->progressBarOPMFC1->setValue(int(percentage));
+        if (percentage > 0) {
+            m_pUI->lblOPMFC1ActualFlow->setText(QString::number(percentage) + "%");
+            mfcFlowLinesOn(mfcNumber, true);
+        }
+        else {
+            m_pUI->lblOPMFC1ActualFlow->setText(QString::number(0) + "%");
+            mfcFlowLinesOn(mfcNumber, false);
+        }
     }
     else if (mfcNumber == 2) {
         // set vertical progress bar
@@ -315,12 +347,14 @@ void OperatorTab::actualFlowChanged(const int mfcNumber, const double actualFlow
         int percentage = 0;
         if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
 
-        m_pUI->lblOPMFC2ActualFlow->setText(QString::number(range, 'f', 1));
-
-        // update the progress bar
-        m_pUI->progressBarOPMFC2->setValue(int(percentage));
-
-        //if (percentage > 0)
+        if (percentage > 0) {
+            m_pUI->lblOPMFC2ActualFlow->setText(QString::number(percentage) + "%");
+            mfcFlowLinesOn(mfcNumber, true);
+        }
+        else {
+            m_pUI->lblOPMFC2ActualFlow->setText(QString::number(0) + "%");
+            mfcFlowLinesOn(mfcNumber, false);
+        }
     }
     else if (mfcNumber == 3) {
         // set vertical progress bar
@@ -328,11 +362,14 @@ void OperatorTab::actualFlowChanged(const int mfcNumber, const double actualFlow
         int percentage = 0;
         if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
 
-        // set max
-        m_pUI->lblOPMFC3ActualFlow->setText(QString::number(range, 'f', 1));
-
-        // update the progress bar
-        m_pUI->progressBarOPMFC3->setValue(int(percentage));
+        if (percentage > 0) {
+            m_pUI->lblOPMFC3ActualFlow->setText(QString::number(percentage) + "%");
+            mfcFlowLinesOn(mfcNumber, true);
+        }
+        else {
+            m_pUI->lblOPMFC3ActualFlow->setText(QString::number(0) + "%");
+            mfcFlowLinesOn(mfcNumber, false);
+        }
     }
     else if (mfcNumber == 4) {
         // set vertical progress bar
@@ -340,10 +377,14 @@ void OperatorTab::actualFlowChanged(const int mfcNumber, const double actualFlow
         int percentage = 0;
         if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
 
-        m_pUI->lblOPMFC4ActualFlow->setText(QString::number(range, 'f', 1));
-
-        // update the progress bar
-        m_pUI->progressBarOPMFC4->setValue(int(percentage));
+        if (percentage > 0) {
+            m_pUI->lblOPMFC4ActualFlow->setText(QString::number(percentage) + "%");
+            mfcFlowLinesOn(mfcNumber, true);
+        }
+        else {
+            m_pUI->lblOPMFC4ActualFlow->setText(QString::number(0) + "%");
+            mfcFlowLinesOn(mfcNumber, false);
+        }
     }
     else if (mfcNumber == 5) {
         // set vertical progress bar
@@ -351,10 +392,14 @@ void OperatorTab::actualFlowChanged(const int mfcNumber, const double actualFlow
         int percentage = 0;
         if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
 
-        m_pUI->lblOPMFC5ActualFlow->setText(QString::number(range, 'f', 1));
-
-        // update the progress bar
-        m_pUI->progressBarOPMFC5->setValue(int(percentage));
+        if (percentage > 0) {
+            m_pUI->lblOPMFC5ActualFlow->setText(QString::number(percentage) + "%");
+            mfcFlowLinesOn(mfcNumber, true);
+        }
+        else {
+            m_pUI->lblOPMFC5ActualFlow->setText(QString::number(0) + "%");
+            mfcFlowLinesOn(mfcNumber, false);
+        }
     }
     else if (mfcNumber == 6) {
         // set vertical progress bar
@@ -362,10 +407,15 @@ void OperatorTab::actualFlowChanged(const int mfcNumber, const double actualFlow
         int percentage = 0;
         if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
 
-        m_pUI->lblOPMFC6ActualFlow->setText(QString::number(range, 'f', 1));
+        if (percentage > 0) {
+            m_pUI->lblOPMFC6ActualFlow->setText(QString::number(percentage) + "%");
+            mfcFlowLinesOn(mfcNumber, true);
+        }
+        else {
+            m_pUI->lblOPMFC6ActualFlow->setText(QString::number(0) + "%");
+            mfcFlowLinesOn(mfcNumber, false);
+        }
 
-        // update the progress bar
-        m_pUI->progressBarOPMFC6->setValue(int(percentage));
     }
 }
 
@@ -403,7 +453,7 @@ void OperatorTab::vacStateChanged(bool state)
 // home state machine
 void OperatorTab::HSM_Startup()
 {
-    m_pUI->btnOPHome->setText("Stop");
+    m_pUI->btnOPLoad->setText("Stop");
 
     m_pUI->btnOPInit->setEnabled(false);
     m_pUI->btnOPPinsUpDown->setEnabled(false);
@@ -413,9 +463,9 @@ void OperatorTab::HSM_Startup()
 
 void OperatorTab::HSM_Done()
 {
-    m_pUI->btnOPHome->setText("Home");
+    m_pUI->btnOPLoad->setText("Load");
 
-    m_pUI->btnOPHome->setChecked(false);
+    m_pUI->btnOPLoad->setChecked(false);
     m_pUI->btnOPInit->setEnabled(true);
     m_pUI->btnOPPinsUpDown->setEnabled(true);
     m_pUI->btnOPChuckVacOnOff->setEnabled(true);
@@ -431,7 +481,7 @@ void OperatorTab::ISM_Startup()
     m_pUI->btnOPPinsUpDown->setEnabled(false);
     m_pUI->btnOPChuckVacOnOff->setEnabled(false);
     m_pUI->btnOPStartPlasma->setEnabled(false);
-    m_pUI->btnOPHome->setEnabled(false);
+    m_pUI->btnOPLoad->setEnabled(false);
 }
 
 void OperatorTab::ISM_Done()
@@ -440,7 +490,7 @@ void OperatorTab::ISM_Done()
     m_pUI->btnOPPinsUpDown->setEnabled(true);
     m_pUI->btnOPChuckVacOnOff->setEnabled(true);
     m_pUI->btnOPStartPlasma->setEnabled(true);
-    m_pUI->btnOPHome->setEnabled(true);
+    m_pUI->btnOPLoad->setEnabled(true);
     m_pUI->btnOPPinsUpDown->setText("Load Pins Down");
     m_pUI->lblOPPinsState->setText("Up");
 }
@@ -457,7 +507,7 @@ void OperatorTab::SSM_Started()
     m_pUI->init_button->setEnabled(false);
 
     m_pUI->btnOPInit->setEnabled(false);
-    m_pUI->btnOPHome->setEnabled(false);
+    m_pUI->btnOPLoad->setEnabled(false);
     m_pUI->btnOPPinsUpDown->setEnabled(false);
     m_pUI->btnOPChuckVacOnOff->setEnabled(false);
 }
@@ -468,7 +518,7 @@ void OperatorTab::SSM_Done()
     m_pUI->texteditOPTabAxisStatus->setText("Scanning Completed");
 
     m_pUI->btnOPInit->setEnabled(true);
-    m_pUI->btnOPHome->setEnabled(true);
+    m_pUI->btnOPLoad->setEnabled(true);
     m_pUI->btnOPPinsUpDown->setEnabled(true);
     m_pUI->btnOPChuckVacOnOff->setEnabled(true);
 }
@@ -478,11 +528,16 @@ void OperatorTab::SSM_StatusUpdate(QString status, QString next)
     m_pUI->axisstatus->setText(status);
 }
 
-void OperatorTab::forwardWattsChanged()
+void OperatorTab::forwardWattsChanged(int watts)
 {
-    int watts = m_controller.getPower().getForwardWatts();
+    //int watts = m_controller.getPower().getForwardWatts();
 
     m_pUI->lblOPRFPowerForward->setText(QString::number(watts));
+}
+
+void OperatorTab::reflectedWattsChanged(int watts)
+{
+
 }
 
 void OperatorTab::MBactualPositionChanged(const double actualPosition)
@@ -501,14 +556,19 @@ void OperatorTab::headTemperatureChanged()
 
 void OperatorTab::plasmaStateChanged(bool plasmaActive)
 {
+    // retain the plasma state
+    m_plasmaActive = plasmaActive;
+
     if (plasmaActive) {
         m_pUI->btnOPStartPlasma->setText("Plasma Off");
         m_pUI->frameOPPlasmaPlume->setStyleSheet("background-color: rgb(246, 77, 241);");
+        //m_pUI->lblOPPlasma->setStyleSheet("color: rgb(246, 77, 241);");
     }
     else {
         m_pUI->btnOPStartPlasma->setChecked(false);
         m_pUI->btnOPStartPlasma->setText("Start Plasma");
         m_pUI->frameOPPlasmaPlume->setStyleSheet("background-color: rgb(52, 101, 164)");
+        //m_pUI->lblOPPlasma->setStyleSheet("color: rgb(255, 255, 255);");
     }
 }
 
@@ -566,13 +626,13 @@ void OperatorTab::btnOPStartPlasma_clicked(bool checked)
     }
 }
 
-void OperatorTab::btnOPHome_clicked(bool checked)
+void OperatorTab::btnOPLoad_clicked(bool checked)
 {
     if (checked) {
         m_controller.getAxesController().StartHome();
     }
     else {
-        m_pUI->btnOPHome->setChecked(false);
+        m_pUI->btnOPLoad->setChecked(false);
         m_controller.getAxesController().StopHome();
     }
 }
@@ -597,6 +657,41 @@ void OperatorTab::comboBoxOPLogin_currentTextChanged(const QString &arg1)
 {
     if (arg1 == "Engineer")
         this->m_pMWndw->engineerModeSelected();
+    else if (arg1 == "Operator")
+        this->m_pMWndw->setUIOperatorMode();
 }
+
+static bool on = false;
+void OperatorTab::testfunction()
+{
+    if (on) {
+        on = false;
+        plasmaStateChanged(true);
+    }
+    else {
+        on = true;
+        plasmaStateChanged(false);
+    }
+
+
+    // QString lineColor = (on == true) ? QString(mfcFlowLinesActive) : QString(mfcFlowLinesInactive);
+    // QString boxColor = (on == true) ? QString(mfcBoxActive) : QString(mfcBoxInactive);
+    // QString textColor = (on == true) ? QString(mfcBoxActivText) : QString(mfcBoxInactivText);
+
+    // m_pUI->lineOPMFC1pre->setStyleSheet(lineColor);
+    // m_pUI->lineOPMFC1post->setStyleSheet(lineColor);
+    // m_pUI->lineOPMFC1vert->setStyleSheet(lineColor);
+    // // set box and text color
+    // m_pUI->frameMFC1->setStyleSheet(boxColor);
+    // m_pUI->lblOPMFC1->setStyleSheet(textColor);
+    //m_pUI->lineOPMFC1vert->setFixedWidth(2);
+    //m_pUI->lineOPMFC1vert->setStyleSheet(lineColor);
+
+    // QPalette palette = m_pUI->lineOPMFC1vert->palette();
+
+    // palette.setColor(palette., Qt::red);
+    // m_pUI->lineOPMFC1vert->setPalette(palette);
+}
+
 
 

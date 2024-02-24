@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include "lighttower.h"
+#include "configuration.h"
 
 namespace Ui {
 class MainWindow;
@@ -12,12 +13,21 @@ QT_END_NAMESPACE
 
 class PlasmaController;
 class MainWindow;
+class Configuration;
 
 class OperatorTab : public QObject {
 
 public:
     OperatorTab(Ui::MainWindow* ui, PlasmaController &controller, MainWindow *mWndw, QObject* parent = nullptr);
     ~OperatorTab();
+
+    typedef enum {
+        MFC6_STACKED_WIDGET_PAGE,
+        MFC5_STACKED_WIDGET_PAGE,
+        MFC4_STACKED_WIDGET_PAGE
+    } MFC_WIDGETS;
+
+    void testfunction();
 
 public slots:
     // stage status to UI
@@ -40,7 +50,8 @@ public slots:
     // process status
     void setUINumberOfMFCs(const int numMFCs);
     void displayAbortMessage(const QString message);
-    void forwardWattsChanged();
+    void forwardWattsChanged(int watts);
+    void reflectedWattsChanged(int watts);
     void MBactualPositionChanged(const double actualPosition);
     void headTemperatureChanged();
     void plasmaStateChanged(const bool plasmaActive);
@@ -57,7 +68,7 @@ private slots:
     void btnOPPinsUpDown_clicked(bool checked);
     void btnOPStartPlasma_clicked(bool checked);
     void btnOPAbort_clicked();
-    void btnOPHome_clicked(bool checked);
+    void btnOPLoad_clicked(bool checked);
     void btnOPInit_clicked();
     void comboBoxOPRecipe_currentTextChanged(const QString &arg1);
     void comboBoxOPLogin_currentTextChanged(const QString &arg1);
@@ -75,6 +86,9 @@ private:
     MainWindow* m_pMWndw;
 
     PlasmaController &m_controller;
+    bool m_plasmaActive;
+
+    Configuration m_config;
 };
 
 #endif // OPERATORTAB_H

@@ -46,8 +46,9 @@ PlasmaController::PlasmaController(QWidget* parent)
     m_collisionDetected(false),
     m_collisionPassed(false),
     m_hasCollision(false),
-    m_runRecipe(false), //Turn plasma on  
-    m_plannedAutoStart(false)
+    m_runRecipe(false), //Turn plasma on
+    m_plannedAutoStart(false),
+    m_abortAcknowledged(false)
 {
     // Add startup data gathering methods.
     for (MFC* mfc: m_mfcs) {
@@ -563,12 +564,14 @@ void PlasmaController::RunDoorOpenSM()
     }
 
     if (m_doorOpenStateMachine.configuration().contains(m_pDODoorOpenedNonProcessState)) {
-        QString abortMessage = "Door opened while stage was moving. Stage position has been lost, close the doors and click OK to initialize the stage and send stage to the Load position.";
+        QString abortMessage = "Door opened while stage was moving. Stage position has been lost, close the doors and click Acknowledge to initialize the stage and send stage to the Load position.";
         emit m_abortMessages.showAbortMessageBox(abortMessage, false);
         emit DOSM_TransitionClosed();
     }
     else if (m_doorOpenStateMachine.configuration().contains(m_pDODoorsClosedState)) {
-        if (!m_stageCTL.getDoorOpen()) {
+
+        if (!m_stageCTL.getDoorOpen() && m_abortAcknowledged) {
+            m_abortAcknowledged = false; // reset ack
             Logger::logInfo("Stage position lost : doors opened");
             m_processDoorAbort = false;
             // state machines to idle

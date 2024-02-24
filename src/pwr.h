@@ -30,8 +30,8 @@ public:
 signals:
     void updateUIRecipeWatts(int watts); // updates the ui recipe value
     void recipeWattsChanged(int watts); // updates the controller recipe value
-    void forwardWattsChanged();
-    void reflectedWattsChanged();
+    void forwardWattsChanged(int watts);
+    void reflectedWattsChanged(int watts);
     void defaultRecipeChanged();
 
 private:

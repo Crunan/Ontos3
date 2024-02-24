@@ -100,6 +100,7 @@ public:
     // matchbox
     void MBLeft();
     void MBRight();
+    void abortAcknowledged() { m_abortAcknowledged = true; }
 
 signals:
     void responseReceived(const QString& response);
@@ -279,6 +280,7 @@ private:
     bool m_hasCollision;
     bool m_runRecipe; //Turn plasma on
     bool m_plannedAutoStart;
+    bool m_abortAcknowledged;
 };
 
 #endif // PLASMACONTROLLER_H

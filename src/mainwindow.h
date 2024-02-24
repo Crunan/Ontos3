@@ -51,7 +51,14 @@ public:
         ENGINEER_TAB
     } tabs;
 
-    void engineerModeSelected() { m_passDialog.show(); }
+    // access control
+    void engineerModeSelected() {     // clear the password
+        m_passDialog.clearPassword();
+        m_passDialog.show();
+    }
+
+    void setUIOperatorMode();
+    void setUIEngineerMode();
 
 signals:
     // main state machine state transiton signals
@@ -87,13 +94,6 @@ public slots:
     void reflectedWattsChanged();
     void MBactualPositionChanged(const double actualPosition);
     void headTemperatureChanged();
-    void plasmaStateChanged(bool plasmaActive);
-
-    // mfc
-    void connectMFCFlowBars();
-    void updateRecipeFlow(const int mfcNumber, const double recipeflow);
-    void actualFlowChanged(const int mfcNumber, const double actualFlow);
-    void setUINumberOfMFCs(const int numMFCs);
 
     // recipe
     void AutoTuneCheckbox_stateChanged(int value);
@@ -110,7 +110,6 @@ public slots:
     void yLimitsChanged();
     void cyclesChanged();
     void loadCascadeRecipe();
-    void rangeChanged(const int mfcNumber, double range);
 
     // callbacks
     void pinsStateChanged(bool state);
@@ -158,7 +157,6 @@ private slots:
     void on_loadRecipeButton_clicked();
     void on_loadRFButton_clicked();
     void on_scan_button_toggled(bool checked);
-    void on_plsmaBtn_toggled(bool checked);
     void on_loadAutoTuneButton_clicked();
     void on_loadMBButton_clicked();
     void on_load_autoscan_clicked();
@@ -197,6 +195,8 @@ private slots:
     void on_mainTabWidget_currentChanged(int index);
     void on_pushButton_clicked(bool checked);
 
+    void on_btnOPAcknowledge_clicked();
+
 private:
 
     // Action Button methods
@@ -206,9 +206,6 @@ private:
     // serial port signals sent from serialInterface
     void serialDisconnected();
     void serialConnected();
-    // update the ui based on login
-    void setUIOperatorMode();
-    void setUIEngineerMode();
     void disableControlButtons();
     void connectMFCRecipeButton(QPushButton* button, const int &mfcNumber);
     // Connection for Recipes buttons

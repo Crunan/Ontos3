@@ -55,9 +55,9 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(&m_mainCTL, &PlasmaController::SSM_Done, this, &MainWindow::SSM_Done);
     connect(&m_mainCTL, &PlasmaController::CSM_StatusUpdate, this, &MainWindow::CSM_StatusUpdate);
     connect(&m_mainCTL, &PlasmaController::scanBoxChanged, this, &MainWindow::scanBoxChanged);
-    connect(&m_mainCTL, &PlasmaController::plasmaStateChanged, this, &MainWindow::plasmaStateChanged);
+    //connect(&m_mainCTL, &PlasmaController::plasmaStateChanged, this, &MainWindow::plasmaStateChanged);
     connect(&m_mainCTL, &PlasmaController::batchIDLoggingIsActive, this, &MainWindow::batchIDLoggingIsActive);
-    connect(&m_mainCTL, &PlasmaController::setUINumberOfMFCs, this, &MainWindow::setUINumberOfMFCs);
+    //connect(&m_mainCTL, &PlasmaController::setUINumberOfMFCs, this, &MainWindow::setUINumberOfMFCs);
     connect(&m_mainCTL.getTuner(), &Tuner::recipePositionChanged, this, &MainWindow::setRecipeMBtuner);
     connect(&m_mainCTL.getTuner(), &Tuner::updateUIRecipePosition, this, &MainWindow::setRecipeMBtuner);
     connect(&m_mainCTL.getPlasmaHead(), &PlasmaHead::headTemperatureChanged, this, &MainWindow::headTemperatureChanged);
@@ -95,9 +95,6 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     // Make signal/slot connections here
     connectRecipeButtons();
 
-    // MFC slots
-    connectMFCFlowBars();
-
     // MFC labels
     setMFCLabels();
 
@@ -112,7 +109,6 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
 
     // give things a little time to settle before opening the serial port
     QTimer::singleShot(50, this, &MainWindow::openMainPort);
-
 
     // temporary
     connectOperatorTabSlots();
@@ -223,18 +219,6 @@ void MainWindow::connectRecipeButtons()
     connectMFCRecipeButton(ui->loadMFC6Button, 6);
 }
 
-void MainWindow::connectMFCFlowBars()
-{
-    // This will connect the flowchanged signal along with its passed params
-    // to the GUI updateFlowbars function.
-    for (int i = 0; i < m_mainCTL.getMFCs().size(); ++i) {
-        connect(m_mainCTL.getMFCs()[i], &MFC::recipeFlowChanged, this, &MainWindow::updateRecipeFlow);
-        connect(m_mainCTL.getMFCs()[i], &MFC::updateUIRecipeFlow, this, &MainWindow::updateRecipeFlow);
-        connect(m_mainCTL.getMFCs()[i], &MFC::updateUIActualFlow, this, &MainWindow::actualFlowChanged);
-        connect(m_mainCTL.getMFCs()[i], &MFC::rangeChanged, this, &MainWindow::rangeChanged);
-    }
-}
-
 void MainWindow::setMFCLabels()
 {
     QString MFC1_label = m_config.getValueForKey(CONFIG_MFC1_LABEL_KEY);
@@ -244,30 +228,6 @@ void MainWindow::setMFCLabels()
     QString MFC5_label = m_config.getValueForKey(CONFIG_MFC5_LABEL_KEY);
     QString MFC6_label = m_config.getValueForKey(CONFIG_MFC6_LABEL_KEY);
 
-    // MFC1
-    if (MFC1_label != QString()) {
-        ui->gas1_label->setText(MFC1_label);
-    }
-    // MFC2
-    if (MFC2_label != QString()) {
-        ui->gas2_label->setText(MFC2_label);
-    }
-    // MFC3
-    if (MFC3_label != QString()) {
-        ui->gas3_label->setText(MFC3_label);
-    }
-    // MFC4
-    if (MFC4_label != QString()) {
-        ui->gas4_label->setText(MFC4_label);
-    }
-    // MFC5
-    if (MFC5_label != QString()) {
-        ui->gas5_label->setText(MFC5_label);
-    }
-    // MFC6
-    if (MFC6_label != QString()) {
-        ui->gas6_label->setText(MFC6_label);
-    }
 }
 
 void MainWindow::connectMFCRecipeButton(QPushButton* button, const int& mfcNumber)
@@ -463,7 +423,7 @@ void MainWindow::serialConnected()
     ui->init_button->setEnabled(true);
     if (m_engineeringMode) {
         ui->n2_purge_button->setEnabled(true);
-        ui->plsmaBtn->setEnabled(true);
+        //ui->plsmaBtn->setEnabled(true);
     }
 
     // clear any remaing status statements
@@ -751,7 +711,7 @@ void MainWindow::installRecipe(QString sRecipeFileAndPath)
     m_mainCTL.setRecipe(sRecipeFileAndPath);
 
     // enable the plasma button now that a recipe is loaded
-    ui->plsmaBtn->setEnabled(true);
+    //ui->plsmaBtn->setEnabled(true);
 
     Logger::logInfo("Recipe opened: " + sRecipeFileAndPath);
 }
@@ -861,91 +821,6 @@ void MainWindow::SaveRecipeFileSelected(const QString &file)
 void MainWindow::SaveRecipeFileRejected()
 {
     delete m_pRecipeFileDialog;
-}
-
-
-// update the recipe progress bar and values
-void MainWindow::updateRecipeFlow(const int mfcNumber, const double recipeFlow)
-{
-    // This uses the parameters passed in the signal
-    if (mfcNumber == 1) {
-       // set vertical progress bar
-       double range = m_mainCTL.findMFCByNumber(1)->getRange();       
-       int percentage = 0;
-       if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
-       ui->gas1_sliderBar->setValue(int(percentage));
-
-       // set dashboard and plasma tab recipe edit box
-       ui->mfc1_recipe->setText(QString::number(recipeFlow, 'f', 2));
-
-       // set the dashboard and plasma tab edit box below the progress bar
-       ui->gas1_recipe_SLPM->setText(QString::number(recipeFlow, 'f', 2));
-    }
-    else if (mfcNumber == 2) {
-       // set vertical progress bar
-       double range = m_mainCTL.findMFCByNumber(2)->getRange();
-       int percentage = 0;
-       if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
-       ui->gas2_sliderBar->setValue(int(percentage));
-
-       // set dashboard and plasma tab recipe edit box
-       ui->mfc2_recipe->setText(QString::number(recipeFlow, 'f', 2));
-
-       // set the dashboard and plasma tab edit box below the progress bar
-       ui->gas2_recipe_SLPM->setText(QString::number(recipeFlow, 'f', 2));
-    }
-    else if (mfcNumber == 3) {
-       // set vertical progress bar
-       double range = m_mainCTL.findMFCByNumber(3)->getRange();
-       int percentage = 0;
-       if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
-       ui->gas3_sliderBar->setValue(int(percentage));
-
-       // set dashboard and plasma tab recipe edit box
-       ui->mfc3_recipe->setText(QString::number(recipeFlow, 'f', 2));
-
-       // set the dashboard and plasma tab edit box below the progress bar
-       ui->gas3_recipe_SLPM->setText(QString::number(recipeFlow, 'f', 2));
-    }
-    else if (mfcNumber == 4) {
-       // set vertical progress bar
-       double range = m_mainCTL.findMFCByNumber(4)->getRange();
-       int percentage = 0;
-       if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
-       ui->gas4_sliderBar->setValue(int(percentage));
-
-       // set dashboard and plasma tab recipe edit box
-       ui->mfc4_recipe->setText(QString::number(recipeFlow, 'f', 2));
-
-       // set the dashboard and plasma tab edit box below the progress bar
-       ui->gas4_recipe_SLPM->setText(QString::number(recipeFlow, 'f', 2));
-    }
-    else if (mfcNumber == 5) {
-       // set vertical progress bar
-       double range = m_mainCTL.findMFCByNumber(5)->getRange();
-       int percentage = 0;
-       if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
-       ui->gas5_sliderBar->setValue(int(percentage));
-
-       // set dashboard and plasma tab recipe edit box
-       ui->mfc5_recipe->setText(QString::number(recipeFlow, 'f', 2));
-
-       // set the dashboard and plasma tab edit box below the progress bar
-       ui->gas5_recipe_SLPM->setText(QString::number(recipeFlow, 'f', 2));
-    }
-    else if (mfcNumber == 6) {
-       // set vertical progress bar
-       double range = m_mainCTL.findMFCByNumber(6)->getRange();
-       int percentage = 0;
-       if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
-       ui->gas6_sliderBar->setValue(int(percentage));
-
-       // set dashboard and plasma tab recipe edit box
-       ui->mfc6_recipe->setText(QString::number(recipeFlow, 'f', 2));
-
-       // set the dashboard and plasma tab edit box below the progress bar
-       ui->gas6_recipe_SLPM->setText(QString::number(recipeFlow, 'f', 2));
-    }
 }
 
 // update the recipe watts
@@ -1063,151 +938,10 @@ void MainWindow::headTemperatureChanged()
     ui->Temp_bar->setValue(int(temp));
 }
 
-void MainWindow::actualFlowChanged(const int mfcNumber, const double actualFlow)
-{
-    // This uses the parameters passed in the signal
-    if (mfcNumber == 1) {
-       // set vertical progress bar
-       double range = m_mainCTL.findMFCByNumber(1)->getRange();
-       int percentage = 0;
-       if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
-
-       // set max
-       ui->gas1_max_label->setText(QString::number(range, 'f', 1));
-
-       // update the progress bar
-       if (percentage > 5) {// progress bars don't look right when value is less than 5
-           ui->gas1ProgressBar->setValue(int(percentage));
-       } else
-           ui->gas1ProgressBar->setValue(0);
-
-       // set the dashboard and plasma tab edit box below the progress bar
-       ui->gas1_actual_SLPM->setText(QString::number(actualFlow));
-    }
-    else if (mfcNumber == 2) {
-       // set vertical progress bar
-       double range = m_mainCTL.findMFCByNumber(2)->getRange();
-
-       int percentage = 0;
-       if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
-
-       // set max
-       ui->gas2_max_label->setText(QString::number(range, 'f', 1));
-
-       // update the progress bar
-       if (percentage > 5) {// progress bars don't look right when value is less than 5
-           ui->gas2ProgressBar->setValue(int(percentage));
-       } else
-           ui->gas2ProgressBar->setValue(0);
-
-       // set the dashboard and plasma tab edit box below the progress bar
-       ui->gas2_actual_SLPM->setText(QString::number(actualFlow));
-    }
-    else if (mfcNumber == 3) {
-       // set vertical progress bar
-       double range = m_mainCTL.findMFCByNumber(3)->getRange();
-       int percentage = 0;
-       if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
-
-       // set max
-       ui->gas3_max_label->setText(QString::number(range, 'f', 1));
-
-       // update the progress bar
-       if (percentage > 5) {// progress bars don't look right when value is less than 5
-           ui->gas3ProgressBar->setValue(int(percentage));
-       } else
-           ui->gas3ProgressBar->setValue(0);
-
-       // set the dashboard and plasma tab edit box below the progress bar
-       ui->gas3_actual_SLPM->setText(QString::number(actualFlow));
-    }
-    else if (mfcNumber == 4) {
-       // set vertical progress bar
-       double range = m_mainCTL.findMFCByNumber(4)->getRange();
-       int percentage = 0;
-       if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
-
-       // set max
-       ui->gas4_max_label->setText(QString::number(range, 'f', 1));
-
-       // update the progress bar
-       if (percentage > 5) {// progress bars don't look right when value is less than 5
-           ui->gas4ProgressBar->setValue(int(percentage));
-       } else
-           ui->gas4ProgressBar->setValue(0);
-
-       // set the dashboard and plasma tab edit box below the progress bar
-       ui->gas4_actual_SLPM->setText(QString::number(actualFlow));
-    }
-    else if (mfcNumber == 5) {
-       // set vertical progress bar
-       double range = m_mainCTL.findMFCByNumber(5)->getRange();
-       int percentage = 0;
-       if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
-
-       // set max
-       ui->gas5_max_label->setText(QString::number(range, 'f', 1));
-
-       // update the progress bar
-       if (percentage > 5) {// progress bars don't look right when value is less than 5
-           ui->gas5ProgressBar->setValue(int(percentage));
-       } else
-           ui->gas5ProgressBar->setValue(0);
-
-       // set the dashboard and plasma tab edit box below the progress bar
-       ui->gas5_actual_SLPM->setText(QString::number(actualFlow));
-    }
-    else if (mfcNumber == 6) {
-       // set vertical progress bar
-       double range = m_mainCTL.findMFCByNumber(6)->getRange();
-       int percentage = 0;
-       if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
-
-       // update the progress bar
-       if (percentage > 5) {// progress bars don't look right when value is less than 5
-           ui->gas6ProgressBar->setValue(int(percentage));
-       } else
-           ui->gas6ProgressBar->setValue(0);
-
-       // set the dashboard and plasma tab edit box below the progress bar
-       ui->gas6_actual_SLPM->setText(QString::number(actualFlow));
-    }
-}
-
-void MainWindow::rangeChanged(const int mfcNumber, double range)
-{
-    if (mfcNumber == 1) {
-        // set max
-        ui->gas1_max_label->setText(QString::number(range, 'f', 1));
-    }
-    else if (mfcNumber == 2) {
-        // set max
-        ui->gas2_max_label->setText(QString::number(range, 'f', 1));
-    }
-    else if (mfcNumber == 3) {
-        // set max
-        ui->gas3_max_label->setText(QString::number(range, 'f', 1));
-    }
-    else if (mfcNumber == 4) {
-        // set max
-        ui->gas4_max_label->setText(QString::number(range, 'f', 1));
-    }
-    else if (mfcNumber == 5) {
-        // set max
-        ui->gas5_max_label->setText(QString::number(range, 'f', 1));
-    }
-    else if (mfcNumber == 6) {
-        // set max
-        ui->gas6_max_label->setText(QString::number(range, 'f', 1));
-    }
-}
 
 void MainWindow::userEnteredPassword()
 {
     QString enteredPassword = m_passDialog.getUserEnteredPassword();
-
-    // clear the password
-    m_passDialog.clearPassword();
 
     QString password = m_config.getValueForKey(CONFIG_PASSWORD_KEY);
 
@@ -1217,21 +951,15 @@ void MainWindow::userEnteredPassword()
        m_engineeringMode = true;
     }
     else {
+        m_engineeringMode = false;
+
+        if (ui->comboBoxOPLogin->currentIndex() != 0)
+            ui->comboBoxOPLogin->setCurrentIndex(0); // back to operator mode
+
         QMessageBox::critical(this, "Error", "Incorrect password");
     }
 }
 
-//  update plasma button if the controller disabled plasma for some reason
-void MainWindow::plasmaStateChanged(bool plasmaActive)
-{
-    if (plasmaActive) {
-        ui->plsmaBtn->setText("PLASMA OFF");
-    }
-    else {
-        ui->plsmaBtn->setChecked(false);
-        ui->plsmaBtn->setText("START PLASMA");
-    }
-}
 //////////////////////////////////////////////////////////////////////////////////
 // cascade recipe
 //////////////////////////////////////////////////////////////////////////////////
@@ -1581,26 +1309,6 @@ void MainWindow::on_vac_button_toggled(bool checked)
     }
 }
 
-// plasma button on dashboard
-void MainWindow::on_plsmaBtn_toggled(bool checked)
-{
-    if (!checked) {
-        m_mainCTL.StopScan();
-        m_mainCTL.RunRecipe(false); // turn off recipe execution
-        ui->plsmaBtn->setText("START PLASMA");
-    }
-    else {
-        ui->plsmaBtn->setText("PLASMA OFF");
-
-        if (m_mainCTL.getCollision() && m_mainCTL.getRecipe()->getAutoScanBool() && !m_mainCTL.getPlasmaActive()) {
-            m_mainCTL.plannedAutoStartOn();//this will make sure we dont accidently start plasma when just clicking RUN SCAN button
-            m_mainCTL.StartScan();
-        }
-        else {
-            m_mainCTL.RunRecipe(true); // turn on recipe execution
-        }
-    }
-}
 
 // thickness button on dashboard
 void MainWindow::on_load_thick_clicked()
@@ -2125,7 +1833,6 @@ void MainWindow::disableControlButtons()
     ui->diameter_button->setEnabled(false);
     ui->wafer_diameter->setEnabled(false);
     ui->n2_purge_button->setEnabled(false);
-    ui->plsmaBtn->setEnabled(false);
     ui->MB_Right_Button->setEnabled(false);
     ui->MB_Left_Button->setEnabled(false);
     ui->menuStage_Test->setEnabled(false);
@@ -2140,98 +1847,14 @@ void MainWindow::setUIEngineerMode()
     sTitle += "      ENGINEER MODE";
     this->setWindowTitle(sTitle);
 
-    // enable recipe setpoint buttons
-    ui->loadMFC1Button->setEnabled(true);
-    ui->loadMFC2Button->setEnabled(true);
-    ui->loadMFC3Button->setEnabled(true);
-    ui->loadMFC4Button->setEnabled(true);
-    ui->loadMFC5Button->setEnabled(true);
-    ui->loadMFC6Button->setEnabled(true);
-    ui->load_thick->setEnabled(true);
-    ui->load_gap->setEnabled(true);
-    ui->load_autoscan->setEnabled(true);
-    ui->load_cycles->setEnabled(true);
-    ui->load_overlap->setEnabled(true);
-    ui->x1_set->setEnabled(true);
-    ui->x2_set->setEnabled(true);
-    ui->y1_set->setEnabled(true);
-    ui->y2_set->setEnabled(true);
-    ui->loadRFButton->setEnabled(true);
-    ui->loadMBButton->setEnabled(true);
-    ui->loadAutoTuneButton->setEnabled(true);
-    ui->loadSpeedButton->setEnabled(true);
-    // only enable these if we have a connection
-    if (m_mainCTL.isOpen()) {
-        ui->n2_purge_button->setEnabled(true);
-        ui->plsmaBtn->setEnabled(true);
-        ui->MB_Right_Button->setEnabled(true);
-        ui->MB_Left_Button->setEnabled(true);
-    }
-    ui->actionConnect->setEnabled(true);
-    ui->actionDisconnect->setEnabled(true);
-    ui->batchIDButton->setEnabled(true);
-    ui->batchIDedit->setEnabled(true);
-    // tool settings tab
-    ui->mainTabWidget->setTabEnabled(2, true);
-    // if initialized enable
-    if (m_mainCTL.getAxesController().getAxesInitilizedStatus()) {
-        ui->Joystick_button->setEnabled(true);
-        ui->vac_button->setEnabled(true);
-        ui->scan_button->setEnabled(true);
-        ui->Home_button->setEnabled(true);
-        ui->Stagepins_button->setEnabled(true);
-        ui->menuStage_Test->setEnabled(true);
-        ui->diameter_button->setEnabled(true);
-        ui->wafer_diameter->setEnabled(true);
-    }
+    ui->mainTabWidget->setTabEnabled(ENGINEER_TAB, true);
 }
 void MainWindow::setUIOperatorMode()
 {
     // remove ENGINEERING MODE from title bar
     this->setWindowTitle("ONTOS3 INTERFACE v" + QString(APP_VERSION));
 
-    // disable recipe setpoint buttons
-    ui->loadMFC1Button->setEnabled(false);
-    ui->loadMFC2Button->setEnabled(false);
-    ui->loadMFC3Button->setEnabled(false);
-    ui->loadMFC4Button->setEnabled(false);
-    ui->loadMFC5Button->setEnabled(false);
-    ui->loadMFC6Button->setEnabled(false);
-    ui->load_thick->setEnabled(false);
-    ui->load_gap->setEnabled(false);
-    ui->load_autoscan->setEnabled(false);
-    ui->load_cycles->setEnabled(false);
-    ui->load_overlap->setEnabled(false);
-    ui->x1_set->setEnabled(false);
-    ui->x2_set->setEnabled(false);
-    ui->y1_set->setEnabled(false);
-    ui->y2_set->setEnabled(false);
-    ui->loadRFButton->setEnabled(false);
-    ui->loadMBButton->setEnabled(false);
-    ui->loadAutoTuneButton->setEnabled(false);
-    ui->loadSpeedButton->setEnabled(false);
-    // disable control buttons
-    ui->diameter_button->setEnabled(false);
-    ui->n2_purge_button->setEnabled(false);
-    ui->wafer_diameter->setEnabled(false);
-    ui->plsmaBtn->setEnabled(false);
-    ui->MB_Right_Button->setEnabled(false);
-    ui->MB_Left_Button->setEnabled(false);
-    ui->menuStage_Test->setEnabled(false);
-    ui->actionConnect->setEnabled(false);
-    ui->actionDisconnect->setEnabled(false);
-    ui->batchIDButton->setEnabled(true);
-    ui->batchIDedit->setEnabled(true);
-    // tool settings tab
-    ui->mainTabWidget->setTabEnabled(2, false);
-    // put in not initilized UI state
-    if (!m_mainCTL.getAxesController().getAxesInitilizedStatus()) {
-        ui->Joystick_button->setEnabled(false);
-        ui->vac_button->setEnabled(false);
-        ui->scan_button->setEnabled(false);
-        ui->Home_button->setEnabled(false);
-        ui->Stagepins_button->setEnabled(false);
-    }
+    ui->mainTabWidget->setTabEnabled(ENGINEER_TAB, false);
 }
 
 // Set Default form service menu
@@ -2386,25 +2009,6 @@ void MainWindow::Recipe_BatchIDAccepted()
     }
 }
 
-// configure the gasses layout according to the number of
-// MFC's returned by the main controller
-void MainWindow::setUINumberOfMFCs(const int numMFCs)
-{
-    if (numMFCs == 5) { // if we have 5 MFC's hide MFC 6
-        ui->gas6_widget->hide();
-        ui->loadMFC6Button->hide();
-        ui->mfc6_recipe->hide();
-    }
-    else if (numMFCs == 4) { // if we have 4 MFC's hide MFC 5 and 6
-        ui->gas5_widget->hide();
-        ui->gas6_widget->hide();
-        ui->loadMFC6Button->hide();
-        ui->loadMFC5Button->hide();
-        ui->mfc5_recipe->hide();
-        ui->mfc6_recipe->hide();
-    }
-}
-
 void MainWindow::on_LEDIntensitySpinBox_valueChanged(double arg1)
 {
     int intensity = arg1;
@@ -2441,9 +2045,10 @@ void MainWindow::connectOperatorTabSlots()
     connect(&m_mainCTL, &PlasmaController::SSM_Done, m_pOperatortab, &OperatorTab::SSM_Done);
     // light tower
     connect(&m_mainCTL.getLightTower(), &LightTower::lightTowerStateChanged, m_pOperatortab, &OperatorTab::lightTowerStateChanged);
-    // plasma status
+    // plasma, power, and head status
     connect(&m_mainCTL, &PlasmaController::plasmaStateChanged, m_pOperatortab, &OperatorTab::plasmaStateChanged);
     connect(&m_mainCTL.getPlasmaHead(), &PlasmaHead::headTemperatureChanged, m_pOperatortab, &OperatorTab::headTemperatureChanged);
+    connect(&m_mainCTL.getPower(), &PWR::reflectedWattsChanged, m_pOperatortab, &OperatorTab::reflectedWattsChanged);
     // matchbox position
     connect(&m_mainCTL.getTuner(), &Tuner::actualPositionChanged, m_pOperatortab, &OperatorTab::MBactualPositionChanged);
     // recipe params gap/thickness
@@ -2464,7 +2069,26 @@ void MainWindow::on_pushButton_clicked(bool checked)
     //     this->m_pOperatortab->mfcFlowLinesOn(1, true);
     // else
     //     this->m_pOperatortab->mfcFlowLinesOn(1, false);
-    emit displayAbortMessage("what the fuck is going on?");
+    //emit displayAbortMessage("what the fuck is going on?");
+
+    //emit plasmaStateChanged(true);
+
+    //emit setUINumberOfMFCs(4); // works
+    //m_mainCTL.testFunction();
+
+    this->m_pOperatortab->testfunction();
+
 }
 
+
+
+void MainWindow::on_btnOPAcknowledge_clicked()
+{
+    ui->btnOPAcknowledge->hide();
+    ui->texteditOPTabAxisStatus->setTextColor(QColor(0, 0, 0));
+    ui->texteditOPTabAxisStatus->clear();
+
+    m_mainCTL.abortAcknowledged();
+
+}
 
