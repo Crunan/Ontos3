@@ -12,7 +12,8 @@ EngineerTab::EngineerTab(Ui::MainWindow* ui, PlasmaController &controller, MainW
     m_pMWndw(mWndw),
     m_controller(controller)
 {
-
+    // hide the ack button until there is an abort condition
+    m_pUI->btnENGAcknowledge->hide();
 }
 
 EngineerTab::~EngineerTab()
@@ -139,6 +140,5 @@ void EngineerTab::on_AutoMBCtrl_toggled(bool checked)
     }
 
 }
-
 
 

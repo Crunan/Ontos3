@@ -277,10 +277,10 @@ QProgressBar::Chunk
        <enum>QFrame::NoFrame</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="stackedWidget6MFCPage">
-       <widget class="Line" name="lineOPMFC2pre">
+       <widget class="Line" name="lineOPMFC2pre_6MFC">
         <property name="geometry">
          <rect>
           <x>131</x>
@@ -314,7 +314,7 @@ QProgressBar::Chunk
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="QFrame" name="frameMFC2">
+       <widget class="QFrame" name="frameMFC2_6MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -356,7 +356,7 @@ QProgressBar::Chunk
         <property name="midLineWidth">
          <number>1</number>
         </property>
-        <widget class="QLabel" name="lblOPMFC2">
+        <widget class="QLabel" name="lblOPMFC2_6MFC">
          <property name="geometry">
           <rect>
            <x>39</x>
@@ -388,7 +388,7 @@ QProgressBar::Chunk
          </property>
         </widget>
        </widget>
-       <widget class="Line" name="lineOPMFC1pre">
+       <widget class="Line" name="lineOPMFC1pre_6MFC">
         <property name="geometry">
          <rect>
           <x>131</x>
@@ -425,7 +425,7 @@ QProgressBar::Chunk
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="Line" name="lineOPMFC2post">
+       <widget class="Line" name="lineOPMFC2post_6MFC">
         <property name="geometry">
          <rect>
           <x>390</x>
@@ -462,7 +462,7 @@ QProgressBar::Chunk
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="QFrame" name="frameMFC6">
+       <widget class="QFrame" name="frameMFC6_6MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -501,7 +501,7 @@ QProgressBar::Chunk
         <property name="midLineWidth">
          <number>1</number>
         </property>
-        <widget class="QLabel" name="lblOPMFC6">
+        <widget class="QLabel" name="lblOPMFC6_6MFC">
          <property name="geometry">
           <rect>
            <x>39</x>
@@ -533,7 +533,7 @@ QProgressBar::Chunk
          </property>
         </widget>
        </widget>
-       <widget class="QLabel" name="lblOPMFC6ActualFlow">
+       <widget class="QLabel" name="lblOPMFC6ActualFlow_6MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -549,7 +549,7 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
        </widget>
-       <widget class="QProgressBar" name="progressBarOPMFC6">
+       <widget class="QProgressBar" name="progressBarOPMFC6_6MFC">
         <property name="geometry">
          <rect>
           <x>1</x>
@@ -600,7 +600,7 @@ QProgressBar::Chunk
          <string>%v%</string>
         </property>
        </widget>
-       <widget class="QLabel" name="lblOPMFC3ActualFlow">
+       <widget class="QLabel" name="lblOPMFC3ActualFlow_6MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -616,7 +616,7 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
        </widget>
-       <widget class="Line" name="lineOPMFC6pre">
+       <widget class="Line" name="lineOPMFC6pre_6MFC">
         <property name="geometry">
          <rect>
           <x>131</x>
@@ -638,7 +638,7 @@ QProgressBar::Chunk
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="QFrame" name="frameMFC1">
+       <widget class="QFrame" name="frameMFC1_6MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -680,7 +680,7 @@ QProgressBar::Chunk
         <property name="midLineWidth">
          <number>2</number>
         </property>
-        <widget class="QLabel" name="lblOPMFC1">
+        <widget class="QLabel" name="lblOPMFC1_6MFC">
          <property name="geometry">
           <rect>
            <x>39</x>
@@ -712,7 +712,7 @@ QProgressBar::Chunk
          </property>
         </widget>
        </widget>
-       <widget class="QFrame" name="frameMFC5">
+       <widget class="QFrame" name="frameMFC5_6MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -751,7 +751,7 @@ QProgressBar::Chunk
         <property name="midLineWidth">
          <number>1</number>
         </property>
-        <widget class="QLabel" name="lblOPMFC5">
+        <widget class="QLabel" name="lblOPMFC5_6MFC">
          <property name="geometry">
           <rect>
            <x>39</x>
@@ -783,7 +783,7 @@ QProgressBar::Chunk
          </property>
         </widget>
        </widget>
-       <widget class="QFrame" name="frameMFC3">
+       <widget class="QFrame" name="frameMFC3_6MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -822,7 +822,7 @@ QProgressBar::Chunk
         <property name="midLineWidth">
          <number>1</number>
         </property>
-        <widget class="QLabel" name="lblOPMFC3">
+        <widget class="QLabel" name="lblOPMFC3_6MFC">
          <property name="geometry">
           <rect>
            <x>39</x>
@@ -854,7 +854,7 @@ QProgressBar::Chunk
          </property>
         </widget>
        </widget>
-       <widget class="QLabel" name="lblOPMFC1ActualFlow">
+       <widget class="QLabel" name="lblOPMFC1ActualFlow_6MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -870,7 +870,7 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
        </widget>
-       <widget class="Line" name="lineOPMFC3pre">
+       <widget class="Line" name="lineOPMFC3pre_6MFC">
         <property name="geometry">
          <rect>
           <x>131</x>
@@ -892,7 +892,7 @@ QProgressBar::Chunk
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="QLabel" name="lblOPMFC2ActualFlow">
+       <widget class="QLabel" name="lblOPMFC2ActualFlow_6MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -908,7 +908,7 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
        </widget>
-       <widget class="QProgressBar" name="progressBarOPMFC1">
+       <widget class="QProgressBar" name="progressBarOPMFC1_6MFC">
         <property name="geometry">
          <rect>
           <x>1</x>
@@ -958,7 +958,7 @@ QProgressBar::Chunk
          <string>%v%</string>
         </property>
        </widget>
-       <widget class="QProgressBar" name="progressBarOPMFC2">
+       <widget class="QProgressBar" name="progressBarOPMFC2_6MFC">
         <property name="geometry">
          <rect>
           <x>1</x>
@@ -1006,7 +1006,7 @@ QProgressBar::Chunk
          <string>%v%</string>
         </property>
        </widget>
-       <widget class="QProgressBar" name="progressBarOPMFC5">
+       <widget class="QProgressBar" name="progressBarOPMFC5_6MFC">
         <property name="geometry">
          <rect>
           <x>1</x>
@@ -1054,7 +1054,7 @@ QProgressBar::Chunk
          <string>%v%</string>
         </property>
        </widget>
-       <widget class="Line" name="lineOPMFC3post">
+       <widget class="Line" name="lineOPMFC3post_6MFC">
         <property name="geometry">
          <rect>
           <x>390</x>
@@ -1076,7 +1076,7 @@ QProgressBar::Chunk
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="Line" name="lineOPMFC1post">
+       <widget class="Line" name="lineOPMFC1post_6MFC">
         <property name="geometry">
          <rect>
           <x>390</x>
@@ -1119,7 +1119,7 @@ QProgressBar::Chunk
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="QProgressBar" name="progressBarOPMFC4">
+       <widget class="QProgressBar" name="progressBarOPMFC4_6MFC">
         <property name="geometry">
          <rect>
           <x>1</x>
@@ -1167,7 +1167,7 @@ QProgressBar::Chunk
          <string>%v%</string>
         </property>
        </widget>
-       <widget class="Line" name="lineOPMFC4post">
+       <widget class="Line" name="lineOPMFC4post_6MFC">
         <property name="geometry">
          <rect>
           <x>390</x>
@@ -1189,7 +1189,7 @@ QProgressBar::Chunk
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="Line" name="lineOPMFC5pre">
+       <widget class="Line" name="lineOPMFC5pre_6MFC">
         <property name="geometry">
          <rect>
           <x>131</x>
@@ -1211,7 +1211,7 @@ QProgressBar::Chunk
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="QLabel" name="lblOPMFC5ActualFlow">
+       <widget class="QLabel" name="lblOPMFC5ActualFlow_6MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -1227,7 +1227,7 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
        </widget>
-       <widget class="QLabel" name="lblOPMFC4ActualFlow">
+       <widget class="QLabel" name="lblOPMFC4ActualFlow_6MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -1243,7 +1243,7 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
        </widget>
-       <widget class="Line" name="lineOPMFC4pre">
+       <widget class="Line" name="lineOPMFC4pre_6MFC">
         <property name="geometry">
          <rect>
           <x>131</x>
@@ -1265,7 +1265,7 @@ QProgressBar::Chunk
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="QProgressBar" name="progressBarOPMFC3">
+       <widget class="QProgressBar" name="progressBarOPMFC3_6MFC">
         <property name="geometry">
          <rect>
           <x>1</x>
@@ -1313,7 +1313,7 @@ QProgressBar::Chunk
          <string>%v%</string>
         </property>
        </widget>
-       <widget class="Line" name="lineOPMFC5post">
+       <widget class="Line" name="lineOPMFC5post_6MFC">
         <property name="geometry">
          <rect>
           <x>390</x>
@@ -1335,7 +1335,7 @@ QProgressBar::Chunk
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="Line" name="lineOPMFC6post">
+       <widget class="Line" name="lineOPMFC6post_6MFC">
         <property name="geometry">
          <rect>
           <x>390</x>
@@ -1357,7 +1357,7 @@ QProgressBar::Chunk
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="QFrame" name="frameMFC4">
+       <widget class="QFrame" name="frameMFC4_6MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -1396,7 +1396,7 @@ QProgressBar::Chunk
         <property name="midLineWidth">
          <number>1</number>
         </property>
-        <widget class="QLabel" name="lblOPMFC4">
+        <widget class="QLabel" name="lblOPMFC4_6MFC">
          <property name="geometry">
           <rect>
            <x>39</x>
@@ -1430,7 +1430,7 @@ QProgressBar::Chunk
        </widget>
       </widget>
       <widget class="QWidget" name="stackedWidget5MFCPage">
-       <widget class="QFrame" name="frameMFC5_2">
+       <widget class="QFrame" name="frameMFC5_5MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -1469,7 +1469,7 @@ QProgressBar::Chunk
         <property name="midLineWidth">
          <number>1</number>
         </property>
-        <widget class="QLabel" name="lblOPMFC5_2">
+        <widget class="QLabel" name="lblOPMFC5_5MFC">
          <property name="geometry">
           <rect>
            <x>39</x>
@@ -1501,7 +1501,7 @@ QProgressBar::Chunk
          </property>
         </widget>
        </widget>
-       <widget class="QLabel" name="lblOPMFC1ActualFlow_2">
+       <widget class="QLabel" name="lblOPMFC1ActualFlow_5MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -1517,7 +1517,7 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
        </widget>
-       <widget class="QFrame" name="frameMFC2_2">
+       <widget class="QFrame" name="frameMFC2_5MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -1559,7 +1559,7 @@ QProgressBar::Chunk
         <property name="midLineWidth">
          <number>1</number>
         </property>
-        <widget class="QLabel" name="lblOPMFC2_2">
+        <widget class="QLabel" name="lblOPMFC2_5MFC">
          <property name="geometry">
           <rect>
            <x>39</x>
@@ -1591,7 +1591,7 @@ QProgressBar::Chunk
          </property>
         </widget>
        </widget>
-       <widget class="QLabel" name="lblOPMFC2ActualFlow_2">
+       <widget class="QLabel" name="lblOPMFC2ActualFlow_5MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -1607,7 +1607,7 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
        </widget>
-       <widget class="QFrame" name="frameMFC1_2">
+       <widget class="QFrame" name="frameMFC1_5MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -1649,7 +1649,7 @@ QProgressBar::Chunk
         <property name="midLineWidth">
          <number>2</number>
         </property>
-        <widget class="QLabel" name="lblOPMFC1_2">
+        <widget class="QLabel" name="lblOPMFC1_5MFC">
          <property name="geometry">
           <rect>
            <x>39</x>
@@ -1681,7 +1681,7 @@ QProgressBar::Chunk
          </property>
         </widget>
        </widget>
-       <widget class="QFrame" name="frameMFC3_2">
+       <widget class="QFrame" name="frameMFC3_5MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -1720,7 +1720,7 @@ QProgressBar::Chunk
         <property name="midLineWidth">
          <number>1</number>
         </property>
-        <widget class="QLabel" name="lblOPMFC3_2">
+        <widget class="QLabel" name="lblOPMFC3_5MFC">
          <property name="geometry">
           <rect>
            <x>39</x>
@@ -1752,7 +1752,7 @@ QProgressBar::Chunk
          </property>
         </widget>
        </widget>
-       <widget class="Line" name="lineOPMFC4pre_2">
+       <widget class="Line" name="lineOPMFC4pre_5MFC">
         <property name="geometry">
          <rect>
           <x>131</x>
@@ -1774,7 +1774,7 @@ QProgressBar::Chunk
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="QProgressBar" name="progressBarOPMFC4_2">
+       <widget class="QProgressBar" name="progressBarOPMFC4_5MFC">
         <property name="geometry">
          <rect>
           <x>1</x>
@@ -1819,10 +1819,10 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
         <property name="format">
-         <string/>
+         <string>%v%</string>
         </property>
        </widget>
-       <widget class="Line" name="lineOPMFC1pre_2">
+       <widget class="Line" name="lineOPMFC1pre_5MFC">
         <property name="geometry">
          <rect>
           <x>131</x>
@@ -1847,7 +1847,7 @@ QProgressBar::Chunk
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="QProgressBar" name="progressBarOPMFC3_2">
+       <widget class="QProgressBar" name="progressBarOPMFC3_5MFC">
         <property name="geometry">
          <rect>
           <x>1</x>
@@ -1892,10 +1892,10 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
         <property name="format">
-         <string/>
+         <string>%v%</string>
         </property>
        </widget>
-       <widget class="Line" name="lineOPMFC5post_2">
+       <widget class="Line" name="lineOPMFC5post_5MFC">
         <property name="geometry">
          <rect>
           <x>390</x>
@@ -1917,7 +1917,7 @@ QProgressBar::Chunk
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="QLabel" name="lblOPMFC3ActualFlow_2">
+       <widget class="QLabel" name="lblOPMFC3ActualFlow_5MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -1933,7 +1933,7 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
        </widget>
-       <widget class="Line" name="lineOPMFC4post_2">
+       <widget class="Line" name="lineOPMFC4post_5MFC">
         <property name="geometry">
          <rect>
           <x>390</x>
@@ -1955,7 +1955,7 @@ QProgressBar::Chunk
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="Line" name="lineOPMFC5pre_2">
+       <widget class="Line" name="lineOPMFC5pre_5MFC">
         <property name="geometry">
          <rect>
           <x>131</x>
@@ -1977,7 +1977,7 @@ QProgressBar::Chunk
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="Line" name="lineOPMFC2post_2">
+       <widget class="Line" name="lineOPMFC2post_5MFC">
         <property name="geometry">
          <rect>
           <x>390</x>
@@ -2002,7 +2002,7 @@ QProgressBar::Chunk
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="QLabel" name="lblOPMFC5ActualFlow_2">
+       <widget class="QLabel" name="lblOPMFC5ActualFlow_5MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -2018,7 +2018,7 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
        </widget>
-       <widget class="Line" name="lineOPMFC2pre_2">
+       <widget class="Line" name="lineOPMFC2pre_5MFC">
         <property name="geometry">
          <rect>
           <x>131</x>
@@ -2040,7 +2040,7 @@ QProgressBar::Chunk
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="QFrame" name="frameMFC4_2">
+       <widget class="QFrame" name="frameMFC4_5MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -2079,7 +2079,7 @@ QProgressBar::Chunk
         <property name="midLineWidth">
          <number>1</number>
         </property>
-        <widget class="QLabel" name="lblOPMFC4_2">
+        <widget class="QLabel" name="lblOPMFC4_5MFC">
          <property name="geometry">
           <rect>
            <x>39</x>
@@ -2111,7 +2111,7 @@ QProgressBar::Chunk
          </property>
         </widget>
        </widget>
-       <widget class="QProgressBar" name="progressBarOPMFC2_2">
+       <widget class="QProgressBar" name="progressBarOPMFC2_5MFC">
         <property name="geometry">
          <rect>
           <x>1</x>
@@ -2156,10 +2156,10 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
         <property name="format">
-         <string/>
+         <string>%v%</string>
         </property>
        </widget>
-       <widget class="QLabel" name="lblOPMFC4ActualFlow_2">
+       <widget class="QLabel" name="lblOPMFC4ActualFlow_5MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -2175,7 +2175,7 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
        </widget>
-       <widget class="Line" name="lineOPMFC3post_2">
+       <widget class="Line" name="lineOPMFC3post_5MFC">
         <property name="geometry">
          <rect>
           <x>390</x>
@@ -2197,7 +2197,7 @@ QProgressBar::Chunk
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="QProgressBar" name="progressBarOPMFC1_2">
+       <widget class="QProgressBar" name="progressBarOPMFC1_5MFC">
         <property name="geometry">
          <rect>
           <x>1</x>
@@ -2244,10 +2244,10 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
         <property name="format">
-         <string/>
+         <string>%v%</string>
         </property>
        </widget>
-       <widget class="Line" name="lineOPMFC1post_2">
+       <widget class="Line" name="lineOPMFC1post_5MFC">
         <property name="geometry">
          <rect>
           <x>390</x>
@@ -2278,7 +2278,7 @@ QProgressBar::Chunk
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="QProgressBar" name="progressBarOPMFC5_2">
+       <widget class="QProgressBar" name="progressBarOPMFC5_5MFC">
         <property name="geometry">
          <rect>
           <x>1</x>
@@ -2323,7 +2323,7 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
         <property name="format">
-         <string/>
+         <string>%v%</string>
         </property>
        </widget>
        <widget class="Line" name="lineOPMFC1vert_2">
@@ -2357,7 +2357,7 @@ QProgressBar::Chunk
          <enum>Qt::Vertical</enum>
         </property>
        </widget>
-       <widget class="Line" name="lineOPMFC3pre_2">
+       <widget class="Line" name="lineOPMFC3pre_5MFC">
         <property name="geometry">
          <rect>
           <x>131</x>
@@ -2381,7 +2381,7 @@ QProgressBar::Chunk
        </widget>
       </widget>
       <widget class="QWidget" name="stackedWidget4MFCPage">
-       <widget class="Line" name="lineOPMFC1post_3">
+       <widget class="Line" name="lineOPMFC1post_4MFC">
         <property name="geometry">
          <rect>
           <x>390</x>
@@ -2412,7 +2412,7 @@ QProgressBar::Chunk
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="Line" name="lineOPMFC4pre_3">
+       <widget class="Line" name="lineOPMFC4pre_4MFC">
         <property name="geometry">
          <rect>
           <x>131</x>
@@ -2434,7 +2434,7 @@ QProgressBar::Chunk
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="QProgressBar" name="progressBarOPMFC4_3">
+       <widget class="QProgressBar" name="progressBarOPMFC4_4MFC">
         <property name="geometry">
          <rect>
           <x>1</x>
@@ -2479,10 +2479,10 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
         <property name="format">
-         <string/>
+         <string>%v%</string>
         </property>
        </widget>
-       <widget class="QLabel" name="lblOPMFC1ActualFlow_3">
+       <widget class="QLabel" name="lblOPMFC1ActualFlow_4MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -2498,7 +2498,7 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
        </widget>
-       <widget class="QLabel" name="lblOPMFC4ActualFlow_3">
+       <widget class="QLabel" name="lblOPMFC4ActualFlow_4MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -2514,7 +2514,7 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
        </widget>
-       <widget class="Line" name="lineOPMFC3post_3">
+       <widget class="Line" name="lineOPMFC3post_4MFC">
         <property name="geometry">
          <rect>
           <x>390</x>
@@ -2536,7 +2536,7 @@ QProgressBar::Chunk
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="QProgressBar" name="progressBarOPMFC2_3">
+       <widget class="QProgressBar" name="progressBarOPMFC2_4MFC">
         <property name="geometry">
          <rect>
           <x>1</x>
@@ -2581,10 +2581,10 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
         <property name="format">
-         <string/>
+         <string>%v%</string>
         </property>
        </widget>
-       <widget class="QFrame" name="frameMFC2_3">
+       <widget class="QFrame" name="frameMFC2_4MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -2626,7 +2626,7 @@ QProgressBar::Chunk
         <property name="midLineWidth">
          <number>1</number>
         </property>
-        <widget class="QLabel" name="lblOPMFC2_4">
+        <widget class="QLabel" name="lblOPMFC2_4MFC">
          <property name="geometry">
           <rect>
            <x>39</x>
@@ -2658,7 +2658,7 @@ QProgressBar::Chunk
          </property>
         </widget>
        </widget>
-       <widget class="Line" name="lineOPMFC2post_3">
+       <widget class="Line" name="lineOPMFC2post_4MFC">
         <property name="geometry">
          <rect>
           <x>390</x>
@@ -2683,7 +2683,7 @@ QProgressBar::Chunk
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="Line" name="lineOPMFC4post_3">
+       <widget class="Line" name="lineOPMFC4post_4MFC">
         <property name="geometry">
          <rect>
           <x>390</x>
@@ -2705,7 +2705,7 @@ QProgressBar::Chunk
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="Line" name="lineOPMFC2pre_3">
+       <widget class="Line" name="lineOPMFC2pre_4MFC">
         <property name="geometry">
          <rect>
           <x>131</x>
@@ -2727,7 +2727,7 @@ QProgressBar::Chunk
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="QFrame" name="frameMFC4_3">
+       <widget class="QFrame" name="frameMFC4_4MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -2766,7 +2766,7 @@ QProgressBar::Chunk
         <property name="midLineWidth">
          <number>1</number>
         </property>
-        <widget class="QLabel" name="lblOPMFC4_4">
+        <widget class="QLabel" name="lblOPMFC4_4MFC">
          <property name="geometry">
           <rect>
            <x>39</x>
@@ -2798,7 +2798,7 @@ QProgressBar::Chunk
          </property>
         </widget>
        </widget>
-       <widget class="QProgressBar" name="progressBarOPMFC1_3">
+       <widget class="QProgressBar" name="progressBarOPMFC1_4MFC">
         <property name="geometry">
          <rect>
           <x>1</x>
@@ -2845,10 +2845,10 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
         <property name="format">
-         <string/>
+         <string>%v%</string>
         </property>
        </widget>
-       <widget class="Line" name="lineOPMFC3pre_3">
+       <widget class="Line" name="lineOPMFC3pre_4MFC">
         <property name="geometry">
          <rect>
           <x>131</x>
@@ -2870,7 +2870,7 @@ QProgressBar::Chunk
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="QProgressBar" name="progressBarOPMFC3_3">
+       <widget class="QProgressBar" name="progressBarOPMFC3_4MFC">
         <property name="geometry">
          <rect>
           <x>1</x>
@@ -2915,10 +2915,10 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
         <property name="format">
-         <string/>
+         <string>%v%</string>
         </property>
        </widget>
-       <widget class="QFrame" name="frameMFC1_3">
+       <widget class="QFrame" name="frameMFC1_4MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -2960,7 +2960,7 @@ QProgressBar::Chunk
         <property name="midLineWidth">
          <number>2</number>
         </property>
-        <widget class="QLabel" name="lblOPMFC1_4">
+        <widget class="QLabel" name="lblOPMFC1_4MFC">
          <property name="geometry">
           <rect>
            <x>39</x>
@@ -2992,7 +2992,7 @@ QProgressBar::Chunk
          </property>
         </widget>
        </widget>
-       <widget class="Line" name="lineOPMFC1pre_3">
+       <widget class="Line" name="lineOPMFC1pre_4MFC">
         <property name="geometry">
          <rect>
           <x>131</x>
@@ -3048,7 +3048,7 @@ QProgressBar::Chunk
          <enum>Qt::Vertical</enum>
         </property>
        </widget>
-       <widget class="QLabel" name="lblOPMFC3ActualFlow_3">
+       <widget class="QLabel" name="lblOPMFC3ActualFlow_4MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -3064,7 +3064,7 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
        </widget>
-       <widget class="QFrame" name="frameMFC3_3">
+       <widget class="QFrame" name="frameMFC3_4MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -3103,7 +3103,7 @@ QProgressBar::Chunk
         <property name="midLineWidth">
          <number>1</number>
         </property>
-        <widget class="QLabel" name="lblOPMFC3_4">
+        <widget class="QLabel" name="lblOPMFC3_4MFC">
          <property name="geometry">
           <rect>
            <x>39</x>
@@ -3135,7 +3135,7 @@ QProgressBar::Chunk
          </property>
         </widget>
        </widget>
-       <widget class="QLabel" name="lblOPMFC2ActualFlow_3">
+       <widget class="QLabel" name="lblOPMFC2ActualFlow_4MFC">
         <property name="geometry">
          <rect>
           <x>261</x>
@@ -3600,6 +3600,12 @@ color: rgb(255, 255, 255);</string>
                 </property>
                 <property name="styleSheet">
                  <string notr="true"/>
+                </property>
+                <property name="frameShape">
+                 <enum>QFrame::Box</enum>
+                </property>
+                <property name="lineWidth">
+                 <number>0</number>
                 </property>
                 <property name="text">
                  <string>Status</string>
@@ -4070,10 +4076,10 @@ border-radius: 80px;
      <widget class="QFrame" name="frame_13">
       <property name="geometry">
        <rect>
-        <x>370</x>
+        <x>450</x>
         <y>510</y>
         <width>331</width>
-        <height>191</height>
+        <height>221</height>
        </rect>
       </property>
       <property name="frameShape">
@@ -4091,6 +4097,9 @@ border-radius: 80px;
        </property>
        <property name="formAlignment">
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+       </property>
+       <property name="verticalSpacing">
+        <number>10</number>
        </property>
        <item row="0" column="0">
         <widget class="QLabel" name="label_20">
@@ -4192,7 +4201,7 @@ border-radius: 80px;
           </font>
          </property>
          <property name="text">
-          <string>Process Complete:</string>
+          <string>Process:</string>
          </property>
         </widget>
        </item>
@@ -4978,7 +4987,7 @@ background-color: palette(base)</string>
             </widget>
            </item>
            <item>
-            <widget class="QComboBox" name="comboBoxOPRecipe_2">
+            <widget class="QComboBox" name="comboBoxENGRecipe">
              <property name="editable">
               <bool>false</bool>
              </property>
@@ -5012,7 +5021,7 @@ background-color: palette(base)</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_15">
            <item>
-            <widget class="QPushButton" name="btnOPChuckVacOnOff_2">
+            <widget class="QPushButton" name="btnENGChuckVacOnOff">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                <horstretch>0</horstretch>
@@ -5050,7 +5059,7 @@ color: rgb(255, 255, 255);</string>
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="btnOPPinsUpDown_2">
+            <widget class="QPushButton" name="btnENGPinsUpDown">
              <property name="enabled">
               <bool>false</bool>
              </property>
@@ -5132,7 +5141,7 @@ color: rgb(255, 255, 255);</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_20">
            <item>
-            <widget class="QPushButton" name="btnOPStartPlasma_2">
+            <widget class="QPushButton" name="btnENGStartPlasma">
              <property name="enabled">
               <bool>false</bool>
              </property>
@@ -5176,7 +5185,7 @@ background-color: rgb(133, 2, 2);
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="btnOPHome_2">
+            <widget class="QPushButton" name="btnENGHome">
              <property name="enabled">
               <bool>false</bool>
              </property>
@@ -5209,7 +5218,7 @@ background-color: rgb(133, 2, 2);
 color: rgb(255, 255, 255);</string>
              </property>
              <property name="text">
-              <string>Home</string>
+              <string>Load</string>
              </property>
              <property name="checkable">
               <bool>true</bool>
@@ -5217,7 +5226,7 @@ color: rgb(255, 255, 255);</string>
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="btnOPInit_2">
+            <widget class="QPushButton" name="btnENGInit">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
                <horstretch>0</horstretch>
@@ -5277,6 +5286,9 @@ color: rgb(255, 255, 255);</string>
              <property name="frameShape">
               <enum>QFrame::Box</enum>
              </property>
+             <property name="frameShadow">
+              <enum>QFrame::Plain</enum>
+             </property>
              <property name="lineWidth">
               <number>0</number>
              </property>
@@ -5325,6 +5337,12 @@ color: rgb(255, 255, 255);</string>
                 <property name="styleSheet">
                  <string notr="true"/>
                 </property>
+                <property name="frameShape">
+                 <enum>QFrame::Box</enum>
+                </property>
+                <property name="lineWidth">
+                 <number>0</number>
+                </property>
                 <property name="text">
                  <string>Status</string>
                 </property>
@@ -5334,9 +5352,15 @@ color: rgb(255, 255, 255);</string>
                </widget>
               </item>
               <item>
-               <widget class="QTextEdit" name="texteditOPTabAxisStatus_2">
+               <widget class="QTextEdit" name="texteditENGTabAxisStatus">
                 <property name="enabled">
                  <bool>true</bool>
+                </property>
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
                 </property>
                 <property name="maximumSize">
                  <size>
@@ -5353,7 +5377,23 @@ color: rgb(255, 255, 255);</string>
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="btnOPAcknowledge_2">
+            <widget class="QFrame" name="frame_12">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::StyledPanel</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Raised</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnENGAcknowledge">
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -7570,349 +7610,6 @@ background-color: blue;
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="stageControlsWidget" native="true">
-      <property name="geometry">
-       <rect>
-        <x>1700</x>
-        <y>20</y>
-        <width>234</width>
-        <height>611</height>
-       </rect>
-      </property>
-      <layout class="QGridLayout" name="gridLayout_8">
-       <item row="4" column="0">
-        <widget class="QPushButton" name="Joystick_button">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton {
-background-color: gray;
-font: 18pt &quot;Ubuntu Bold&quot;;
-
-}
-QPushButton:disabled {
-color:gray;
-}
-
-</string>
-         </property>
-         <property name="text">
-          <string>JOY</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="7" column="1">
-        <widget class="QPushButton" name="n2_purge_button">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton {
-background-color: gray;
-font: 14pt &quot;Ubuntu Bold&quot;;
-}
-QPushButton:disabled {
-color:gray;
-}</string>
-         </property>
-         <property name="text">
-          <string>N2 PURGE</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1">
-        <widget class="QPushButton" name="Home_button">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton {
-background-color: rgb(119, 136, 153);
-font: 18pt &quot;Ubuntu Bold&quot;;
-}
-QPushButton:disabled {
-color:gray;
-}</string>
-         </property>
-         <property name="text">
-          <string>LOAD</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QPushButton" name="vac_button">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton {
-background-color: gray;
-font: 18pt &quot;Ubuntu Bold&quot;;
-}
-QPushButton:disabled {
-color:gray;
-}</string>
-         </property>
-         <property name="text">
-          <string>VAC</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="1">
-        <widget class="QPushButton" name="diameter_button">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton {
-background-color: rgb(119, 136, 153);
-font: 14pt &quot;Ubuntu Bold&quot;;
-}
-QPushButton:disabled {
-color:gray;
-}
-</string>
-         </property>
-         <property name="text">
-          <string>DIAMETER</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QPushButton" name="init_button">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton {
-background-color: rgb(119, 136, 153);
-font: 14pt &quot;Ubuntu Bold&quot;;
-}
-QPushButton:disabled {
-color:gray;
-}</string>
-         </property>
-         <property name="text">
-          <string>INITIALIZE</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QPushButton" name="scan_button">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton {
-background-color: rgb(119, 136, 153);
-font: 18pt &quot;Ubuntu Bold&quot;;
-}
-QPushButton:disabled {
-color:gray;
-}</string>
-         </property>
-         <property name="text">
-          <string>SCAN</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_54">
-         <property name="text">
-          <string>Stage Buttons</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QPushButton" name="Stagepins_button">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton {
-background-color: gray;
-font: 18pt &quot;Ubuntu Bold&quot;;
-}
-QPushButton:disabled {
-color:gray;
-}</string>
-         </property>
-         <property name="text">
-          <string>PINS</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-         <property name="checked">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="0">
-        <layout class="QVBoxLayout" name="verticalLayout_22">
-         <item>
-          <widget class="QLabel" name="label_55">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>30</height>
-            </size>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QLabel {
-font: 8pt &quot;Ubuntu Bold&quot;;
-}</string>
-           </property>
-           <property name="text">
-            <string>Wafer Diameter:</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="wafer_diameter">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>200</width>
-             <height>50</height>
-            </size>
-           </property>
-           <property name="layoutDirection">
-            <enum>Qt::RightToLeft</enum>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QComboBox {
-background-color: gray;
-font: 16pt &quot;Ubuntu Bold&quot;;
-}
-QComboBox:disabled {
-color:gray;
-}</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="stageStatusWidget" native="true">
-      <property name="geometry">
-       <rect>
-        <x>1700</x>
-        <y>650</y>
-        <width>231</width>
-        <height>196</height>
-       </rect>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout_21">
-       <item>
-        <widget class="QLabel" name="label_52">
-         <property name="text">
-          <string>Stage Current Step Status:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QTextEdit" name="axisstatus">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_53">
-         <property name="text">
-          <string>Stage Next Step Status:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QTextEdit" name="axisstatus_2">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
      <widget class="QDoubleSpinBox" name="LEDIntensitySpinBox">
       <property name="geometry">
        <rect>
@@ -8087,6 +7784,22 @@ QDoubleSpinBox::QLineEdit {
       </property>
       <property name="text">
        <string>LED brightness control</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="Joystick_button">
+      <property name="geometry">
+       <rect>
+        <x>320</x>
+        <y>140</y>
+        <width>131</width>
+        <height>81</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Joy</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
       </property>
      </widget>
     </widget>
@@ -8460,8 +8173,6 @@ font: 14pt &quot;Ubuntu Bold&quot;;
      <addaction name="actionTest_Z"/>
     </widget>
     <addaction name="separator"/>
-    <addaction name="actionEngineer_Mode"/>
-    <addaction name="actionOperator_Mode"/>
     <addaction name="actionSet_Default"/>
     <addaction name="menuStage_Test"/>
     <addaction name="actionAbout"/>

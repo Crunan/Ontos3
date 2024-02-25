@@ -1080,14 +1080,14 @@ void PlasmaController::setRecipe(QString filePath)
     setMFCsFlowFromRecipe();
     setRFSetpointFromRecipe();
     setTunerSetpointFromRecipe();
-    // as per cory Auto Tune should be set to on when loading any recipe
+    // MCD: 2/25/24 Not sure this makes sense, need to verify
+    // as per cory Auto Tune should be set to on when loading any recipe  
     m_tuner.setAutoTune(true);
 }
 
 void PlasmaController::setMFCsFlowFromRecipe()
 {
-    for (int i = 0; i < m_mfcs.size(); i++)
-    {
+    for (int i = 0; i < m_mfcs.size(); i++) {
         MFC* mfc = m_mfcs.at(i);
         QString mfcKey = RECIPE_MFC_KEY + QString::number(i + 1);
 

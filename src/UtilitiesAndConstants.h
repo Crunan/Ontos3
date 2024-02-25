@@ -38,5 +38,8 @@ static const char RECIPE_HEATER_KEY[] = "HEATER";
 static const char RECIPE_DIRECTORY[] = "/opt/OTT_PLUS/Recipes";
 static const char CASCADE_RECIPE_DIRECTORY[] = "/opt/OTT_PLUS/Cascade Recipes";
 
+const int GAS_FLOW_OK_TOLERANCE = 3; // gas flow must be withing 3% of the recipe setpoint for it to be considered OK
+const int REFLECTED_POWER_OK_TOLERANCE = 10; // when flowing plasma, reflected power must be less than 10 watts to be considered ok
+
 
 #endif // UTILITIESANDCONSTANTS_H

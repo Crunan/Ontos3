@@ -6,7 +6,6 @@
 #include "settingsdialog.h"
 #include "logger.h"
 #include "plasmacontroller.h"
-#include "stagewidget.h"
 #include "axescontroller.h"
 #include <chrono>
 
@@ -55,6 +54,7 @@ public:
     void engineerModeSelected() {     // clear the password
         m_passDialog.clearPassword();
         m_passDialog.show();
+        m_passDialog.setFocusLineEdit();
     }
 
     void setUIOperatorMode();
@@ -71,7 +71,6 @@ signals:
 public slots:
     void setInitialUIState();
     void openRecipeWindowMFC();
-    void stageStatusUpdate(QString statusNow, QString statusNext);
     void showAbortMessageBox(QString message, bool shutdown);
     void batchIDLoggingIsActive();
 
@@ -80,11 +79,7 @@ public slots:
     void closeMainPort();
     void readTimeoutError(QString lastCommand);
 
-    // state machine ui updating slots
-    void homeStateMachineStartup();
-    void homeStateMachineDone();
-    void initStateMachineStartup();
-    void initStateMachineDone();
+    // state machine
     void runMainStateMachine();
 
     // real time data updates
@@ -112,15 +107,7 @@ public slots:
     void loadCascadeRecipe();
 
     // callbacks
-    void pinsStateChanged(bool state);
     void joystickStateChanged(bool state);
-    void n2StateChanged(bool state);
-    void vacStateChanged(bool state);
-    void CSM_StatusUpdate(QString status, QString next);
-    void SSM_Started();
-    void SSM_Done();
-    void SSM_StatusUpdate(QString status, QString next);
-    void scanBoxChanged();
     void userEnteredPassword();
 
     // recipe set value slots
@@ -144,19 +131,13 @@ public slots:
 
 private slots:
     // controls handlers
-    void on_init_button_clicked();
     void on_load_thick_clicked();
     void on_load_gap_clicked();
     void on_load_overlap_clicked();
     void on_loadSpeedButton_clicked();
     void on_load_cycles_clicked();
-    void on_wafer_diameter_currentIndexChanged(int index);
-    void on_vac_button_toggled(bool checked);
-    void on_n2_purge_button_toggled(bool checked);
-    void on_Home_button_toggled(bool checked);
     void on_loadRecipeButton_clicked();
     void on_loadRFButton_clicked();
-    void on_scan_button_toggled(bool checked);
     void on_loadAutoTuneButton_clicked();
     void on_loadMBButton_clicked();
     void on_load_autoscan_clicked();
@@ -167,15 +148,13 @@ private slots:
     void on_removeCascadeRecipeButton_clicked();
     void on_clear_cascade_recipe_button_clicked();
     void on_Joystick_button_toggled(bool checked);
-    void on_Stagepins_button_toggled(bool checked);   
-    void on_diameter_button_clicked();
     void on_x1_set_clicked();
     void on_x2_set_clicked();
     void on_y1_set_clicked();
     void on_y2_set_clicked();
     // menu actions
-    void on_actionOperator_Mode_triggered();
-    void on_actionEngineer_Mode_triggered();
+    // void on_actionOperator_Mode_triggered();
+    // void on_actionEngineer_Mode_triggered();
     void on_actionAbout_triggered();
     void on_actionConnect_triggered();
     void on_actionDisconnect_triggered();
@@ -194,8 +173,6 @@ private slots:
     void on_LEDIntensitySpinBox_valueChanged(double arg1);
     void on_mainTabWidget_currentChanged(int index);
     void on_pushButton_clicked(bool checked);
-
-    void on_btnOPAcknowledge_clicked();
 
 private:
 
@@ -237,9 +214,8 @@ private:
     // tabs UI components slots to their respective
     // signals
     void connectOperatorTabSlots();
-    // operator tab class
+
     OperatorTab *m_pOperatortab;
-    // engineer tab class
     EngineerTab *m_pEngineertab;
 
     MainLoop *m_pMainLoop;

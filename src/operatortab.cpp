@@ -17,14 +17,15 @@ static const char mfcBoxActivText[] = "color: rgb(255, 255, 255);";
 static const char mfcBoxInactive[] = "background-color: rgb(base);";
 static const char mfcBoxInactivText[] = "color: rgb(0, 0, 0);";
 
-
 OperatorTab::OperatorTab(Ui::MainWindow* ui, PlasmaController &controller, MainWindow *mWndw, QObject* parent) :
     QObject(parent),
     m_pUI(ui),
     m_pMWndw(mWndw),
     m_controller(controller),
     m_plasmaActive(false),
-    m_config()
+    m_config(),
+    m_numMFCs(6),
+    m_currentReflectedWatts(0)
 {
     populateRecipeComboBox();
 
@@ -35,6 +36,7 @@ OperatorTab::OperatorTab(Ui::MainWindow* ui, PlasmaController &controller, MainW
     connect(m_pUI->btnOPInit, &QPushButton::clicked, this, &OperatorTab::btnOPInit_clicked);
     connect(m_pUI->comboBoxOPRecipe, &QComboBox::currentTextChanged, this, &OperatorTab::comboBoxOPRecipe_currentTextChanged);
     connect(m_pUI->comboBoxOPLogin, &QComboBox::currentTextChanged, this, &OperatorTab::comboBoxOPLogin_currentTextChanged);
+    connect(m_pUI->btnOPAcknowledge, &QPushButton::clicked, this, &OperatorTab::btnOPAcknowledged_clicked);
 
     connectMFCFlowBars();
 
@@ -43,14 +45,6 @@ OperatorTab::OperatorTab(Ui::MainWindow* ui, PlasmaController &controller, MainW
 
     // default to 6 mfc's
     m_pUI->stackedWidgetMFC->setCurrentIndex(MFC6_STACKED_WIDGET_PAGE);
-
-    // hide flow labels initially
-    m_pUI->lblOPMFC1ActualFlow->hide();
-    m_pUI->lblOPMFC2ActualFlow->hide();
-    m_pUI->lblOPMFC3ActualFlow->hide();
-    m_pUI->lblOPMFC4ActualFlow->hide();
-    m_pUI->lblOPMFC5ActualFlow->hide();
-    m_pUI->lblOPMFC6ActualFlow->hide();
 }
 
 OperatorTab::~OperatorTab()
@@ -114,68 +108,6 @@ void OperatorTab::lightTowerSetInactive()
 }
 
 
-void OperatorTab::mfcFlowLinesOn(int mfcNum, bool on)
-{
-    QString lineColor = (on == true) ? QString(mfcFlowLinesActive) : QString(mfcFlowLinesInactive);
-    QString boxColor = (on == true) ? QString(mfcBoxActive) : QString(mfcBoxInactive);
-    QString textColor = (on == true) ? QString(mfcBoxActivText) : QString(mfcBoxInactivText);
-
-    if (mfcNum == 1) {
-        // set line colors
-        // m_pUI->lineOPMFC1pre->setStyleSheet(lineColor);
-        // m_pUI->lineOPMFC1post->setStyleSheet(lineColor);
-        // m_pUI->lineOPMFC1vert->setStyleSheet(lineColor);
-        // set box and text color
-        m_pUI->frameMFC1->setStyleSheet(boxColor);
-        m_pUI->lblOPMFC1->setStyleSheet(textColor);
-    }
-    else if (mfcNum == 2) {
-        // set line colors
-        // m_pUI->lineOPMFC2pre->setStyleSheet(lineColor);
-        // m_pUI->lineOPMFC2post->setStyleSheet(lineColor);
-        // m_pUI->lineOPMFC2vert->setStyleSheet(lineColor);
-        // set box and text color
-        m_pUI->frameMFC2->setStyleSheet(boxColor);
-        m_pUI->lblOPMFC2->setStyleSheet(textColor);
-    }
-    else if (mfcNum == 3) {
-        // set line colors
-        // m_pUI->lineOPMFC3pre->setStyleSheet(lineColor);
-        // m_pUI->lineOPMFC3post->setStyleSheet(lineColor);
-        // m_pUI->lineOPMFC3vert->setStyleSheet(lineColor);
-        // set box and text color
-        m_pUI->frameMFC3->setStyleSheet(boxColor);
-        m_pUI->lblOPMFC3->setStyleSheet(textColor);
-    }
-    else if (mfcNum == 4) {
-        // set line colors
-        // m_pUI->lineOPMFC4pre->setStyleSheet(lineColor);
-        // m_pUI->lineOPMFC4post->setStyleSheet(lineColor);
-        // m_pUI->lineOPMFC4vert->setStyleSheet(lineColor);
-        // set box and text color
-        m_pUI->frameMFC4->setStyleSheet(boxColor);
-        m_pUI->lblOPMFC4->setStyleSheet(textColor);
-    }
-    else if (mfcNum == 5) {
-        // set line colors
-        // m_pUI->lineOPMFC5pre->setStyleSheet(lineColor);
-        // m_pUI->lineOPMFC5post->setStyleSheet(lineColor);
-        // m_pUI->lineOPMFC5vert->setStyleSheet(lineColor);
-        // set box and text color
-        m_pUI->frameMFC5->setStyleSheet(boxColor);
-        m_pUI->lblOPMFC5->setStyleSheet(textColor);
-    }
-    else if (mfcNum == 6) {
-        // set line colors
-        // m_pUI->lineOPMFC6pre->setStyleSheet(lineColor);
-        // m_pUI->lineOPMFC6post->setStyleSheet(lineColor);
-        // m_pUI->lineOPMFC6vert->setStyleSheet(lineColor);
-        // set box and text color
-        m_pUI->frameMFC6->setStyleSheet(boxColor);
-        m_pUI->lblOPMFC6->setStyleSheet(textColor);
-    }
-}
-
 // configure the gasses layout according to the number of
 // MFC's returned by the main controller
 void OperatorTab::setUINumberOfMFCs(const int numMFCs)
@@ -184,18 +116,91 @@ void OperatorTab::setUINumberOfMFCs(const int numMFCs)
         m_pUI->stackedWidgetMFC->setCurrentIndex(MFC4_STACKED_WIDGET_PAGE);
         m_pUI->lineOPMFC5vert->hide();
         m_pUI->lineOPMFC6vert->hide();
-    }
-    else if (numMFCs == 5) { // if we have 5 MFC's hide MFC 6
-        m_pUI->stackedWidgetMFC->setCurrentIndex(MFC5_STACKED_WIDGET_PAGE);
-        m_pUI->lineOPMFC5vert->show();
-        m_pUI->lineOPMFC6vert->hide();
+
+        // hide flow labels initially
+        m_pUI->lblOPMFC1ActualFlow_4MFC->hide();
+        m_pUI->lblOPMFC2ActualFlow_4MFC->hide();
+        m_pUI->lblOPMFC3ActualFlow_4MFC->hide();
+        m_pUI->lblOPMFC4ActualFlow_4MFC->hide();
     }
     else if (numMFCs == 6) { // if we have 4 MFC's hide MFC 5 and 6
         m_pUI->stackedWidgetMFC->setCurrentIndex(MFC6_STACKED_WIDGET_PAGE);
         m_pUI->lineOPMFC5vert->show();
         m_pUI->lineOPMFC6vert->show();
 
+        // hide flow labels initially
+        m_pUI->lblOPMFC1ActualFlow_6MFC->hide();
+        m_pUI->lblOPMFC2ActualFlow_6MFC->hide();
+        m_pUI->lblOPMFC3ActualFlow_6MFC->hide();
+        m_pUI->lblOPMFC4ActualFlow_6MFC->hide();
+        m_pUI->lblOPMFC5ActualFlow_6MFC->hide();
+        m_pUI->lblOPMFC6ActualFlow_6MFC->hide();
+    }
 
+    m_numMFCs = numMFCs;
+}
+
+void OperatorTab::mfcFlowLinesOn_4MFC(int mfcNum, bool on)
+{
+    QString boxColor = (on == true) ? QString(mfcBoxActive) : QString(mfcBoxInactive);
+    QString textColor = (on == true) ? QString(mfcBoxActivText) : QString(mfcBoxInactivText);
+
+    if (mfcNum == 1) {
+        // set box and text color
+        m_pUI->frameMFC1_4MFC->setStyleSheet(boxColor);
+        m_pUI->lblOPMFC1_4MFC->setStyleSheet(textColor);
+    }
+    else if (mfcNum == 2) {
+        // set box and text color
+        m_pUI->frameMFC2_4MFC->setStyleSheet(boxColor);
+        m_pUI->lblOPMFC2_4MFC->setStyleSheet(textColor);
+    }
+    else if (mfcNum == 3) {
+        // set box and text color
+        m_pUI->frameMFC3_4MFC->setStyleSheet(boxColor);
+        m_pUI->lblOPMFC3_4MFC->setStyleSheet(textColor);
+    }
+    else if (mfcNum == 4) {
+        // set box and text color
+        m_pUI->frameMFC4_4MFC->setStyleSheet(boxColor);
+        m_pUI->lblOPMFC4_4MFC->setStyleSheet(textColor);
+    }
+}
+
+void OperatorTab::mfcFlowLinesOn_6MFC(int mfcNum, bool on)
+{
+    QString boxColor = (on == true) ? QString(mfcBoxActive) : QString(mfcBoxInactive);
+    QString textColor = (on == true) ? QString(mfcBoxActivText) : QString(mfcBoxInactivText);
+
+    if (mfcNum == 1) {
+        // set box and text color
+        m_pUI->frameMFC1_6MFC->setStyleSheet(boxColor);
+        m_pUI->lblOPMFC1_6MFC->setStyleSheet(textColor);
+    }
+    else if (mfcNum == 2) {
+        // set box and text color
+        m_pUI->frameMFC2_6MFC->setStyleSheet(boxColor);
+        m_pUI->lblOPMFC2_6MFC->setStyleSheet(textColor);
+    }
+    else if (mfcNum == 3) {
+        // set box and text color
+        m_pUI->frameMFC3_6MFC->setStyleSheet(boxColor);
+        m_pUI->lblOPMFC3_6MFC->setStyleSheet(textColor);
+    }
+    else if (mfcNum == 4) {
+        // set box and text color
+        m_pUI->frameMFC4_6MFC->setStyleSheet(boxColor);
+        m_pUI->lblOPMFC4_6MFC->setStyleSheet(textColor);
+    }
+    else if (mfcNum == 5) {
+        // set box and text color
+        m_pUI->frameMFC5_6MFC->setStyleSheet(boxColor);
+        m_pUI->lblOPMFC5_6MFC->setStyleSheet(textColor);
+    }
+    else if (mfcNum == 6) {
+        // set box and text color
+        m_pUI->frameMFC6_6MFC->setStyleSheet(boxColor);
+        m_pUI->lblOPMFC6_6MFC->setStyleSheet(textColor);
     }
 }
 
@@ -204,6 +209,14 @@ void OperatorTab::displayAbortMessage(QString smsg)
     m_pUI->texteditOPTabAxisStatus->setTextColor(QColor(133, 2, 2));
     m_pUI->texteditOPTabAxisStatus->setText(smsg);
     m_pUI->btnOPAcknowledge->show();
+
+    // disable user interaction. Reenabled when acknowledged
+    m_pUI->btnOPChuckVacOnOff->setEnabled(false);
+    m_pUI->btnOPPinsUpDown->setEnabled(false);
+    m_pUI->comboBoxOPRecipe->setEnabled(false);
+    m_pUI->btnOPStartPlasma->setEnabled(false);
+    m_pUI->btnOPLoad->setEnabled(false);
+    m_pUI->btnOPInit->setEnabled(false);
 }
 
 
@@ -271,59 +284,113 @@ void OperatorTab::axisStatusToUI()
 // update the recipe progress bar and values
 void OperatorTab::updateRecipeFlow(const int mfcNumber, const double recipeFlow)
 {
+    if (m_numMFCs == 4) updateRecipeFlow_4MFC(mfcNumber, recipeFlow);
+    else if (m_numMFCs == 6) updateRecipeFlow_6MFC(mfcNumber, recipeFlow);
+}
+
+// udpate the 4 MFC stacked widget
+void OperatorTab::updateRecipeFlow_4MFC(const int mfcNumber, const double recipeFlow)
+{
     // This uses the parameters passed in the signal
     if (mfcNumber == 1) {
         double range = m_controller.findMFCByNumber(1)->getRange();
         int percentage = 0;
         if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
-        m_pUI->progressBarOPMFC1->setValue(int(percentage));
+        m_pUI->progressBarOPMFC1_4MFC->setValue(int(percentage));
 
-        if (percentage > 0) m_pUI->lblOPMFC1ActualFlow->show();
+        if (percentage > 0) m_pUI->lblOPMFC1ActualFlow_4MFC->show();
     }
     else if (mfcNumber == 2) {
         double range = m_controller.findMFCByNumber(2)->getRange();
         int percentage = 0;
         if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
-        m_pUI->progressBarOPMFC2->setValue(int(percentage));
+        m_pUI->progressBarOPMFC2_4MFC->setValue(int(percentage));
 
-        if (percentage > 0) m_pUI->lblOPMFC2ActualFlow->show();
+        if (percentage > 0) m_pUI->lblOPMFC2ActualFlow_4MFC->show();
     }
     else if (mfcNumber == 3) {
         double range = m_controller.findMFCByNumber(3)->getRange();
         int percentage = 0;
         if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
-        m_pUI->progressBarOPMFC3->setValue(int(percentage));
+        m_pUI->progressBarOPMFC3_4MFC->setValue(int(percentage));
 
-        if (percentage > 0) m_pUI->lblOPMFC3ActualFlow->show();
+        if (percentage > 0) m_pUI->lblOPMFC3ActualFlow_4MFC->show();
     }
     else if (mfcNumber == 4) {
         double range = m_controller.findMFCByNumber(4)->getRange();
         int percentage = 0;
         if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
-        m_pUI->progressBarOPMFC4->setValue(int(percentage));
+        m_pUI->progressBarOPMFC4_4MFC->setValue(int(percentage));
 
-        if (percentage > 0) m_pUI->lblOPMFC4ActualFlow->show();
+        if (percentage > 0) m_pUI->lblOPMFC4ActualFlow_4MFC->show();
+    }
+}
+
+// update the 6 MFC stacked widget
+void OperatorTab::updateRecipeFlow_6MFC(const int mfcNumber, const double recipeFlow)
+{
+    // This uses the parameters passed in the signal
+    if (mfcNumber == 1) {
+        double range = m_controller.findMFCByNumber(1)->getRange();
+        int percentage = 0;
+        if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
+        m_pUI->progressBarOPMFC1_6MFC->setValue(int(percentage));
+
+        if (percentage > 0) m_pUI->lblOPMFC1ActualFlow_6MFC->show();
+    }
+    else if (mfcNumber == 2) {
+        double range = m_controller.findMFCByNumber(2)->getRange();
+        int percentage = 0;
+        if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
+        m_pUI->progressBarOPMFC2_6MFC->setValue(int(percentage));
+
+        if (percentage > 0) m_pUI->lblOPMFC2ActualFlow_6MFC->show();
+    }
+    else if (mfcNumber == 3) {
+        double range = m_controller.findMFCByNumber(3)->getRange();
+        int percentage = 0;
+        if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
+        m_pUI->progressBarOPMFC3_6MFC->setValue(int(percentage));
+
+        if (percentage > 0) m_pUI->lblOPMFC3ActualFlow_6MFC->show();
+    }
+    else if (mfcNumber == 4) {
+        double range = m_controller.findMFCByNumber(4)->getRange();
+        int percentage = 0;
+        if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
+        m_pUI->progressBarOPMFC4_6MFC->setValue(int(percentage));
+
+        if (percentage > 0) m_pUI->lblOPMFC4ActualFlow_6MFC->show();
     }
     else if (mfcNumber == 5) {
         double range = m_controller.findMFCByNumber(5)->getRange();
         int percentage = 0;
         if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
-        m_pUI->progressBarOPMFC5->setValue(int(percentage));
+        m_pUI->progressBarOPMFC5_6MFC->setValue(int(percentage));
 
-        if (percentage > 0) m_pUI->lblOPMFC5ActualFlow->show();
+        if (percentage > 0) m_pUI->lblOPMFC5ActualFlow_6MFC->show();
     }
     else if (mfcNumber == 6) {
         double range = m_controller.findMFCByNumber(6)->getRange();
         int percentage = 0;
         if (range != 0 && recipeFlow != 0) percentage = int((recipeFlow / range) * 100); // divide by zero protection
-        m_pUI->progressBarOPMFC6->setValue(int(percentage));
+        m_pUI->progressBarOPMFC6_6MFC->setValue(int(percentage));
 
-        if (percentage > 0) m_pUI->lblOPMFC6ActualFlow->show();
+        if (percentage > 0) m_pUI->lblOPMFC6ActualFlow_6MFC->show();
     }
 }
 
 void OperatorTab::actualFlowChanged(const int mfcNumber, const double actualFlow)
 {
+    if (m_numMFCs == 4) updateActualFlow_4MFC(mfcNumber, actualFlow);
+    else if (m_numMFCs == 6) updateActualFlow_6MFC(mfcNumber, actualFlow);
+}
+
+void OperatorTab::updateActualFlow_4MFC(const int mfcNumber, const double actualFlow)
+{
+    // displayed gas flow status
+    static bool mfcFlowStatusOK = false;
+
     // This uses the parameters passed in the signal
     if (mfcNumber == 1) {
         // set vertical progress bar
@@ -332,12 +399,19 @@ void OperatorTab::actualFlowChanged(const int mfcNumber, const double actualFlow
         if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
 
         if (percentage > 0) {
-            m_pUI->lblOPMFC1ActualFlow->setText(QString::number(percentage) + "%");
-            mfcFlowLinesOn(mfcNumber, true);
+            m_pUI->lblOPMFC1ActualFlow_4MFC->setText(QString::number(percentage) + "%");
+            mfcFlowLinesOn_4MFC(mfcNumber, true);
+            // in tolerance?
+            if (abs(percentage - m_pUI->progressBarOPMFC1_4MFC->value()) <= GAS_FLOW_OK_TOLERANCE) {
+                mfcFlowStatusOK = true;
+            }
+            else {
+                mfcFlowStatusOK = false;
+            }
         }
         else {
-            m_pUI->lblOPMFC1ActualFlow->setText(QString::number(0) + "%");
-            mfcFlowLinesOn(mfcNumber, false);
+            m_pUI->lblOPMFC1ActualFlow_4MFC->setText(QString::number(0) + "%");
+            mfcFlowLinesOn_4MFC(mfcNumber, false);
         }
     }
     else if (mfcNumber == 2) {
@@ -348,12 +422,19 @@ void OperatorTab::actualFlowChanged(const int mfcNumber, const double actualFlow
         if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
 
         if (percentage > 0) {
-            m_pUI->lblOPMFC2ActualFlow->setText(QString::number(percentage) + "%");
-            mfcFlowLinesOn(mfcNumber, true);
+            m_pUI->lblOPMFC2ActualFlow_4MFC->setText(QString::number(percentage) + "%");
+            mfcFlowLinesOn_4MFC(mfcNumber, true);
+            // in tolerance?
+            if (abs(percentage - m_pUI->progressBarOPMFC2_4MFC->value()) <= GAS_FLOW_OK_TOLERANCE) {
+                mfcFlowStatusOK = true;
+            }
+            else {
+                mfcFlowStatusOK = false;
+            }
         }
         else {
-            m_pUI->lblOPMFC2ActualFlow->setText(QString::number(0) + "%");
-            mfcFlowLinesOn(mfcNumber, false);
+            m_pUI->lblOPMFC2ActualFlow_4MFC->setText(QString::number(0) + "%");
+            mfcFlowLinesOn_4MFC(mfcNumber, false);
         }
     }
     else if (mfcNumber == 3) {
@@ -363,12 +444,19 @@ void OperatorTab::actualFlowChanged(const int mfcNumber, const double actualFlow
         if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
 
         if (percentage > 0) {
-            m_pUI->lblOPMFC3ActualFlow->setText(QString::number(percentage) + "%");
-            mfcFlowLinesOn(mfcNumber, true);
+            m_pUI->lblOPMFC3ActualFlow_4MFC->setText(QString::number(percentage) + "%");
+            mfcFlowLinesOn_4MFC(mfcNumber, true);
+            // in tolerance?
+            if (abs(percentage - m_pUI->progressBarOPMFC3_4MFC->value()) <= GAS_FLOW_OK_TOLERANCE) {
+                mfcFlowStatusOK = true;
+            }
+            else {
+                mfcFlowStatusOK = false;
+            }
         }
         else {
-            m_pUI->lblOPMFC3ActualFlow->setText(QString::number(0) + "%");
-            mfcFlowLinesOn(mfcNumber, false);
+            m_pUI->lblOPMFC3ActualFlow_4MFC->setText(QString::number(0) + "%");
+            mfcFlowLinesOn_4MFC(mfcNumber, false);
         }
     }
     else if (mfcNumber == 4) {
@@ -378,12 +466,119 @@ void OperatorTab::actualFlowChanged(const int mfcNumber, const double actualFlow
         if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
 
         if (percentage > 0) {
-            m_pUI->lblOPMFC4ActualFlow->setText(QString::number(percentage) + "%");
-            mfcFlowLinesOn(mfcNumber, true);
+            m_pUI->lblOPMFC4ActualFlow_4MFC->setText(QString::number(percentage) + "%");
+            mfcFlowLinesOn_4MFC(mfcNumber, true);
+            // in tolerance?
+            if (abs(percentage - m_pUI->progressBarOPMFC4_4MFC->value()) <= GAS_FLOW_OK_TOLERANCE) {
+                mfcFlowStatusOK = true;
+            }
+            else {
+                mfcFlowStatusOK = false;
+            }
         }
         else {
-            m_pUI->lblOPMFC4ActualFlow->setText(QString::number(0) + "%");
-            mfcFlowLinesOn(mfcNumber, false);
+            m_pUI->lblOPMFC4ActualFlow_4MFC->setText(QString::number(0) + "%");
+            mfcFlowLinesOn_4MFC(mfcNumber, false);
+        }
+    }
+
+    QString gasFlowStatus = (mfcFlowStatusOK == true) ? "OK" : "";
+    m_pUI->lblOPGasFlowStatus->setText(gasFlowStatus);
+}
+
+void OperatorTab::updateActualFlow_6MFC(const int mfcNumber, const double actualFlow)
+{
+    // displayed gas flow status
+    static bool mfcFlowStatusOK = false;
+
+    // This uses the parameters passed in the signal
+    if (mfcNumber == 1) {
+        // set vertical progress bar
+        double range = m_controller.findMFCByNumber(1)->getRange();
+        int percentage = 0;
+        if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
+
+        if (percentage > 0) {
+            m_pUI->lblOPMFC1ActualFlow_6MFC->setText(QString::number(percentage) + "%");
+            mfcFlowLinesOn_6MFC(mfcNumber, true);
+            // in tolerance?
+            if (abs(percentage - m_pUI->progressBarOPMFC1_6MFC->value()) <= GAS_FLOW_OK_TOLERANCE) {
+                mfcFlowStatusOK = true;
+            }
+            else {
+                mfcFlowStatusOK = false;
+            }
+        }
+        else {
+            m_pUI->lblOPMFC1ActualFlow_6MFC->setText(QString::number(0) + "%");
+            mfcFlowLinesOn_6MFC(mfcNumber, false);
+        }
+    }
+    else if (mfcNumber == 2) {
+        // set vertical progress bar
+        double range = m_controller.findMFCByNumber(2)->getRange();
+
+        int percentage = 0;
+        if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
+
+        if (percentage > 0) {
+            m_pUI->lblOPMFC2ActualFlow_6MFC->setText(QString::number(percentage) + "%");
+            mfcFlowLinesOn_6MFC(mfcNumber, true);
+            // in tolerance?
+            if (abs(percentage - m_pUI->progressBarOPMFC2_6MFC->value()) <= GAS_FLOW_OK_TOLERANCE) {
+                mfcFlowStatusOK = true;
+            }
+            else {
+                mfcFlowStatusOK = false;
+            }
+        }
+        else {
+            m_pUI->lblOPMFC2ActualFlow_6MFC->setText(QString::number(0) + "%");
+            mfcFlowLinesOn_6MFC(mfcNumber, false);
+        }
+    }
+    else if (mfcNumber == 3) {
+        // set vertical progress bar
+        double range = m_controller.findMFCByNumber(3)->getRange();
+        int percentage = 0;
+        if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
+
+        if (percentage > 0) {
+            m_pUI->lblOPMFC3ActualFlow_6MFC->setText(QString::number(percentage) + "%");
+            mfcFlowLinesOn_6MFC(mfcNumber, true);
+            // in tolerance?
+            if (abs(percentage - m_pUI->progressBarOPMFC3_6MFC->value()) <= GAS_FLOW_OK_TOLERANCE) {
+                mfcFlowStatusOK = true;
+            }
+            else {
+                mfcFlowStatusOK = false;
+            }
+        }
+        else {
+            m_pUI->lblOPMFC3ActualFlow_6MFC->setText(QString::number(0) + "%");
+            mfcFlowLinesOn_6MFC(mfcNumber, false);
+        }
+    }
+    else if (mfcNumber == 4) {
+        // set vertical progress bar
+        double range = m_controller.findMFCByNumber(4)->getRange();
+        int percentage = 0;
+        if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
+
+        if (percentage > 0) {
+            m_pUI->lblOPMFC4ActualFlow_6MFC->setText(QString::number(percentage) + "%");
+            mfcFlowLinesOn_6MFC(mfcNumber, true);
+            // in tolerance?
+            if (abs(percentage - m_pUI->progressBarOPMFC4_6MFC->value()) <= GAS_FLOW_OK_TOLERANCE) {
+                mfcFlowStatusOK = true;
+            }
+            else {
+                mfcFlowStatusOK = false;
+            }
+        }
+        else {
+            m_pUI->lblOPMFC4ActualFlow_6MFC->setText(QString::number(0) + "%");
+            mfcFlowLinesOn_6MFC(mfcNumber, false);
         }
     }
     else if (mfcNumber == 5) {
@@ -393,12 +588,19 @@ void OperatorTab::actualFlowChanged(const int mfcNumber, const double actualFlow
         if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
 
         if (percentage > 0) {
-            m_pUI->lblOPMFC5ActualFlow->setText(QString::number(percentage) + "%");
-            mfcFlowLinesOn(mfcNumber, true);
+            m_pUI->lblOPMFC5ActualFlow_6MFC->setText(QString::number(percentage) + "%");
+            mfcFlowLinesOn_6MFC(mfcNumber, true);
+            // in tolerance?
+            if (abs(percentage - m_pUI->progressBarOPMFC5_6MFC->value()) <= GAS_FLOW_OK_TOLERANCE) {
+                mfcFlowStatusOK = true;
+            }
+            else {
+                mfcFlowStatusOK = false;
+            }
         }
         else {
-            m_pUI->lblOPMFC5ActualFlow->setText(QString::number(0) + "%");
-            mfcFlowLinesOn(mfcNumber, false);
+            m_pUI->lblOPMFC5ActualFlow_6MFC->setText(QString::number(0) + "%");
+            mfcFlowLinesOn_6MFC(mfcNumber, false);
         }
     }
     else if (mfcNumber == 6) {
@@ -408,15 +610,24 @@ void OperatorTab::actualFlowChanged(const int mfcNumber, const double actualFlow
         if (range != 0 && actualFlow != 0) percentage = int((actualFlow / range) * 100); // divide by zero protection
 
         if (percentage > 0) {
-            m_pUI->lblOPMFC6ActualFlow->setText(QString::number(percentage) + "%");
-            mfcFlowLinesOn(mfcNumber, true);
+            m_pUI->lblOPMFC6ActualFlow_6MFC->setText(QString::number(percentage) + "%");
+            mfcFlowLinesOn_6MFC(mfcNumber, true);
+            // in tolerance?
+            if (abs(percentage - m_pUI->progressBarOPMFC6_6MFC->value()) <= GAS_FLOW_OK_TOLERANCE) {
+                mfcFlowStatusOK = true;
+            }
+            else {
+                mfcFlowStatusOK = false;
+            }
         }
         else {
-            m_pUI->lblOPMFC6ActualFlow->setText(QString::number(0) + "%");
-            mfcFlowLinesOn(mfcNumber, false);
+            m_pUI->lblOPMFC6ActualFlow_6MFC->setText(QString::number(0) + "%");
+            mfcFlowLinesOn_6MFC(mfcNumber, false);
         }
-
     }
+
+    QString gasFlowStatus = (mfcFlowStatusOK == true) ? "OK" : "";
+    m_pUI->lblOPGasFlowStatus->setText(gasFlowStatus);
 }
 
 void OperatorTab::stageStatusUpdate(QString statusNow, QString statusNext)
@@ -504,18 +715,21 @@ void OperatorTab::CSM_StatusUpdate(QString status, QString next)
 // scan state machine
 void OperatorTab::SSM_Started()
 {
-    m_pUI->init_button->setEnabled(false);
-
     m_pUI->btnOPInit->setEnabled(false);
     m_pUI->btnOPLoad->setEnabled(false);
     m_pUI->btnOPPinsUpDown->setEnabled(false);
     m_pUI->btnOPChuckVacOnOff->setEnabled(false);
+
+    m_pUI->lblOPScanningStatus->setText("OK");
+    m_pUI->lblOPProcessStatus->setText("Running");
 }
 
 void OperatorTab::SSM_Done()
 {
     // update status
     m_pUI->texteditOPTabAxisStatus->setText("Scanning Completed");
+    m_pUI->lblOPScanningStatus->setText("");
+    m_pUI->lblOPProcessStatus->setText("Done");
 
     m_pUI->btnOPInit->setEnabled(true);
     m_pUI->btnOPLoad->setEnabled(true);
@@ -525,19 +739,25 @@ void OperatorTab::SSM_Done()
 
 void OperatorTab::SSM_StatusUpdate(QString status, QString next)
 {
-    m_pUI->axisstatus->setText(status);
+    m_pUI->texteditOPTabAxisStatus->setText(status);
 }
 
 void OperatorTab::forwardWattsChanged(int watts)
 {
-    //int watts = m_controller.getPower().getForwardWatts();
-
     m_pUI->lblOPRFPowerForward->setText(QString::number(watts));
 }
 
 void OperatorTab::reflectedWattsChanged(int watts)
 {
+    m_currentReflectedWatts = watts; // might be needed in the future
 
+    // update ui
+    if (m_plasmaActive && (watts < 10)) {
+        m_pUI->lblOPPlasmaStatus->setText("OK");
+    }
+    else {
+        m_pUI->lblOPPlasmaStatus->setText("");
+    }
 }
 
 void OperatorTab::MBactualPositionChanged(const double actualPosition)
@@ -659,6 +879,23 @@ void OperatorTab::comboBoxOPLogin_currentTextChanged(const QString &arg1)
         this->m_pMWndw->engineerModeSelected();
     else if (arg1 == "Operator")
         this->m_pMWndw->setUIOperatorMode();
+}
+
+void OperatorTab::btnOPAcknowledged_clicked()
+{
+    m_pUI->btnOPAcknowledge->hide();
+    m_pUI->texteditOPTabAxisStatus->setTextColor(QColor(0, 0, 0));
+    m_pUI->texteditOPTabAxisStatus->clear();
+
+    m_controller.abortAcknowledged();
+
+    // reenable
+    m_pUI->btnOPChuckVacOnOff->setEnabled(true);
+    m_pUI->btnOPPinsUpDown->setEnabled(true);
+    m_pUI->comboBoxOPRecipe->setEnabled(true);
+    m_pUI->btnOPStartPlasma->setEnabled(true);
+    m_pUI->btnOPLoad->setEnabled(true);
+    m_pUI->btnOPInit->setEnabled(true);
 }
 
 static bool on = false;

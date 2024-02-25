@@ -17,6 +17,7 @@ public:
 
     QString getUserEnteredPassword();
     void clearPassword();
+    void setFocusLineEdit();
 
 signals:
     void userEnteredPassword();

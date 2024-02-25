@@ -29,6 +29,8 @@ public:
 
     void testfunction();
 
+    void populateRecipeComboBox();
+
 public slots:
     // stage status to UI
     void stageStatusUpdate(const QString status1, const QString status2);
@@ -61,7 +63,7 @@ public slots:
     void actualFlowChanged(const int mfcNumber, const double actualFlow);
     void lightTowerStateChanged(const LightTower::LightState state);
     void doorStateChanged(bool state);
-    void mfcFlowLinesOn(const int mfcNum, const bool on);
+
 
 private slots:
     void btnChuckVacOnOff_clicked(bool checked);
@@ -72,15 +74,23 @@ private slots:
     void btnOPInit_clicked();
     void comboBoxOPRecipe_currentTextChanged(const QString &arg1);
     void comboBoxOPLogin_currentTextChanged(const QString &arg1);
+    void btnOPAcknowledged_clicked();
 
 private:
-    void populateRecipeComboBox();
+
     void connectMFCFlowBars();
     void lightTowerSetGreen();
     void lightTowerSetYellow();
     void lightTowerSetRed();
     void lightTowerSetInactive();
-    //void mfcFlowLinesOn(int mfcNum, bool on);
+
+    // updates MFC UI components
+    void updateRecipeFlow_4MFC(const int mfcNumber, const double recipeFlow);
+    void updateRecipeFlow_6MFC(const int mfcNumber, const double recipeFlow);
+    void updateActualFlow_4MFC(const int mfcNumber, const double actualFlow);
+    void updateActualFlow_6MFC(const int mfcNumber, const double actualFlow);
+    void mfcFlowLinesOn_4MFC(const int mfcNum, const bool on);
+    void mfcFlowLinesOn_6MFC(const int mfcNum, const bool on);
 
     Ui::MainWindow* m_pUI;
     MainWindow* m_pMWndw;
@@ -89,6 +99,8 @@ private:
     bool m_plasmaActive;
 
     Configuration m_config;
+    int m_numMFCs;
+    int m_currentReflectedWatts;
 };
 
 #endif // OPERATORTAB_H

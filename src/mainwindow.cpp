@@ -36,28 +36,8 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     // setup the state machine
     setupMainStateMachine();
 
-    // ui updates from axescontroller
-    connect(&m_mainCTL.getAxesController(), &AxesController::stageStatusUpdate, this, &MainWindow::stageStatusUpdate);
-    connect(&m_mainCTL.getAxesController(), &AxesController::setUIHomeSMStartup, this, &MainWindow::homeStateMachineStartup);
-    connect(&m_mainCTL.getAxesController(), &AxesController::setUIHomeSMDone, this, &MainWindow::homeStateMachineDone);
-    connect(&m_mainCTL.getAxesController(), &AxesController::initSMStartup, this, &MainWindow::initStateMachineStartup);
-    connect(&m_mainCTL.getAxesController(), &AxesController::initSMDone, this, &MainWindow::initStateMachineDone);
-    connect(&m_mainCTL.getAxesController(), &AxesController::pinsStateChanged, this, &MainWindow::pinsStateChanged);
-
     connect(&m_gamepadController, &GamepadController::joystickStateChanged, this, &MainWindow::joystickStateChanged);
-
-    connect(&m_mainCTL.getAxesController(), &AxesController::n2StateChanged, this, &MainWindow::n2StateChanged);
-    connect(&m_mainCTL.getAxesController(), &AxesController::vacStateChanged, this, &MainWindow::vacStateChanged);
-    connect(&m_mainCTL.getAxesController(), &AxesController::updateUIAxisStatus, this, &MainWindow::AxisStatusToUI);
-    // ui updates from plasma controller and sub objects
-    connect(&m_mainCTL, &PlasmaController::SSM_StatusUpdate, this, &MainWindow::SSM_StatusUpdate);
-    connect(&m_mainCTL, &PlasmaController::SSM_Started, this, &MainWindow::SSM_Started);
-    connect(&m_mainCTL, &PlasmaController::SSM_Done, this, &MainWindow::SSM_Done);
-    connect(&m_mainCTL, &PlasmaController::CSM_StatusUpdate, this, &MainWindow::CSM_StatusUpdate);
-    connect(&m_mainCTL, &PlasmaController::scanBoxChanged, this, &MainWindow::scanBoxChanged);
-    //connect(&m_mainCTL, &PlasmaController::plasmaStateChanged, this, &MainWindow::plasmaStateChanged);
     connect(&m_mainCTL, &PlasmaController::batchIDLoggingIsActive, this, &MainWindow::batchIDLoggingIsActive);
-    //connect(&m_mainCTL, &PlasmaController::setUINumberOfMFCs, this, &MainWindow::setUINumberOfMFCs);
     connect(&m_mainCTL.getTuner(), &Tuner::recipePositionChanged, this, &MainWindow::setRecipeMBtuner);
     connect(&m_mainCTL.getTuner(), &Tuner::updateUIRecipePosition, this, &MainWindow::setRecipeMBtuner);
     connect(&m_mainCTL.getPlasmaHead(), &PlasmaHead::headTemperatureChanged, this, &MainWindow::headTemperatureChanged);
@@ -66,6 +46,9 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(m_mainCTL.getSerialInterface(), &SerialInterface::serialOpen, this, &MainWindow::serialConnected);
     connect(m_mainCTL.getSerialInterface(), &SerialInterface::readTimeoutError, this, &MainWindow::readTimeoutError);
     connect(&m_mainCTL.getAbortMessages(), &AbortCodeMessages::showAbortMessageBox, this, &MainWindow::showAbortMessageBox);
+
+    // temporary
+    connect(ui->Joystick_button, &QPushButton::toggled, this, &MainWindow::on_Joystick_button_toggled);
     // run the next cascade recipe
     connect(&m_mainCTL, &PlasmaController::loadCascadeRecipe, this, &MainWindow::loadCascadeRecipe);
     // main state machine from main loop
@@ -101,16 +84,13 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     // status bar
     ui->statusBar->addWidget(m_pStatus);
 
-    // setup wafer diamter combo box
-    ui->wafer_diameter->addItems(m_mainCTL.getDiameter().getWaferDiameterTextList());
-
     // Setup Recipe List for Cascade Recipes
     populateRecipeListWidgetFromDirectory(ui->listRecipes);
 
     // give things a little time to settle before opening the serial port
     QTimer::singleShot(50, this, &MainWindow::openMainPort);
 
-    // temporary
+    // operator tab is initial tab
     connectOperatorTabSlots();
 }
 
@@ -153,7 +133,7 @@ void MainWindow::showEvent(QShowEvent *)
 {
     if (firstShow) {
         // hide stage controls
-        showStageControls(false);
+        //showStageControls(false);
 
         QTimer::singleShot(50, this, &MainWindow::setInitialUIState);
 
@@ -176,18 +156,6 @@ void MainWindow::setInitialUIState()
     ui->x2_recipe->setText(m_mainCTL.getRecipe()->getXmaxPHQStr());
     ui->y1_recipe->setText(m_mainCTL.getRecipe()->getYminPHQStr());
     ui->y2_recipe->setText(m_mainCTL.getRecipe()->getYmaxPHQStr());
-}
-
-void MainWindow::showStageControls(bool show)
-{
-    if (show) {
-        ui->stageControlsWidget->show();
-        ui->stageStatusWidget->show();
-    }
-    else {
-        ui->stageControlsWidget->hide();
-        ui->stageStatusWidget->hide();
-    }
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -243,112 +211,6 @@ void MainWindow::has3Axis()
 }
 
 //////////////////////////////////////////////////////////////////////////////////
-// State machine slots
-//////////////////////////////////////////////////////////////////////////////////
-
-// set ui elements accordingly
-void MainWindow::homeStateMachineStartup()
-{
-    ui->Home_button->setText("STOP");
-
-    // disable other stage movement buttons
-    ui->init_button->setEnabled(false);
-    ui->diameter_button->setEnabled(false);
-    ui->scan_button->setEnabled(false);
-    ui->Stagepins_button->setEnabled(false);
-    ui->vac_button->setEnabled(false);
-}
-
-// set ui elements accordingly
-void MainWindow::homeStateMachineDone()
-{
-    ui->Home_button->setChecked(false);
-    ui->Home_button->setText("LOAD");
-
-    ui->scan_button->setEnabled(true);
-    ui->init_button->setEnabled(true);
-    ui->Stagepins_button->setEnabled(true);
-    ui->vac_button->setEnabled(true);
-
-    if (m_engineeringMode) {
-        // enable other stage movement buttons
-        ui->diameter_button->setEnabled(true);
-    }
-}
-
-// set ui elements accordingly
-void MainWindow::initStateMachineStartup()
-{
-    // disaable the init buttons
-    ui->init_button->setEnabled(false);
-
-    // disable the other state movement buttons
-    ui->diameter_button->setEnabled(false);
-    ui->wafer_diameter->setEnabled(false);
-    ui->scan_button->setEnabled(false);
-    ui->Home_button->setEnabled(false);
-    ui->menuStage_Test->setEnabled(false);
-}
-
-// set ui elements accordingly
-void MainWindow::initStateMachineDone()
-{
-    // enable the init buttons again
-    ui->init_button->setEnabled(true);
-    ui->scan_button->setEnabled(true);
-    ui->Home_button->setEnabled(true);
-    ui->vac_button->setEnabled(true);
-    ui->Stagepins_button->setEnabled(true);
-
-    if (m_engineeringMode) {
-        // enable the buttons that we disabled
-        ui->diameter_button->setEnabled(true);
-        ui->wafer_diameter->setEnabled(true);
-        ui->diameter_button->setEnabled(true);
-        ui->menuStage_Test->setEnabled(true);
-        ui->Joystick_button->setEnabled(true);
-    }
-}
-
-void MainWindow::SSM_Started()
-{
-    ui->scan_button->setText("STOP");
-
-    // disable other stage movement buttons
-    ui->init_button->setEnabled(false);
-    ui->Home_button->setEnabled(false);
-    ui->diameter_button->setEnabled(false);
-    ui->Stagepins_button->setEnabled(false);
-    ui->vac_button->setEnabled(false);
-}
-
-void MainWindow::SSM_Done()
-{
-    ui->scan_button->setChecked(false);
-    ui->scan_button->setText("SCAN");
-
-    // update status
-    ui->axisstatus->setText("Scanning Completed");
-    ui->axisstatus_2->setText("");
-
-    // reenable
-    ui->init_button->setEnabled(true);
-    ui->Home_button->setEnabled(true);
-    ui->scan_button->setEnabled(true);
-    ui->vac_button->setEnabled(true);
-    ui->Stagepins_button->setEnabled(true);
-}
-
-void MainWindow::scanBoxChanged()
-{   
-    // dashboard tab
-    ui->x1_recipe->setText(m_mainCTL.getRecipe()->getXminPHQStr());
-    ui->x2_recipe->setText(m_mainCTL.getRecipe()->getXmaxPHQStr());
-    ui->y1_recipe->setText(m_mainCTL.getRecipe()->getYminPHQStr());
-    ui->y2_recipe->setText(m_mainCTL.getRecipe()->getYmaxPHQStr());
-}
-
-//////////////////////////////////////////////////////////////////////////////////
 // Serial Ports
 //////////////////////////////////////////////////////////////////////////////////
 void MainWindow::closeMainPort()
@@ -401,9 +263,6 @@ void MainWindow::serialConnected()
     // determine if there is a 3 axis board in the system as soon as possible
     has3Axis();
 
-    // show stage controls if 3 axis board is connected
-    showStageControls(m_has3AxisBoard);
-
     if (m_has3AxisBoard) {
         m_mainCTL.getAxesController().resetAxes(); // reset axes controller if one is connected
     }
@@ -418,17 +277,6 @@ void MainWindow::serialConnected()
 
     // start the main state machine
     emit MSM_TransitionStartup();
-
-    // allow user to init only
-    ui->init_button->setEnabled(true);
-    if (m_engineeringMode) {
-        ui->n2_purge_button->setEnabled(true);
-        //ui->plsmaBtn->setEnabled(true);
-    }
-
-    // clear any remaing status statements
-    ui->axisstatus->clear();
-    ui->axisstatus_2->clear();
 
     SettingsDialog::Settings p = m_pSettings->settings();
 
@@ -557,18 +405,6 @@ void MainWindow::setRecipeMBtuner(double MBtunerSP)
     ui->mb_recipe->setText(QString::number(MBtunerSP, 'f', 2));
 }
 
-void MainWindow::CSM_StatusUpdate(QString status, QString next)
-{
-    ui->axisstatus->setText(status);
-    ui->axisstatus_2->setText(next);
-}
-
-void MainWindow::SSM_StatusUpdate(QString status, QString next)
-{
-    ui->axisstatus->setText(status);
-    ui->axisstatus_2->setText(next);
-}
-
 void MainWindow::showAbortMessageBox(QString message, bool shutdown)
 {
     if (shutdown) {
@@ -578,85 +414,6 @@ void MainWindow::showAbortMessageBox(QString message, bool shutdown)
     else {
         emit displayAbortMessage(message);  // forward to a child tab
         //QMessageBox::critical(this, "ABORT CONDITION", message);
-    }
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-// 3 axis
-//////////////////////////////////////////////////////////////////////////////////
-void MainWindow::pinsStateChanged(bool state)
-{
-    if (state) {
-        ui->Stagepins_button->setText("PINS OFF");
-    }
-    else {
-        ui->Stagepins_button->setText("PINS");
-    }
-}
-
-void MainWindow::joystickStateChanged(bool state)
-{
-    if (state) {
-        ui->Joystick_button->setText("JOY OFF");
-        ui->Joystick_button->setChecked(true);
-    }
-    else {
-        ui->Joystick_button->setText("JOY");
-        ui->Joystick_button->setChecked(false);
-    }
-}
-
-void MainWindow::n2StateChanged(bool state)
-{
-    if (state) {
-        ui->n2_purge_button->setText("N2 OFF");
-    }
-    else {
-        ui->n2_purge_button->setText("N2 PURGE");
-    }
-}
-void MainWindow::vacStateChanged(bool state)
-{
-    if (state) {
-        ui->vac_button->setText("VAC OFF");
-    }
-    else {
-        ui->vac_button->setText("VAC");
-    }
-}
-
-void MainWindow::stageStatusUpdate(QString statusNow, QString statusNext)
-{
-    // dashboard
-    ui->axisstatus->setText(statusNow);
-    ui->axisstatus_2->setText(statusNext);
-}
-
-void MainWindow::AxisStatusToUI()
-{
-    // XAxis
-    if (m_mainCTL.getAxesController().getXAxisState() >= AXIS_IDLE) {
-        double Xpos = m_mainCTL.getAxesController().getXPosition();
-        ui->X_relative_PH->setText(QString::number(m_mainCTL.getAxesController().TranslateCoordXBase2PH(Xpos)));
-    }
-    else {
-        ui->X_relative_PH->setText("???");
-    }
-    // YAxis
-    if (m_mainCTL.getAxesController().getYAxisState() >= AXIS_IDLE) {
-        double Ypos = m_mainCTL.getAxesController().getYPosition();
-        ui->Y_relative_PH->setText(QString::number(m_mainCTL.getAxesController().TranslateCoordYBase2PH(Ypos)));
-    }
-    else {
-        ui->Y_relative_PH->setText("???");
-    }
-    // ZAxis
-    if (m_mainCTL.getAxesController().getZAxisState() >= AXIS_IDLE) {
-        double Zpos = m_mainCTL.getAxesController().getZPosition();
-        ui->Z_relative_PH->setText(QString::number(m_mainCTL.getAxesController().TranslateCoordZBase2PH(Zpos)));
-    }
-    else {
-        ui->Z_relative_PH->setText("???");
     }
 }
 
@@ -1171,62 +928,6 @@ void MainWindow::loadCascadeRecipe()
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////////
-// Button handlers
-//////////////////////////////////////////////////////////////////////////////////
-
-// init button on dash
-void MainWindow::on_init_button_clicked()
-{
-    m_mainCTL.getAxesController().StartInit();
-}
-
-// home button on dash
-void MainWindow::on_Home_button_toggled(bool checked)
-{
-    if (checked) {
-       m_mainCTL.getAxesController().StartHome();
-    }
-    else {
-       ui->Home_button->setChecked(false);
-       m_mainCTL.getAxesController().StopHome();
-    }
-}
-
-// scan button on dashboard
-void MainWindow::on_scan_button_toggled(bool checked)
-{
-    if (checked) {
-        m_mainCTL.StartScan();
-    }
-    else {
-        ui->scan_button->setChecked(false);
-        m_mainCTL.StopScan();
-    }
-}
-
-// pins on dashboard
-void MainWindow::on_Stagepins_button_toggled(bool checked)
-{
-    if (checked) {
-        m_mainCTL.getAxesController().togglePinsOn();
-    }
-    else {
-        m_mainCTL.getAxesController().togglePinsOff();
-    }
-}
-
-// n2 purge button on dashboard
-void MainWindow::on_n2_purge_button_toggled(bool checked)
-{
-    if (checked) {
-        m_mainCTL.getAxesController().toggleN2PurgeOn();
-    }
-    else {
-        m_mainCTL.getAxesController().toggleN2PurgeOff();
-    }
-
-}
 
 // joystick button on dashboard
 void MainWindow::on_Joystick_button_toggled(bool checked)
@@ -1256,56 +957,6 @@ void MainWindow::on_Joystick_button_toggled(bool checked)
         m_gamepadController.Close();
         m_mainCTL.getAxesController().toggleJoystickOff();
         ui->Joystick_button->setText("JOY");
-    }
-}
-
-// diameter button on dashboard
-void MainWindow::on_diameter_button_clicked()
-{
-    // get the index of the current displayed diameter
-    int comboboxCurrentIndex = ui->wafer_diameter->currentIndex();
-
-    // set our diameter object
-    m_mainCTL.getDiameter().setCurrentWaferDiameter(m_mainCTL.getDiameter().getWaferDiameterByIndex(comboboxCurrentIndex));
-
-    // update the combox box on the 3axis tab
-    ui->wafer_diameter->setCurrentIndex(comboboxCurrentIndex);
-
-    // reset the scan box
-    m_mainCTL.runDiameter();
-}
-
-
-// wafer combo box on the dashboard
-void MainWindow::on_wafer_diameter_currentIndexChanged(int index)
-{
-    // get the index of the current displayed diameter
-    int comboboxCurrentIndex = index;
-
-    // get the current diameter
-    int currentDiameter = m_mainCTL.getDiameter().getCurrentWaferDiameterSelection();
-
-    // proposed diameter
-    int proposedDiameter = m_mainCTL.getDiameter().getWaferDiameterByIndex(comboboxCurrentIndex);
-
-    if (currentDiameter != proposedDiameter) {
-
-        // set our diameter object
-        m_mainCTL.getDiameter().setCurrentWaferDiameter(m_mainCTL.getDiameter().getWaferDiameterByIndex(comboboxCurrentIndex));
-
-        // update the combo box on the dashboard tab
-        ui->wafer_diameter->setCurrentIndex(comboboxCurrentIndex);
-    }
-}
-
-// vacuum button on dashboard
-void MainWindow::on_vac_button_toggled(bool checked)
-{
-    if (checked) {
-        m_mainCTL.getAxesController().toggleVacOn();
-    }
-    else {
-        m_mainCTL.getAxesController().toggleVacOff();
     }
 }
 
@@ -1809,34 +1460,12 @@ void MainWindow::on_MB_Left_Button_clicked()
     m_mainCTL.MBLeft();
 }
 
-// Engineer choice from service menu
-void MainWindow::on_actionEngineer_Mode_triggered()
-{
-    m_passDialog.show();
-}
-
-// Operator choice from service menu
-void MainWindow::on_actionOperator_Mode_triggered()
-{
-    m_engineeringMode = false;
-    setUIOperatorMode();
-}
-
 void MainWindow::disableControlButtons()
 {
-    ui->Joystick_button->setEnabled(false);
-    ui->vac_button->setEnabled(false);
-    ui->scan_button->setEnabled(false);
-    ui->Home_button->setEnabled(false);
-    ui->Stagepins_button->setEnabled(false);
     ui->menuStage_Test->setEnabled(false);
-    ui->diameter_button->setEnabled(false);
-    ui->wafer_diameter->setEnabled(false);
-    ui->n2_purge_button->setEnabled(false);
     ui->MB_Right_Button->setEnabled(false);
     ui->MB_Left_Button->setEnabled(false);
     ui->menuStage_Test->setEnabled(false);
-    ui->init_button->setEnabled(false);
     ui->batchIDButton->setEnabled(false);
     ui->batchIDedit->setEnabled(false);
 }
@@ -1885,6 +1514,19 @@ void MainWindow::on_actionConnect_triggered()
         QMessageBox::critical(this, "Error", m_mainCTL.getPortErrorString());
 
         showStatusMessage("Open error" + m_mainCTL.getPortErrorString());
+    }
+}
+
+// temporary
+void MainWindow::joystickStateChanged(bool state)
+{
+    if (state) {
+        ui->Joystick_button->setText("JOY OFF");
+        ui->Joystick_button->setChecked(true);
+    }
+    else {
+        ui->Joystick_button->setText("JOY");
+        ui->Joystick_button->setChecked(false);
     }
 }
 
@@ -1949,13 +1591,7 @@ void MainWindow::on_batchID_checkBox_clicked(bool checked)
 void MainWindow::batchIDEnabled()
 {
     if (ui->batchID_checkBox->isChecked()) {
-        // show button and text box    connect(&m_mainCTL.getTuner(), &Tuner::recipePositionChanged, this, &MainWindow::setRecipeMBtuner);
-        connect(&m_mainCTL.getTuner(), &Tuner::updateUIRecipePosition, this, &MainWindow::setRecipeMBtuner);
-        connect(&m_mainCTL.getPlasmaHead(), &PlasmaHead::headTemperatureChanged, this, &MainWindow::headTemperatureChanged);
-        connect(&m_passDialog, &PasswordDialog::userEnteredPassword, this, &MainWindow::userEnteredPassword);
-        connect(m_mainCTL.getSerialInterface(), &SerialInterface::serialClosed, this, &MainWindow::serialDisconnected);
-        connect(m_mainCTL.getSerialInterface(), &SerialInterface::serialOpen, this, &MainWindow::serialConnected);
-        connect(m_mainCTL.getSerialInterface(), &SerialInterface::readTimeoutError, this, &MainWindow::readTimeoutError);
+        // show button and text box
         ui->batchIDButton->setEnabled(true);
         ui->batchIDedit->setEnabled(true);
     }
@@ -2018,11 +1654,12 @@ void MainWindow::on_LEDIntensitySpinBox_valueChanged(double arg1)
 // Tab clicked callback.  Index is new tab
 void MainWindow::on_mainTabWidget_currentChanged(int index)
 {
-    // switch(index){
-    // case OPERATOR_TAB:
-    //     connectOperatorTabSlots(); // this happens in main form.  add appropriate slots to OperatorTab object
-    //     break;
-    // }
+    switch(index){
+    case OPERATOR_TAB:
+        connectOperatorTabSlots();
+        m_pOperatortab->populateRecipeComboBox();
+        break;
+    }
 }
 
 void MainWindow::connectOperatorTabSlots()
@@ -2069,7 +1706,6 @@ void MainWindow::on_pushButton_clicked(bool checked)
     //     this->m_pOperatortab->mfcFlowLinesOn(1, true);
     // else
     //     this->m_pOperatortab->mfcFlowLinesOn(1, false);
-    //emit displayAbortMessage("what the fuck is going on?");
 
     //emit plasmaStateChanged(true);
 
@@ -2077,18 +1713,6 @@ void MainWindow::on_pushButton_clicked(bool checked)
     //m_mainCTL.testFunction();
 
     this->m_pOperatortab->testfunction();
-
 }
 
-
-
-void MainWindow::on_btnOPAcknowledge_clicked()
-{
-    ui->btnOPAcknowledge->hide();
-    ui->texteditOPTabAxisStatus->setTextColor(QColor(0, 0, 0));
-    ui->texteditOPTabAxisStatus->clear();
-
-    m_mainCTL.abortAcknowledged();
-
-}
 
