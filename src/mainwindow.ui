@@ -4713,9 +4713,9 @@ background-color: palette(base)</string>
       <property name="geometry">
        <rect>
         <x>370</x>
-        <y>30</y>
+        <y>65</y>
         <width>600</width>
-        <height>295</height>
+        <height>270</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -4755,10 +4755,10 @@ background-color: palette(base)</string>
        <bool>true</bool>
       </attribute>
       <attribute name="verticalHeaderMinimumSectionSize">
-       <number>55</number>
+       <number>50</number>
       </attribute>
       <attribute name="verticalHeaderDefaultSectionSize">
-       <number>55</number>
+       <number>50</number>
       </attribute>
       <row>
        <property name="text">
@@ -5434,7 +5434,7 @@ color: rgb(255, 255, 255);</string>
       <property name="geometry">
        <rect>
         <x>990</x>
-        <y>30</y>
+        <y>143</y>
         <width>400</width>
         <height>130</height>
        </rect>
@@ -5548,7 +5548,7 @@ color: rgb(255, 255, 255);</string>
       <property name="geometry">
        <rect>
         <x>370</x>
-        <y>340</y>
+        <y>343</y>
         <width>600</width>
         <height>240</height>
        </rect>
@@ -5560,7 +5560,7 @@ color: rgb(255, 255, 255);</string>
         <x>370</x>
         <y>590</y>
         <width>450</width>
-        <height>295</height>
+        <height>270</height>
        </rect>
       </property>
       <property name="verticalScrollBarPolicy">
@@ -5576,10 +5576,10 @@ color: rgb(255, 255, 255);</string>
        <bool>false</bool>
       </attribute>
       <attribute name="verticalHeaderMinimumSectionSize">
-       <number>55</number>
+       <number>50</number>
       </attribute>
       <attribute name="verticalHeaderDefaultSectionSize">
-       <number>55</number>
+       <number>50</number>
       </attribute>
       <row>
        <property name="text">
@@ -5661,7 +5661,7 @@ color: rgb(255, 255, 255);</string>
       <property name="geometry">
        <rect>
         <x>850</x>
-        <y>600</y>
+        <y>590</y>
         <width>230</width>
         <height>51</height>
        </rect>
@@ -5671,6 +5671,9 @@ color: rgb(255, 255, 255);</string>
         <family>Century Gothic</family>
         <pointsize>16</pointsize>
        </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(78, 154, 6);</string>
       </property>
       <property name="text">
        <string>Start Scan</string>
@@ -5680,7 +5683,7 @@ color: rgb(255, 255, 255);</string>
       <property name="geometry">
        <rect>
         <x>850</x>
-        <y>660</y>
+        <y>650</y>
         <width>230</width>
         <height>51</height>
        </rect>
@@ -5690,6 +5693,9 @@ color: rgb(255, 255, 255);</string>
         <family>Century Gothic</family>
         <pointsize>16</pointsize>
        </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(78, 154, 6);</string>
       </property>
       <property name="text">
        <string>Stop Scan</string>
@@ -5699,7 +5705,7 @@ color: rgb(255, 255, 255);</string>
       <property name="geometry">
        <rect>
         <x>990</x>
-        <y>170</y>
+        <y>283</y>
         <width>230</width>
         <height>51</height>
        </rect>
@@ -5710,6 +5716,9 @@ color: rgb(255, 255, 255);</string>
         <pointsize>16</pointsize>
        </font>
       </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(78, 154, 6);</string>
+      </property>
       <property name="text">
        <string>Auto ON/OFF</string>
       </property>
@@ -5718,7 +5727,7 @@ color: rgb(255, 255, 255);</string>
       <property name="geometry">
        <rect>
         <x>1270</x>
-        <y>170</y>
+        <y>283</y>
         <width>51</width>
         <height>51</height>
        </rect>
@@ -5728,6 +5737,9 @@ color: rgb(255, 255, 255);</string>
         <family>Century Gothic</family>
         <pointsize>20</pointsize>
        </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(78, 154, 6);</string>
       </property>
       <property name="text">
        <string>-</string>
@@ -5737,7 +5749,7 @@ color: rgb(255, 255, 255);</string>
       <property name="geometry">
        <rect>
         <x>1340</x>
-        <y>170</y>
+        <y>283</y>
         <width>51</width>
         <height>51</height>
        </rect>
@@ -5748,14 +5760,397 @@ color: rgb(255, 255, 255);</string>
         <pointsize>20</pointsize>
        </font>
       </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(78, 154, 6);</string>
+      </property>
       <property name="text">
        <string>+</string>
+      </property>
+     </widget>
+     <widget class="QTableWidget" name="MachineStatus">
+      <property name="geometry">
+       <rect>
+        <x>1450</x>
+        <y>65</y>
+        <width>400</width>
+        <height>270</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Century Gothic</family>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="verticalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+      <attribute name="horizontalHeaderDefaultSectionSize">
+       <number>200</number>
+      </attribute>
+      <attribute name="verticalHeaderVisible">
+       <bool>false</bool>
+      </attribute>
+      <attribute name="verticalHeaderMinimumSectionSize">
+       <number>60</number>
+      </attribute>
+      <attribute name="verticalHeaderDefaultSectionSize">
+       <number>60</number>
+      </attribute>
+      <row>
+       <property name="text">
+        <string/>
+       </property>
+      </row>
+      <row>
+       <property name="text">
+        <string/>
+       </property>
+      </row>
+      <row>
+       <property name="text">
+        <string/>
+       </property>
+      </row>
+      <row>
+       <property name="text">
+        <string/>
+       </property>
+      </row>
+      <column>
+       <property name="text">
+        <string>Status</string>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>17</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string/>
+       </property>
+      </column>
+      <item row="0" column="0">
+       <property name="text">
+        <string>Plasma Stable</string>
+       </property>
+       <property name="flags">
+        <set>ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+       </property>
+      </item>
+      <item row="1" column="0">
+       <property name="text">
+        <string>Head Temp</string>
+       </property>
+       <property name="flags">
+        <set>ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+       </property>
+      </item>
+      <item row="2" column="0">
+       <property name="text">
+        <string>Door</string>
+       </property>
+       <property name="flags">
+        <set>ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+       </property>
+      </item>
+      <item row="3" column="0">
+       <property name="text">
+        <string>Light Tower</string>
+       </property>
+       <property name="flags">
+        <set>ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+       </property>
+      </item>
+     </widget>
+     <widget class="QTableWidget" name="StagePosition">
+      <property name="geometry">
+       <rect>
+        <x>1450</x>
+        <y>343</y>
+        <width>400</width>
+        <height>210</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Century Gothic</family>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="verticalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+      <attribute name="horizontalHeaderDefaultSectionSize">
+       <number>200</number>
+      </attribute>
+      <attribute name="verticalHeaderVisible">
+       <bool>false</bool>
+      </attribute>
+      <attribute name="verticalHeaderMinimumSectionSize">
+       <number>60</number>
+      </attribute>
+      <attribute name="verticalHeaderDefaultSectionSize">
+       <number>60</number>
+      </attribute>
+      <row>
+       <property name="text">
+        <string/>
+       </property>
+      </row>
+      <row>
+       <property name="text">
+        <string/>
+       </property>
+      </row>
+      <row>
+       <property name="text">
+        <string/>
+       </property>
+      </row>
+      <column>
+       <property name="text">
+        <string>Stage Position</string>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>17</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string/>
+       </property>
+      </column>
+      <item row="0" column="0">
+       <property name="text">
+        <string>X</string>
+       </property>
+       <property name="flags">
+        <set>ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+       </property>
+      </item>
+      <item row="1" column="0">
+       <property name="text">
+        <string>Y</string>
+       </property>
+       <property name="flags">
+        <set>ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+       </property>
+      </item>
+      <item row="2" column="0">
+       <property name="text">
+        <string>Z</string>
+       </property>
+       <property name="flags">
+        <set>ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+       </property>
+      </item>
+     </widget>
+     <widget class="QTableWidget" name="N2PurgeOptions">
+      <property name="geometry">
+       <rect>
+        <x>990</x>
+        <y>65</y>
+        <width>400</width>
+        <height>70</height>
+       </rect>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Sunken</enum>
+      </property>
+      <property name="verticalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+      <property name="autoScrollMargin">
+       <number>0</number>
+      </property>
+      <property name="textElideMode">
+       <enum>Qt::ElideRight</enum>
+      </property>
+      <property name="showGrid">
+       <bool>true</bool>
+      </property>
+      <property name="cornerButtonEnabled">
+       <bool>true</bool>
+      </property>
+      <attribute name="horizontalHeaderVisible">
+       <bool>true</bool>
+      </attribute>
+      <attribute name="horizontalHeaderCascadingSectionResizes">
+       <bool>false</bool>
+      </attribute>
+      <attribute name="horizontalHeaderDefaultSectionSize">
+       <number>200</number>
+      </attribute>
+      <attribute name="horizontalHeaderHighlightSections">
+       <bool>true</bool>
+      </attribute>
+      <attribute name="horizontalHeaderStretchLastSection">
+       <bool>false</bool>
+      </attribute>
+      <attribute name="verticalHeaderVisible">
+       <bool>false</bool>
+      </attribute>
+      <attribute name="verticalHeaderMinimumSectionSize">
+       <number>55</number>
+      </attribute>
+      <attribute name="verticalHeaderDefaultSectionSize">
+       <number>55</number>
+      </attribute>
+      <attribute name="verticalHeaderHighlightSections">
+       <bool>true</bool>
+      </attribute>
+      <attribute name="verticalHeaderStretchLastSection">
+       <bool>false</bool>
+      </attribute>
+      <row>
+       <property name="text">
+        <string/>
+       </property>
+      </row>
+      <column>
+       <property name="text">
+        <string>Options</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="textAlignment">
+        <set>AlignLeading|AlignVCenter</set>
+       </property>
+      </column>
+      <item row="0" column="0">
+       <property name="text">
+        <string>N2 Purge</string>
+       </property>
+       <property name="flags">
+        <set>ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+       </property>
+      </item>
+     </widget>
+     <widget class="QTableWidget" name="MachineConsumption">
+      <property name="geometry">
+       <rect>
+        <x>1450</x>
+        <y>561</y>
+        <width>400</width>
+        <height>150</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Century Gothic</family>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="verticalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+      <attribute name="horizontalHeaderDefaultSectionSize">
+       <number>200</number>
+      </attribute>
+      <attribute name="verticalHeaderVisible">
+       <bool>false</bool>
+      </attribute>
+      <attribute name="verticalHeaderMinimumSectionSize">
+       <number>60</number>
+      </attribute>
+      <attribute name="verticalHeaderDefaultSectionSize">
+       <number>60</number>
+      </attribute>
+      <row>
+       <property name="text">
+        <string/>
+       </property>
+      </row>
+      <row>
+       <property name="text">
+        <string/>
+       </property>
+      </row>
+      <column>
+       <property name="text">
+        <string>Consumption</string>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>17</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string/>
+       </property>
+      </column>
+      <item row="0" column="0">
+       <property name="text">
+        <string>Estimated Process Time</string>
+       </property>
+       <property name="flags">
+        <set>ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+       </property>
+      </item>
+      <item row="1" column="0">
+       <property name="text">
+        <string>Estimated Gas Usage</string>
+       </property>
+       <property name="flags">
+        <set>ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+       </property>
+      </item>
+     </widget>
+     <widget class="QPushButton" name="SaveRecipe">
+      <property name="geometry">
+       <rect>
+        <x>1450</x>
+        <y>719</y>
+        <width>400</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Century Gothic</family>
+        <pointsize>16</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(78, 154, 6);</string>
+      </property>
+      <property name="text">
+       <string>Save Recipe</string>
       </property>
      </widget>
     </widget>
     <widget class="QWidget" name="Dashboard">
      <attribute name="icon">
-      <iconset theme="applications-office"/>
+      <iconset theme="applications-office">
+       <normaloff>.</normaloff>.</iconset>
      </attribute>
      <attribute name="title">
       <string>Dashboard</string>
@@ -5849,7 +6244,8 @@ font: 14pt &quot;Ubuntu Bold&quot;;
           <string>SAVE RECIPE</string>
          </property>
          <property name="icon">
-          <iconset theme="media-floppy"/>
+          <iconset theme="media-floppy">
+           <normaloff>.</normaloff>.</iconset>
          </property>
          <property name="iconSize">
           <size>
@@ -7118,7 +7514,8 @@ color:gray;
           <string>LOAD RECIPE</string>
          </property>
          <property name="icon">
-          <iconset theme="document-open"/>
+          <iconset theme="document-open">
+           <normaloff>.</normaloff>.</iconset>
          </property>
          <property name="iconSize">
           <size>
@@ -7805,7 +8202,8 @@ QDoubleSpinBox::QLineEdit {
     </widget>
     <widget class="QWidget" name="recipe">
      <attribute name="icon">
-      <iconset theme="folder"/>
+      <iconset theme="folder">
+       <normaloff>.</normaloff>.</iconset>
      </attribute>
      <attribute name="title">
       <string>Cascade Recipe</string>
@@ -7971,7 +8369,8 @@ font: 14pt &quot;Ubuntu Bold&quot;;
         <string>LOAD CASCADE RECIPE</string>
        </property>
        <property name="icon">
-        <iconset theme="document-open"/>
+        <iconset theme="document-open">
+         <normaloff>.</normaloff>.</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -8007,7 +8406,8 @@ font: 14pt &quot;Ubuntu Bold&quot;;
         <string>SAVE CASCADE RECIPE</string>
        </property>
        <property name="icon">
-        <iconset theme="media-floppy"/>
+        <iconset theme="media-floppy">
+         <normaloff>.</normaloff>.</iconset>
        </property>
       </widget>
       <widget class="QListWidget" name="listRecipes">
@@ -8050,7 +8450,8 @@ font: 14pt &quot;Ubuntu Bold&quot;;
     </widget>
     <widget class="QWidget" name="settings">
      <attribute name="icon">
-      <iconset theme="preferences-system"/>
+      <iconset theme="preferences-system">
+       <normaloff>.</normaloff>.</iconset>
      </attribute>
      <attribute name="title">
       <string>Tool Settings</string>
@@ -8106,7 +8507,8 @@ font: 14pt &quot;Ubuntu Bold&quot;;
            <string>Batch ID Enabled</string>
           </property>
           <property name="icon">
-           <iconset theme="emblem-documents"/>
+           <iconset theme="emblem-documents">
+            <normaloff>.</normaloff>.</iconset>
           </property>
           <property name="iconSize">
            <size>
@@ -8125,7 +8527,8 @@ font: 14pt &quot;Ubuntu Bold&quot;;
            <string>Request/Response Terminal</string>
           </property>
           <property name="icon">
-           <iconset theme="utilities-terminal"/>
+           <iconset theme="utilities-terminal">
+            <normaloff>.</normaloff>.</iconset>
           </property>
           <property name="iconSize">
            <size>
