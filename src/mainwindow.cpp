@@ -47,6 +47,15 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(m_mainCTL.getSerialInterface(), &SerialInterface::readTimeoutError, this, &MainWindow::readTimeoutError);
     connect(&m_mainCTL.getAbortMessages(), &AbortCodeMessages::showAbortMessageBox, this, &MainWindow::showAbortMessageBox);
 
+    // setup stacked widget for program control
+    connect(ui->btnChuckVacOnOff, &QPushButton::clicked, this, &MainWindow::btnChuckVacOnOff_clicked);
+    connect(ui->btnPinsUpDown, &QPushButton::clicked, this, &MainWindow::btnPinsUpDown_clicked);
+    connect(ui->btnStartPlasma, &QPushButton::clicked, this, &MainWindow::btnStartPlasma_clicked);
+    connect(ui->btnLoad, &QPushButton::clicked, this, &MainWindow::btnLoad_clicked);
+    connect(ui->btnInit, &QPushButton::clicked, this, &MainWindow::btnInit_clicked);
+    connect(ui->comboBoxRecipe, &QComboBox::currentTextChanged, this, &MainWindow::comboBoxRecipe_currentTextChanged);
+    connect(ui->btnAcknowledge, &QPushButton::clicked, this, &MainWindow::btnAcknowledged_clicked);
+
     // temporary
     connect(ui->Joystick_button, &QPushButton::toggled, this, &MainWindow::on_Joystick_button_toggled);
     // run the next cascade recipe
@@ -86,12 +95,16 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
 
     // Setup Recipe List for Cascade Recipes
     populateRecipeListWidgetFromDirectory(ui->listRecipes);
+    populateRecipeComboBox();
 
     // give things a little time to settle before opening the serial port
     QTimer::singleShot(50, this, &MainWindow::openMainPort);
 
     // operator tab is initial tab
     connectOperatorTabSlots();
+
+    // hide the ack button until there is an abort condition
+    ui->btnAcknowledge->hide();
 }
 
 MainWindow::~MainWindow() {
@@ -107,6 +120,23 @@ MainWindow::~MainWindow() {
     delete m_pMainPollingState;
     delete m_pMainShutdownState;
     delete m_pMainLoop;
+}
+
+void MainWindow::populateRecipeComboBox()
+{
+    ui->comboBoxRecipe->clear();
+
+    QDir directory(RECIPE_DIRECTORY);
+
+    QFileInfoList fileInfoList = directory.entryInfoList(QDir::Files | QDir::NoDotAndDotDot);
+
+    foreach (const QFileInfo& fileInfo, fileInfoList) {
+        // Add each file name to the list widget
+        ui->comboBoxRecipe->addItem(fileInfo.fileName());
+    }
+
+    ui->comboBoxRecipe->setPlaceholderText(QStringLiteral(""));
+    ui->comboBoxRecipe->setCurrentIndex(-1);
 }
 
 // show status message at the bottom on MainWindow
@@ -412,7 +442,7 @@ void MainWindow::showAbortMessageBox(QString message, bool shutdown)
         QApplication::quit();
     }
     else {
-        emit displayAbortMessage(message);  // forward to a child tab
+        displayAbortMessage(message);  // forward to a child tab
         //QMessageBox::critical(this, "ABORT CONDITION", message);
     }
 }
@@ -578,6 +608,135 @@ void MainWindow::SaveRecipeFileSelected(const QString &file)
 void MainWindow::SaveRecipeFileRejected()
 {
     delete m_pRecipeFileDialog;
+}
+
+// Program Control stacked widget slot functions
+void MainWindow::displayAbortMessage(QString smsg)
+{
+    ui->texteditTabAxisStatus->setTextColor(QColor(133, 2, 2));
+    ui->texteditTabAxisStatus->setText(smsg);
+    ui->btnAcknowledge->show();
+
+    // disable user interaction. Reenabled when acknowledged
+    ui->btnChuckVacOnOff->setEnabled(false);
+    ui->btnPinsUpDown->setEnabled(false);
+    ui->comboBoxRecipe->setEnabled(false);
+    ui->btnStartPlasma->setEnabled(false);
+    ui->btnLoad->setEnabled(false);
+    ui->btnInit->setEnabled(false);
+}
+
+void MainWindow::stageStatusUpdate(QString statusNow, QString statusNext)
+{
+    ui->texteditTabAxisStatus->setText(statusNow);
+}
+
+// collision state machine
+void MainWindow::CSM_StatusUpdate(QString status, QString next)
+{
+    ui->texteditTabAxisStatus->setText(status);
+}
+
+// scan state machine
+void MainWindow::SSM_Started()
+{
+    ui->btnInit->setEnabled(false);
+    ui->btnLoad->setEnabled(false);
+    ui->btnPinsUpDown->setEnabled(false);
+    ui->btnChuckVacOnOff->setEnabled(false);
+}
+
+void MainWindow::SSM_Done()
+{
+    // update status
+    ui->texteditTabAxisStatus->setText("Scanning Completed");
+
+    ui->btnInit->setEnabled(true);
+    ui->btnLoad->setEnabled(true);
+    ui->btnPinsUpDown->setEnabled(true);
+    ui->btnChuckVacOnOff->setEnabled(true);
+}
+
+void MainWindow::SSM_StatusUpdate(QString status, QString next)
+{
+    ui->texteditTabAxisStatus->setText(status);
+}
+
+void MainWindow::plasmaStateChanged(bool plasmaActive)
+{
+    // retain the plasma state
+    m_plasmaActive = plasmaActive;
+
+    if (plasmaActive) {
+       ui->btnStartPlasma->setText("Plasma Off");
+    }
+    else {
+       ui->btnStartPlasma->setChecked(false);
+       ui->btnStartPlasma->setText("Start Plasma");
+    }
+}
+
+void MainWindow::pinsStateChanged(bool state)
+{
+    if (state) {
+       ui->btnPinsUpDown->setText("Load Pins Up");
+    }
+    else {
+       ui->btnPinsUpDown->setText("Load Pins Down");
+    }
+}
+
+void MainWindow::vacStateChanged(bool state)
+{
+    if (state) {
+       ui->btnChuckVacOnOff->setText("Chuck Vacuum Off");
+    }
+    else {
+       ui->btnChuckVacOnOff->setText("Chuck Vacuum On");
+    }
+}
+
+// home state machine
+void MainWindow::HSM_Startup()
+{
+    ui->btnLoad->setText("Stop");
+
+    ui->btnInit->setEnabled(false);
+    ui->btnPinsUpDown->setEnabled(false);
+    ui->btnChuckVacOnOff->setEnabled(false);
+    ui->btnStartPlasma->setEnabled(false);
+}
+
+void MainWindow::HSM_Done()
+{
+    ui->btnLoad->setText("Load");
+
+    ui->btnLoad->setChecked(false);
+    ui->btnInit->setEnabled(true);
+    ui->btnPinsUpDown->setEnabled(true);
+    ui->btnChuckVacOnOff->setEnabled(true);
+    ui->btnStartPlasma->setEnabled(true);
+    ui->btnPinsUpDown->setText("Load Pins Up");
+}
+
+// init state machine
+void MainWindow::ISM_Startup()
+{
+    ui->btnInit->setEnabled(false);
+    ui->btnPinsUpDown->setEnabled(false);
+    ui->btnChuckVacOnOff->setEnabled(false);
+    ui->btnStartPlasma->setEnabled(false);
+    ui->btnLoad->setEnabled(false);
+}
+
+void MainWindow::ISM_Done()
+{
+    ui->btnInit->setEnabled(true);
+    ui->btnPinsUpDown->setEnabled(true);
+    ui->btnChuckVacOnOff->setEnabled(true);
+    ui->btnStartPlasma->setEnabled(true);
+    ui->btnLoad->setEnabled(true);
+    ui->btnPinsUpDown->setText("Load Pins Down");
 }
 
 // update the recipe watts
@@ -1657,7 +1816,12 @@ void MainWindow::on_mainTabWidget_currentChanged(int index)
     switch(index){
     case OPERATOR_TAB:
         connectOperatorTabSlots();
-        m_pOperatortab->populateRecipeComboBox();
+        // populateRecipeComboBox();
+        // set program control to OP/EN view
+        ui->stackedWidgetProgCtrl->setCurrentIndex(0);
+        break;
+    case ENGINEER_TAB:
+        ui->stackedWidgetProgCtrl->setCurrentIndex(0);
         break;
     }
 }
@@ -1665,21 +1829,21 @@ void MainWindow::on_mainTabWidget_currentChanged(int index)
 void MainWindow::connectOperatorTabSlots()
 {
     // ui updates from axescontroller
-    connect(&m_mainCTL.getAxesController(), &AxesController::stageStatusUpdate, m_pOperatortab, &OperatorTab::stageStatusUpdate);
+    // connect(&m_mainCTL.getAxesController(), &AxesController::stageStatusUpdate, m_pOperatortab, &OperatorTab::stageStatusUpdate);
     connect(&m_mainCTL.getAxesController(), &AxesController::pinsStateChanged, m_pOperatortab, &OperatorTab::pinsStateChanged);
     connect(&m_mainCTL.getAxesController(), &AxesController::vacStateChanged, m_pOperatortab, &OperatorTab::vacStateChanged);
     connect(&m_mainCTL.getAxesController(), &AxesController::updateUIAxisStatus, m_pOperatortab, &OperatorTab::axisStatusToUI);
     connect(&m_mainCTL.getAxesController(), &AxesController::doorStateChanged, m_pOperatortab, &OperatorTab::doorStateChanged);
     // init and home state machines
-    connect(&m_mainCTL.getAxesController(), &AxesController::initSMStartup, m_pOperatortab, &OperatorTab::ISM_Startup);
+    // connect(&m_mainCTL.getAxesController(), &AxesController::initSMStartup, m_pOperatortab, &OperatorTab::ISM_Startup);
     connect(&m_mainCTL.getAxesController(), &AxesController::initSMDone, m_pOperatortab, &OperatorTab::ISM_Done);
-    connect(&m_mainCTL.getAxesController(), &AxesController::setUIHomeSMStartup, m_pOperatortab, &OperatorTab::HSM_Startup);
+    // connect(&m_mainCTL.getAxesController(), &AxesController::setUIHomeSMStartup, m_pOperatortab, &OperatorTab::HSM_Startup);
     connect(&m_mainCTL.getAxesController(), &AxesController::setUIHomeSMDone, m_pOperatortab, &OperatorTab::HSM_Done);
     // scan/collision state machine
-    connect(&m_mainCTL, &PlasmaController::CSM_StatusUpdate, m_pOperatortab, &OperatorTab::CSM_StatusUpdate);
-    connect(&m_mainCTL, &PlasmaController::SSM_StatusUpdate, m_pOperatortab, &OperatorTab::SSM_StatusUpdate);
+    // connect(&m_mainCTL, &PlasmaController::CSM_StatusUpdate, m_pOperatortab, &OperatorTab::CSM_StatusUpdate);
+    // connect(&m_mainCTL, &PlasmaController::SSM_StatusUpdate, m_pOperatortab, &OperatorTab::SSM_StatusUpdate);
     connect(&m_mainCTL, &PlasmaController::SSM_Started, m_pOperatortab, &OperatorTab::SSM_Started);
-    connect(&m_mainCTL, &PlasmaController::SSM_Done, m_pOperatortab, &OperatorTab::SSM_Done);
+    // connect(&m_mainCTL, &PlasmaController::SSM_Done, m_pOperatortab, &OperatorTab::SSM_Done);
     // light tower
     connect(&m_mainCTL.getLightTower(), &LightTower::lightTowerStateChanged, m_pOperatortab, &OperatorTab::lightTowerStateChanged);
     // plasma, power, and head status
@@ -1694,7 +1858,7 @@ void MainWindow::connectOperatorTabSlots()
     // forward power
     connect(&m_mainCTL.getPower(), &PWR::forwardWattsChanged, m_pOperatortab, &OperatorTab::forwardWattsChanged);
     // abort message
-    connect(this, &MainWindow::displayAbortMessage, m_pOperatortab, &OperatorTab::displayAbortMessage);
+    // connect(this, &MainWindow::displayAbortMessage, this, &MainWindow::displayAbortMessage);
     // mfc
     connect(&m_mainCTL, &PlasmaController::setUINumberOfMFCs, m_pOperatortab, &OperatorTab::setUINumberOfMFCs);
 }
@@ -1713,6 +1877,95 @@ void MainWindow::on_pushButton_clicked(bool checked)
     //m_mainCTL.testFunction();
 
     this->m_pOperatortab->testfunction();
+}
+
+//////////////////////// Buttons ////////////////////
+void MainWindow::btnChuckVacOnOff_clicked(bool checked)
+{
+    if (checked) {
+        m_mainCTL.getAxesController().toggleVacOn();
+    }
+    else {
+        m_mainCTL.getAxesController().toggleVacOff();
+    }
+}
+
+
+void MainWindow::btnPinsUpDown_clicked(bool checked)
+{
+    if (checked) {
+        m_mainCTL.getAxesController().togglePinsOff(); // pins down
+    }
+    else {
+        m_mainCTL.getAxesController().togglePinsOn(); // pins up
+    }
+}
+
+
+void MainWindow::btnStartPlasma_clicked(bool checked)
+{
+    if (!checked) {
+        m_mainCTL.StopScan();
+        m_mainCTL.RunRecipe(false); // turn off recipe execution
+        ui->btnStartPlasma->setText("Start Plasma");
+    }
+    else {
+        ui->btnStartPlasma->setText("Plasma Off");
+
+        if (m_mainCTL.getCollision() && m_mainCTL.getRecipe()->getAutoScanBool() && !m_mainCTL.getPlasmaActive()) {
+            m_mainCTL.plannedAutoStartOn();//this will make sure we dont accidently start plasma when just clicking RUN SCAN button
+            m_mainCTL.StartScan();
+        }
+        else {
+            m_mainCTL.RunRecipe(true); // turn on recipe execution
+        }
+    }
+}
+
+void MainWindow::btnLoad_clicked(bool checked)
+{
+    if (checked) {
+        m_mainCTL.getAxesController().StartHome();
+    }
+    else {
+        ui->btnLoad->setChecked(false);
+        m_mainCTL.getAxesController().StopHome();
+    }
+}
+
+
+void MainWindow::btnInit_clicked()
+{
+    m_mainCTL.getAxesController().StartInit();
+}
+
+
+void MainWindow::comboBoxRecipe_currentTextChanged(const QString &arg1)
+{
+    QString fullPathToRecipeFile = RECIPE_DIRECTORY;
+    fullPathToRecipeFile += "/";
+    fullPathToRecipeFile += arg1;
+
+    OpenRecipeFileSelected(fullPathToRecipeFile);
+}
+
+
+
+void MainWindow::btnAcknowledged_clicked()
+{
+    ui->btnAcknowledge->hide();
+    ui->texteditTabAxisStatus->setTextColor(QColor(0, 0, 0));
+    ui->texteditTabAxisStatus->clear();
+
+    m_mainCTL.abortAcknowledged();
+
+    // reenable
+    ui->btnChuckVacOnOff->setEnabled(true);
+    ui->btnPinsUpDown->setEnabled(true);
+    ui->comboBoxRecipe->setEnabled(true);
+    ui->btnStartPlasma->setEnabled(true);
+    ui->btnLoad->setEnabled(true);
+    ui->btnInit->setEnabled(true);
 }
 
 

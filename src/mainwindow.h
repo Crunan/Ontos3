@@ -50,6 +50,8 @@ public:
         ENGINEER_TAB
     } tabs;
 
+    void populateRecipeComboBox();
+
     // access control
     void engineerModeSelected() {     // clear the password
         m_passDialog.clearPassword();
@@ -66,7 +68,6 @@ signals:
     void MSM_TransitionStartup();
     void MSM_TransitionShutdown();
     void MSM_TransitionIdle();
-    void displayAbortMessage(QString smsg);
 
 public slots:
     void setInitialUIState();
@@ -129,6 +130,22 @@ public slots:
     void OpenRecipeRejected();
     void SaveRecipeFileRejected();
 
+    // program control actions
+    //void displayAbortMessage(const QString message);
+    void stageStatusUpdate(const QString status1, const QString status2);
+    void CSM_StatusUpdate(const QString status, const QString next);
+    void SSM_Started();
+    void SSM_StatusUpdate(const QString status, const QString next);
+    void SSM_Done();
+    void ISM_Startup();
+    void ISM_Done();
+    void HSM_Startup();
+    void HSM_Done();
+    void pinsStateChanged(const bool state);
+    void vacStateChanged(const bool state);
+    void plasmaStateChanged(const bool plasmaActive);
+    void displayAbortMessage(QString smsg);
+
 private slots:
     // controls handlers
     void on_load_thick_clicked();
@@ -173,6 +190,16 @@ private slots:
     void on_LEDIntensitySpinBox_valueChanged(double arg1);
     void on_mainTabWidget_currentChanged(int index);
     void on_pushButton_clicked(bool checked);
+
+
+    void btnChuckVacOnOff_clicked(bool checked);
+    void btnPinsUpDown_clicked(bool checked);
+    void btnStartPlasma_clicked(bool checked);
+    // void btnAbort_clicked();
+    void btnLoad_clicked(bool checked);
+    void btnInit_clicked();
+    void comboBoxRecipe_currentTextChanged(const QString &arg1);
+    void btnAcknowledged_clicked();
 
 private:
 
@@ -243,5 +270,7 @@ private:
     QState *m_pMainIdleState;
     QState *m_pMainPollingState;
     QState *m_pMainShutdownState;
+
+    bool m_plasmaActive;
 };
 #endif // MAINWINDOW_H

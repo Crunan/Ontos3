@@ -74,9 +74,9 @@ QProgressBar::Chunk
     </property>
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>330</x>
       <y>20</y>
-      <width>1891</width>
+      <width>1571</width>
       <height>931</height>
      </rect>
     </property>
@@ -117,7 +117,7 @@ QProgressBar::Chunk
      <widget class="Line" name="line_8">
       <property name="geometry">
        <rect>
-        <x>1093</x>
+        <x>773</x>
         <y>178</y>
         <width>244</width>
         <height>20</height>
@@ -139,7 +139,7 @@ QProgressBar::Chunk
      <widget class="QFrame" name="frame_2">
       <property name="geometry">
        <rect>
-        <x>879</x>
+        <x>559</x>
         <y>537</y>
         <width>231</width>
         <height>141</height>
@@ -201,7 +201,7 @@ QProgressBar::Chunk
      <widget class="QFrame" name="frame_3">
       <property name="geometry">
        <rect>
-        <x>1335</x>
+        <x>1015</x>
         <y>149</y>
         <width>221</width>
         <height>91</height>
@@ -267,7 +267,7 @@ QProgressBar::Chunk
      <widget class="QStackedWidget" name="stackedWidgetMFC">
       <property name="geometry">
        <rect>
-        <x>371</x>
+        <x>51</x>
         <y>30</y>
         <width>521</width>
         <height>440</height>
@@ -277,7 +277,7 @@ QProgressBar::Chunk
        <enum>QFrame::NoFrame</enum>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="stackedWidget6MFCPage">
        <widget class="Line" name="lineOPMFC2pre_6MFC">
@@ -3153,574 +3153,10 @@ QProgressBar::Chunk
        </widget>
       </widget>
      </widget>
-     <widget class="QFrame" name="frame_4">
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>30</y>
-        <width>281</width>
-        <height>821</height>
-       </rect>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Raised</enum>
-      </property>
-      <widget class="QWidget" name="layoutWidget_2">
-       <property name="geometry">
-        <rect>
-         <x>4</x>
-         <y>10</y>
-         <width>269</width>
-         <height>791</height>
-        </rect>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout_7">
-        <item>
-         <widget class="QFrame" name="verticalFrame_2">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>70</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>300</width>
-            <height>70</height>
-           </size>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::Box</enum>
-          </property>
-          <property name="lineWidth">
-           <number>0</number>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_8">
-           <property name="spacing">
-            <number>0</number>
-           </property>
-           <property name="topMargin">
-            <number>1</number>
-           </property>
-           <property name="bottomMargin">
-            <number>1</number>
-           </property>
-           <item>
-            <widget class="QLabel" name="label_7">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>30</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>30</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Century Gothic</family>
-               <italic>false</italic>
-               <bold>true</bold>
-               <underline>false</underline>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true"/>
-             </property>
-             <property name="text">
-              <string>Load Recipe</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QComboBox" name="comboBoxOPRecipe">
-             <property name="editable">
-              <bool>false</bool>
-             </property>
-             <property name="currentText">
-              <string/>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item>
-         <widget class="QFrame" name="frame_5">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>110</height>
-           </size>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::Box</enum>
-          </property>
-          <property name="lineWidth">
-           <number>0</number>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_10">
-           <item>
-            <widget class="QPushButton" name="btnOPChuckVacOnOff">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Century Gothic</family>
-               <bold>true</bold>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">background-color: rgb(133, 2, 2);
-color: rgb(255, 255, 255);</string>
-             </property>
-             <property name="text">
-              <string>Chuck Vacuum On</string>
-             </property>
-             <property name="checkable">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btnOPPinsUpDown">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Century Gothic</family>
-               <bold>true</bold>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">background-color: rgb(133, 2, 2);
-color: rgb(255, 255, 255);</string>
-             </property>
-             <property name="text">
-              <string>Load Pins Up</string>
-             </property>
-             <property name="checkable">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item>
-         <widget class="QFrame" name="frame_10">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>110</height>
-           </size>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::Box</enum>
-          </property>
-          <property name="lineWidth">
-           <number>0</number>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_11"/>
-         </widget>
-        </item>
-        <item>
-         <widget class="QFrame" name="frame">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::Box</enum>
-          </property>
-          <property name="lineWidth">
-           <number>0</number>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_9">
-           <item>
-            <widget class="QPushButton" name="btnOPStartPlasma">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Century Gothic</family>
-               <bold>true</bold>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(133, 2, 2);
-
-
-</string>
-             </property>
-             <property name="text">
-              <string>Start Plasma</string>
-             </property>
-             <property name="checkable">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btnOPLoad">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Century Gothic</family>
-               <bold>true</bold>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">background-color: rgb(133, 2, 2);
-color: rgb(255, 255, 255);</string>
-             </property>
-             <property name="text">
-              <string>Load</string>
-             </property>
-             <property name="checkable">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btnOPInit">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Century Gothic</family>
-               <bold>true</bold>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">background-color: rgb(133, 2, 2);
-color: rgb(255, 255, 255);</string>
-             </property>
-             <property name="text">
-              <string>Init</string>
-             </property>
-             <property name="checkable">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QFrame" name="frame_11">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>150</height>
-              </size>
-             </property>
-             <property name="frameShape">
-              <enum>QFrame::Box</enum>
-             </property>
-             <property name="lineWidth">
-              <number>0</number>
-             </property>
-             <layout class="QVBoxLayout" name="verticalLayout_12"/>
-            </widget>
-           </item>
-           <item>
-            <widget class="QWidget" name="stageStatusWidget_2" native="true">
-             <layout class="QVBoxLayout" name="verticalLayout_25">
-              <property name="spacing">
-               <number>0</number>
-              </property>
-              <property name="leftMargin">
-               <number>1</number>
-              </property>
-              <property name="topMargin">
-               <number>1</number>
-              </property>
-              <property name="rightMargin">
-               <number>1</number>
-              </property>
-              <property name="bottomMargin">
-               <number>1</number>
-              </property>
-              <item>
-               <widget class="QLabel" name="label_56">
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>16777215</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <family>Century Gothic</family>
-                  <italic>false</italic>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true"/>
-                </property>
-                <property name="frameShape">
-                 <enum>QFrame::Box</enum>
-                </property>
-                <property name="lineWidth">
-                 <number>0</number>
-                </property>
-                <property name="text">
-                 <string>Status</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QTextEdit" name="texteditOPTabAxisStatus">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>16777215</width>
-                  <height>150</height>
-                 </size>
-                </property>
-                <property name="readOnly">
-                 <bool>true</bool>
-                </property>
-                <property name="overwriteMode">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
-           <item>
-            <widget class="QFrame" name="frameOPacknowledgeButton">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>150</height>
-              </size>
-             </property>
-             <property name="frameShape">
-              <enum>QFrame::Box</enum>
-             </property>
-             <property name="lineWidth">
-              <number>0</number>
-             </property>
-             <layout class="QVBoxLayout" name="verticalLayout_13">
-              <property name="topMargin">
-               <number>0</number>
-              </property>
-              <property name="bottomMargin">
-               <number>0</number>
-              </property>
-             </layout>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btnOPAcknowledge">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Century Gothic</family>
-               <bold>true</bold>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">background-color: rgb(133, 2, 2);
-color: rgb(255, 255, 255);</string>
-             </property>
-             <property name="text">
-              <string>Acknowledge</string>
-             </property>
-             <property name="checkable">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </widget>
      <widget class="Line" name="line_17">
       <property name="geometry">
        <rect>
-        <x>1083</x>
+        <x>763</x>
         <y>187</y>
         <width>20</width>
         <height>350</height>
@@ -3745,7 +3181,7 @@ color: rgb(255, 255, 255);</string>
      <widget class="QFrame" name="frame_7">
       <property name="geometry">
        <rect>
-        <x>760</x>
+        <x>440</x>
         <y>780</y>
         <width>470</width>
         <height>41</height>
@@ -3776,7 +3212,7 @@ color: rgb(255, 255, 255);</string>
      <widget class="QFrame" name="frameSubstrate">
       <property name="geometry">
        <rect>
-        <x>880</x>
+        <x>560</x>
         <y>736</y>
         <width>231</width>
         <height>46</height>
@@ -3844,7 +3280,7 @@ color: rgb(255, 255, 255);</string>
      <widget class="QFrame" name="frameOPPlasmaPlume">
       <property name="geometry">
        <rect>
-        <x>911</x>
+        <x>591</x>
         <y>681</y>
         <width>171</width>
         <height>21</height>
@@ -3876,7 +3312,7 @@ color: rgb(255, 255, 255);</string>
      <widget class="QFrame" name="frame_8">
       <property name="geometry">
        <rect>
-        <x>1693</x>
+        <x>1373</x>
         <y>111</y>
         <width>160</width>
         <height>160</height>
@@ -3944,7 +3380,7 @@ border-radius: 80px;
      <widget class="Line" name="line_15">
       <property name="geometry">
        <rect>
-        <x>1554</x>
+        <x>1234</x>
         <y>180</y>
         <width>140</width>
         <height>20</height>
@@ -3966,7 +3402,7 @@ border-radius: 80px;
      <widget class="Line" name="lineOPMFC2vert">
       <property name="geometry">
        <rect>
-        <x>889</x>
+        <x>569</x>
         <y>153</y>
         <width>3</width>
         <height>385</height>
@@ -3988,7 +3424,7 @@ border-radius: 80px;
      <widget class="Line" name="lineOPMFC3vert">
       <property name="geometry">
        <rect>
-        <x>889</x>
+        <x>569</x>
         <y>224</y>
         <width>3</width>
         <height>314</height>
@@ -4010,7 +3446,7 @@ border-radius: 80px;
      <widget class="Line" name="lineOPMFC4vert">
       <property name="geometry">
        <rect>
-        <x>882</x>
+        <x>562</x>
         <y>297</y>
         <width>16</width>
         <height>242</height>
@@ -4032,7 +3468,7 @@ border-radius: 80px;
      <widget class="Line" name="lineOPMFC5vert">
       <property name="geometry">
        <rect>
-        <x>882</x>
+        <x>562</x>
         <y>370</y>
         <width>16</width>
         <height>167</height>
@@ -4054,7 +3490,7 @@ border-radius: 80px;
      <widget class="Line" name="lineOPMFC6vert">
       <property name="geometry">
        <rect>
-        <x>882</x>
+        <x>562</x>
         <y>442</y>
         <width>16</width>
         <height>97</height>
@@ -4076,7 +3512,7 @@ border-radius: 80px;
      <widget class="QFrame" name="frame_13">
       <property name="geometry">
        <rect>
-        <x>450</x>
+        <x>130</x>
         <y>510</y>
         <width>331</width>
         <height>221</height>
@@ -4262,7 +3698,7 @@ border-radius: 80px;
      <widget class="QFrame" name="frame_14">
       <property name="geometry">
        <rect>
-        <x>1410</x>
+        <x>1090</x>
         <y>700</y>
         <width>151</width>
         <height>111</height>
@@ -4367,7 +3803,7 @@ border-radius: 80px;
      <widget class="QLabel" name="label_35">
       <property name="geometry">
        <rect>
-        <x>1410</x>
+        <x>1090</x>
         <y>670</y>
         <width>151</width>
         <height>31</height>
@@ -4405,7 +3841,7 @@ border-radius: 80px;
      <widget class="QLabel" name="lblOPHeadTemp">
       <property name="geometry">
        <rect>
-        <x>1300</x>
+        <x>980</x>
         <y>580</y>
         <width>101</width>
         <height>17</height>
@@ -4424,7 +3860,7 @@ border-radius: 80px;
      <widget class="QFrame" name="frameOPRedLight">
       <property name="geometry">
        <rect>
-        <x>970</x>
+        <x>650</x>
         <y>20</y>
         <width>41</width>
         <height>41</height>
@@ -4456,7 +3892,7 @@ background-color: palette(base)</string>
      <widget class="QFrame" name="frameOPYellowLight">
       <property name="geometry">
        <rect>
-        <x>970</x>
+        <x>650</x>
         <y>60</y>
         <width>41</width>
         <height>41</height>
@@ -4487,7 +3923,7 @@ background-color: palette(base)</string>
      <widget class="QFrame" name="frameOPGreenLight">
       <property name="geometry">
        <rect>
-        <x>970</x>
+        <x>650</x>
         <y>100</y>
         <width>41</width>
         <height>41</height>
@@ -4518,7 +3954,7 @@ background-color: palette(base)</string>
      <widget class="QLabel" name="label_12">
       <property name="geometry">
        <rect>
-        <x>1230</x>
+        <x>910</x>
         <y>550</y>
         <width>71</width>
         <height>71</height>
@@ -4537,7 +3973,7 @@ background-color: palette(base)</string>
      <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
-        <x>1121</x>
+        <x>800</x>
         <y>700</y>
         <width>105</width>
         <height>27</height>
@@ -4575,7 +4011,7 @@ background-color: palette(base)</string>
      <widget class="Line" name="lineOPMFC1vert">
       <property name="geometry">
        <rect>
-        <x>889</x>
+        <x>569</x>
         <y>80</y>
         <width>2</width>
         <height>456</height>
@@ -4618,7 +4054,7 @@ background-color: palette(base)</string>
      <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
-        <x>1600</x>
+        <x>1280</x>
         <y>550</y>
         <width>235</width>
         <height>27</height>
@@ -4656,8 +4092,8 @@ background-color: palette(base)</string>
      <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
-        <x>1580</x>
-        <y>25</y>
+        <x>1260</x>
+        <y>30</y>
         <width>266</width>
         <height>35</height>
        </rect>
@@ -4712,7 +4148,7 @@ background-color: palette(base)</string>
      <widget class="QTableWidget" name="RecipeParams">
       <property name="geometry">
        <rect>
-        <x>370</x>
+        <x>50</x>
         <y>65</y>
         <width>600</width>
         <height>270</height>
@@ -4886,554 +4322,10 @@ background-color: palette(base)</string>
        </property>
       </item>
      </widget>
-     <widget class="QFrame" name="frame_6">
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>30</y>
-        <width>281</width>
-        <height>821</height>
-       </rect>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Raised</enum>
-      </property>
-      <widget class="QWidget" name="layoutWidget_3">
-       <property name="geometry">
-        <rect>
-         <x>4</x>
-         <y>10</y>
-         <width>269</width>
-         <height>791</height>
-        </rect>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout_13">
-        <item>
-         <widget class="QFrame" name="verticalFrame_3">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>70</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>300</width>
-            <height>70</height>
-           </size>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::Box</enum>
-          </property>
-          <property name="lineWidth">
-           <number>0</number>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_14">
-           <property name="spacing">
-            <number>0</number>
-           </property>
-           <property name="topMargin">
-            <number>1</number>
-           </property>
-           <property name="bottomMargin">
-            <number>1</number>
-           </property>
-           <item>
-            <widget class="QLabel" name="label_10">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>30</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>30</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Century Gothic</family>
-               <italic>false</italic>
-               <bold>true</bold>
-               <underline>false</underline>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true"/>
-             </property>
-             <property name="text">
-              <string>Load Recipe</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QComboBox" name="comboBoxENGRecipe">
-             <property name="editable">
-              <bool>false</bool>
-             </property>
-             <property name="currentText">
-              <string/>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item>
-         <widget class="QFrame" name="frame_9">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>110</height>
-           </size>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::Box</enum>
-          </property>
-          <property name="lineWidth">
-           <number>0</number>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_15">
-           <item>
-            <widget class="QPushButton" name="btnENGChuckVacOnOff">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Century Gothic</family>
-               <bold>true</bold>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">background-color: rgb(133, 2, 2);
-color: rgb(255, 255, 255);</string>
-             </property>
-             <property name="text">
-              <string>Chuck Vacuum On</string>
-             </property>
-             <property name="checkable">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btnENGPinsUpDown">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Century Gothic</family>
-               <bold>true</bold>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">background-color: rgb(133, 2, 2);
-color: rgb(255, 255, 255);</string>
-             </property>
-             <property name="text">
-              <string>Load Pins Up</string>
-             </property>
-             <property name="checkable">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item>
-         <widget class="QFrame" name="frame_15">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>110</height>
-           </size>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::Box</enum>
-          </property>
-          <property name="lineWidth">
-           <number>0</number>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_19"/>
-         </widget>
-        </item>
-        <item>
-         <widget class="QFrame" name="frame_16">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::Box</enum>
-          </property>
-          <property name="lineWidth">
-           <number>0</number>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_20">
-           <item>
-            <widget class="QPushButton" name="btnENGStartPlasma">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Century Gothic</family>
-               <bold>true</bold>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(133, 2, 2);
-
-
-</string>
-             </property>
-             <property name="text">
-              <string>Start Plasma</string>
-             </property>
-             <property name="checkable">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btnENGHome">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Century Gothic</family>
-               <bold>true</bold>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">background-color: rgb(133, 2, 2);
-color: rgb(255, 255, 255);</string>
-             </property>
-             <property name="text">
-              <string>Load</string>
-             </property>
-             <property name="checkable">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btnENGInit">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Century Gothic</family>
-               <bold>true</bold>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">background-color: rgb(133, 2, 2);
-color: rgb(255, 255, 255);</string>
-             </property>
-             <property name="text">
-              <string>Init</string>
-             </property>
-             <property name="checkable">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QFrame" name="frame_17">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>150</height>
-              </size>
-             </property>
-             <property name="frameShape">
-              <enum>QFrame::Box</enum>
-             </property>
-             <property name="frameShadow">
-              <enum>QFrame::Plain</enum>
-             </property>
-             <property name="lineWidth">
-              <number>0</number>
-             </property>
-             <layout class="QVBoxLayout" name="verticalLayout_26"/>
-            </widget>
-           </item>
-           <item>
-            <widget class="QWidget" name="stageStatusWidget_3" native="true">
-             <layout class="QVBoxLayout" name="verticalLayout_27">
-              <property name="spacing">
-               <number>0</number>
-              </property>
-              <property name="leftMargin">
-               <number>1</number>
-              </property>
-              <property name="topMargin">
-               <number>1</number>
-              </property>
-              <property name="rightMargin">
-               <number>1</number>
-              </property>
-              <property name="bottomMargin">
-               <number>1</number>
-              </property>
-              <item>
-               <widget class="QLabel" name="label_57">
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>16777215</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <family>Century Gothic</family>
-                  <italic>false</italic>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true"/>
-                </property>
-                <property name="frameShape">
-                 <enum>QFrame::Box</enum>
-                </property>
-                <property name="lineWidth">
-                 <number>0</number>
-                </property>
-                <property name="text">
-                 <string>Status</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QTextEdit" name="texteditENGTabAxisStatus">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>16777215</width>
-                  <height>150</height>
-                 </size>
-                </property>
-                <property name="readOnly">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
-           <item>
-            <widget class="QFrame" name="frame_12">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="frameShape">
-              <enum>QFrame::StyledPanel</enum>
-             </property>
-             <property name="frameShadow">
-              <enum>QFrame::Raised</enum>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btnENGAcknowledge">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Century Gothic</family>
-               <bold>true</bold>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">background-color: rgb(133, 2, 2);
-color: rgb(255, 255, 255);</string>
-             </property>
-             <property name="text">
-              <string>Acknowledge</string>
-             </property>
-             <property name="checkable">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </widget>
      <widget class="QTableWidget" name="MBCtrl">
       <property name="geometry">
        <rect>
-        <x>990</x>
+        <x>670</x>
         <y>143</y>
         <width>400</width>
         <height>130</height>
@@ -5547,7 +4439,7 @@ color: rgb(255, 255, 255);</string>
      <widget class="QTableWidget" name="tableWidget">
       <property name="geometry">
        <rect>
-        <x>370</x>
+        <x>50</x>
         <y>343</y>
         <width>600</width>
         <height>240</height>
@@ -5557,7 +4449,7 @@ color: rgb(255, 255, 255);</string>
      <widget class="QTableWidget" name="StageParams">
       <property name="geometry">
        <rect>
-        <x>370</x>
+        <x>50</x>
         <y>590</y>
         <width>450</width>
         <height>270</height>
@@ -5660,7 +4552,7 @@ color: rgb(255, 255, 255);</string>
      <widget class="QPushButton" name="StartScan">
       <property name="geometry">
        <rect>
-        <x>850</x>
+        <x>530</x>
         <y>590</y>
         <width>230</width>
         <height>51</height>
@@ -5682,7 +4574,7 @@ color: rgb(255, 255, 255);</string>
      <widget class="QPushButton" name="StopScan">
       <property name="geometry">
        <rect>
-        <x>850</x>
+        <x>530</x>
         <y>650</y>
         <width>230</width>
         <height>51</height>
@@ -5704,7 +4596,7 @@ color: rgb(255, 255, 255);</string>
      <widget class="QPushButton" name="AutoMBCtrl">
       <property name="geometry">
        <rect>
-        <x>990</x>
+        <x>670</x>
         <y>283</y>
         <width>230</width>
         <height>51</height>
@@ -5726,7 +4618,7 @@ color: rgb(255, 255, 255);</string>
      <widget class="QPushButton" name="DecrementMBStartPoint">
       <property name="geometry">
        <rect>
-        <x>1270</x>
+        <x>950</x>
         <y>283</y>
         <width>51</width>
         <height>51</height>
@@ -5748,7 +4640,7 @@ color: rgb(255, 255, 255);</string>
      <widget class="QPushButton" name="IncrementMBStartPoint">
       <property name="geometry">
        <rect>
-        <x>1340</x>
+        <x>1020</x>
         <y>283</y>
         <width>51</width>
         <height>51</height>
@@ -5770,7 +4662,7 @@ color: rgb(255, 255, 255);</string>
      <widget class="QTableWidget" name="MachineStatus">
       <property name="geometry">
        <rect>
-        <x>1450</x>
+        <x>1130</x>
         <y>65</y>
         <width>400</width>
         <height>270</height>
@@ -5872,7 +4764,7 @@ color: rgb(255, 255, 255);</string>
      <widget class="QTableWidget" name="StagePosition">
       <property name="geometry">
        <rect>
-        <x>1450</x>
+        <x>1130</x>
         <y>343</y>
         <width>400</width>
         <height>210</height>
@@ -5961,7 +4853,7 @@ color: rgb(255, 255, 255);</string>
      <widget class="QTableWidget" name="N2PurgeOptions">
       <property name="geometry">
        <rect>
-        <x>990</x>
+        <x>670</x>
         <y>65</y>
         <width>400</width>
         <height>70</height>
@@ -6051,7 +4943,7 @@ color: rgb(255, 255, 255);</string>
      <widget class="QTableWidget" name="MachineConsumption">
       <property name="geometry">
        <rect>
-        <x>1450</x>
+        <x>1130</x>
         <y>561</y>
         <width>400</width>
         <height>150</height>
@@ -6127,7 +5019,7 @@ color: rgb(255, 255, 255);</string>
      <widget class="QPushButton" name="SaveRecipe">
       <property name="geometry">
        <rect>
-        <x>1450</x>
+        <x>1130</x>
         <y>719</y>
         <width>400</width>
         <height>51</height>
@@ -6158,8 +5050,8 @@ color: rgb(255, 255, 255);</string>
      <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
-        <x>1220</x>
-        <y>23</y>
+        <x>1050</x>
+        <y>20</y>
         <width>458</width>
         <height>831</height>
        </rect>
@@ -7549,7 +6441,7 @@ color:gray;
      <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
-        <x>850</x>
+        <x>690</x>
         <y>80</y>
         <width>345</width>
         <height>771</height>
@@ -8010,7 +6902,7 @@ background-color: blue;
      <widget class="QDoubleSpinBox" name="LEDIntensitySpinBox">
       <property name="geometry">
        <rect>
-        <x>860</x>
+        <x>690</x>
         <y>0</y>
         <width>131</width>
         <height>71</height>
@@ -8173,7 +7065,7 @@ QDoubleSpinBox::QLineEdit {
      <widget class="QLabel" name="label_3">
       <property name="geometry">
        <rect>
-        <x>1010</x>
+        <x>830</x>
         <y>30</y>
         <width>181</width>
         <height>17</height>
@@ -8542,6 +7434,576 @@ font: 14pt &quot;Ubuntu Bold&quot;;
       </widget>
      </widget>
     </widget>
+   </widget>
+   <widget class="QStackedWidget" name="stackedWidgetProgCtrl">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>110</y>
+      <width>281</width>
+      <height>821</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <widget class="QWidget" name="stackedWidget_4Page1">
+     <widget class="QWidget" name="layoutWidget_2">
+      <property name="geometry">
+       <rect>
+        <x>4</x>
+        <y>10</y>
+        <width>269</width>
+        <height>791</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_7">
+       <item>
+        <widget class="QFrame" name="verticalFrame_2">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>70</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>300</width>
+           <height>70</height>
+          </size>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="lineWidth">
+          <number>0</number>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_8">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>1</number>
+          </property>
+          <property name="bottomMargin">
+           <number>1</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="label_7">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Century Gothic</family>
+              <italic>false</italic>
+              <bold>true</bold>
+              <underline>false</underline>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="text">
+             <string>Load Recipe</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="comboBoxRecipe">
+            <property name="editable">
+             <bool>false</bool>
+            </property>
+            <property name="currentText">
+             <string/>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QFrame" name="frame_5">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>110</height>
+          </size>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="lineWidth">
+          <number>0</number>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_10">
+          <item>
+           <widget class="QPushButton" name="btnChuckVacOnOff">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Century Gothic</family>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(133, 2, 2);
+color: rgb(255, 255, 255);</string>
+            </property>
+            <property name="text">
+             <string>Chuck Vacuum On</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnPinsUpDown">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Century Gothic</family>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(133, 2, 2);
+color: rgb(255, 255, 255);</string>
+            </property>
+            <property name="text">
+             <string>Load Pins Up</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QFrame" name="frame_10">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>110</height>
+          </size>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="lineWidth">
+          <number>0</number>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_11"/>
+        </widget>
+       </item>
+       <item>
+        <widget class="QFrame" name="frame">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="lineWidth">
+          <number>0</number>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_9">
+          <item>
+           <widget class="QPushButton" name="btnStartPlasma">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Century Gothic</family>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);
+background-color: rgb(133, 2, 2);
+
+
+</string>
+            </property>
+            <property name="text">
+             <string>Start Plasma</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnLoad">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Century Gothic</family>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(133, 2, 2);
+color: rgb(255, 255, 255);</string>
+            </property>
+            <property name="text">
+             <string>Load</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnInit">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Century Gothic</family>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(133, 2, 2);
+color: rgb(255, 255, 255);</string>
+            </property>
+            <property name="text">
+             <string>Init</string>
+            </property>
+            <property name="checkable">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QFrame" name="frame_11">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>150</height>
+             </size>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::Box</enum>
+            </property>
+            <property name="lineWidth">
+             <number>0</number>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_12"/>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="stageStatusWidget_2" native="true">
+            <layout class="QVBoxLayout" name="verticalLayout_25">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <property name="leftMargin">
+              <number>1</number>
+             </property>
+             <property name="topMargin">
+              <number>1</number>
+             </property>
+             <property name="rightMargin">
+              <number>1</number>
+             </property>
+             <property name="bottomMargin">
+              <number>1</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="label_56">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <family>Century Gothic</family>
+                 <italic>false</italic>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true"/>
+               </property>
+               <property name="frameShape">
+                <enum>QFrame::Box</enum>
+               </property>
+               <property name="lineWidth">
+                <number>0</number>
+               </property>
+               <property name="text">
+                <string>Status</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QTextEdit" name="texteditTabAxisStatus">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>150</height>
+                </size>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+               <property name="overwriteMode">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QFrame" name="frameacknowledgeButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>150</height>
+             </size>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::Box</enum>
+            </property>
+            <property name="lineWidth">
+             <number>0</number>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_16">
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnAcknowledge">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Century Gothic</family>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(133, 2, 2);
+color: rgb(255, 255, 255);</string>
+            </property>
+            <property name="text">
+             <string>Acknowledge</string>
+            </property>
+            <property name="checkable">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="page"/>
    </widget>
   </widget>
   <widget class="QStatusBar" name="statusBar">

@@ -27,21 +27,25 @@ OperatorTab::OperatorTab(Ui::MainWindow* ui, PlasmaController &controller, MainW
     m_numMFCs(6),
     m_currentReflectedWatts(0)
 {
-    populateRecipeComboBox();
+    // populateRecipeComboBox();
 
-    connect(m_pUI->btnOPChuckVacOnOff, &QPushButton::clicked, this, &OperatorTab::btnChuckVacOnOff_clicked);
-    connect(m_pUI->btnOPPinsUpDown, &QPushButton::clicked, this, &OperatorTab::btnOPPinsUpDown_clicked);
-    connect(m_pUI->btnOPStartPlasma, &QPushButton::clicked, this, &OperatorTab::btnOPStartPlasma_clicked);
-    connect(m_pUI->btnOPLoad, &QPushButton::clicked, this, &OperatorTab::btnOPLoad_clicked);
-    connect(m_pUI->btnOPInit, &QPushButton::clicked, this, &OperatorTab::btnOPInit_clicked);
-    connect(m_pUI->comboBoxOPRecipe, &QComboBox::currentTextChanged, this, &OperatorTab::comboBoxOPRecipe_currentTextChanged);
     connect(m_pUI->comboBoxOPLogin, &QComboBox::currentTextChanged, this, &OperatorTab::comboBoxOPLogin_currentTextChanged);
-    connect(m_pUI->btnOPAcknowledge, &QPushButton::clicked, this, &OperatorTab::btnOPAcknowledged_clicked);
 
+    // previous operatortab connections for program control
+    /*
+    connect(m_pUI->btnChuckVacOnOff, &QPushButton::clicked, this, &OperatorTab::btnChuckVacOnOff_clicked);
+    connect(m_pUI->btnPinsUpDown, &QPushButton::clicked, this, &OperatorTab::btnOPPinsUpDown_clicked);
+    connect(m_pUI->btnStartPlasma, &QPushButton::clicked, this, &OperatorTab::btnOPStartPlasma_clicked);
+    connect(m_pUI->btnLoad, &QPushButton::clicked, this, &OperatorTab::btnOPLoad_clicked);
+    connect(m_pUI->btnInit, &QPushButton::clicked, this, &OperatorTab::btnOPInit_clicked);
+    connect(m_pUI->comboBoxRecipe, &QComboBox::currentTextChanged, this, &OperatorTab::comboBoxOPRecipe_currentTextChanged);
+
+    connect(m_pUI->btnAcknowledge, &QPushButton::clicked, this, &OperatorTab::btnOPAcknowledged_clicked);
+    */
     connectMFCFlowBars();
 
     // hide the ack button until there is an abort condition
-    m_pUI->btnOPAcknowledge->hide();
+    // m_pUI->btnAcknowledge->hide();
 
     // default to 6 mfc's
     m_pUI->stackedWidgetMFC->setCurrentIndex(MFC6_STACKED_WIDGET_PAGE);
@@ -53,10 +57,10 @@ OperatorTab::~OperatorTab()
     m_pUI = nullptr;
     m_pMWndw = nullptr;
 }
-
+/*
 void OperatorTab::populateRecipeComboBox()
 {
-    m_pUI->comboBoxOPRecipe->clear();
+    m_pUI->comboBoxRecipe->clear();
 
     QDir directory(RECIPE_DIRECTORY);
 
@@ -64,13 +68,13 @@ void OperatorTab::populateRecipeComboBox()
 
     foreach (const QFileInfo& fileInfo, fileInfoList) {
         // Add each file name to the list widget
-        m_pUI->comboBoxOPRecipe->addItem(fileInfo.fileName());
+        m_pUI->comboBoxRecipe->addItem(fileInfo.fileName());
     }
 
-    m_pUI->comboBoxOPRecipe->setPlaceholderText(QStringLiteral(""));
-    m_pUI->comboBoxOPRecipe->setCurrentIndex(-1);
+    m_pUI->comboBoxRecipe->setPlaceholderText(QStringLiteral(""));
+    m_pUI->comboBoxRecipe->setCurrentIndex(-1);
 }
-
+*/
 void OperatorTab::connectMFCFlowBars()
 {
     for (int i = 0; i < m_controller.getMFCs().size(); ++i) {
@@ -203,23 +207,23 @@ void OperatorTab::mfcFlowLinesOn_6MFC(int mfcNum, bool on)
         m_pUI->lblOPMFC6_6MFC->setStyleSheet(textColor);
     }
 }
-
+/*
 void OperatorTab::displayAbortMessage(QString smsg)
 {
-    m_pUI->texteditOPTabAxisStatus->setTextColor(QColor(133, 2, 2));
-    m_pUI->texteditOPTabAxisStatus->setText(smsg);
-    m_pUI->btnOPAcknowledge->show();
+    m_pUI->texteditTabAxisStatus->setTextColor(QColor(133, 2, 2));
+    m_pUI->texteditTabAxisStatus->setText(smsg);
+    m_pUI->btnAcknowledge->show();
 
     // disable user interaction. Reenabled when acknowledged
-    m_pUI->btnOPChuckVacOnOff->setEnabled(false);
-    m_pUI->btnOPPinsUpDown->setEnabled(false);
-    m_pUI->comboBoxOPRecipe->setEnabled(false);
-    m_pUI->btnOPStartPlasma->setEnabled(false);
-    m_pUI->btnOPLoad->setEnabled(false);
-    m_pUI->btnOPInit->setEnabled(false);
+    m_pUI->btnChuckVacOnOff->setEnabled(false);
+    m_pUI->btnPinsUpDown->setEnabled(false);
+    m_pUI->comboBoxRecipe->setEnabled(false);
+    m_pUI->btnStartPlasma->setEnabled(false);
+    m_pUI->btnLoad->setEnabled(false);
+    m_pUI->btnInit->setEnabled(false);
 }
 
-
+*/
 //////////////// SLOTS //////////////////////////
 
 void OperatorTab::doorStateChanged(bool state)
@@ -629,119 +633,123 @@ void OperatorTab::updateActualFlow_6MFC(const int mfcNumber, const double actual
     QString gasFlowStatus = (mfcFlowStatusOK == true) ? "OK" : "";
     m_pUI->lblOPGasFlowStatus->setText(gasFlowStatus);
 }
-
+/*
 void OperatorTab::stageStatusUpdate(QString statusNow, QString statusNext)
 {
-    m_pUI->texteditOPTabAxisStatus->setText(statusNow);
+    m_pUI->texteditTabAxisStatus->setText(statusNow);
 }
-
+*/
 // false = down
 // true = up
+
 void OperatorTab::pinsStateChanged(bool state)
 {
     if (state) {
-        m_pUI->btnOPPinsUpDown->setText("Load Pins Up");
         m_pUI->lblOPPinsState->setText("Down");
+        // m_pUI->btnPinsUpDown->setText("Load Pins Up");
     }
     else {
-        m_pUI->btnOPPinsUpDown->setText("Load Pins Down");
         m_pUI->lblOPPinsState->setText("Up");
+        // m_pUI->btnPinsUpDown->setText("Load Pins Down");
+
     }
 }
 
 void OperatorTab::vacStateChanged(bool state)
 {
     if (state) {
-        m_pUI->btnOPChuckVacOnOff->setText("Chuck Vacuum Off");
         m_pUI->lblOPChuckVacState->setText("On");
+        // m_pUI->btnChuckVacOnOff->setText("Chuck Vacuum Off");
     }
     else {
-        m_pUI->btnOPChuckVacOnOff->setText("Chuck Vacuum On");
         m_pUI->lblOPChuckVacState->setText("Off");
+        // m_pUI->btnChuckVacOnOff->setText("Chuck Vacuum On");
     }
 }
-
+/*
 // home state machine
 void OperatorTab::HSM_Startup()
 {
-    m_pUI->btnOPLoad->setText("Stop");
+    m_pUI->btnLoad->setText("Stop");
 
-    m_pUI->btnOPInit->setEnabled(false);
-    m_pUI->btnOPPinsUpDown->setEnabled(false);
-    m_pUI->btnOPChuckVacOnOff->setEnabled(false);
-    m_pUI->btnOPStartPlasma->setEnabled(false);
+    m_pUI->btnInit->setEnabled(false);
+    m_pUI->btnPinsUpDown->setEnabled(false);
+    m_pUI->btnChuckVacOnOff->setEnabled(false);
+    m_pUI->btnStartPlasma->setEnabled(false);
 }
-
+*/
 void OperatorTab::HSM_Done()
 {
-    m_pUI->btnOPLoad->setText("Load");
+    /*
+    m_pUI->btnLoad->setText("Load");
 
-    m_pUI->btnOPLoad->setChecked(false);
-    m_pUI->btnOPInit->setEnabled(true);
-    m_pUI->btnOPPinsUpDown->setEnabled(true);
-    m_pUI->btnOPChuckVacOnOff->setEnabled(true);
-    m_pUI->btnOPStartPlasma->setEnabled(true);
-    m_pUI->btnOPPinsUpDown->setText("Load Pins Up");
+    m_pUI->btnLoad->setChecked(false);
+    m_pUI->btnInit->setEnabled(true);
+    m_pUI->btnPinsUpDown->setEnabled(true);
+    m_pUI->btnChuckVacOnOff->setEnabled(true);
+    m_pUI->btnStartPlasma->setEnabled(true);
+    m_pUI->btnPinsUpDown->setText("Load Pins Up");
+    */
     m_pUI->lblOPPinsState->setText("Down");
 }
-
+/*
 // init state machine
 void OperatorTab::ISM_Startup()
 {
-    m_pUI->btnOPInit->setEnabled(false);
-    m_pUI->btnOPPinsUpDown->setEnabled(false);
-    m_pUI->btnOPChuckVacOnOff->setEnabled(false);
-    m_pUI->btnOPStartPlasma->setEnabled(false);
-    m_pUI->btnOPLoad->setEnabled(false);
+    m_pUI->btnInit->setEnabled(false);
+    m_pUI->btnPinsUpDown->setEnabled(false);
+    m_pUI->btnChuckVacOnOff->setEnabled(false);
+    m_pUI->btnStartPlasma->setEnabled(false);
+    m_pUI->btnLoad->setEnabled(false);
 }
-
+*/
 void OperatorTab::ISM_Done()
 {
-    m_pUI->btnOPInit->setEnabled(true);
-    m_pUI->btnOPPinsUpDown->setEnabled(true);
-    m_pUI->btnOPChuckVacOnOff->setEnabled(true);
-    m_pUI->btnOPStartPlasma->setEnabled(true);
-    m_pUI->btnOPLoad->setEnabled(true);
-    m_pUI->btnOPPinsUpDown->setText("Load Pins Down");
+    /*
+    m_pUI->btnInit->setEnabled(true);
+    m_pUI->btnPinsUpDown->setEnabled(true);
+    m_pUI->btnChuckVacOnOff->setEnabled(true);
+    m_pUI->btnStartPlasma->setEnabled(true);
+    m_pUI->btnLoad->setEnabled(true);
+    m_pUI->btnPinsUpDown->setText("Load Pins Down");
+    */
     m_pUI->lblOPPinsState->setText("Up");
 }
 
+/*
 // collision state machine
 void OperatorTab::CSM_StatusUpdate(QString status, QString next)
 {
-    m_pUI->texteditOPTabAxisStatus->setText(status);
+    m_pUI->texteditTabAxisStatus->setText(status);
 }
+*/
 
 // scan state machine
 void OperatorTab::SSM_Started()
 {
-    m_pUI->btnOPInit->setEnabled(false);
-    m_pUI->btnOPLoad->setEnabled(false);
-    m_pUI->btnOPPinsUpDown->setEnabled(false);
-    m_pUI->btnOPChuckVacOnOff->setEnabled(false);
-
+    /*
+    m_pUI->btnInit->setEnabled(false);
+    m_pUI->btnLoad->setEnabled(false);
+    m_pUI->btnPinsUpDown->setEnabled(false);
+    m_pUI->btnChuckVacOnOff->setEnabled(false);
+    */
     m_pUI->lblOPScanningStatus->setText("OK");
     m_pUI->lblOPProcessStatus->setText("Running");
 }
-
+/*
 void OperatorTab::SSM_Done()
 {
-    // update status
-    m_pUI->texteditOPTabAxisStatus->setText("Scanning Completed");
-    m_pUI->lblOPScanningStatus->setText("");
-    m_pUI->lblOPProcessStatus->setText("Done");
-
-    m_pUI->btnOPInit->setEnabled(true);
-    m_pUI->btnOPLoad->setEnabled(true);
-    m_pUI->btnOPPinsUpDown->setEnabled(true);
-    m_pUI->btnOPChuckVacOnOff->setEnabled(true);
+    m_pUI->btnInit->setEnabled(true);
+    m_pUI->btnLoad->setEnabled(true);
+    m_pUI->btnPinsUpDown->setEnabled(true);
+    m_pUI->btnChuckVacOnOff->setEnabled(true);
 }
 
 void OperatorTab::SSM_StatusUpdate(QString status, QString next)
 {
-    m_pUI->texteditOPTabAxisStatus->setText(status);
+    m_pUI->texteditTabAxisStatus->setText(status);
 }
-
+*/
 void OperatorTab::forwardWattsChanged(int watts)
 {
     m_pUI->lblOPRFPowerForward->setText(QString::number(watts));
@@ -780,13 +788,10 @@ void OperatorTab::plasmaStateChanged(bool plasmaActive)
     m_plasmaActive = plasmaActive;
 
     if (plasmaActive) {
-        m_pUI->btnOPStartPlasma->setText("Plasma Off");
         m_pUI->frameOPPlasmaPlume->setStyleSheet("background-color: rgb(246, 77, 241);");
         //m_pUI->lblOPPlasma->setStyleSheet("color: rgb(246, 77, 241);");
     }
     else {
-        m_pUI->btnOPStartPlasma->setChecked(false);
-        m_pUI->btnOPStartPlasma->setText("Start Plasma");
         m_pUI->frameOPPlasmaPlume->setStyleSheet("background-color: rgb(52, 101, 164)");
         //m_pUI->lblOPPlasma->setStyleSheet("color: rgb(255, 255, 255);");
     }
@@ -802,7 +807,7 @@ void OperatorTab::gapChanged()
     m_pUI->lblOPGap->setText(m_controller.getRecipe()->getGapQStr());
 }
 
-
+/*
 //////////////////////// Buttons ////////////////////
 void OperatorTab::btnChuckVacOnOff_clicked(bool checked)
 {
@@ -831,10 +836,10 @@ void OperatorTab::btnOPStartPlasma_clicked(bool checked)
     if (!checked) {
         m_controller.StopScan();
         m_controller.RunRecipe(false); // turn off recipe execution
-        m_pUI->btnOPStartPlasma->setText("Start Plasma");
+        m_pUI->btnStartPlasma->setText("Start Plasma");
     }
     else {
-        m_pUI->btnOPStartPlasma->setText("Plasma Off");
+        m_pUI->btnStartPlasma->setText("Plasma Off");
 
         if (m_controller.getCollision() && m_controller.getRecipe()->getAutoScanBool() && !m_controller.getPlasmaActive()) {
             m_controller.plannedAutoStartOn();//this will make sure we dont accidently start plasma when just clicking RUN SCAN button
@@ -852,7 +857,7 @@ void OperatorTab::btnOPLoad_clicked(bool checked)
         m_controller.getAxesController().StartHome();
     }
     else {
-        m_pUI->btnOPLoad->setChecked(false);
+        m_pUI->btnLoad->setChecked(false);
         m_controller.getAxesController().StopHome();
     }
 }
@@ -873,29 +878,32 @@ void OperatorTab::comboBoxOPRecipe_currentTextChanged(const QString &arg1)
     this->m_pMWndw->OpenRecipeFileSelected(fullPathToRecipeFile);
 }
 
+
+
+void OperatorTab::btnOPAcknowledged_clicked()
+{
+    m_pUI->btnAcknowledge->hide();
+    m_pUI->texteditTabAxisStatus->setTextColor(QColor(0, 0, 0));
+    m_pUI->texteditTabAxisStatus->clear();
+
+    m_controller.abortAcknowledged();
+
+    // reenable
+    m_pUI->btnChuckVacOnOff->setEnabled(true);
+    m_pUI->btnPinsUpDown->setEnabled(true);
+    m_pUI->comboBoxRecipe->setEnabled(true);
+    m_pUI->btnStartPlasma->setEnabled(true);
+    m_pUI->btnLoad->setEnabled(true);
+    m_pUI->btnInit->setEnabled(true);
+}
+*/
+
 void OperatorTab::comboBoxOPLogin_currentTextChanged(const QString &arg1)
 {
     if (arg1 == "Engineer")
         this->m_pMWndw->engineerModeSelected();
     else if (arg1 == "Operator")
         this->m_pMWndw->setUIOperatorMode();
-}
-
-void OperatorTab::btnOPAcknowledged_clicked()
-{
-    m_pUI->btnOPAcknowledge->hide();
-    m_pUI->texteditOPTabAxisStatus->setTextColor(QColor(0, 0, 0));
-    m_pUI->texteditOPTabAxisStatus->clear();
-
-    m_controller.abortAcknowledged();
-
-    // reenable
-    m_pUI->btnOPChuckVacOnOff->setEnabled(true);
-    m_pUI->btnOPPinsUpDown->setEnabled(true);
-    m_pUI->comboBoxOPRecipe->setEnabled(true);
-    m_pUI->btnOPStartPlasma->setEnabled(true);
-    m_pUI->btnOPLoad->setEnabled(true);
-    m_pUI->btnOPInit->setEnabled(true);
 }
 
 static bool on = false;

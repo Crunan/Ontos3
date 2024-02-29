@@ -13,7 +13,7 @@ EngineerTab::EngineerTab(Ui::MainWindow* ui, PlasmaController &controller, MainW
     m_controller(controller)
 {
     // hide the ack button until there is an abort condition
-    m_pUI->btnENGAcknowledge->hide();
+    // m_pUI->btnENGAcknowledge->hide();
 }
 
 EngineerTab::~EngineerTab()
