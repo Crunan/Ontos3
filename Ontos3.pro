@@ -1,6 +1,6 @@
 QT += core gui widgets serialport statemachine
 
-VERSION = 01.00.14
+VERSION = 01.00.17
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
 greaterThan(QT_MAJOR_VERSION, 4)
@@ -19,6 +19,7 @@ LIBS += -L/usr/lib/x86_64-linux-gnu -lSDL2 -ldl -lpthread
 INCLUDES += /usr/include/SDL2
 
 SOURCES += \
+    src/tab.cpp \
     src/engineertab.cpp \
     src/gamepadcontroller.cpp \
     src/UtilitiesAndConstants.cpp \
@@ -48,6 +49,7 @@ SOURCES += \
 
 
 HEADERS += \
+    src/tab.h \
     src/engineertab.h \
     src/gamepadcontroller.h \
     src/UtilitiesAndConstants.h \

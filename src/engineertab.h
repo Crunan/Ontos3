@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QTableWidgetItem>
+#include "configuration.h"
 
 namespace Ui {
 class MainWindow;
@@ -12,6 +13,7 @@ QT_END_NAMESPACE
 
 class PlasmaController;
 class MainWindow;
+class QInputDialog;
 
 class EngineerTab : public QObject {
 
@@ -20,19 +22,19 @@ public:
     ~EngineerTab();
 
 public slots:
-    // Recipe parameters changed
     void on_RecipeParams_itemChanged(QTableWidgetItem *item);
-    // Matchbox control start point changed
     void on_MBCtrl_itemChanged(QTableWidgetItem *item);
-    // Stage parameters changed
     void on_StageParams_itemChanged(QTableWidgetItem *item);
-    // Start Scan clicked
     void on_StartScan_clicked();
-    // Stop Scan clicked
     void on_StopScan_clicked();
-    // Auto Match Box Control toggled
     void on_AutoMBCtrl_toggled(bool checked);
+    void Recipe_MFCSetpointAccepted();
+    void updateRecipeFlow(const int mfcNumber, const double recipeFlow);
+    void recipeWattsChanged(int watts);
 
+    void stageParams_cellClicked(int row, int column);
+    void recipeParams_cellClicked(int row, int column);
+    void recipeParams_itemClicked(QTableWidgetItem *item);
 
 private slots:
     void btnChuckVacOnOff_clicked(bool checked);
@@ -43,12 +45,28 @@ private slots:
     void btnENInit_clicked();
     void comboBoxENRecipe_currentTextChanged(const QString &arg1);
     void comboBoxENLogin_currentTextChanged(const QString &arg1);
+    void tablewidgetRecipeParams_cellEntered(int row, int column);
+    void tablewidgetRecipeParams_cellChanged(int row, int column);
 
 private:
+    void MFCRecipeValueChange(int mfcNumber);
+    void connectMFCRecipeFlow();
+
+    void setMFCLabels();
+
+    // updates MFC UI components
+    void updateActualFlow_4MFC(const int mfcNumber, const double actualFlow);
+    void updateActualFlow_6MFC(const int mfcNumber, const double actualFlow);
+
     Ui::MainWindow* m_pUI;
     MainWindow* m_pMWndw;
 
     PlasmaController &m_controller;
+
+    QInputDialog *m_pRecipeInputDialog;
+
+    int m_numMFCs;
+    Configuration m_config;
 };
 
 #endif // ENGINEERTAB_H

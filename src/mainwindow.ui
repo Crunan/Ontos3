@@ -102,7 +102,7 @@ QProgressBar::Chunk
      <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <property name="iconSize">
      <size>
@@ -267,9 +267,9 @@ QProgressBar::Chunk
      <widget class="QStackedWidget" name="stackedWidgetMFC">
       <property name="geometry">
        <rect>
-        <x>51</x>
+        <x>21</x>
         <y>30</y>
-        <width>521</width>
+        <width>551</width>
         <height>440</height>
        </rect>
       </property>
@@ -283,9 +283,9 @@ QProgressBar::Chunk
        <widget class="Line" name="lineOPMFC2pre_6MFC">
         <property name="geometry">
          <rect>
-          <x>131</x>
+          <x>190</x>
           <y>122</y>
-          <width>130</width>
+          <width>101</width>
           <height>2</height>
          </rect>
         </property>
@@ -317,7 +317,7 @@ QProgressBar::Chunk
        <widget class="QFrame" name="frameMFC2_6MFC">
         <property name="geometry">
          <rect>
-          <x>261</x>
+          <x>291</x>
           <y>102</y>
           <width>129</width>
           <height>43</height>
@@ -391,9 +391,9 @@ QProgressBar::Chunk
        <widget class="Line" name="lineOPMFC1pre_6MFC">
         <property name="geometry">
          <rect>
-          <x>131</x>
+          <x>190</x>
           <y>50</y>
-          <width>130</width>
+          <width>101</width>
           <height>2</height>
          </rect>
         </property>
@@ -428,7 +428,7 @@ QProgressBar::Chunk
        <widget class="Line" name="lineOPMFC2post_6MFC">
         <property name="geometry">
          <rect>
-          <x>390</x>
+          <x>420</x>
           <y>122</y>
           <width>130</width>
           <height>2</height>
@@ -465,7 +465,7 @@ QProgressBar::Chunk
        <widget class="QFrame" name="frameMFC6_6MFC">
         <property name="geometry">
          <rect>
-          <x>261</x>
+          <x>291</x>
           <y>392</y>
           <width>129</width>
           <height>43</height>
@@ -536,14 +536,14 @@ QProgressBar::Chunk
        <widget class="QLabel" name="lblOPMFC6ActualFlow_6MFC">
         <property name="geometry">
          <rect>
-          <x>261</x>
+          <x>291</x>
           <y>363</y>
-          <width>129</width>
+          <width>125</width>
           <height>29</height>
          </rect>
         </property>
         <property name="text">
-         <string>0%</string>
+         <string>0.0 SLPM</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -552,7 +552,7 @@ QProgressBar::Chunk
        <widget class="QProgressBar" name="progressBarOPMFC6_6MFC">
         <property name="geometry">
          <rect>
-          <x>1</x>
+          <x>60</x>
           <y>391</y>
           <width>130</width>
           <height>43</height>
@@ -597,20 +597,20 @@ QProgressBar::Chunk
          <enum>QProgressBar::TopToBottom</enum>
         </property>
         <property name="format">
-         <string>%v%</string>
+         <string/>
         </property>
        </widget>
        <widget class="QLabel" name="lblOPMFC3ActualFlow_6MFC">
         <property name="geometry">
          <rect>
-          <x>261</x>
+          <x>291</x>
           <y>145</y>
-          <width>129</width>
+          <width>125</width>
           <height>29</height>
          </rect>
         </property>
         <property name="text">
-         <string>0%</string>
+         <string>0.0 SLPM</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -619,9 +619,9 @@ QProgressBar::Chunk
        <widget class="Line" name="lineOPMFC6pre_6MFC">
         <property name="geometry">
          <rect>
-          <x>131</x>
+          <x>190</x>
           <y>411</y>
-          <width>130</width>
+          <width>101</width>
           <height>3</height>
          </rect>
         </property>
@@ -641,7 +641,7 @@ QProgressBar::Chunk
        <widget class="QFrame" name="frameMFC1_6MFC">
         <property name="geometry">
          <rect>
-          <x>261</x>
+          <x>291</x>
           <y>30</y>
           <width>129</width>
           <height>43</height>
@@ -715,7 +715,7 @@ QProgressBar::Chunk
        <widget class="QFrame" name="frameMFC5_6MFC">
         <property name="geometry">
          <rect>
-          <x>261</x>
+          <x>291</x>
           <y>319</y>
           <width>129</width>
           <height>43</height>
@@ -786,7 +786,7 @@ QProgressBar::Chunk
        <widget class="QFrame" name="frameMFC3_6MFC">
         <property name="geometry">
          <rect>
-          <x>261</x>
+          <x>291</x>
           <y>174</y>
           <width>129</width>
           <height>43</height>
@@ -857,14 +857,14 @@ QProgressBar::Chunk
        <widget class="QLabel" name="lblOPMFC1ActualFlow_6MFC">
         <property name="geometry">
          <rect>
-          <x>261</x>
+          <x>291</x>
           <y>1</y>
-          <width>129</width>
+          <width>125</width>
           <height>29</height>
          </rect>
         </property>
         <property name="text">
-         <string>0%</string>
+         <string>0.0 SLPM</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -873,9 +873,9 @@ QProgressBar::Chunk
        <widget class="Line" name="lineOPMFC3pre_6MFC">
         <property name="geometry">
          <rect>
-          <x>131</x>
+          <x>190</x>
           <y>194</y>
-          <width>130</width>
+          <width>101</width>
           <height>3</height>
          </rect>
         </property>
@@ -895,14 +895,14 @@ QProgressBar::Chunk
        <widget class="QLabel" name="lblOPMFC2ActualFlow_6MFC">
         <property name="geometry">
          <rect>
-          <x>261</x>
+          <x>291</x>
           <y>73</y>
-          <width>129</width>
+          <width>125</width>
           <height>29</height>
          </rect>
         </property>
         <property name="text">
-         <string>0%</string>
+         <string>0.0 SLPM</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -911,7 +911,7 @@ QProgressBar::Chunk
        <widget class="QProgressBar" name="progressBarOPMFC1_6MFC">
         <property name="geometry">
          <rect>
-          <x>1</x>
+          <x>60</x>
           <y>30</y>
           <width>130</width>
           <height>43</height>
@@ -955,13 +955,13 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
         <property name="format">
-         <string>%v%</string>
+         <string/>
         </property>
        </widget>
        <widget class="QProgressBar" name="progressBarOPMFC2_6MFC">
         <property name="geometry">
          <rect>
-          <x>1</x>
+          <x>60</x>
           <y>102</y>
           <width>130</width>
           <height>43</height>
@@ -996,6 +996,9 @@ QProgressBar::Chunk
      background-color: rgb(52, 101, 164);
  }</string>
         </property>
+        <property name="maximum">
+         <number>100</number>
+        </property>
         <property name="value">
          <number>0</number>
         </property>
@@ -1003,13 +1006,13 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
         <property name="format">
-         <string>%v%</string>
+         <string/>
         </property>
        </widget>
        <widget class="QProgressBar" name="progressBarOPMFC5_6MFC">
         <property name="geometry">
          <rect>
-          <x>1</x>
+          <x>60</x>
           <y>319</y>
           <width>130</width>
           <height>43</height>
@@ -1051,13 +1054,13 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
         <property name="format">
-         <string>%v%</string>
+         <string/>
         </property>
        </widget>
        <widget class="Line" name="lineOPMFC3post_6MFC">
         <property name="geometry">
          <rect>
-          <x>390</x>
+          <x>420</x>
           <y>194</y>
           <width>130</width>
           <height>3</height>
@@ -1079,7 +1082,7 @@ QProgressBar::Chunk
        <widget class="Line" name="lineOPMFC1post_6MFC">
         <property name="geometry">
          <rect>
-          <x>390</x>
+          <x>420</x>
           <y>50</y>
           <width>130</width>
           <height>2</height>
@@ -1122,7 +1125,7 @@ QProgressBar::Chunk
        <widget class="QProgressBar" name="progressBarOPMFC4_6MFC">
         <property name="geometry">
          <rect>
-          <x>1</x>
+          <x>60</x>
           <y>247</y>
           <width>130</width>
           <height>43</height>
@@ -1164,13 +1167,13 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
         <property name="format">
-         <string>%v%</string>
+         <string/>
         </property>
        </widget>
        <widget class="Line" name="lineOPMFC4post_6MFC">
         <property name="geometry">
          <rect>
-          <x>390</x>
+          <x>420</x>
           <y>267</y>
           <width>130</width>
           <height>3</height>
@@ -1192,9 +1195,9 @@ QProgressBar::Chunk
        <widget class="Line" name="lineOPMFC5pre_6MFC">
         <property name="geometry">
          <rect>
-          <x>131</x>
+          <x>190</x>
           <y>339</y>
-          <width>130</width>
+          <width>101</width>
           <height>3</height>
          </rect>
         </property>
@@ -1214,14 +1217,14 @@ QProgressBar::Chunk
        <widget class="QLabel" name="lblOPMFC5ActualFlow_6MFC">
         <property name="geometry">
          <rect>
-          <x>261</x>
+          <x>291</x>
           <y>290</y>
-          <width>129</width>
+          <width>125</width>
           <height>29</height>
          </rect>
         </property>
         <property name="text">
-         <string>0%</string>
+         <string>0.0 SLPM</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -1230,14 +1233,14 @@ QProgressBar::Chunk
        <widget class="QLabel" name="lblOPMFC4ActualFlow_6MFC">
         <property name="geometry">
          <rect>
-          <x>261</x>
+          <x>291</x>
           <y>217</y>
-          <width>129</width>
+          <width>125</width>
           <height>29</height>
          </rect>
         </property>
         <property name="text">
-         <string>0%</string>
+         <string>0.0 SLPM</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -1246,9 +1249,9 @@ QProgressBar::Chunk
        <widget class="Line" name="lineOPMFC4pre_6MFC">
         <property name="geometry">
          <rect>
-          <x>131</x>
+          <x>190</x>
           <y>267</y>
-          <width>130</width>
+          <width>101</width>
           <height>3</height>
          </rect>
         </property>
@@ -1268,7 +1271,7 @@ QProgressBar::Chunk
        <widget class="QProgressBar" name="progressBarOPMFC3_6MFC">
         <property name="geometry">
          <rect>
-          <x>1</x>
+          <x>60</x>
           <y>174</y>
           <width>130</width>
           <height>43</height>
@@ -1310,13 +1313,13 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
         <property name="format">
-         <string>%v%</string>
+         <string/>
         </property>
        </widget>
        <widget class="Line" name="lineOPMFC5post_6MFC">
         <property name="geometry">
          <rect>
-          <x>390</x>
+          <x>420</x>
           <y>339</y>
           <width>130</width>
           <height>3</height>
@@ -1338,7 +1341,7 @@ QProgressBar::Chunk
        <widget class="Line" name="lineOPMFC6post_6MFC">
         <property name="geometry">
          <rect>
-          <x>390</x>
+          <x>420</x>
           <y>412</y>
           <width>130</width>
           <height>3</height>
@@ -1360,7 +1363,7 @@ QProgressBar::Chunk
        <widget class="QFrame" name="frameMFC4_6MFC">
         <property name="geometry">
          <rect>
-          <x>261</x>
+          <x>291</x>
           <y>247</y>
           <width>129</width>
           <height>43</height>
@@ -1427,6 +1430,237 @@ QProgressBar::Chunk
           <set>Qt::AlignCenter</set>
          </property>
         </widget>
+       </widget>
+       <widget class="QLabel" name="lblOPGasTypeMFC1_6MFC">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>40</y>
+          <width>41</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Century Gothic</family>
+          <pointsize>11</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="scaledContents">
+         <bool>false</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblOPGasTypeMFC2_6MFC">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>112</y>
+          <width>41</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Century Gothic</family>
+          <pointsize>11</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblOPGasTypeMFC3_6MFC">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>184</y>
+          <width>41</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Century Gothic</family>
+          <pointsize>11</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblOPGasTypeMFC4_6MFC">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>257</y>
+          <width>41</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Century Gothic</family>
+          <pointsize>11</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblOPGasTypeMFC5_6MFC">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>329</y>
+          <width>41</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Century Gothic</family>
+          <pointsize>11</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblOPGasTypeMFC6_6MFC">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>401</y>
+          <width>41</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Century Gothic</family>
+          <pointsize>11</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblOPMFC1RecipeFlow_6MFC">
+        <property name="geometry">
+         <rect>
+          <x>89</x>
+          <y>43</y>
+          <width>67</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>SLPM</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblOPMFC2RecipeFlow_6MFC">
+        <property name="geometry">
+         <rect>
+          <x>89</x>
+          <y>115</y>
+          <width>67</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>SLPM</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblOPMFC3RecipeFlow_6MFC">
+        <property name="geometry">
+         <rect>
+          <x>89</x>
+          <y>188</y>
+          <width>67</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>SLPM</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblOPMFC4RecipeFlow_6MFC">
+        <property name="geometry">
+         <rect>
+          <x>89</x>
+          <y>261</y>
+          <width>67</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>SLPM</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblOPMFC5RecipeFlow_6MFC">
+        <property name="geometry">
+         <rect>
+          <x>89</x>
+          <y>333</y>
+          <width>67</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>SLPM</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblOPMFC6RecipeFlow_6MFC">
+        <property name="geometry">
+         <rect>
+          <x>89</x>
+          <y>405</y>
+          <width>67</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>SLPM</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
        </widget>
       </widget>
       <widget class="QWidget" name="stackedWidget5MFCPage">
@@ -2384,7 +2618,7 @@ QProgressBar::Chunk
        <widget class="Line" name="lineOPMFC1post_4MFC">
         <property name="geometry">
          <rect>
-          <x>390</x>
+          <x>420</x>
           <y>50</y>
           <width>130</width>
           <height>3</height>
@@ -2415,9 +2649,9 @@ QProgressBar::Chunk
        <widget class="Line" name="lineOPMFC4pre_4MFC">
         <property name="geometry">
          <rect>
-          <x>131</x>
+          <x>190</x>
           <y>267</y>
-          <width>130</width>
+          <width>101</width>
           <height>3</height>
          </rect>
         </property>
@@ -2437,7 +2671,7 @@ QProgressBar::Chunk
        <widget class="QProgressBar" name="progressBarOPMFC4_4MFC">
         <property name="geometry">
          <rect>
-          <x>1</x>
+          <x>60</x>
           <y>247</y>
           <width>130</width>
           <height>43</height>
@@ -2479,45 +2713,45 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
         <property name="format">
-         <string>%v%</string>
+         <string/>
         </property>
        </widget>
        <widget class="QLabel" name="lblOPMFC1ActualFlow_4MFC">
         <property name="geometry">
          <rect>
-          <x>261</x>
+          <x>291</x>
           <y>1</y>
-          <width>129</width>
+          <width>65</width>
           <height>29</height>
          </rect>
         </property>
         <property name="text">
-         <string>0%</string>
+         <string>0</string>
         </property>
         <property name="alignment">
-         <set>Qt::AlignCenter</set>
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
        <widget class="QLabel" name="lblOPMFC4ActualFlow_4MFC">
         <property name="geometry">
          <rect>
-          <x>261</x>
+          <x>291</x>
           <y>217</y>
-          <width>129</width>
+          <width>65</width>
           <height>30</height>
          </rect>
         </property>
         <property name="text">
-         <string>0%</string>
+         <string>0</string>
         </property>
         <property name="alignment">
-         <set>Qt::AlignCenter</set>
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
        <widget class="Line" name="lineOPMFC3post_4MFC">
         <property name="geometry">
          <rect>
-          <x>390</x>
+          <x>420</x>
           <y>194</y>
           <width>130</width>
           <height>3</height>
@@ -2539,7 +2773,7 @@ QProgressBar::Chunk
        <widget class="QProgressBar" name="progressBarOPMFC2_4MFC">
         <property name="geometry">
          <rect>
-          <x>1</x>
+          <x>60</x>
           <y>102</y>
           <width>130</width>
           <height>43</height>
@@ -2581,13 +2815,13 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
         <property name="format">
-         <string>%v%</string>
+         <string/>
         </property>
        </widget>
        <widget class="QFrame" name="frameMFC2_4MFC">
         <property name="geometry">
          <rect>
-          <x>261</x>
+          <x>291</x>
           <y>102</y>
           <width>129</width>
           <height>43</height>
@@ -2661,7 +2895,7 @@ QProgressBar::Chunk
        <widget class="Line" name="lineOPMFC2post_4MFC">
         <property name="geometry">
          <rect>
-          <x>390</x>
+          <x>420</x>
           <y>122</y>
           <width>130</width>
           <height>3</height>
@@ -2686,7 +2920,7 @@ QProgressBar::Chunk
        <widget class="Line" name="lineOPMFC4post_4MFC">
         <property name="geometry">
          <rect>
-          <x>390</x>
+          <x>420</x>
           <y>267</y>
           <width>130</width>
           <height>3</height>
@@ -2708,9 +2942,9 @@ QProgressBar::Chunk
        <widget class="Line" name="lineOPMFC2pre_4MFC">
         <property name="geometry">
          <rect>
-          <x>131</x>
+          <x>190</x>
           <y>122</y>
-          <width>130</width>
+          <width>101</width>
           <height>3</height>
          </rect>
         </property>
@@ -2730,7 +2964,7 @@ QProgressBar::Chunk
        <widget class="QFrame" name="frameMFC4_4MFC">
         <property name="geometry">
          <rect>
-          <x>261</x>
+          <x>291</x>
           <y>247</y>
           <width>129</width>
           <height>43</height>
@@ -2801,7 +3035,7 @@ QProgressBar::Chunk
        <widget class="QProgressBar" name="progressBarOPMFC1_4MFC">
         <property name="geometry">
          <rect>
-          <x>1</x>
+          <x>60</x>
           <y>30</y>
           <width>130</width>
           <height>43</height>
@@ -2845,15 +3079,15 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
         <property name="format">
-         <string>%v%</string>
+         <string/>
         </property>
        </widget>
        <widget class="Line" name="lineOPMFC3pre_4MFC">
         <property name="geometry">
          <rect>
-          <x>131</x>
+          <x>190</x>
           <y>194</y>
-          <width>130</width>
+          <width>101</width>
           <height>3</height>
          </rect>
         </property>
@@ -2873,7 +3107,7 @@ QProgressBar::Chunk
        <widget class="QProgressBar" name="progressBarOPMFC3_4MFC">
         <property name="geometry">
          <rect>
-          <x>1</x>
+          <x>60</x>
           <y>174</y>
           <width>130</width>
           <height>43</height>
@@ -2915,13 +3149,13 @@ QProgressBar::Chunk
          <set>Qt::AlignCenter</set>
         </property>
         <property name="format">
-         <string>%v%</string>
+         <string/>
         </property>
        </widget>
        <widget class="QFrame" name="frameMFC1_4MFC">
         <property name="geometry">
          <rect>
-          <x>261</x>
+          <x>291</x>
           <y>30</y>
           <width>129</width>
           <height>43</height>
@@ -2995,9 +3229,9 @@ QProgressBar::Chunk
        <widget class="Line" name="lineOPMFC1pre_4MFC">
         <property name="geometry">
          <rect>
-          <x>131</x>
+          <x>190</x>
           <y>50</y>
-          <width>130</width>
+          <width>101</width>
           <height>3</height>
          </rect>
         </property>
@@ -3051,23 +3285,23 @@ QProgressBar::Chunk
        <widget class="QLabel" name="lblOPMFC3ActualFlow_4MFC">
         <property name="geometry">
          <rect>
-          <x>261</x>
+          <x>291</x>
           <y>145</y>
-          <width>129</width>
+          <width>65</width>
           <height>29</height>
          </rect>
         </property>
         <property name="text">
-         <string>0%</string>
+         <string>0</string>
         </property>
         <property name="alignment">
-         <set>Qt::AlignCenter</set>
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
        <widget class="QFrame" name="frameMFC3_4MFC">
         <property name="geometry">
          <rect>
-          <x>261</x>
+          <x>291</x>
           <y>174</y>
           <width>129</width>
           <height>43</height>
@@ -3138,17 +3372,224 @@ QProgressBar::Chunk
        <widget class="QLabel" name="lblOPMFC2ActualFlow_4MFC">
         <property name="geometry">
          <rect>
-          <x>261</x>
+          <x>291</x>
           <y>73</y>
-          <width>129</width>
+          <width>65</width>
           <height>29</height>
          </rect>
         </property>
         <property name="text">
-         <string>0%</string>
+         <string>0</string>
         </property>
         <property name="alignment">
-         <set>Qt::AlignCenter</set>
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_30">
+        <property name="geometry">
+         <rect>
+          <x>360</x>
+          <y>7</y>
+          <width>41</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>SLPM</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_33">
+        <property name="geometry">
+         <rect>
+          <x>360</x>
+          <y>79</y>
+          <width>41</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>SLPM</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_34">
+        <property name="geometry">
+         <rect>
+          <x>360</x>
+          <y>151</y>
+          <width>41</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>SLPM</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_37">
+        <property name="geometry">
+         <rect>
+          <x>360</x>
+          <y>223</y>
+          <width>41</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>SLPM</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblOPGasTypeMFC4_4MFC">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>257</y>
+          <width>41</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Century Gothic</family>
+          <pointsize>11</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblOPGasTypeMFC1_4MFC">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>40</y>
+          <width>41</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Century Gothic</family>
+          <pointsize>11</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="scaledContents">
+         <bool>false</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblOPGasTypeMFC3_4MFC">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>184</y>
+          <width>41</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Century Gothic</family>
+          <pointsize>11</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblOPGasTypeMFC2_4MFC">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>112</y>
+          <width>41</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Century Gothic</family>
+          <pointsize>11</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblOPMFC1RecipeFlow_4MFC">
+        <property name="geometry">
+         <rect>
+          <x>89</x>
+          <y>43</y>
+          <width>67</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>SLPM</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblOPMFC2RecipeFlow_4MFC">
+        <property name="geometry">
+         <rect>
+          <x>89</x>
+          <y>115</y>
+          <width>67</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>SLPM</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblOPMFC3RecipeFlow_4MFC">
+        <property name="geometry">
+         <rect>
+          <x>89</x>
+          <y>188</y>
+          <width>67</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>SLPM</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblOPMFC4RecipeFlow_4MFC">
+        <property name="geometry">
+         <rect>
+          <x>89</x>
+          <y>261</y>
+          <width>67</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>SLPM</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </widget>
@@ -3344,9 +3785,9 @@ border-radius: 80px;
       <widget class="QLabel" name="lblOPRFPowerForward">
        <property name="geometry">
         <rect>
-         <x>60</x>
+         <x>27</x>
          <y>60</y>
-         <width>48</width>
+         <width>111</width>
          <height>39</height>
         </rect>
        </property>
@@ -3370,7 +3811,7 @@ border-radius: 80px;
         <string>RF</string>
        </property>
        <property name="scaledContents">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
@@ -3559,7 +4000,7 @@ border-radius: 80px;
           </font>
          </property>
          <property name="text">
-          <string>OK</string>
+          <string/>
          </property>
         </widget>
        </item>
@@ -3598,7 +4039,7 @@ border-radius: 80px;
           </font>
          </property>
          <property name="text">
-          <string>OK</string>
+          <string/>
          </property>
         </widget>
        </item>
@@ -3611,7 +4052,7 @@ border-radius: 80px;
           </font>
          </property>
          <property name="text">
-          <string>OK</string>
+          <string/>
          </property>
         </widget>
        </item>
@@ -3624,7 +4065,7 @@ border-radius: 80px;
           </font>
          </property>
          <property name="text">
-          <string>OK</string>
+          <string/>
          </property>
         </widget>
        </item>
@@ -3854,7 +4295,7 @@ border-radius: 80px;
        </font>
       </property>
       <property name="text">
-       <string>TextLabel</string>
+       <string/>
       </property>
      </widget>
      <widget class="QFrame" name="frameOPRedLight">
@@ -4002,7 +4443,7 @@ background-color: palette(base)</string>
           </font>
          </property>
          <property name="text">
-          <string>1.00</string>
+          <string/>
          </property>
         </widget>
        </item>
@@ -4140,188 +4581,39 @@ background-color: palette(base)</string>
        </item>
       </layout>
      </widget>
+     <zorder>stackedWidgetMFC</zorder>
+     <zorder>line_8</zorder>
+     <zorder>frame_2</zorder>
+     <zorder>frame_3</zorder>
+     <zorder>line_17</zorder>
+     <zorder>frame_7</zorder>
+     <zorder>frameSubstrate</zorder>
+     <zorder>frameOPPlasmaPlume</zorder>
+     <zorder>frame_8</zorder>
+     <zorder>line_15</zorder>
+     <zorder>lineOPMFC2vert</zorder>
+     <zorder>lineOPMFC3vert</zorder>
+     <zorder>lineOPMFC4vert</zorder>
+     <zorder>lineOPMFC5vert</zorder>
+     <zorder>lineOPMFC6vert</zorder>
+     <zorder>frame_13</zorder>
+     <zorder>frame_14</zorder>
+     <zorder>label_35</zorder>
+     <zorder>label_11</zorder>
+     <zorder>lblOPHeadTemp</zorder>
+     <zorder>frameOPRedLight</zorder>
+     <zorder>frameOPYellowLight</zorder>
+     <zorder>frameOPGreenLight</zorder>
+     <zorder>label_12</zorder>
+     <zorder>layoutWidget</zorder>
+     <zorder>lineOPMFC1vert</zorder>
+     <zorder>layoutWidget</zorder>
+     <zorder>layoutWidget</zorder>
     </widget>
     <widget class="QWidget" name="engineerTab">
      <attribute name="title">
       <string>Engineer</string>
      </attribute>
-     <widget class="QTableWidget" name="RecipeParams">
-      <property name="geometry">
-       <rect>
-        <x>50</x>
-        <y>65</y>
-        <width>600</width>
-        <height>270</height>
-       </rect>
-      </property>
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="lineWidth">
-       <number>1</number>
-      </property>
-      <property name="verticalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOff</enum>
-      </property>
-      <property name="horizontalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOff</enum>
-      </property>
-      <property name="sizeAdjustPolicy">
-       <enum>QAbstractScrollArea::AdjustToContents</enum>
-      </property>
-      <property name="autoScrollMargin">
-       <number>0</number>
-      </property>
-      <attribute name="horizontalHeaderCascadingSectionResizes">
-       <bool>true</bool>
-      </attribute>
-      <attribute name="horizontalHeaderMinimumSectionSize">
-       <number>100</number>
-      </attribute>
-      <attribute name="horizontalHeaderDefaultSectionSize">
-       <number>200</number>
-      </attribute>
-      <attribute name="verticalHeaderVisible">
-       <bool>false</bool>
-      </attribute>
-      <attribute name="verticalHeaderCascadingSectionResizes">
-       <bool>true</bool>
-      </attribute>
-      <attribute name="verticalHeaderMinimumSectionSize">
-       <number>50</number>
-      </attribute>
-      <attribute name="verticalHeaderDefaultSectionSize">
-       <number>50</number>
-      </attribute>
-      <row>
-       <property name="text">
-        <string/>
-       </property>
-      </row>
-      <row>
-       <property name="text">
-        <string/>
-       </property>
-      </row>
-      <row>
-       <property name="text">
-        <string/>
-       </property>
-      </row>
-      <row>
-       <property name="text">
-        <string/>
-       </property>
-      </row>
-      <row>
-       <property name="text">
-        <string/>
-       </property>
-      </row>
-      <column>
-       <property name="text">
-        <string>Recipe Parameters</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Setting</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Actual</string>
-       </property>
-      </column>
-      <item row="0" column="0">
-       <property name="text">
-        <string>He</string>
-       </property>
-       <property name="flags">
-        <set>ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
-       </property>
-      </item>
-      <item row="0" column="1">
-       <property name="text">
-        <string/>
-       </property>
-      </item>
-      <item row="0" column="2">
-       <property name="text">
-        <string/>
-       </property>
-       <property name="flags">
-        <set>ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
-       </property>
-      </item>
-      <item row="1" column="0">
-       <property name="text">
-        <string>He/H2</string>
-       </property>
-       <property name="flags">
-        <set>ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
-       </property>
-      </item>
-      <item row="1" column="2">
-       <property name="text">
-        <string/>
-       </property>
-       <property name="flags">
-        <set>ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
-       </property>
-      </item>
-      <item row="2" column="0">
-       <property name="text">
-        <string>N2</string>
-       </property>
-       <property name="flags">
-        <set>ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
-       </property>
-      </item>
-      <item row="2" column="2">
-       <property name="text">
-        <string/>
-       </property>
-       <property name="flags">
-        <set>ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
-       </property>
-      </item>
-      <item row="3" column="0">
-       <property name="text">
-        <string>O2</string>
-       </property>
-       <property name="flags">
-        <set>ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
-       </property>
-      </item>
-      <item row="3" column="2">
-       <property name="text">
-        <string/>
-       </property>
-       <property name="flags">
-        <set>ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
-       </property>
-      </item>
-      <item row="4" column="0">
-       <property name="text">
-        <string>Power</string>
-       </property>
-       <property name="flags">
-        <set>ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
-       </property>
-      </item>
-      <item row="4" column="2">
-       <property name="text">
-        <string/>
-       </property>
-       <property name="flags">
-        <set>ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
-       </property>
-      </item>
-     </widget>
      <widget class="QTableWidget" name="MBCtrl">
       <property name="geometry">
        <rect>
@@ -4330,6 +4622,14 @@ background-color: palette(base)</string>
         <width>400</width>
         <height>130</height>
        </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QHeaderView::section { 
+color: rgb(255, 255, 255);
+background-color: rgb(52, 101, 164);
+font: bold;
+}
+</string>
       </property>
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
@@ -4436,17 +4736,7 @@ background-color: palette(base)</string>
        </property>
       </item>
      </widget>
-     <widget class="QTableWidget" name="tableWidget">
-      <property name="geometry">
-       <rect>
-        <x>50</x>
-        <y>343</y>
-        <width>600</width>
-        <height>240</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QTableWidget" name="StageParams">
+     <widget class="QTableWidget" name="tablewidgetStageParams">
       <property name="geometry">
        <rect>
         <x>50</x>
@@ -4455,11 +4745,22 @@ background-color: palette(base)</string>
         <height>270</height>
        </rect>
       </property>
+      <property name="styleSheet">
+       <string notr="true">QHeaderView::section { 
+color: rgb(255, 255, 255);
+background-color: rgb(52, 101, 164);
+font: bold;
+}
+</string>
+      </property>
       <property name="verticalScrollBarPolicy">
        <enum>Qt::ScrollBarAlwaysOff</enum>
       </property>
       <property name="horizontalScrollBarPolicy">
        <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+      <property name="editTriggers">
+       <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
       </property>
       <attribute name="horizontalHeaderDefaultSectionSize">
        <number>225</number>
@@ -4514,6 +4815,11 @@ background-color: palette(base)</string>
        </property>
        <property name="flags">
         <set>ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+       </property>
+      </item>
+      <item row="0" column="1">
+       <property name="text">
+        <string/>
        </property>
       </item>
       <item row="1" column="0">
@@ -4674,6 +4980,14 @@ background-color: palette(base)</string>
         <bold>false</bold>
        </font>
       </property>
+      <property name="styleSheet">
+       <string notr="true">QHeaderView::section { 
+color: rgb(255, 255, 255);
+background-color: rgb(52, 101, 164);
+font: bold;
+}
+</string>
+      </property>
       <property name="verticalScrollBarPolicy">
        <enum>Qt::ScrollBarAlwaysOff</enum>
       </property>
@@ -4776,6 +5090,14 @@ background-color: palette(base)</string>
         <bold>false</bold>
        </font>
       </property>
+      <property name="styleSheet">
+       <string notr="true">QHeaderView::section { 
+color: rgb(255, 255, 255);
+background-color: rgb(52, 101, 164);
+font: bold;
+}
+</string>
+      </property>
       <property name="verticalScrollBarPolicy">
        <enum>Qt::ScrollBarAlwaysOff</enum>
       </property>
@@ -4858,6 +5180,14 @@ background-color: palette(base)</string>
         <width>400</width>
         <height>70</height>
        </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QHeaderView::section { 
+color: rgb(255, 255, 255);
+background-color: rgb(52, 101, 164);
+font: bold;
+}
+</string>
       </property>
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
@@ -4955,12 +5285,23 @@ background-color: palette(base)</string>
         <bold>false</bold>
        </font>
       </property>
+      <property name="styleSheet">
+       <string notr="true">QHeaderView::section { 
+color: rgb(255, 255, 255);
+background-color: rgb(52, 101, 164);
+font: bold;
+}
+</string>
+      </property>
       <property name="verticalScrollBarPolicy">
        <enum>Qt::ScrollBarAlwaysOff</enum>
       </property>
       <property name="horizontalScrollBarPolicy">
        <enum>Qt::ScrollBarAlwaysOff</enum>
       </property>
+      <attribute name="horizontalHeaderVisible">
+       <bool>true</bool>
+      </attribute>
       <attribute name="horizontalHeaderDefaultSectionSize">
        <number>200</number>
       </attribute>
@@ -5038,11 +5379,271 @@ background-color: palette(base)</string>
        <string>Save Recipe</string>
       </property>
      </widget>
+     <widget class="QTableView" name="tableView">
+      <property name="geometry">
+       <rect>
+        <x>680</x>
+        <y>360</y>
+        <width>256</width>
+        <height>192</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QWidget" name="">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>65</y>
+        <width>601</width>
+        <height>511</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <property name="spacing">
+        <number>22</number>
+       </property>
+       <item>
+        <widget class="QTableWidget" name="tablewidgetRecipeParams">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>363</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QHeaderView::section { 
+color: rgb(255, 255, 255);
+background-color: rgb(52, 101, 164);
+font: bold;
+}
+
+</string>
+         </property>
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="autoScroll">
+          <bool>true</bool>
+         </property>
+         <property name="autoScrollMargin">
+          <number>0</number>
+         </property>
+         <property name="editTriggers">
+          <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::ExtendedSelection</enum>
+         </property>
+         <property name="rowCount">
+          <number>7</number>
+         </property>
+         <attribute name="horizontalHeaderVisible">
+          <bool>true</bool>
+         </attribute>
+         <attribute name="horizontalHeaderCascadingSectionResizes">
+          <bool>true</bool>
+         </attribute>
+         <attribute name="horizontalHeaderMinimumSectionSize">
+          <number>100</number>
+         </attribute>
+         <attribute name="horizontalHeaderDefaultSectionSize">
+          <number>200</number>
+         </attribute>
+         <attribute name="horizontalHeaderStretchLastSection">
+          <bool>false</bool>
+         </attribute>
+         <attribute name="verticalHeaderVisible">
+          <bool>false</bool>
+         </attribute>
+         <attribute name="verticalHeaderCascadingSectionResizes">
+          <bool>true</bool>
+         </attribute>
+         <attribute name="verticalHeaderMinimumSectionSize">
+          <number>50</number>
+         </attribute>
+         <attribute name="verticalHeaderDefaultSectionSize">
+          <number>50</number>
+         </attribute>
+         <row>
+          <property name="text">
+           <string/>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string/>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string/>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string/>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string/>
+          </property>
+         </row>
+         <row/>
+         <row/>
+         <column>
+          <property name="text">
+           <string>Recipe Parameters</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Setting</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Actual</string>
+          </property>
+         </column>
+         <item row="0" column="0">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="flags">
+           <set>ItemIsSelectable|ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+          </property>
+         </item>
+         <item row="0" column="2">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="flags">
+           <set>ItemIsSelectable|ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+          </property>
+         </item>
+         <item row="1" column="0">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="flags">
+           <set>ItemIsSelectable|ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+          </property>
+         </item>
+         <item row="1" column="1">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="flags">
+           <set>ItemIsEditable|ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+          </property>
+         </item>
+         <item row="1" column="2">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="flags">
+           <set>ItemIsSelectable|ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+          </property>
+         </item>
+         <item row="2" column="0">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="flags">
+           <set>ItemIsSelectable|ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+          </property>
+         </item>
+         <item row="2" column="1">
+          <property name="flags">
+           <set>ItemIsEditable|ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+          </property>
+         </item>
+         <item row="2" column="2">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="flags">
+           <set>ItemIsSelectable|ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+          </property>
+         </item>
+         <item row="3" column="0">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="flags">
+           <set>ItemIsSelectable|ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+          </property>
+         </item>
+         <item row="3" column="1">
+          <property name="flags">
+           <set>ItemIsEditable|ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+          </property>
+         </item>
+         <item row="3" column="2">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="flags">
+           <set>ItemIsSelectable|ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+          </property>
+         </item>
+         <item row="4" column="0">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="flags">
+           <set>ItemIsSelectable|ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+          </property>
+         </item>
+         <item row="4" column="1">
+          <property name="flags">
+           <set>ItemIsEditable|ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+          </property>
+         </item>
+         <item row="4" column="2">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="flags">
+           <set>ItemIsSelectable|ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+          </property>
+         </item>
+         <item row="5" column="1">
+          <property name="flags">
+           <set>ItemIsEditable|ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+          </property>
+         </item>
+         <item row="6" column="0">
+          <property name="text">
+           <string>Power</string>
+          </property>
+         </item>
+         <item row="6" column="1">
+          <property name="flags">
+           <set>ItemIsEditable|ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableWidget" name="tableWidget"/>
+       </item>
+      </layout>
+     </widget>
     </widget>
     <widget class="QWidget" name="Dashboard">
      <attribute name="icon">
-      <iconset theme="applications-office">
-       <normaloff>.</normaloff>.</iconset>
+      <iconset theme="applications-office"/>
      </attribute>
      <attribute name="title">
       <string>Dashboard</string>
@@ -5136,8 +5737,7 @@ font: 14pt &quot;Ubuntu Bold&quot;;
           <string>SAVE RECIPE</string>
          </property>
          <property name="icon">
-          <iconset theme="media-floppy">
-           <normaloff>.</normaloff>.</iconset>
+          <iconset theme="media-floppy"/>
          </property>
          <property name="iconSize">
           <size>
@@ -6406,8 +7006,7 @@ color:gray;
           <string>LOAD RECIPE</string>
          </property>
          <property name="icon">
-          <iconset theme="document-open">
-           <normaloff>.</normaloff>.</iconset>
+          <iconset theme="document-open"/>
          </property>
          <property name="iconSize">
           <size>
@@ -6438,472 +7037,11 @@ color:gray;
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="layoutWidget">
-      <property name="geometry">
-       <rect>
-        <x>690</x>
-        <y>80</y>
-        <width>345</width>
-        <height>771</height>
-       </rect>
-      </property>
-      <layout class="QHBoxLayout" name="Power_Layout_2">
-       <property name="spacing">
-        <number>6</number>
-       </property>
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_18">
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_18">
-           <item>
-            <widget class="QLCDNumber" name="RF_Actual_LCD">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>164</width>
-               <height>75</height>
-              </size>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">color: rgb(204, 0, 0);</string>
-             </property>
-             <property name="frameShape">
-              <enum>QFrame::Box</enum>
-             </property>
-             <property name="frameShadow">
-              <enum>QFrame::Raised</enum>
-             </property>
-             <property name="smallDecimalPoint">
-              <bool>false</bool>
-             </property>
-             <property name="digitCount">
-              <number>4</number>
-             </property>
-             <property name="value" stdset="0">
-              <double>0.000000000000000</double>
-             </property>
-             <property name="intValue" stdset="0">
-              <number>0</number>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="RFfor_label_2">
-             <property name="styleSheet">
-              <string notr="true">font: 14pt &quot;Ubuntu&quot;;</string>
-             </property>
-             <property name="text">
-              <string> FORWARD PWR</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <widget class="QProgressBar" name="RF_bar">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>55</height>
-            </size>
-           </property>
-           <property name="font">
-            <font>
-             <family>Century Gothic</family>
-             <stylestrategy>PreferDefault</stylestrategy>
-            </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true"/>
-           </property>
-           <property name="maximum">
-            <number>200</number>
-           </property>
-           <property name="value">
-            <number>0</number>
-           </property>
-           <property name="textVisible">
-            <bool>false</bool>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QProgressBar" name="RefRF_bar">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>55</height>
-            </size>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QProgressBar 
-{		
-	border-radius: 26px;
-	background-color: #d3dbdd;
-}
-
-QProgressBar::Chunk
-{
-    border-radius: 26px;
-	background-color:  rgb(255, 242, 0);
-}
-</string>
-           </property>
-           <property name="maximum">
-            <number>30</number>
-           </property>
-           <property name="value">
-            <number>0</number>
-           </property>
-           <property name="textVisible">
-            <bool>false</bool>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="invertedAppearance">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_20">
-           <item>
-            <widget class="QLabel" name="ref_label_3">
-             <property name="styleSheet">
-              <string notr="true">font: 14pt &quot;Ubuntu&quot;;</string>
-             </property>
-             <property name="text">
-              <string>REFLECTED PWR</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLCDNumber" name="RefRF_Actual_LCD">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>164</width>
-               <height>75</height>
-              </size>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">color:  rgb(255, 242, 0);
-</string>
-             </property>
-             <property name="frameShape">
-              <enum>QFrame::Box</enum>
-             </property>
-             <property name="frameShadow">
-              <enum>QFrame::Raised</enum>
-             </property>
-             <property name="smallDecimalPoint">
-              <bool>false</bool>
-             </property>
-             <property name="digitCount">
-              <number>4</number>
-             </property>
-             <property name="intValue" stdset="0">
-              <number>0</number>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_19">
-           <item>
-            <widget class="QLCDNumber" name="MB_Actual_LCD">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>164</width>
-               <height>75</height>
-              </size>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">color: black;</string>
-             </property>
-             <property name="frameShape">
-              <enum>QFrame::Box</enum>
-             </property>
-             <property name="frameShadow">
-              <enum>QFrame::Raised</enum>
-             </property>
-             <property name="smallDecimalPoint">
-              <bool>true</bool>
-             </property>
-             <property name="digitCount">
-              <number>4</number>
-             </property>
-             <property name="value" stdset="0">
-              <double>5.000000000000000</double>
-             </property>
-             <property name="intValue" stdset="0">
-              <number>5</number>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="MBfor_label_3">
-             <property name="styleSheet">
-              <string notr="true">font: 14pt &quot;Ubuntu&quot;;</string>
-             </property>
-             <property name="text">
-              <string>MATCHBOX</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <widget class="QProgressBar" name="MB_Pos_Bar">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>55</height>
-            </size>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QProgressBar::Chunk {
-background-color: black;
-}</string>
-           </property>
-           <property name="value">
-            <number>0</number>
-           </property>
-           <property name="textVisible">
-            <bool>false</bool>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_13">
-           <item>
-            <widget class="QPushButton" name="MB_Left_Button">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Maximum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="layoutDirection">
-              <enum>Qt::LeftToRight</enum>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">QPushButton {
-background-color: rgb(119, 136, 153);
-font: 18pt &quot;Ubuntu Bold&quot;;
-}
-QPushButton:disabled {
-color:gray;
-}</string>
-             </property>
-             <property name="text">
-              <string>Left</string>
-             </property>
-             <property name="iconSize">
-              <size>
-               <width>128</width>
-               <height>64</height>
-              </size>
-             </property>
-             <property name="checkable">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="MB_Right_Button">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Maximum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="layoutDirection">
-              <enum>Qt::LeftToRight</enum>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">QPushButton {
-background-color: rgb(119, 136, 153);
-font: 18pt &quot;Ubuntu Bold&quot;;
-}
-QPushButton:disabled {
-color:gray;
-}</string>
-             </property>
-             <property name="text">
-              <string>Right</string>
-             </property>
-             <property name="iconSize">
-              <size>
-               <width>128</width>
-               <height>64</height>
-              </size>
-             </property>
-             <property name="checkable">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_22">
-           <item>
-            <widget class="QLabel" name="ref_label_4">
-             <property name="font">
-              <font>
-               <family>Ubuntu</family>
-               <pointsize>14</pointsize>
-               <italic>false</italic>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">font: 14pt &quot;Ubuntu&quot;;</string>
-             </property>
-             <property name="text">
-              <string>TEMPERATURE (*C)</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item alignment="Qt::AlignRight">
-            <widget class="QLCDNumber" name="temp_LCD">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>164</width>
-               <height>75</height>
-              </size>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">color: blue;</string>
-             </property>
-             <property name="frameShape">
-              <enum>QFrame::Box</enum>
-             </property>
-             <property name="frameShadow">
-              <enum>QFrame::Raised</enum>
-             </property>
-             <property name="smallDecimalPoint">
-              <bool>false</bool>
-             </property>
-             <property name="digitCount">
-              <number>4</number>
-             </property>
-             <property name="mode">
-              <enum>QLCDNumber::Dec</enum>
-             </property>
-             <property name="value" stdset="0">
-              <double>0.000000000000000</double>
-             </property>
-             <property name="intValue" stdset="0">
-              <number>0</number>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <widget class="QProgressBar" name="Temp_bar">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>55</height>
-            </size>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QProgressBar::Chunk {
-background-color: blue;
-}</string>
-           </property>
-           <property name="maximum">
-            <number>150</number>
-           </property>
-           <property name="value">
-            <number>0</number>
-           </property>
-           <property name="textVisible">
-            <bool>false</bool>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </widget>
      <widget class="QDoubleSpinBox" name="LEDIntensitySpinBox">
       <property name="geometry">
        <rect>
-        <x>690</x>
-        <y>0</y>
+        <x>640</x>
+        <y>240</y>
         <width>131</width>
         <height>71</height>
        </rect>
@@ -7065,8 +7203,8 @@ QDoubleSpinBox::QLineEdit {
      <widget class="QLabel" name="label_3">
       <property name="geometry">
        <rect>
-        <x>830</x>
-        <y>30</y>
+        <x>780</x>
+        <y>270</y>
         <width>181</width>
         <height>17</height>
        </rect>
@@ -7091,11 +7229,90 @@ QDoubleSpinBox::QLineEdit {
        <bool>true</bool>
       </property>
      </widget>
+     <widget class="QPushButton" name="MB_Left_Button">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>400</y>
+        <width>167</width>
+        <height>36</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Maximum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::LeftToRight</enum>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton {
+background-color: rgb(119, 136, 153);
+font: 18pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
+}</string>
+      </property>
+      <property name="text">
+       <string>Left</string>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>128</width>
+        <height>64</height>
+       </size>
+      </property>
+      <property name="checkable">
+       <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="MB_Right_Button">
+      <property name="geometry">
+       <rect>
+        <x>350</x>
+        <y>400</y>
+        <width>211</width>
+        <height>36</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Maximum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::LeftToRight</enum>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton {
+background-color: rgb(119, 136, 153);
+font: 18pt &quot;Ubuntu Bold&quot;;
+}
+QPushButton:disabled {
+color:gray;
+}</string>
+      </property>
+      <property name="text">
+       <string>Right</string>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>128</width>
+        <height>64</height>
+       </size>
+      </property>
+      <property name="checkable">
+       <bool>false</bool>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="recipe">
      <attribute name="icon">
-      <iconset theme="folder">
-       <normaloff>.</normaloff>.</iconset>
+      <iconset theme="folder"/>
      </attribute>
      <attribute name="title">
       <string>Cascade Recipe</string>
@@ -7261,8 +7478,7 @@ font: 14pt &quot;Ubuntu Bold&quot;;
         <string>LOAD CASCADE RECIPE</string>
        </property>
        <property name="icon">
-        <iconset theme="document-open">
-         <normaloff>.</normaloff>.</iconset>
+        <iconset theme="document-open"/>
        </property>
        <property name="iconSize">
         <size>
@@ -7298,8 +7514,7 @@ font: 14pt &quot;Ubuntu Bold&quot;;
         <string>SAVE CASCADE RECIPE</string>
        </property>
        <property name="icon">
-        <iconset theme="media-floppy">
-         <normaloff>.</normaloff>.</iconset>
+        <iconset theme="media-floppy"/>
        </property>
       </widget>
       <widget class="QListWidget" name="listRecipes">
@@ -7342,8 +7557,7 @@ font: 14pt &quot;Ubuntu Bold&quot;;
     </widget>
     <widget class="QWidget" name="settings">
      <attribute name="icon">
-      <iconset theme="preferences-system">
-       <normaloff>.</normaloff>.</iconset>
+      <iconset theme="preferences-system"/>
      </attribute>
      <attribute name="title">
       <string>Tool Settings</string>
@@ -7399,8 +7613,7 @@ font: 14pt &quot;Ubuntu Bold&quot;;
            <string>Batch ID Enabled</string>
           </property>
           <property name="icon">
-           <iconset theme="emblem-documents">
-            <normaloff>.</normaloff>.</iconset>
+           <iconset theme="emblem-documents"/>
           </property>
           <property name="iconSize">
            <size>
@@ -7419,8 +7632,7 @@ font: 14pt &quot;Ubuntu Bold&quot;;
            <string>Request/Response Terminal</string>
           </property>
           <property name="icon">
-           <iconset theme="utilities-terminal">
-            <normaloff>.</normaloff>.</iconset>
+           <iconset theme="utilities-terminal"/>
           </property>
           <property name="iconSize">
            <size>
@@ -7439,9 +7651,9 @@ font: 14pt &quot;Ubuntu Bold&quot;;
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>110</y>
+      <y>80</y>
       <width>281</width>
-      <height>821</height>
+      <height>871</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -7460,7 +7672,7 @@ font: 14pt &quot;Ubuntu Bold&quot;;
         <x>4</x>
         <y>10</y>
         <width>269</width>
-        <height>791</height>
+        <height>841</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -7575,6 +7787,9 @@ font: 14pt &quot;Ubuntu Bold&quot;;
          <layout class="QVBoxLayout" name="verticalLayout_10">
           <item>
            <widget class="QPushButton" name="btnChuckVacOnOff">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
@@ -7600,8 +7815,16 @@ font: 14pt &quot;Ubuntu Bold&quot;;
              </font>
             </property>
             <property name="styleSheet">
-             <string notr="true">background-color: rgb(133, 2, 2);
-color: rgb(255, 255, 255);</string>
+             <string notr="true">
+
+QPushButton:disabled {
+	background-color:light gray;
+}
+
+QPushButton {
+background-color: rgb(133, 2, 2);
+color: rgb(255, 255, 255);
+}</string>
             </property>
             <property name="text">
              <string>Chuck Vacuum On</string>
@@ -7641,8 +7864,15 @@ color: rgb(255, 255, 255);</string>
              </font>
             </property>
             <property name="styleSheet">
-             <string notr="true">background-color: rgb(133, 2, 2);
-color: rgb(255, 255, 255);</string>
+             <string notr="true">
+QPushButton:disabled {
+	background-color:light gray;
+}
+
+QPushButton {
+background-color: rgb(133, 2, 2);
+color: rgb(255, 255, 255);
+}</string>
             </property>
             <property name="text">
              <string>Load Pins Up</string>
@@ -7723,8 +7953,15 @@ color: rgb(255, 255, 255);</string>
              </font>
             </property>
             <property name="styleSheet">
-             <string notr="true">color: rgb(255, 255, 255);
+             <string notr="true">
+QPushButton:disabled {
+	background-color:light gray;
+}
+
+QPushButton {
 background-color: rgb(133, 2, 2);
+color: rgb(255, 255, 255);
+}
 
 
 </string>
@@ -7767,8 +8004,15 @@ background-color: rgb(133, 2, 2);
              </font>
             </property>
             <property name="styleSheet">
-             <string notr="true">background-color: rgb(133, 2, 2);
-color: rgb(255, 255, 255);</string>
+             <string notr="true">
+QPushButton:disabled {
+	background-color:light gray;
+}
+
+QPushButton {
+background-color: rgb(133, 2, 2);
+color: rgb(255, 255, 255);
+}</string>
             </property>
             <property name="text">
              <string>Load</string>
@@ -7780,6 +8024,9 @@ color: rgb(255, 255, 255);</string>
           </item>
           <item>
            <widget class="QPushButton" name="btnInit">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
               <horstretch>0</horstretch>
@@ -7805,8 +8052,15 @@ color: rgb(255, 255, 255);</string>
              </font>
             </property>
             <property name="styleSheet">
-             <string notr="true">background-color: rgb(133, 2, 2);
-color: rgb(255, 255, 255);</string>
+             <string notr="true">
+QPushButton:disabled {
+	background-color:light gray;
+}
+
+QPushButton {
+background-color: rgb(133, 2, 2);
+color: rgb(255, 255, 255);
+}</string>
             </property>
             <property name="text">
              <string>Init</string>

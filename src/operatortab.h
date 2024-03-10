@@ -29,29 +29,16 @@ public:
 
     void testfunction();
 
-    // void populateRecipeComboBox();
-
 public slots:
-    // stage status to UI
-    // void stageStatusUpdate(const QString status1, const QString status2);
+
     void pinsStateChanged(const bool state);
     void vacStateChanged(const bool state);
     void axisStatusToUI();
-    // home state machine
-    // void HSM_Startup();
     void HSM_Done();
-    // init state machine
-    // void ISM_Startup();
     void ISM_Done();
-    // collision state machine
-    // void CSM_StatusUpdate(const QString status, const QString next);
-    // scan state machine
     void SSM_Started();
-    // void SSM_Done();
-    // void SSM_StatusUpdate(const QString status, const QString next);
-    // process status
+    void SSM_Done();
     void setUINumberOfMFCs(const int numMFCs);
-    // void displayAbortMessage(const QString message);
     void forwardWattsChanged(int watts);
     void reflectedWattsChanged(int watts);
     void MBactualPositionChanged(const double actualPosition);
@@ -64,24 +51,10 @@ public slots:
     void lightTowerStateChanged(const LightTower::LightState state);
     void doorStateChanged(bool state);
 
-
 private slots:
     void comboBoxOPLogin_currentTextChanged(const QString &arg1);
-    /*
-    void btnChuckVacOnOff_clicked(bool checked);
-    void btnOPPinsUpDown_clicked(bool checked);
-    void btnOPStartPlasma_clicked(bool checked);
-    void btnOPAbort_clicked();
-    void btnOPLoad_clicked(bool checked);
-    void btnOPInit_clicked();
-    void comboBoxOPRecipe_currentTextChanged(const QString &arg1);
-    void btnOPAcknowledged_clicked();
-    */
-
-
 
 private:
-
     void connectMFCFlowBars();
     void lightTowerSetGreen();
     void lightTowerSetYellow();
@@ -95,6 +68,8 @@ private:
     void updateActualFlow_6MFC(const int mfcNumber, const double actualFlow);
     void mfcFlowLinesOn_4MFC(const int mfcNum, const bool on);
     void mfcFlowLinesOn_6MFC(const int mfcNum, const bool on);
+
+    void setMFCLabels();
 
     Ui::MainWindow* m_pUI;
     MainWindow* m_pMWndw;

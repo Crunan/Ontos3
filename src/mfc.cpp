@@ -5,7 +5,7 @@ MFC::MFC(int mfcNumber)
     m_mfcNumber(mfcNumber),
     m_recipeFlow(0.0),
     m_actualFlow(0.0),
-    m_range(0.0),
+    m_range(100.0),
     m_defaultRecipe(0.0)
 {}
 

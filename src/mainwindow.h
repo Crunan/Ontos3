@@ -83,14 +83,6 @@ public slots:
     // state machine
     void runMainStateMachine();
 
-    // real time data updates
-    void recipeWattsChanged();
-    void autoTuneChanged(bool autoTune);
-    void forwardWattsChanged();
-    void reflectedWattsChanged();
-    void MBactualPositionChanged(const double actualPosition);
-    void headTemperatureChanged();
-
     // recipe
     void AutoTuneCheckbox_stateChanged(int value);
     void openRecipe();
@@ -106,6 +98,8 @@ public slots:
     void yLimitsChanged();
     void cyclesChanged();
     void loadCascadeRecipe();
+    void recipeWattsChanged();
+    void autoTuneChanged(bool autoTune);
 
     // callbacks
     void joystickStateChanged(bool state);
@@ -169,9 +163,6 @@ private slots:
     void on_x2_set_clicked();
     void on_y1_set_clicked();
     void on_y2_set_clicked();
-    // menu actions
-    // void on_actionOperator_Mode_triggered();
-    // void on_actionEngineer_Mode_triggered();
     void on_actionAbout_triggered();
     void on_actionConnect_triggered();
     void on_actionDisconnect_triggered();
@@ -237,10 +228,11 @@ private:
     void RecipeToUI();
     void setMFCLabels();
 
-    // helper function that connects the operator
+    // helper function that connects the individual
     // tabs UI components slots to their respective
     // signals
     void connectOperatorTabSlots();
+    void connectEngineerTabSlots();
 
     OperatorTab *m_pOperatortab;
     EngineerTab *m_pEngineertab;

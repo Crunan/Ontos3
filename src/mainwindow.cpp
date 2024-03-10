@@ -7,6 +7,7 @@
 #include "UtilitiesAndConstants.h"
 #include "operatortab.h"
 #include "engineertab.h"
+#include <QSignalBlocker>
 
 int SM_PollCounter = 0;
 const int SM_POLL_PERIOD = 5;
@@ -16,7 +17,6 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     QMainWindow(parent),
     m_pMainLoop(loop),
     ui(new Ui::MainWindow),
-
     m_pStatus(new QLabel),
     m_passDialog(this),
     m_pSettings(new SettingsDialog),
@@ -40,12 +40,12 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(&m_mainCTL, &PlasmaController::batchIDLoggingIsActive, this, &MainWindow::batchIDLoggingIsActive);
     connect(&m_mainCTL.getTuner(), &Tuner::recipePositionChanged, this, &MainWindow::setRecipeMBtuner);
     connect(&m_mainCTL.getTuner(), &Tuner::updateUIRecipePosition, this, &MainWindow::setRecipeMBtuner);
-    connect(&m_mainCTL.getPlasmaHead(), &PlasmaHead::headTemperatureChanged, this, &MainWindow::headTemperatureChanged);
     connect(&m_passDialog, &PasswordDialog::userEnteredPassword, this, &MainWindow::userEnteredPassword);
     connect(m_mainCTL.getSerialInterface(), &SerialInterface::serialClosed, this, &MainWindow::serialDisconnected);
     connect(m_mainCTL.getSerialInterface(), &SerialInterface::serialOpen, this, &MainWindow::serialConnected);
     connect(m_mainCTL.getSerialInterface(), &SerialInterface::readTimeoutError, this, &MainWindow::readTimeoutError);
     connect(&m_mainCTL.getAbortMessages(), &AbortCodeMessages::showAbortMessageBox, this, &MainWindow::showAbortMessageBox);
+    connect(&m_mainCTL, &PlasmaController::plasmaStateChanged, this, &MainWindow::plasmaStateChanged);
 
     // setup stacked widget for program control
     connect(ui->btnChuckVacOnOff, &QPushButton::clicked, this, &MainWindow::btnChuckVacOnOff_clicked);
@@ -55,7 +55,19 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(ui->btnInit, &QPushButton::clicked, this, &MainWindow::btnInit_clicked);
     connect(ui->comboBoxRecipe, &QComboBox::currentTextChanged, this, &MainWindow::comboBoxRecipe_currentTextChanged);
     connect(ui->btnAcknowledge, &QPushButton::clicked, this, &MainWindow::btnAcknowledged_clicked);
-
+    connect(&m_mainCTL.getAxesController(), &AxesController::pinsStateChanged, this, &MainWindow::pinsStateChanged);
+    connect(&m_mainCTL.getAxesController(), &AxesController::vacStateChanged, this, &MainWindow::vacStateChanged);
+    connect(&m_mainCTL.getAxesController(), &AxesController::stageStatusUpdate, this, &MainWindow::stageStatusUpdate);
+    // state machines
+    // init, collision, scan and home state machines
+    connect(&m_mainCTL.getAxesController(), &AxesController::initSMStartup, this, &MainWindow::ISM_Startup);
+    connect(&m_mainCTL.getAxesController(), &AxesController::initSMDone, this, &MainWindow::ISM_Done);
+    connect(&m_mainCTL.getAxesController(), &AxesController::setUIHomeSMStartup, this, &MainWindow::HSM_Startup);
+    connect(&m_mainCTL.getAxesController(), &AxesController::setUIHomeSMDone, this, &MainWindow::HSM_Done);
+    connect(&m_mainCTL, &PlasmaController::CSM_StatusUpdate, this, &MainWindow::CSM_StatusUpdate);
+    connect(&m_mainCTL, &PlasmaController::SSM_Started, this, &MainWindow::SSM_Started);
+    connect(&m_mainCTL, &PlasmaController::SSM_Done, this, &MainWindow::SSM_Done);
+    connect(&m_mainCTL, &PlasmaController::SSM_StatusUpdate, this, &MainWindow::SSM_StatusUpdate);
     // temporary
     connect(ui->Joystick_button, &QPushButton::toggled, this, &MainWindow::on_Joystick_button_toggled);
     // run the next cascade recipe
@@ -73,11 +85,6 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     connect(m_mainCTL.getRecipe(), &PlasmaRecipe::cyclesChanged, this, &MainWindow::cyclesChanged);
     connect(&m_mainCTL.getPower(), &PWR::recipeWattsChanged, this, &MainWindow::recipeWattsChanged);
     connect(&m_mainCTL.getPower(), &PWR::updateUIRecipeWatts, this, &MainWindow::recipeWattsChanged);
-    connect(&m_mainCTL.getPower(), &PWR::forwardWattsChanged, this, &MainWindow::forwardWattsChanged);
-    connect(&m_mainCTL.getPower(), &PWR::reflectedWattsChanged, this, &MainWindow::reflectedWattsChanged);
-    connect(&m_mainCTL.getTuner(), &Tuner::autoTuneChanged, this, &MainWindow::autoTuneChanged);
-    connect(&m_mainCTL.getTuner(), &Tuner::updateUIAutoTune, this, &MainWindow::autoTuneChanged);
-    connect(&m_mainCTL.getTuner(), &Tuner::actualPositionChanged, this, &MainWindow::MBactualPositionChanged);
     // connect gamecontroller signal with axescontroller slot
     connect(&m_gamepadController, &GamepadController::gameControllerMove, &m_mainCTL.getAxesController(), &AxesController::gameControllerMove);
 
@@ -87,15 +94,18 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
     // Make signal/slot connections here
     connectRecipeButtons();
 
-    // MFC labels
-    setMFCLabels();
-
     // status bar
     ui->statusBar->addWidget(m_pStatus);
 
-    // Setup Recipe List for Cascade Recipes
-    populateRecipeListWidgetFromDirectory(ui->listRecipes);
-    populateRecipeComboBox();
+    {
+        const QSignalBlocker blocker(ui->comboBoxRecipe);
+        // Setup Recipe List for Cascade Recipes
+        populateRecipeListWidgetFromDirectory(ui->listRecipes);
+        populateRecipeComboBox();
+        // no recipe selected yet
+        ui->comboBoxRecipe->setPlaceholderText(QStringLiteral(""));
+        ui->comboBoxRecipe->setCurrentIndex(-1);
+    }
 
     // give things a little time to settle before opening the serial port
     QTimer::singleShot(50, this, &MainWindow::openMainPort);
@@ -105,6 +115,11 @@ MainWindow::MainWindow(MainLoop* loop, QWidget *parent) :
 
     // hide the ack button until there is an abort condition
     ui->btnAcknowledge->hide();
+
+    // disable until implemented correctly
+    //ui->mainTabWidget->setTabVisible(2, false);
+    ui->mainTabWidget->setTabVisible(3, false);
+    ui->mainTabWidget->setTabVisible(4, false);
 }
 
 MainWindow::~MainWindow() {
@@ -162,9 +177,6 @@ static bool firstShow = true;
 void MainWindow::showEvent(QShowEvent *)
 {
     if (firstShow) {
-        // hide stage controls
-        //showStageControls(false);
-
         QTimer::singleShot(50, this, &MainWindow::setInitialUIState);
 
         firstShow = false;
@@ -217,16 +229,7 @@ void MainWindow::connectRecipeButtons()
     connectMFCRecipeButton(ui->loadMFC6Button, 6);
 }
 
-void MainWindow::setMFCLabels()
-{
-    QString MFC1_label = m_config.getValueForKey(CONFIG_MFC1_LABEL_KEY);
-    QString MFC2_label = m_config.getValueForKey(CONFIG_MFC2_LABEL_KEY);
-    QString MFC3_label = m_config.getValueForKey(CONFIG_MFC3_LABEL_KEY);
-    QString MFC4_label = m_config.getValueForKey(CONFIG_MFC4_LABEL_KEY);
-    QString MFC5_label = m_config.getValueForKey(CONFIG_MFC5_LABEL_KEY);
-    QString MFC6_label = m_config.getValueForKey(CONFIG_MFC6_LABEL_KEY);
 
-}
 
 void MainWindow::connectMFCRecipeButton(QPushButton* button, const int& mfcNumber)
 {
@@ -269,10 +272,16 @@ void MainWindow::openMainPort()
 
 void MainWindow::readTimeoutError(QString lastCommand)
 {
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(this, "Error: ", "Read timeout on command " + lastCommand + ". Exit?",
-                                  QMessageBox::Yes|QMessageBox::No);
-    if (reply == QMessageBox::Yes) {
+    QMessageBox msgBox(QMessageBox::Question,
+                       "Error: ",
+                       "Read timeout on command " + lastCommand + ". Press OK to exit",
+                        QMessageBox::Ok,
+                       this);
+    msgBox.setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
+
+    int reply = msgBox.exec();
+
+    if (reply == QMessageBox::Ok) {
         QApplication::quit();
     }
 }
@@ -424,6 +433,10 @@ void MainWindow::RunStartup()
     else {
         Logger::logCritical("Cannot find config file entry for: " + QString(HANDSHAKE));
     }
+
+    // enable buttons
+    ui->btnInit->setEnabled(true);
+    ui->btnChuckVacOnOff->setEnabled(true);
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -679,10 +692,10 @@ void MainWindow::plasmaStateChanged(bool plasmaActive)
 void MainWindow::pinsStateChanged(bool state)
 {
     if (state) {
-       ui->btnPinsUpDown->setText("Load Pins Up");
+       ui->btnPinsUpDown->setText("Load Pins Down");
     }
     else {
-       ui->btnPinsUpDown->setText("Load Pins Down");
+       ui->btnPinsUpDown->setText("Load Pins Up");
     }
 }
 
@@ -813,47 +826,6 @@ void MainWindow::AutoTuneCheckbox_stateChanged(int value)
 {
     m_mainCTL.getTuner().setAutoTune(value);
 }
-
-//////////////////////////////////////////////////////////////////////////////////
-// runtime updates
-//////////////////////////////////////////////////////////////////////////////////
-void MainWindow::forwardWattsChanged()
-{
-    int watts = m_mainCTL.getPower().getForwardWatts();
-
-    // dashboard
-    ui->RF_Actual_LCD->display(watts);
-    ui->RF_bar->setMaximum(m_mainCTL.getPower().getMaxForwardWatts());
-    ui->RF_bar->setValue(watts);
-}
-
-void MainWindow::reflectedWattsChanged()
-{
-    int watts = m_mainCTL.getPower().getReflectedWatts();
-
-    // dashboard
-    ui->RefRF_Actual_LCD->display(watts);
-    ui->RefRF_bar->setValue(watts);
-}
-
-void MainWindow::MBactualPositionChanged(const double actualPosition)
-{
-    //double testPosition = 55.00;
-    QString sDisplayValue = QString::number(actualPosition, 'f', 2);
-    // dashboard
-    ui->MB_Actual_LCD->display(sDisplayValue);
-    ui->MB_Pos_Bar->setValue(int(actualPosition));
-}
-
-void MainWindow::headTemperatureChanged()
-{
-    double temp = m_mainCTL.getPlasmaHead().getTemperature();
-
-    // dashboard
-    ui->temp_LCD->display(temp);
-    ui->Temp_bar->setValue(int(temp));
-}
-
 
 void MainWindow::userEnteredPassword()
 {
@@ -1829,21 +1801,15 @@ void MainWindow::on_mainTabWidget_currentChanged(int index)
 void MainWindow::connectOperatorTabSlots()
 {
     // ui updates from axescontroller
-    // connect(&m_mainCTL.getAxesController(), &AxesController::stageStatusUpdate, m_pOperatortab, &OperatorTab::stageStatusUpdate);
     connect(&m_mainCTL.getAxesController(), &AxesController::pinsStateChanged, m_pOperatortab, &OperatorTab::pinsStateChanged);
     connect(&m_mainCTL.getAxesController(), &AxesController::vacStateChanged, m_pOperatortab, &OperatorTab::vacStateChanged);
     connect(&m_mainCTL.getAxesController(), &AxesController::updateUIAxisStatus, m_pOperatortab, &OperatorTab::axisStatusToUI);
     connect(&m_mainCTL.getAxesController(), &AxesController::doorStateChanged, m_pOperatortab, &OperatorTab::doorStateChanged);
-    // init and home state machines
-    // connect(&m_mainCTL.getAxesController(), &AxesController::initSMStartup, m_pOperatortab, &OperatorTab::ISM_Startup);
+    // state machines
     connect(&m_mainCTL.getAxesController(), &AxesController::initSMDone, m_pOperatortab, &OperatorTab::ISM_Done);
-    // connect(&m_mainCTL.getAxesController(), &AxesController::setUIHomeSMStartup, m_pOperatortab, &OperatorTab::HSM_Startup);
     connect(&m_mainCTL.getAxesController(), &AxesController::setUIHomeSMDone, m_pOperatortab, &OperatorTab::HSM_Done);
-    // scan/collision state machine
-    // connect(&m_mainCTL, &PlasmaController::CSM_StatusUpdate, m_pOperatortab, &OperatorTab::CSM_StatusUpdate);
-    // connect(&m_mainCTL, &PlasmaController::SSM_StatusUpdate, m_pOperatortab, &OperatorTab::SSM_StatusUpdate);
     connect(&m_mainCTL, &PlasmaController::SSM_Started, m_pOperatortab, &OperatorTab::SSM_Started);
-    // connect(&m_mainCTL, &PlasmaController::SSM_Done, m_pOperatortab, &OperatorTab::SSM_Done);
+    connect(&m_mainCTL, &PlasmaController::SSM_Done, m_pOperatortab, &OperatorTab::SSM_Done);
     // light tower
     connect(&m_mainCTL.getLightTower(), &LightTower::lightTowerStateChanged, m_pOperatortab, &OperatorTab::lightTowerStateChanged);
     // plasma, power, and head status
@@ -1857,8 +1823,12 @@ void MainWindow::connectOperatorTabSlots()
     connect(m_mainCTL.getRecipe(), &PlasmaRecipe::gapChanged, m_pOperatortab, &OperatorTab::gapChanged);
     // forward power
     connect(&m_mainCTL.getPower(), &PWR::forwardWattsChanged, m_pOperatortab, &OperatorTab::forwardWattsChanged);
-    // abort message
-    // connect(this, &MainWindow::displayAbortMessage, this, &MainWindow::displayAbortMessage);
+    // mfc
+    connect(&m_mainCTL, &PlasmaController::setUINumberOfMFCs, m_pOperatortab, &OperatorTab::setUINumberOfMFCs);
+}
+
+void MainWindow::connectEngineerTabSlots()
+{
     // mfc
     connect(&m_mainCTL, &PlasmaController::setUINumberOfMFCs, m_pOperatortab, &OperatorTab::setUINumberOfMFCs);
 }
